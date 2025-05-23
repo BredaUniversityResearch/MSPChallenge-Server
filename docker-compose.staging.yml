@@ -1,10 +1,9 @@
 services:
   php:
-    build:
-      context: .
-      target: frankenphp_prod
+    image: cradlewebmaster/msp-challenge-server:latest
     volumes:
       - ./:/app
+      - /app/var/cache
     environment:
       SERVER_NAME: ${SERVER_NAME:-:80}
       APP_SECRET: ${APP_SECRET}

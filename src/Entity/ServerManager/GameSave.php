@@ -7,6 +7,7 @@ use App\Domain\Common\EntityEnums\GameSaveVisibilityValue;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameVisibilityValue;
+use App\Entity\EntityBase;
 use App\Repository\ServerManager\GameSaveRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -14,7 +15,7 @@ use function App\isBase64Encoded;
 
 #[ORM\Table(name: 'game_saves')]
 #[ORM\Entity(repositoryClass: GameSaveRepository::class)]
-class GameSave
+class GameSave extends EntityBase
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

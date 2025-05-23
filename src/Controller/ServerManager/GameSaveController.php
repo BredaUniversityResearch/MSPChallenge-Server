@@ -3,7 +3,6 @@
 namespace App\Controller\ServerManager;
 
 use App\Entity\ServerManager\GameList;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,28 +37,34 @@ class GameSaveController extends BaseController
         return $this->render('manager/gamesave_page.html.twig');
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{saveVisibility}',
         name: 'manager_gamesave_list',
         requirements: ['saveVisibility' => '(active|archived)']
     )]
     public function gameSave(
-        EntityManagerInterface $entityManager,
         string $saveVisibility
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSaves = $entityManager->getRepository(GameSave::class)->findBy(['saveVisibility' => $saveVisibility]);
         return $this->render('manager/GameSave/gamesave.html.twig', ['gameSaves' => $gameSaves]);
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route(
         '/{saveId}/download',
         name: 'manager_gamesave_download',
         requirements: ['saveId' => '\d+']
     )]
     public function gameSaveDownload(
-        EntityManagerInterface $entityManager,
         int $saveId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSave = $entityManager->getRepository(GameSave::class)->find($saveId);
         if (is_null($gameSave)) {
             return new Response(null, 422);
@@ -80,14 +85,17 @@ class GameSaveController extends BaseController
         return $response;
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/{saveId}/form', name: 'manager_gamesave_form', requirements: ['saveId' => '\d+'])]
     public function gameSaveForm(
-        EntityManagerInterface $entityManager,
         Request $request,
         MessageBusInterface $messageBus,
         SymfonyToLegacyHelper $symfonyToLegacyHelper,
         int $saveId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $form = $this->createForm(
             GameListAddBySaveLoadFormType::class,
             new GameList(),
@@ -114,12 +122,15 @@ class GameSaveController extends BaseController
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/{saveId}/details', name: 'manager_gamesave_details', requirements: ['saveId' => '\d+'])]
     public function gameSaveDetails(
-        EntityManagerInterface $entityManager,
         Request $request,
         int $saveId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSave = $entityManager->getRepository(GameSave::class)->find($saveId);
         $form = $this->createForm(
             GameSaveEditFormType::class,
@@ -141,12 +152,15 @@ class GameSaveController extends BaseController
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/upload', name: 'manager_gamesave_upload')]
     public function gameSaveUpload(
         KernelInterface $kernel,
-        EntityManagerInterface $entityManager,
         Request $request
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $form = $this->createForm(
             GameSaveUploadFormType::class,
             new GameSave(),
@@ -155,7 +169,7 @@ class GameSaveController extends BaseController
         $form->handleRequest($request);
         if ($form->isSubmitted()) {
             $saveZip = $form->get('saveZip')->getData();
-            $gameSaveZip = new GameSaveZipFileValidator($saveZip->getRealPath(), $kernel, $entityManager);
+            $gameSaveZip = new GameSaveZipFileValidator($saveZip->getRealPath(), $kernel, $this->connectionManager);
             if ($form->isValid() && self::isGameSaveZipValid($gameSaveZip, $form)) {
                 $gameSave = $gameSaveZip->getGameSave();
                 $entityManager->persist($gameSave);
@@ -175,11 +189,14 @@ class GameSaveController extends BaseController
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/{saveId}/archive', name: 'manager_gamesave_archive', requirements: ['saveId' => '\d+'])]
     public function gameSaveArchive(
-        EntityManagerInterface $entityManager,
         int $saveId
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSave = $entityManager->getRepository(GameSave::class)->find($saveId);
         $gameSave->setSaveVisibility(new GameSaveVisibilityValue('archived'));
         $entityManager->flush();

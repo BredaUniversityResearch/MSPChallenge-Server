@@ -2,11 +2,11 @@
 namespace App\Security;
 
 use App\Domain\Communicator\Auth2Communicator;
+use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\Setting;
 use App\Entity\ServerManager\User;
 use App\Exception\MSPAuth2RedirectException;
 use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
 use Lcobucci\Clock\FrozenClock;
 use Lcobucci\JWT\Encoding\JoseEncoder;
 use Lcobucci\JWT\Exception;
@@ -36,7 +36,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
 
     public function __construct(
         private readonly HttpClientInterface $client,
-        private readonly EntityManagerInterface $mspServerManagerEntityManager
+        private readonly ConnectionManager $connectionManager
     ) {
         $this->auth2Communicator = new Auth2Communicator($this->client);
     }
@@ -51,6 +51,9 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         return true;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function authenticate(Request $request): Passport
     {
         // get the token from Session or GET
@@ -70,7 +73,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
             throw new MSPAuth2RedirectException();
         }
         // retrieve some user details from the token
-        $user = $this->mspServerManagerEntityManager->getRepository(User::class)->findOneBy(
+        $user = $this->connectionManager->getServerManagerEntityManager()->getRepository(User::class)->findOneBy(
             [
                 'username' => $unencryptedToken->claims()->get('username')
             ]
@@ -82,7 +85,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
             $user->setToken($apiToken);
             $user->setRefreshToken('unused');
             $user->setRefreshTokenExpiration(new DateTime());
-            $this->mspServerManagerEntityManager->persist($user);
+            $this->connectionManager->getServerManagerEntityManager()->persist($user);
         } else {
             $user->setToken($apiToken);
         }
@@ -93,7 +96,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
                 'You do not have permission to access this MSP Challenge Server Manager at this time.'
             );
         }
-        $this->mspServerManagerEntityManager->flush();
+        $this->connectionManager->getServerManagerEntityManager()->flush();
         // add token to session storage if still required
         if ($request->getSession()->get('token') !== $apiToken) {
             $request->getSession()->set('token', $apiToken);
@@ -108,7 +111,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
     private function authorized(User $user, Request $request): bool
     {
         try {
-            $serverUUID = $this->mspServerManagerEntityManager
+            $serverUUID = $this->connectionManager->getServerManagerEntityManager()
                 ->getRepository(Setting::class)->findOneBy(['name' => 'server_uuid']);
             if (is_null($serverUUID)) {
                 // including first-time Server Manager use registration, if still required
@@ -131,6 +134,9 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     private function register(User $user, Request $request): Setting
     {
         $serverId = new Setting('server_id', uniqid('', true));
@@ -142,12 +148,13 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         );
         $serverUuid = new Setting('server_uuid', Uuid::v4());
         $serverPassword = new Setting('server_password', (string) time());
-        $this->mspServerManagerEntityManager->persist($serverId);
-        $this->mspServerManagerEntityManager->persist($serverName);
-        $this->mspServerManagerEntityManager->persist($serverDescription);
-        $this->mspServerManagerEntityManager->persist($serverUuid);
-        $this->mspServerManagerEntityManager->persist($serverPassword);
-        $this->mspServerManagerEntityManager->flush();
+        $mspServerManagerEntityManager = $this->connectionManager->getServerManagerEntityManager();
+        $mspServerManagerEntityManager->persist($serverId);
+        $mspServerManagerEntityManager->persist($serverName);
+        $mspServerManagerEntityManager->persist($serverDescription);
+        $mspServerManagerEntityManager->persist($serverUuid);
+        $mspServerManagerEntityManager->persist($serverPassword);
+        $mspServerManagerEntityManager->flush();
 
         $params = ["server" =>
             [

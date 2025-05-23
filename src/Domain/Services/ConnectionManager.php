@@ -20,6 +20,7 @@ use React\EventLoop\LoopInterface;
 
 class ConnectionManager extends DatabaseDefaults
 {
+    public const SERVER_MANAGER_ENTITY_MAPPING_ALIAS = 'ServerManager';
     const ERROR_CODE_SET_DOCTRINE_NOT_CALLED = 1;
 
     private static ?ConnectionManager $instance = null;
@@ -121,16 +122,52 @@ class ConnectionManager extends DatabaseDefaults
         return $config;
     }
 
-    public function getEntityManagerConfig(string $dbName): array
+    public function getEntityManagerConfig(string $connectionName): array
     {
         $config['report_fields_where_declared'] = true;
         // @note(MH): You cannot enable "auto_mapping" on more than one manager at the same time
-        $config['connection'] = $dbName;
-        $config['mappings']['App'] = [
+        $config['connection'] = $connectionName;
+        $key = preg_replace_callback(
+            '/msp_session_(\d+)/',
+            fn($matches) => 'SessionAPI'.$matches[1],
+            $connectionName
+        );
+        $config['mappings'][$key] = [
             'is_bundle' => false,
-            'dir' => '%kernel.project_dir%/src/Entity',
-            'prefix' => 'App\Entity',
+            'dir' => '%kernel.project_dir%/src/Entity/SessionAPI',
+            'prefix' => 'App\Entity\SessionAPI',
             'alias' => 'App'
+        ];
+        $config['naming_strategy'] = 'doctrine.orm.naming_strategy.underscore_number_aware';
+        $config['metadata_cache_driver'] = [
+            'type' => 'pool',
+            'pool' => 'doctrine.meta_cache_pool'
+        ];
+        if (($_ENV['APP_ENV'] ?? null) !== 'prod') {
+            return $config;
+        }
+        return array_merge($config, [
+            'query_cache_driver' => [
+                'type' => 'pool',
+                'pool' => 'doctrine.system_cache_pool'
+            ],
+            'result_cache_driver' => [
+                'type' => 'pool',
+                'pool' => 'doctrine.result_cache_pool'
+            ]
+        ]);
+    }
+
+    public function getServerEntityManagerConfig(string $connectionName): array
+    {
+        $config['report_fields_where_declared'] = true;
+        // @note(MH): You cannot enable "auto_mapping" on more than one manager at the same time
+        $config['connection'] = $connectionName;
+        $config['mappings']['ServerManager'] = [
+            'is_bundle' => false,
+            'dir' => '%kernel.project_dir%/src/Entity/ServerManager',
+            'prefix' => 'App\Entity\ServerManager',
+            'alias' => self::SERVER_MANAGER_ENTITY_MAPPING_ALIAS
         ];
         $config['naming_strategy'] = 'doctrine.orm.naming_strategy.underscore_number_aware';
         $config['metadata_cache_driver'] = [

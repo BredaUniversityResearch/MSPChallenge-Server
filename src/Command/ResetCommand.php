@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameConfigFile;
 use App\Entity\ServerManager\GameGeoServer;
 use App\Entity\ServerManager\GameList;
@@ -10,7 +11,6 @@ use App\Entity\ServerManager\GameWatchdogServer;
 use App\Message\GameList\GameListArchiveMessage;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -36,7 +36,7 @@ class ResetCommand extends Command
     private Filesystem $fileSystem;
 
     public function __construct(
-        private readonly EntityManagerInterface $mspServerManagerEntityManager,
+        private readonly ConnectionManager $connectionManager,
         private readonly KernelInterface $kernel,
         private readonly MessageBusInterface $messageBus,
         private readonly ParameterBagInterface $params
@@ -91,6 +91,9 @@ class ResetCommand extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function selectiveSessionReset(array $sessionRange): void
     {
         if ($this->io->isDebug()) {
@@ -98,7 +101,7 @@ class ResetCommand extends Command
                 "This is a selective session reset. Only removing selected sessions, nothing else."
             );
         }
-        $sessions = $this->mspServerManagerEntityManager->getRepository(GameList::class)
+        $sessions = $this->connectionManager->getServerManagerEntityManager()->getRepository(GameList::class)
             ->matching(
                 (new Criteria())
                     ->where(Criteria::expr()->gte('id', $sessionRange[0]))
@@ -107,6 +110,9 @@ class ResetCommand extends Command
         $this->removeGameLists($sessions);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function hardReset(): void
     {
         if ($this->io->isDebug()) {
@@ -115,20 +121,25 @@ class ResetCommand extends Command
             );
         }
         
-        $sessions = $this->mspServerManagerEntityManager->getRepository(GameList::class)->findAll();
+        $sessions = $this->connectionManager->getServerManagerEntityManager()
+            ->getRepository(GameList::class)->findAll();
         $this->removeGameLists($sessions);
 
-        $saves = $this->mspServerManagerEntityManager->getRepository(GameSave::class)->findAll();
+        $saves = $this->connectionManager->getServerManagerEntityManager()
+            ->getRepository(GameSave::class)->findAll();
         $this->removeGameSaves($saves);
         
-        $configs = $this->mspServerManagerEntityManager->getRepository(GameConfigFile::class)->findAll();
+        $configs = $this->connectionManager->getServerManagerEntityManager()
+            ->getRepository(GameConfigFile::class)->findAll();
         $this->removeGameConfigs($configs);
         
-        $geoservers = $this->mspServerManagerEntityManager->getRepository(GameGeoServer::class)
+        $geoservers = $this->connectionManager->getServerManagerEntityManager()
+            ->getRepository(GameGeoServer::class)
             ->matching((new Criteria())->where(Criteria::expr()->neq('id', 1)));
         $this->removeEntities($geoservers, 'GeoServers');
         
-        $watchdogservers = $this->mspServerManagerEntityManager->getRepository(GameWatchdogServer::class)
+        $watchdogservers = $this->connectionManager->getServerManagerEntityManager()
+            ->getRepository(GameWatchdogServer::class)
             ->matching((new Criteria())->where(Criteria::expr()->neq('id', 1)));
         $this->removeEntities($watchdogservers, 'Watchdogs');
     }
@@ -217,9 +228,12 @@ class ResetCommand extends Command
         }
     }
 
+    /**
+     * @throws \Exception
+     */
     private function removeEntity(object $entity): void
     {
-        $this->mspServerManagerEntityManager->remove($entity);
-        $this->mspServerManagerEntityManager->flush();
+        $this->connectionManager->getServerManagerEntityManager()->remove($entity);
+        $this->connectionManager->getServerManagerEntityManager()->flush();
     }
 }

@@ -4,11 +4,17 @@ namespace App\Tests\ServerManager;
 use App\Domain\Common\GameListAndSaveSerializer;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
+use ReflectionException;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 class GameListSaveSerializationTest extends KernelTestCase
 {
 
+    /**
+     * @throws ReflectionException
+     * @throws ExceptionInterface
+     */
     public static function testSerializations(): void
     {
         GameListCreationTest::testGameListCreation();

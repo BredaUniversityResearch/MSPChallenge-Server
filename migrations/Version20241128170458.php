@@ -9,7 +9,7 @@ use App\Domain\API\v1\Simulation;
 use App\Domain\Common\InternalSimulationName;
 use App\Domain\Services\SimulationHelper;
 use App\Domain\Services\SymfonyToLegacyHelper;
-use App\Entity\Watchdog;
+use App\Entity\SessionAPI\Watchdog;
 use Doctrine\DBAL\Schema\Schema;
 use Exception;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;

@@ -19,11 +19,12 @@ class AccessTokenAuthenticatedListener
 
     public function __construct(
         private readonly RequestStack $requestStack,
-        private readonly ConnectionManager $connectionManager
+        private readonly ConnectionManager $connectionManager,
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
     ) {
         $this->request = $this->requestStack->getCurrentRequest();
         if (is_null($this->request)) {
-            $this->request = SymfonyToLegacyHelper::getInstance()->getRequest();
+            $this->request = $symfonyToLegacyHelper->getRequest();
         }
     }
 

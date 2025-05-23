@@ -86,4 +86,10 @@ Encore
 //.autoProvidejQuery()
 ;
 
-module.exports = Encore.getWebpackConfig();
+// Use polling instead of inotify
+const config = Encore.getWebpackConfig();
+config.watchOptions = {
+    poll: true,
+};
+
+module.exports = config;

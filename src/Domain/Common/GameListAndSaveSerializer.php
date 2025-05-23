@@ -5,12 +5,14 @@ namespace App\Domain\Common;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameVisibilityValue;
-use App\Domain\Common\NormalizerContextBuilder;
 use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use ReflectionException;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
@@ -26,6 +28,9 @@ class GameListAndSaveSerializer
         $this->serializer = new Serializer([$this->normalizer], [new JsonEncoder()]);
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function createJsonFromGameSave(GameSave $gameSave): string
     {
         $gameSave->encodePasswords();
@@ -39,6 +44,10 @@ class GameListAndSaveSerializer
         );
     }
 
+    /**
+     * @throws ExceptionInterface
+     * @throws ReflectionException
+     */
     public function createDataFromGameList(GameList $gameList): array
     {
         return $this->serializer->normalize(
@@ -51,6 +60,10 @@ class GameListAndSaveSerializer
         );
     }
 
+    /**
+     * @throws ExceptionInterface
+     * @throws ReflectionException
+     */
     public function createDataFromGameSave(GameSave $gameSave): array
     {
         return $this->serializer->normalize(
@@ -63,9 +76,13 @@ class GameListAndSaveSerializer
         );
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     public function createGameSaveFromJson(string $json): GameSave
     {
-        $gameSave = $this->serializer->deserialize(
+        return $this->serializer->deserialize(
             $json,
             GameSave::class,
             'json',
@@ -74,17 +91,18 @@ class GameListAndSaveSerializer
                 ->withCallbacks($this->getGameListJsonDenormalizeCallbacks())
                 ->toArray()
         );
-        return $gameSave;
     }
 
     /**
      * @param array $data being a normalization of a GameList or GameSave object
      *
      * @return GameList
+     * @throws ReflectionException
+     * @throws Exception
      */
     public function createGameListFromData(array $data): GameList
     {
-        $gameList = $this->serializer->denormalize(
+        return $this->serializer->denormalize(
             $data,
             GameList::class,
             null,
@@ -93,17 +111,18 @@ class GameListAndSaveSerializer
                 ->withCallbacks($this->getGameListDenormalizeCallbacks())
                 ->toArray()
         );
-        return $gameList;
     }
 
     /**
      * @param array $data being a normalization of a GameSave or GameList object
      *
      * @return GameSave
+     * @throws ReflectionException
+     * @throws Exception
      */
     public function createGameSaveFromData(array $data): GameSave
     {
-        $gameSave = $this->serializer->denormalize(
+        return $this->serializer->denormalize(
             $data,
             GameSave::class,
             null,
@@ -112,7 +131,6 @@ class GameListAndSaveSerializer
                 ->withCallbacks($this->getGenericDenormalizeCallbacks())
                 ->toArray()
         );
-        return $gameSave;
     }
 
     private function getGenericIgnoredAttributes(): array
@@ -134,6 +152,9 @@ class GameListAndSaveSerializer
         ];
     }
 
+    /**
+     * @throws Exception
+     */
     private function getGenericDenormalizeCallbacks(): array
     {
         return [
@@ -146,6 +167,9 @@ class GameListAndSaveSerializer
         ];
     }
 
+    /**
+     * @throws Exception
+     */
     private function getGameListDenormalizeCallbacks(): array
     {
         $callbacks = $this->getGenericDenormalizeCallbacks();
@@ -162,6 +186,9 @@ class GameListAndSaveSerializer
         return $callbacks;
     }
 
+    /**
+     * @throws Exception
+     */
     private function getGameListJsonDenormalizeCallbacks(): array
     {
         $callbacks = $this->getGenericDenormalizeCallbacks();
