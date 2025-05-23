@@ -92,4 +92,4 @@ config.watchOptions = {
     poll: true,
 };
 
-module.exports = Encore.getWebpackConfig();
+module.exports = config;
