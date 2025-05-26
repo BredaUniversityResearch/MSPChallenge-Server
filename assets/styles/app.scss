@@ -1,4 +1,16 @@
-// Bootstrap SCSS variables overrides:
+@import 'http://fonts.googleapis.com/css?family=Cabin';
+
+// font awesome 4
+@import '~font-awesome';
+
+// font awesome 6
+//   don't forget to install yarn package @fortawesome/fontawesome-free
+//@import "~@fortawesome/fontawesome-free/scss/fontawesome";
+//@import "~@fortawesome/fontawesome-free/scss/solid";
+//@import "~@fortawesome/fontawesome-free/scss/brands";
+
+// https://symfony.com/doc/current/frontend/encore/bootstrap.html#importing-bootstrap-styles
+// *** Bootstrap **** SCSS variables overrides BEGIN
 $light: #ffffff;
 $lightAlternate1: #f5f5f5;
 $lightAlternate2: #f7a02b;
@@ -34,9 +46,8 @@ $link-decoration: none;
 
 $table-bg: none;
 
-@import 'http://fonts.googleapis.com/css?family=Cabin';
-@import '~bootstrap';
-@import '~font-awesome';
+@import "~bootstrap/scss/bootstrap";
+// *** Bootstrap **** SCSS variables overrides EMD
 
 html, body {
     height: 100%;
