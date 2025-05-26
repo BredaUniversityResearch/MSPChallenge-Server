@@ -99,8 +99,6 @@ services:
       NEXUS_CREDENTIALS: ${NEXUS_CREDENTIALS:-}
       NEXUS_ANTI_CSRF_TOKEN: ${NEXUS_ANTI_CSRF_TOKEN:-}
     ports:
-      # Expose docker api
-      - "2375:2375"
       # Websocket server
       - "${WS_SERVER_PORT:-45001}:${WS_SERVER_PORT:-45001}"
       # HTTP needs to be defined in the override/prod/staging/... yml files
