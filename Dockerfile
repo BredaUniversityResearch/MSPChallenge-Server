@@ -82,9 +82,6 @@ COPY --link docker/supervisor/supervisord.conf /etc/supervisord.conf
 RUN mkdir -p /etc/supervisor.d/
 COPY --link docker/supervisor/supervisor.d/*.ini /etc/supervisor.d/
 
-# Mount Docker socket
-VOLUME /var/run/docker.sock
-
 ENTRYPOINT ["docker-entrypoint"]
 
 # Install Blackfire Probe

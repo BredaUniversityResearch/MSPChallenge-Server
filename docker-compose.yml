@@ -51,7 +51,6 @@ services:
       - node_modules_data:/app/node_modules:rw
       - public_build_data:/app/public/build:rw
       - /app/var/log
-      - /var/run/docker.sock:/var/run/docker.sock # to communicate with the Docker daemon
     networks:
       - database
       - php
