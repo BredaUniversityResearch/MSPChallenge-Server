@@ -1,10 +1,7 @@
 #syntax=docker/dockerfile:1
 
 # build a local image using the following command:
-#   * for Dev, e.g:
-#     docker build -t cradlewebmaster/msp-challenge-server:5.2.0-alpha-dev -t cradlewebmaster/msp-challenge-server:latest-dev -f Dockerfile --target frankenphp_dev .
-#   * for Prod, e.g:
-#     docker build -t cradlewebmaster/msp-challenge-server:5.2.0-alpha -t cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
+#   docker build -t cradlewebmaster/msp-challenge-server:5.2.0-alpha -t cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
 
 FROM dunglas/frankenphp:1-php8.3 AS frankenphp_upstream
 

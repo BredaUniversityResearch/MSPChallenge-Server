@@ -38,7 +38,9 @@ services:
       driver: "local"
 
   php:
-    image: cradlewebmaster/msp-challenge-server:latest-dev
+    build:
+        context: .
+        target: frankenphp_dev
     volumes:
       - ./:/app
       - ./frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro
@@ -74,6 +76,13 @@ services:
       - target: 80
         published: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
         protocol: tcp
+
+  simulations:
+    build:
+      context: .
+      dockerfile: simulations/debian.11-x64/Dockerfile
+      args:
+        source_dir: simulations/debian.11-x64
 
 networks:
   mitmproxy:
