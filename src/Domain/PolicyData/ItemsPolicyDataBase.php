@@ -10,7 +10,7 @@ use Swaggest\JsonSchema\Schema;
 abstract class ItemsPolicyDataBase extends PolicyDataBase
 {
     /** @var object[] */
-    public array $items;
+    public array $items = [];
 
     abstract public function getItemSchema(): Schema;
 
@@ -73,6 +73,7 @@ abstract class ItemsPolicyDataBase extends PolicyDataBase
      */
     public static function import($data, Context $options = null)
     {
+        $data->items ??= [];
         $result = parent::import($data, $options);
         // should have been taken care of by the schema
         assert(property_exists($data, 'items') && is_array($data->items));
@@ -94,6 +95,7 @@ abstract class ItemsPolicyDataBase extends PolicyDataBase
     {
         parent::setUpProperties($properties, $ownerSchema);
         $itemsSchema = Schema::arr();
+        $itemsSchema->default = [];
         $itemsSchema->items = Schema::object()
             ->addMeta(
                 fn() => (new static())->getItemSchema(),
