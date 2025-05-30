@@ -38,3 +38,9 @@ vendor/
 .env.local.php
 .env.test
 node_modules/
+
+# these are symlinked by "bash install.sh"
+composer.json
+composer.lock
+symfony.lock
+config/
