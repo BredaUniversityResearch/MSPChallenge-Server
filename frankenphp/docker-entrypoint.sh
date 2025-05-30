@@ -6,7 +6,6 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 #		composer install --prefer-dist --no-progress --no-interaction
 #	fi
   bash install.sh
-  yarn install
 
   # Display information about the current project
 	# Or about an error in project initialization
@@ -42,6 +41,7 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
   chown -R "$(whoami)":www-data export raster running_session_config ServerManager/configfiles ServerManager/log ServerManager/saves ServerManager/session_archive session_archive var vendor POV
   chmod -R u+rwX,g+rwX,o+rX export raster running_session_config ServerManager/configfiles ServerManager/log ServerManager/saves ServerManager/session_archive session_archive var vendor POV
 
+  yarn install
   echo 'PHP app ready!'
 
   echo "Starting supervisor..."

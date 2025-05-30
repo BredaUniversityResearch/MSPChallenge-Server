@@ -2,6 +2,8 @@
 
 # build a local image using the following command:
 #   docker build -t cradlewebmaster/msp-challenge-server:5.2.0-alpha -t cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
+# how to run it:
+#   docker run -it -p 8000:8000 -v /var/run/docker.sock:/var/run/docker.sock cradlewebmaster/msp-challenge-server:latest
 
 FROM dunglas/frankenphp:1-php8.3 AS frankenphp_upstream
 
