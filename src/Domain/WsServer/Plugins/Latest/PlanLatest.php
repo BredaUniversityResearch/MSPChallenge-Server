@@ -6,9 +6,12 @@ use App\Domain\API\v1\GeneralPolicyType;
 use App\Domain\API\v1\Plan;
 use App\Domain\Common\CommonBase;
 use App\Domain\Common\EntityEnums\PolicyTypeName;
+use App\Domain\PolicyData\PolicyDataBase;
+use App\Domain\PolicyData\PolicyDataFactory;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\PromiseInterface;
+use Swaggest\JsonSchema\InvalidValue;
 use function App\await;
 use function App\parallel;
 use function App\tpf;
@@ -252,6 +255,10 @@ class PlanLatest extends CommonBase
         return $this->isAsync() ? $promise : await($promise);
     }
 
+    /**
+     * @throws \Swaggest\JsonSchema\Exception
+     * @throws InvalidValue
+     */
     private function formatByPolicyType(array &$plan, PolicyTypeName $policyType): void
     {
         $policy['policy_type'] = $policyType->value;
@@ -285,6 +292,8 @@ class PlanLatest extends CommonBase
                 if (!empty($plan[$policyType->value.'_data'])) {
                     $policy = array_merge($policy, json_decode($plan[$policyType->value.'_data'] ?? [], true));
                 }
+                $policyObj = PolicyDataFactory::createPolicyDataByJsonObject((object)$policy);
+                $policy = (array)PolicyDataBase::export($policyObj);
                 break;
         }
 

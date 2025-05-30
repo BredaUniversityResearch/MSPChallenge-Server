@@ -39,7 +39,7 @@ vendor/
 .env.test
 node_modules/
 
-# composer/symfony symlinks
+# composer/symfony symlinks by "bash install.sh"
 config/
 composer.json
 composer.lock
@@ -54,4 +54,3 @@ ServerManager/saves/*
 ServerManager/session_archive/*
 session_archive/*
 exports/*
-

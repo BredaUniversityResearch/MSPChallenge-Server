@@ -14,13 +14,19 @@ services:
       - /app/var/cache
     environment:
       APP_SECRET: ${APP_SECRET}
+      APP_ENV: prod
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
+      URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-localhost}
+      URL_WS_SERVER_HOST: ${URL_WS_SERVER_HOST:-localhost}
     ports:
       # HTTP
       - target: 80
         published: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
         protocol: tcp
+
+  simulations:
+    image: cradlewebmaster/msp-challenge-simulations:latest
 
 volumes:
   configfiles_data:
