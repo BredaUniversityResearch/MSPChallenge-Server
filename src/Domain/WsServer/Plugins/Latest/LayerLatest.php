@@ -155,6 +155,7 @@ class LayerLatest extends CommonBase
                 ->from('layer')
                 ->where('layer_geotype = ' . $qb->createPositionalParameter('raster'))
                 ->andWhere('layer_lastupdate > ' . $qb->createPositionalParameter($time))
+                ->andWhere('layer_active = 1')
         );
     }
 }
