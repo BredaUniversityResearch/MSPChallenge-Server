@@ -13,7 +13,7 @@ services:
       # port 0 meaning: let docker choose a random available port
       - "${REDIS_ADMIN_PORT:-0}:80"
     networks:
-      - redis
+      - app_network
     logging:
       driver: "local"
 
@@ -25,7 +25,7 @@ services:
     image: mitmproxy/mitmproxy:10.3.1
     entrypoint: "mitmweb --web-host 0.0.0.0 --listen-port ${MITMPROXY_PORT:-8080} --web-port ${MITMPROXY_WEB_PORT:-8081} --mode reverse:http://php --set websocket=true"
     networks:
-      - php
+      - app_network
     ports:
       - "${MITMPROXY_PORT:-8080}:${MITMPROXY_PORT:-8080}"
       - "${MITMPROXY_WEB_PORT:-8081}:${MITMPROXY_WEB_PORT:-8081}"
@@ -45,12 +45,6 @@ services:
       - ./:/app
       - ./frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro
       - ./frankenphp/conf.d/20-app.dev.ini:/usr/local/etc/php/app.conf.d/20-app.dev.ini:ro
-    networks:
-      - mitmproxy
-      - database
-      - php
-      - redis
-      - simulations
     environment:
       # this forces non-ssl
       SERVER_NAME: :80
@@ -83,6 +77,3 @@ services:
       dockerfile: simulations/debian.11-x64/Dockerfile
       args:
         source_dir: simulations/debian.11-x64
-
-networks:
-  mitmproxy:

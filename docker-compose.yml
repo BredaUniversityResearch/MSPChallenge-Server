@@ -3,7 +3,7 @@ services:
     image: redis:7.2.4-alpine
     restart: always
     networks:
-      - redis
+      - app_network
     logging:
       driver: "local"
 
@@ -31,7 +31,7 @@ services:
       '--myisam-sort-buffer-size=67108864'
     ]
     networks:
-      - database
+      - app_network
     volumes:
       - ./docker/database/my2_80.sql:/root/my2_80.sql:ro
       - mariadb_data:/var/lib/mysql
@@ -53,10 +53,7 @@ services:
       - /app/var/log
       - /var/run/docker.sock:/var/run/docker.sock # to communicate with the Docker daemon
     networks:
-      - database
-      - php
-      - redis
-      - simulations
+      - app_network
     environment:
       SERVER_NAME: ${SERVER_NAME:-localhost}, localhost:80
       DOCKER: 1
@@ -67,9 +64,8 @@ services:
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://php/.well-known/mercure}
       MERCURE_PUBLIC_URL: ${CADDY_MERCURE_PUBLIC_URL:-https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}/.well-known/mercure}
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
-      # The two next lines can be removed after initial installation
+      # For /app/set_symfony_version.sh
       SYMFONY_VERSION: ${SYMFONY_VERSION:-6.4}
-      STABILITY: ${STABILITY:-stable}
       # Exposes BLACKFIRE_CLIENT_* environment variables allowing the client to communicate with Blackfire's API:
       BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED:-0}
       BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID:-}
@@ -123,7 +119,7 @@ services:
     logging:
       driver: "local"
     networks:
-      - php
+      - app_network
 
   blackfire:
     image: blackfire/blackfire:2
@@ -142,7 +138,7 @@ services:
         BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID:-}
         BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
     networks:
-      - php
+      - app_network
     logging:
       driver: "local"
 
@@ -165,7 +161,4 @@ volumes:
 ###< doctrine/doctrine-bundle ###
 
 networks:
-  database:
-  php:
-  redis:
-  simulations:
+  app_network:
