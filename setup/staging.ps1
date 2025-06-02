@@ -6,6 +6,11 @@ if ($args.Count -gt 0) {
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.yml" -OutFile "docker-compose.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.staging.yml" -OutFile "docker-compose.staging.yml"
 
+# Check if .env exists and copy it to .env.local
+if (Test-Path ".env") {
+    Copy-Item -Path ".env" -Destination ".env.local" -Force
+}
+
 # Load environment variables from .env.local if it exists
 if (Test-Path ".env.local") {
     Get-Content ".env.local" | ForEach-Object {

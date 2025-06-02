@@ -8,6 +8,11 @@ fi
 curl -O "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/${BRANCH_NAME}/docker-compose.yml"
 curl -O "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/${BRANCH_NAME}/docker-compose.staging.yml"
 
+# Check if .env exists and copy it to .env.local
+if [ -f ".env" ]; then
+  cp .env .env.local
+fi
+
 # Load environment variables from .env.local if it exists
 if [ -f ".env.local" ]; then
   source .env.local
