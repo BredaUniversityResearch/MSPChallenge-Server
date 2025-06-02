@@ -14,7 +14,7 @@ if (Test-Path ".env") {
 # Load environment variables from .env.local if it exists
 if (Test-Path ".env.local") {
     Get-Content ".env.local" | ForEach-Object {
-        if ($_ -match "^(.*)=(.*)$") {
+        if ($_ -match "^(.*?)=(.*)$") {
             if ($matches.Count -ge 3) {
                 [Environment]::SetEnvironmentVariable($matches[1], $matches[2])
             }

@@ -11,7 +11,7 @@ if (Test-Path ".env") {
 # Load environment variables from .env.local if it exists
 if (Test-Path ".env.local") {
     Get-Content ".env.local" | ForEach-Object {
-        if ($_ -match "^(.*)=(.*)$") {
+        if ($_ -match "^(.*?)=(.*)$") {
             if ($matches.Count -ge 3) {
                 [Environment]::SetEnvironmentVariable($matches[1], $matches[2])
             }
@@ -36,19 +36,7 @@ docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/do
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.yml" -OutFile "docker-compose.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
 
-if (-not $env:SERVER_NAME) {
-    $env:SERVER_NAME = Read-Host "Enter your domain name (default: localhost)"
-    if (-not $env:SERVER_NAME) {
-        $env:SERVER_NAME = "localhost"
-    }
-}
-
-if (-not $env:SERVER_NAME) {
-    $env:SERVER_NAME = Read-Host "Enter your domain name (default: localhost)"
-    if (-not $env:SERVER_NAME) {
-        $env:SERVER_NAME = "localhost"
-    }
-}
+$env:SERVER_NAME = "localhost"
 
 if (-not $env:CADDY_MERCURE_JWT_SECRET) {
     $secret = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 32 | ForEach-Object {[char]$_})
