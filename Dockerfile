@@ -37,11 +37,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         procps \
         nano \
         gnupg \
-        docker.io \
         && rm -rf /var/lib/apt/lists/*
-
-RUN curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
-    chmod +x /usr/local/bin/docker-compose
 
 # Add Yarn APT repository and install Yarn
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
@@ -88,9 +84,6 @@ RUN mkdir -p /var/log/supervisor/
 COPY --link docker/supervisor/supervisord.conf /etc/supervisord.conf
 RUN mkdir -p /etc/supervisor.d/
 COPY --link docker/supervisor/supervisor.d/*.ini /etc/supervisor.d/
-
-# Mount Docker socket
-VOLUME /var/run/docker.sock
 
 ENTRYPOINT ["docker-entrypoint"]
 
