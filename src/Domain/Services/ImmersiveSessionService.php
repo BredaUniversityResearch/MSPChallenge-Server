@@ -112,32 +112,13 @@ class ImmersiveSessionService
             ->setDockerApiID($this->getDockerApi()->getId())
             ->setPort($nextAvailablePort);
 
-        $branchName = ($_ENV['IMMERSIVE_TWINS_DOCKER_BRANCH'] ?? null) ?: 'main';
-        $this->dockerApiCall('POST', '/build', [
-            'query' => [
-                't' => 'unity-server-image',
-                'nocache' => true,
-                'remote' => 'https://github.com/BredaUniversityResearch/ImmersiveTwins-UnityServer-Docker.git#'.
-                    $branchName,
-                'rm' => true,
-                'forcerm' => true, // Always remove intermediate containers, even upon failure.
-                'buildargs' => json_encode(
-                    [
-                        'NEXUS_CREDENTIALS' => $_ENV['NEXUS_CREDENTIALS'],
-                        'NEXUS_ANTI_CSRF_TOKEN' => $_ENV['NEXUS_ANTI_CSRF_TOKEN']
-                    ],
-                    JSON_UNESCAPED_SLASHES
-                )
-            ]
-        ]);
-
         $data = array_merge(
             $immersiveSessionType->getDataDefault() ?? [],
             $sess->getData() ?? []
         );
         $responseContent = $this->dockerApiCall('POST', '/containers/create', [
             'json' => [
-               'Image' => 'unity-server-image', // Use the built image
+               'Image' => 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:latest',
                'ExposedPorts' => [
                     '50123/udp' => new \stdClass() // Explicitly expose the port
                 ],

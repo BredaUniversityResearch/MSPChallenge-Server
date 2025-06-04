@@ -1,7 +1,7 @@
 #syntax=docker/dockerfile:1
 
 # build a local image using the following command:
-#   docker build -t cradlewebmaster/msp-challenge-server:5.2.0-alpha -t cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
+#   docker build -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:5.2.0-alpha -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
 # how to run it:
 #  (replace [branch_name] with the branch you want to run, e.g. `main` or `dev`)
 #  * from Linux:

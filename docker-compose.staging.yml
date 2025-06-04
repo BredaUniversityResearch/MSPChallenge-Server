@@ -1,6 +1,6 @@
 services:
   php:
-    image: cradlewebmaster/msp-challenge-server:latest
+    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest
     volumes:
       - ./:/app
       - /app/var/cache
@@ -16,4 +16,4 @@ services:
         protocol: tcp
 
   simulations:
-    image: cradlewebmaster/msp-challenge-simulations:latest
+    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:latest

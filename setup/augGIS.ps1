@@ -31,8 +31,7 @@ if (-not $env:NEXUS_ANTI_CSRF_TOKEN -or -not $env:NEXUS_CREDENTIALS) {
     exit 1
 }
 
-docker build --no-cache -t cradlewebmaster/docker-api:latest https://raw.githubusercontent.com/BredaUniversityResearch/ImmersiveTwins-UnityServer-Docker/refs/heads/main/api/Dockerfile
-docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock cradlewebmaster/docker-api:latest
+docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.yml" -OutFile "docker-compose.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
 
