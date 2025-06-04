@@ -680,4 +680,51 @@ class Geometry
         }
         return $jsonArray;
     }
+
+    public function toWkt(bool $withInnerRings = true): string
+    {
+        $exteriorRing = self::toWktCollection(json_decode($this->getGeometryGeometry(), true));
+        $innerRings = [];// the holes
+        if ($withInnerRings) {
+            foreach ($this->getGeometrySubtractives() as $subtractive) {
+                $innerRings[] = self::toWktCollection(json_decode($subtractive->getGeometryGeometry(), true));
+            }
+        }
+        return 'POLYGON('.$exteriorRing.(empty($innerRings) ? '' : ','.implode(',', $innerRings)).')';
+    }
+
+    public static function toWktCollection(array $coordinates): string
+    {
+        // if the first and last element are not the same, add the first element to the end
+        if ($coordinates[0] !== end($coordinates)) {
+            $coordinates[] = $coordinates[0];
+        }
+        $originalPolygonCoordsText = implode(
+            ',',
+            array_map(fn($p) => implode(' ', $p), $coordinates)
+        );
+        return '('.$originalPolygonCoordsText.')';
+    }
+
+    public static function exteriorRingCoordinatesFromWkt(string $wkt): array
+    {
+        // Strip "POLYGON(" and the trailing ")"
+        $wkt = substr($wkt, strlen("POLYGON("), -1);
+        // Match inner parts between parentheses
+        preg_match_all('/\((.*?)\)/', $wkt, $matches);
+        $rings = $matches[1];
+        $coordinates = [];
+        // Only the first ring is the exterior ring
+        if (empty($rings)) {
+            return $coordinates; // No rings found
+        }
+        $ring = $rings[0]; // exterior ring
+        $points = explode(',', $ring);
+        // Iterate through each point
+        foreach ($points as $point) {
+            list($x, $y) = explode(' ', trim($point));
+            $coordinates[] = array((float)$x, (float)$y);
+        }
+        return $coordinates;
+    }
 }

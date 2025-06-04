@@ -23,6 +23,16 @@ use Symfony\Component\Routing\Attribute\Route;
     description: '<u>{simulation} being either Simulation or simulation</u>. '.
         'Operations related to simulation management'
 )]
+#[OA\Parameter(
+    name: 'simulation',
+    in: 'path',
+    required: true,
+    schema: new OA\Schema(
+        type: 'string',
+        default: 'simulation',
+        enum: ['simulation', 'Simulation']
+    )
+)]
 class SimulationController extends BaseController
 {
     /**

@@ -801,12 +801,12 @@ SUBQUERY,
                     SQL
                 );
             }
-            $st->bindValue('text', self::toWkt(json_decode($geom->getGeometryGeometry(), true)));
+            $st->bindValue('text', $geom->toWkt(false));
             $st->bindValue('buffer', $policyData->radius);
             $st->execute();
             // for debugging use https://wktmap.com/ to visualize using EPSG:3035 !
             $bufferedPolygonText = $st->fetchColumn();
-            return self::fromWkt($bufferedPolygonText);
+            return Geometry::exteriorRingCoordinatesFromWkt($bufferedPolygonText);
         } catch (\Exception $e) {
             while (null !== $prev = $e->getPrevious()) {
                 $e = $prev;
@@ -927,40 +927,5 @@ SUBQUERY,
         // needed for polygons: 1 entry is exterior ring, 2nd and onwards are interior rings
         //   only an exterior ring in this case.
         $result[] = [json_decode($geometryPoints, true)];
-    }
-
-    private static function toWkt(array $coordinates): string
-    {
-        // if the first and last element are not the same, add the first element to the end
-        if ($coordinates[0] !== end($coordinates)) {
-            $coordinates[] = $coordinates[0];
-        }
-        $originalPolygonCoordsText = implode(
-            ',',
-            array_map(fn($p) => implode(' ', $p), $coordinates)
-        );
-        return 'POLYGON(('.$originalPolygonCoordsText.'))';
-    }
-
-    private static function fromWkt(string $wkt): array
-    {
-        // Strip "POLYGON(" and the trailing ")"
-        $wkt = substr($wkt, strlen("POLYGON("), -1);
-        // Match inner parts between parentheses
-        preg_match_all('/\((.*?)\)/', $wkt, $matches);
-        $rings = $matches[1];
-        $coordinates = array();
-        // Iterate through each ring
-        foreach ($rings as $ring) {
-            $points = explode(',', $ring);
-            $rCoordinates = array();
-            // Iterate through each point
-            foreach ($points as $point) {
-                list($x, $y) = explode(' ', trim($point));
-                $rCoordinates[] = array((float)$x, (float)$y);
-            }
-            $coordinates[] = $rCoordinates;
-        }
-        return $coordinates;
     }
 }

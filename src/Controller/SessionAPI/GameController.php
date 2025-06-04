@@ -34,7 +34,17 @@ use function App\await;
 #[Route('/api/{game}', requirements: ['game' => '[gG]ame'])]
 #[OA\Tag(
     name: 'Game',
-    description: '<u>{game} being either Game or game</u>. Operations related to game management.'
+    description: 'Operations related to game management.'
+)]
+#[OA\Parameter(
+    name: 'game',
+    in: 'path',
+    required: true,
+    schema: new OA\Schema(
+        type: 'string',
+        default: 'game',
+        enum: ['game', 'Game']
+    )
 )]
 class GameController extends BaseController
 {
