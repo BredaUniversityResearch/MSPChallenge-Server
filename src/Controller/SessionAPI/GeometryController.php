@@ -79,7 +79,8 @@ class GeometryController extends BaseController
         $em = $this->connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
         $geom = $em->getRepository(Geometry::class);
         /** @var Geometry $geometry */
-        if (null === $geometry = $geom->find($id)) {
+        $geometry = $geom->find($id);
+        if (null === $geometry) {
             return new JsonResponse(
                 self::wrapPayloadForResponse(
                     false,
