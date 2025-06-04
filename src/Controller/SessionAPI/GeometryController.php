@@ -80,7 +80,7 @@ class GeometryController extends BaseController
         $geom = $em->getRepository(Geometry::class);
         /** @var Geometry $geometry */
         $geometry = $geom->find($id);
-        if (null === $geometry) {
+        if (null == $geometry) {
             return new JsonResponse(
                 self::wrapPayloadForResponse(
                     false,
