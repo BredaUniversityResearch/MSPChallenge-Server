@@ -125,21 +125,29 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 COPY --link frankenphp/conf.d/20-app.prod.ini $PHP_INI_DIR/app.conf.d/
 COPY --link frankenphp/worker.Caddyfile /etc/caddy/worker.Caddyfile
 
-# prevent the reinstallation of vendors at every changes in the source code
-COPY --link composer.* symfony.* ./
-RUN set -eux; \
-	composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress
-
+# Replace symbolic links with COPY --link
+COPY --link config-symfony6.4 config
+COPY --link composer-symfony6.4.json composer.json
+COPY --link composer-symfony6.4.lock composer.lock
+COPY --link symfony6.4.lock symfony.lock
+COPY --link package.json package.json
 # copy sources
 COPY --link . ./
-RUN rm -Rf frankenphp/
 
+# Install dependencies
+RUN set -eux; \
+  composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress
+
+# Install PHP dependencies
 RUN set -eux; \
 	mkdir -p var/cache var/log; \
 	composer dump-autoload --classmap-authoritative --no-dev; \
 	composer dump-env prod; \
 	composer run-script --no-dev post-install-cmd; \
 	chmod +x bin/console; sync;
+
+# Clean up unnecessary files
+RUN rm -rf frankenphp/
 
 FROM node:22.6 as node_base
 
