@@ -318,7 +318,7 @@ class Game extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Meta(int $user, bool $sort = false, bool $onlyActiveLayers = false)
+    public function Meta(int $user, bool $sort = false, bool $onlyActiveLayers = true)
     {
         $this->getDatabase()->query("UPDATE user SET user_lastupdate=? WHERE user_id=?", array(0, $user));
 
