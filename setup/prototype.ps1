@@ -71,10 +71,12 @@ $parameterMetadata = @{
         ForceInput = $true
         MSPChallengeServerParam = $true
         EnvVar = "SERVER_NAME"
+        Group = "MSP Challenge Server"
     }
     ServerPort = @{
         MSPChallengeServerParam = $true
         EnvVar = "SERVER_PORT"
+        Group = "MSP Challenge Server"
     }
     TestSwitch = @{
         MSPChallengeServerParam = $true
@@ -83,46 +85,46 @@ $parameterMetadata = @{
     EnableGui = @{
         ActAsBoolean = $true
     }
-    Var1 = @{ MSPChallengeServerParam = $true }
-    Var2 = @{ MSPChallengeServerParam = $true }
-    Var3 = @{ MSPChallengeServerParam = $true }
-    Var4 = @{ MSPChallengeServerParam = $true }
-    Var5 = @{ MSPChallengeServerParam = $true }
-    Var6 = @{ MSPChallengeServerParam = $true }
-    Var7 = @{ MSPChallengeServerParam = $true }
-    Var8 = @{ MSPChallengeServerParam = $true }
-    Var9 = @{ MSPChallengeServerParam = $true }
-    Var10 = @{ MSPChallengeServerParam = $true }
-    Var11 = @{ MSPChallengeServerParam = $true }
-    Var12 = @{ MSPChallengeServerParam = $true }
-    Var13 = @{ MSPChallengeServerParam = $true }
-    Var14 = @{ MSPChallengeServerParam = $true }
-    Var15 = @{ MSPChallengeServerParam = $true }
-    Var16 = @{ MSPChallengeServerParam = $true }
-    Var17 = @{ MSPChallengeServerParam = $true }
-    Var18 = @{ MSPChallengeServerParam = $true }
-    Var19 = @{ MSPChallengeServerParam = $true }
-    Var20 = @{ MSPChallengeServerParam = $true }
-    Var21 = @{ MSPChallengeServerParam = $true }
-    Var22 = @{ MSPChallengeServerParam = $true }
-    Var23 = @{ MSPChallengeServerParam = $true }
-    Var24 = @{ MSPChallengeServerParam = $true }
-    Var25 = @{ MSPChallengeServerParam = $true }
-    Var26 = @{ MSPChallengeServerParam = $true }
-    Var27 = @{ MSPChallengeServerParam = $true }
-    Var28 = @{ MSPChallengeServerParam = $true }
-    Var29 = @{ MSPChallengeServerParam = $true }
-    Var30 = @{ MSPChallengeServerParam = $true }
-    Var31 = @{ MSPChallengeServerParam = $true }
-    Var32 = @{ MSPChallengeServerParam = $true }
-    Var33 = @{ MSPChallengeServerParam = $true }
-    Var34 = @{ MSPChallengeServerParam = $true }
-    Var35 = @{ MSPChallengeServerParam = $true }
-    Var36 = @{ MSPChallengeServerParam = $true }
-    Var37 = @{ MSPChallengeServerParam = $true }
-    Var38 = @{ MSPChallengeServerParam = $true }
-    Var39 = @{ MSPChallengeServerParam = $true }
-    Var40 = @{ MSPChallengeServerParam = $true }
+    Var1 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var2 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var3 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var4 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var5 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var6 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var7 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var8 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var9 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var10 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var11 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var12 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var13 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var14 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var15 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var16 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var17 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var18 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var19 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var20 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var21 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var22 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var23 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var24 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var25 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var26 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var27 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var28 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var29 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var30 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var31 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var32 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var33 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var34 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var35 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var36 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var37 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var38 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var39 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var40 = @{ MSPChallengeServerParam = $true; Group="Test" }
 }
 
 function GetParamMetadataValue {
@@ -166,7 +168,8 @@ foreach ($param in $parameters.Keys) {
     if (-not $PSBoundParameters[$param]) {
         $envVar = GetParamMetadataValue -param $param -metadata "EnvVar"
         if ($envVar) {
-            $PSBoundParameters[$param] = (Get-ChildItem Env:$envVar -ErrorAction SilentlyContinue)?.Value
+            $envValue = Get-ChildItem Env:$envVar -ErrorAction SilentlyContinue
+            $PSBoundParameters[$param] = if ($envValue) { $envValue.Value } else { $null }
         }
     }
     if (-not $PSBoundParameters[$param]) {
@@ -179,65 +182,103 @@ if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
     Write-Host "Running in GUI mode..."
     Add-Type -AssemblyName System.Windows.Forms
 
+    # Create the main form
     $form = New-Object System.Windows.Forms.Form
     $form.Text = "Input Parameters"
     $form.Width = 1024
     $form.Height = 768
 
-    # Create a panel with AutoScroll enabled
-    $panel = New-Object System.Windows.Forms.Panel
-    $panel.Dock = [System.Windows.Forms.DockStyle]::Fill
-    $panel.AutoScroll = $true
-    $form.Controls.Add($panel)
+    # Create a Panel to hold the TabControl and Button
+    $mainPanel = New-Object System.Windows.Forms.Panel
+    $mainPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+    $form.Controls.Add($mainPanel)
 
-    $controls = @{}
-    $yOffset = 20
+    # Create a TabControl
+    $tabControl = New-Object System.Windows.Forms.TabControl
+    $tabControl.Dock = [System.Windows.Forms.DockStyle]::Top
+    $tabControl.Height = $form.Height - 100 # Leave space for the button
+    $mainPanel.Controls.Add($tabControl)
+
+    # Define categories for grouping parameters
+    $categories = @{}
 
     foreach ($param in $parameters.Keys) {
         if (-not (GetParamMetadataValue -param $param -metadata "MSPChallengeServerParam")) {
             continue
         }
-
-        $label = New-Object System.Windows.Forms.Label
-        $label.Text = $param
-        $label.Top = $yOffset
-        $label.Left = 10
-        $panel.Controls.Add($label)
-
-        if (($PSBoundParameters[$param] -is [bool]) -or (GetParamMetadataValue -param $param -metadata "ActAsBoolean")) {
-            $checkbox = New-Object System.Windows.Forms.CheckBox
-            $checkbox.Top = $yOffset
-            $checkbox.Left = 150
-            $checkbox.Checked = $PSBoundParameters[$param]
-            $panel.Controls.Add($checkbox)
-            $controls[$param] = $checkbox
-        } elseif ($PSBoundParameters[$param] -is [int]) {
-            $numericUpDown = New-Object System.Windows.Forms.NumericUpDown
-            $numericUpDown.Top = $yOffset
-            $numericUpDown.Left = 150
-            $numericUpDown.Width = 200
-            $numericUpDown.Minimum = 1
-            $numericUpDown.Maximum = 65535
-            $numericUpDown.Value = $PSBoundParameters[$param]
-            $panel.Controls.Add($numericUpDown)
-            $controls[$param] = $numericUpDown
-        } else {
-            $textbox = New-Object System.Windows.Forms.TextBox
-            $textbox.Top = $yOffset
-            $textbox.Left = 150
-            $textbox.Width = 200
-            $textbox.Text = $PSBoundParameters[$param]
-            $panel.Controls.Add($textbox)
-            $controls[$param] = $textbox
+        $category = (GetParamMetadataValue -param $param -metadata "Group")
+        if (-not $category) {
+            $category = "Other"
         }
-
-        $yOffset += 30
+        if (-not $categories.ContainsKey($category)) {
+            $categories[$category] = @()
+        }
+        $categories[$category] += $param
     }
 
+    # Initialize the controls hashtable
+    $controls = @{}
+
+    foreach ($category in $categories.Keys) {
+        # Create a TabPage for each category
+        $tabPage = New-Object System.Windows.Forms.TabPage
+        $tabPage.Text = $category
+        $tabControl.TabPages.Add($tabPage)
+
+        # Create a scrollable Panel for each TabPage
+        $panel = New-Object System.Windows.Forms.Panel
+        $panel.Dock = [System.Windows.Forms.DockStyle]::Fill
+        $panel.AutoScroll = $true
+        $tabPage.Controls.Add($panel)
+
+        $yOffset = 20
+        foreach ($param in $categories[$category]) {
+            if (-not (GetParamMetadataValue -param $param -metadata "MSPChallengeServerParam")) {
+                continue
+            }
+
+            $label = New-Object System.Windows.Forms.Label
+            $label.Text = $param
+            $label.Top = $yOffset
+            $label.Left = 10
+            $panel.Controls.Add($label)
+
+            if (($PSBoundParameters[$param] -is [bool]) -or (GetParamMetadataValue -param $param -metadata "ActAsBoolean")) {
+                $checkbox = New-Object System.Windows.Forms.CheckBox
+                $checkbox.Top = $yOffset
+                $checkbox.Left = 150
+                $checkbox.Checked = $PSBoundParameters[$param]
+                $panel.Controls.Add($checkbox)
+                $controls[$param] = $checkbox
+            } elseif ($PSBoundParameters[$param] -is [int]) {
+                $numericUpDown = New-Object System.Windows.Forms.NumericUpDown
+                $numericUpDown.Top = $yOffset
+                $numericUpDown.Left = 150
+                $numericUpDown.Width = 200
+                $numericUpDown.Minimum = 1
+                $numericUpDown.Maximum = 65535
+                $numericUpDown.Value = $PSBoundParameters[$param]
+                $panel.Controls.Add($numericUpDown)
+                $controls[$param] = $numericUpDown
+            } else {
+                $textbox = New-Object System.Windows.Forms.TextBox
+                $textbox.Top = $yOffset
+                $textbox.Left = 150
+                $textbox.Width = 200
+                $textbox.Text = $PSBoundParameters[$param]
+                $panel.Controls.Add($textbox)
+                $controls[$param] = $textbox
+            }
+
+            $yOffset += 30
+        }
+    }
+
+    # Create a Button
     $button = New-Object System.Windows.Forms.Button
     $button.Text = "Submit"
-    $button.Top = $yOffset
-    $button.Left = 150
+    $button.Dock = [System.Windows.Forms.DockStyle]::Bottom
+    $button.Height = 50
     $button.Add_Click({
         foreach ($param in $controls.Keys) {
             if ($controls[$param] -is [System.Windows.Forms.CheckBox]) {
@@ -248,8 +289,9 @@ if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
         }
         $form.Close()
     })
-    $panel.Controls.Add($button)
+    $mainPanel.Controls.Add($button)
 
+    # Show the form
     $form.ShowDialog()
 
     # Output resolved parameters
