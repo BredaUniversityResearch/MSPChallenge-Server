@@ -379,7 +379,6 @@ class GameLatest extends CommonBase
      */
     private function getLatestEnergy(array $context): PromiseInterface
     {
-        ;
         $energy = new EnergyLatest();
         $this->asyncDataTransferTo($energy);
         $deferred = new Deferred();
