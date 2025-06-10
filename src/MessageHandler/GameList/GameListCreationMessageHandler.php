@@ -1017,8 +1017,8 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
                     $grid->addSocketGeometry($this->findNewGeometry($gridSocketConfig['geometry'], $context));
                 }
             }
-            if (is_array($gridConfig['sources'])) {
-                foreach ($gridConfig['sources'] as $gridSourceConfig) {
+            if (is_array($gridConfig['sources'] ?? [])) {
+                foreach ($gridConfig['sources'] ?? [] as $gridSourceConfig) {
                     $grid->addSourceGeometry($this->findNewGeometry($gridSourceConfig['geometry'], $context));
                 }
             }
