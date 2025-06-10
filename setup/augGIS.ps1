@@ -1,3 +1,26 @@
+param([switch]$elevated)
+
+function Test-Admin {
+    $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
+    $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
+}
+
+# Check for administrative privileges
+if ((Test-Admin) -eq $false)  {
+    if ($elevated) {
+        Write-Host "Failed to elevate privileges. Exiting..."
+    } else {
+        Write-Host "This script requires administrative privileges. Relaunching as admin..."
+        Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file "{0}" -elevated' -f ($myinvocation.MyCommand.Definition))
+    }
+    exit
+}
+
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
+
+# Change to the script's directory
+Set-Location -Path (Split-Path -Parent $MyInvocation.MyCommand.Definition)
+
 $branch_name = "msp-ar"
 if ($args.Count -gt 0) {
     $branch_name = $args[0]
