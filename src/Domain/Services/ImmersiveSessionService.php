@@ -116,6 +116,13 @@ class ImmersiveSessionService
             $immersiveSessionType->getDataDefault() ?? [],
             $sess->getData() ?? []
         );
+        // Pull the image before creating the container
+        $this->dockerApiCall('POST', '/images/create', [
+            'query' => [
+                'fromImage' => 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server',
+                'tag' => 'latest',
+            ],
+        ]);
         $responseContent = $this->dockerApiCall('POST', '/containers/create', [
             'json' => [
                'Image' => 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:latest',
