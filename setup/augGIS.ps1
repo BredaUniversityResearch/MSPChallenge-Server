@@ -19,18 +19,6 @@ if (Test-Path ".env.local") {
     }
 }
 
-if (-not $env:NEXUS_CREDENTIALS) {
-    $env:NEXUS_CREDENTIALS = Read-Host "Enter Nexus credentials"
-}
-if (-not $env:NEXUS_ANTI_CSRF_TOKEN ) {
-    $env:NEXUS_ANTI_CSRF_TOKEN  = Read-Host "Enter Nexus anti-CSRF token"
-}
-
-if (-not $env:NEXUS_ANTI_CSRF_TOKEN -or -not $env:NEXUS_CREDENTIALS) {
-    Write-Output "Nexus environment variables (NEXUS_ANTI_CSRF_TOKEN and NEXUS_CREDENTIALS) need to be set."
-    exit 1
-}
-
 docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.yml" -OutFile "docker-compose.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
@@ -48,8 +36,6 @@ SERVER_NAME=$env:SERVER_NAME
 URL_WEB_SERVER_HOST=$env:SERVER_NAME
 URL_WS_SERVER_HOST=$env:SERVER_NAME
 CADDY_MERCURE_JWT_SECRET=$env:CADDY_MERCURE_JWT_SECRET
-NEXUS_CREDENTIALS=$env:NEXUS_CREDENTIALS
-NEXUS_ANTI_CSRF_TOKEN=$env:NEXUS_ANTI_CSRF_TOKEN
 "@
 
 docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.prod.yml" up -d

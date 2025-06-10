@@ -92,8 +92,6 @@ services:
       # other
       APP_ENV: ${APP_ENV:-dev}
       FRAMEWORK_CACHE_APP: ${FRAMEWORK_CACHE_APP:-cache.adapter.redis}
-      NEXUS_CREDENTIALS: ${NEXUS_CREDENTIALS:-}
-      NEXUS_ANTI_CSRF_TOKEN: ${NEXUS_ANTI_CSRF_TOKEN:-}
     ports:
       # Websocket server
       - "${WS_SERVER_PORT:-45001}:${WS_SERVER_PORT:-45001}"
