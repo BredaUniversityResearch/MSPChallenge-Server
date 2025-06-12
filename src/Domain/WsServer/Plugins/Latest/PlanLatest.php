@@ -289,11 +289,14 @@ class PlanLatest extends CommonBase
                 unset($plan['restriction_settings']);
                 break;
             default:
+                $policyObj = new \stdClass();
+                $policyObj->policy_type = $policyType->value;
                 if (!empty($plan[$policyType->value.'_data'])) {
-                    $policy = array_merge($policy, json_decode($plan[$policyType->value.'_data'] ?? [], true));
+                    $policyObj = PolicyDataFactory::createPolicyDataByJsonObject(
+                        json_decode($plan[$policyType->value.'_data'])
+                    );
                 }
-                $policyObj = PolicyDataFactory::createPolicyDataByJsonObject((object)$policy);
-                $policy = (array)PolicyDataBase::export($policyObj);
+                $policy = PolicyDataBase::export($policyObj);
                 break;
         }
 
