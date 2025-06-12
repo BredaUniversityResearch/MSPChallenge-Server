@@ -52,7 +52,7 @@ services:
       # force web(socket) server over 8080 (mitmproxy reverse proxy)
       WEB_SERVER_HOST: host.docker.internal
       WS_SERVER_HOST: host.docker.internal
-      URL_WEB_SERVER_HOST: host.docker.internal
+      URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-host.docker.internal}
       URL_WS_SERVER_HOST: host.docker.internal
       MITMPROXY_PORT: ${MITMPROXY_PORT:-8080}
       URL_WEB_SERVER_PORT: ${MITMPROXY_PORT:-8080}
