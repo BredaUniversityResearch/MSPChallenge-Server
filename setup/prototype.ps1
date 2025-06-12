@@ -22,7 +22,7 @@ param(
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
     [int]$TestSwitch = 0,
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
-    [int]$EnableGui = 0,
+    [int]$EnableGui = 1,
     [string]$Var1 = "default1",
     [string]$Var2 = "default2",
     [string]$Var3 = "default3",
@@ -69,62 +69,75 @@ param(
 $parameterMetadata = @{
     ServerName = @{
         ForceInput = $true
-        MSPChallengeServerParam = $true
         EnvVar = "SERVER_NAME"
-        Group = "MSP Challenge Server"
+        Tab = "MSP Challenge Server"
+        Environments = @("production")
     }
     ServerPort = @{
-        MSPChallengeServerParam = $true
         EnvVar = "SERVER_PORT"
-        Group = "MSP Challenge Server"
+        Tab = "MSP Challenge Server"
     }
     TestSwitch = @{
-        MSPChallengeServerParam = $true
         ActAsBoolean = $true
+        Tab = "Other"
     }
     EnableGui = @{
         ActAsBoolean = $true
     }
-    Var1 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var2 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var3 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var4 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var5 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var6 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var7 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var8 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var9 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var10 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var11 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var12 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var13 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var14 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var15 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var16 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var17 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var18 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var19 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var20 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var21 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var22 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var23 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var24 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var25 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var26 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var27 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var28 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var29 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var30 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var31 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var32 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var33 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var34 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var35 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var36 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var37 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var38 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var39 = @{ MSPChallengeServerParam = $true; Group="Test" }
-    Var40 = @{ MSPChallengeServerParam = $true; Group="Test" }
+    Var1 = @{ Tab="Test" }
+    Var2 = @{ Tab="Test" }
+    Var3 = @{ Tab="Test" }
+    Var4 = @{ Tab="Test" }
+    Var5 = @{ Tab="Test" }
+    Var6 = @{ Tab="Test" }
+    Var7 = @{ Tab="Test" }
+    Var8 = @{ Tab="Test" }
+    Var9 = @{ Tab="Test" }
+    Var10 = @{ Tab="Test" }
+    Var11 = @{ Tab="Test" }
+    Var12 = @{ Tab="Test" }
+    Var13 = @{ Tab="Test" }
+    Var14 = @{ Tab="Test" }
+    Var15 = @{ Tab="Test" }
+    Var16 = @{ Tab="Test" }
+    Var17 = @{ Tab="Test" }
+    Var18 = @{ Tab="Test" }
+    Var19 = @{ Tab="Test" }
+    Var20 = @{ Tab="Test" }
+    Var21 = @{ Tab="Test" }
+    Var22 = @{ Tab="Test" }
+    Var23 = @{ Tab="Test" }
+    Var24 = @{ Tab="Test" }
+    Var25 = @{ Tab="Test" }
+    Var26 = @{ Tab="Test" }
+    Var27 = @{ Tab="Test" }
+    Var28 = @{ Tab="Test" }
+    Var29 = @{ Tab="Test" }
+    Var30 = @{ Tab="Test" }
+    Var31 = @{ Tab="Test" }
+    Var32 = @{ Tab="Test" }
+    Var33 = @{ Tab="Test" }
+    Var34 = @{ Tab="Test" }
+    Var35 = @{ Tab="Test" }
+    Var36 = @{ Tab="Test" }
+    Var37 = @{ Tab="Test" }
+    Var38 = @{ Tab="Test" }
+    Var39 = @{ Tab="Test" }
+    Var40 = @{ Tab="Test" }
+}
+
+# Function to update visible controls based on the selected environment
+function Update-VisibleControls {
+    $selectedEnv = $envRadioButtons.Keys | Where-Object { $envRadioButtons[$_].Checked }
+    foreach ($param in $controls.Keys) {
+        $validEnvs = $parameterMetadata[$param]["Environments"]
+        $container = $controls[$param]
+        if ($validEnvs -and -not ($validEnvs -contains $selectedEnv)) {
+            $container.Visible = $false
+        } else {
+            $container.Visible = $true
+        }
+    }
 }
 
 function GetParamMetadataValue {
@@ -195,26 +208,22 @@ if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
 
     # Create a TabControl
     $tabControl = New-Object System.Windows.Forms.TabControl
-    $tabControl.Dock = [System.Windows.Forms.DockStyle]::Top
-    $tabControl.Height = $form.Height - 100 # Leave space for the button
+    $tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
     $mainPanel.Controls.Add($tabControl)
 
     # Define categories for grouping parameters
     $categories = @{}
 
     foreach ($param in $parameters.Keys) {
-        if (-not (GetParamMetadataValue -param $param -metadata "MSPChallengeServerParam")) {
+        if (-not (GetParamMetadataValue -param $param -metadata "Tab")) {
             continue
         }
-        $category = (GetParamMetadataValue -param $param -metadata "Group")
-        if (-not $category) {
-            $category = "Other"
-        }
+        $category = (GetParamMetadataValue -param $param -metadata "Tab")
         if (-not $categories.ContainsKey($category)) {
             $categories[$category] = @()
         }
         $categories[$category] += $param
-    }
+    }    
 
     # Initialize the controls hashtable
     $controls = @{}
@@ -223,54 +232,78 @@ if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
         # Create a TabPage for each category
         $tabPage = New-Object System.Windows.Forms.TabPage
         $tabPage.Text = $category
+        $tabPage.Dock = [System.Windows.Forms.DockStyle]::Fill
         $tabControl.TabPages.Add($tabPage)
 
-        # Create a scrollable Panel for each TabPage
-        $panel = New-Object System.Windows.Forms.Panel
-        $panel.Dock = [System.Windows.Forms.DockStyle]::Fill
-        $panel.AutoScroll = $true
-        $tabPage.Controls.Add($panel)
+        # Create a parent FlowLayoutPanel for all parameters
+        $parentPanel = New-Object System.Windows.Forms.FlowLayoutPanel
+        $parentPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+        $parentPanel.FlowDirection = [System.Windows.Forms.FlowDirection]::TopDown
+        $parentPanel.WrapContents = $false
+        $parentPanel.AutoScroll = $true
+        $tabPage.Controls.Add($parentPanel)
 
-        $yOffset = 20
+        # calculate the max. width the label
+        # Initialize a variable to track the maximum label width
+        $maxLabelWidth = 0
+        foreach ($param in $categories[$category])
+        {
+            if (-not (GetParamMetadataValue -param $param -metadata "Tab")) {
+                continue
+            }
+            $label = New-Object System.Windows.Forms.Label
+            $label.Text = $param
+            # Measure the width of the label text
+            $textSize = [System.Windows.Forms.TextRenderer]::MeasureText($label.Text, $label.Font)
+            $currentLabelWidth = $textSize.Width
+            # Update the maximum label width
+            if ($currentLabelWidth -gt $maxLabelWidth) {
+                $maxLabelWidth = $currentLabelWidth
+            }
+        }
+
         foreach ($param in $categories[$category]) {
-            if (-not (GetParamMetadataValue -param $param -metadata "MSPChallengeServerParam")) {
+            if (-not (GetParamMetadataValue -param $param -metadata "Tab")) {
                 continue
             }
 
+            # Create a container FlowLayoutPanel for each parameter
+            $linePanel = New-Object System.Windows.Forms.FlowLayoutPanel
+            $linePanel.FlowDirection = [System.Windows.Forms.FlowDirection]::LeftToRight
+            $linePanel.WrapContents = $false
+            $linePanel.Width = $parentPanel.ClientSize.Width - 20
+            $linePanel.Height = 30
+            $parentPanel.Controls.Add($linePanel)
+
+            # Store the container for visibility updates
+            $controls[$param] = $linePanel
+
+            # Create a Label
             $label = New-Object System.Windows.Forms.Label
             $label.Text = $param
-            $label.Top = $yOffset
-            $label.Left = 10
-            $panel.Controls.Add($label)
+            $label.Width = $maxLabelWidth+10
+            $label.Anchor = [System.Windows.Forms.AnchorStyles]::None
+            $label.Margin = [System.Windows.Forms.Padding]::new(0, 5, 5, 5) # Adjust vertical alignment
+            $linePanel.Controls.Add($label)
 
             if (($PSBoundParameters[$param] -is [bool]) -or (GetParamMetadataValue -param $param -metadata "ActAsBoolean")) {
                 $checkbox = New-Object System.Windows.Forms.CheckBox
-                $checkbox.Top = $yOffset
-                $checkbox.Left = 150
                 $checkbox.Checked = $PSBoundParameters[$param]
-                $panel.Controls.Add($checkbox)
-                $controls[$param] = $checkbox
+                $linePanel.Controls.Add($checkbox)
             } elseif ($PSBoundParameters[$param] -is [int]) {
                 $numericUpDown = New-Object System.Windows.Forms.NumericUpDown
-                $numericUpDown.Top = $yOffset
-                $numericUpDown.Left = 150
                 $numericUpDown.Width = 200
                 $numericUpDown.Minimum = 1
                 $numericUpDown.Maximum = 65535
                 $numericUpDown.Value = $PSBoundParameters[$param]
-                $panel.Controls.Add($numericUpDown)
-                $controls[$param] = $numericUpDown
+                $linePanel.Controls.Add($numericUpDown)
             } else {
+                # Create a TextBox
                 $textbox = New-Object System.Windows.Forms.TextBox
-                $textbox.Top = $yOffset
-                $textbox.Left = 150
                 $textbox.Width = 200
                 $textbox.Text = $PSBoundParameters[$param]
-                $panel.Controls.Add($textbox)
-                $controls[$param] = $textbox
+                $linePanel.Controls.Add($textbox)
             }
-
-            $yOffset += 30
         }
     }
 
@@ -281,15 +314,48 @@ if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
     $button.Height = 50
     $button.Add_Click({
         foreach ($param in $controls.Keys) {
-            if ($controls[$param] -is [System.Windows.Forms.CheckBox]) {
-                $PSBoundParameters[$param] = $controls[$param].Checked
-            } else {
-                $PSBoundParameters[$param] = $controls[$param].Text
+            if ($controls[$param].Visible) { # exclude hidden parameters
+                if ($controls[$param] -is [System.Windows.Forms.CheckBox]) {
+                    $PSBoundParameters[$param] = $controls[$param].Checked
+                } else {
+                    $PSBoundParameters[$param] = $controls[$param].Text
+                }
             }
         }
         $form.Close()
     })
     $mainPanel.Controls.Add($button)
+
+    # Add a GroupBox for environment selection
+    $envGroupBox = New-Object System.Windows.Forms.GroupBox
+    $envGroupBox.Text = "Target Environment"
+    $envGroupBox.Dock = [System.Windows.Forms.DockStyle]::Top
+    $envGroupBox.Height = 60
+    $form.Controls.Add($envGroupBox)
+
+    # Add radio buttons for environments
+    $environments = @("dev", "staging", "production")
+    $envRadioButtons = @{}
+    $xOffset = 10
+    foreach ($env in $environments) {
+        $radioButton = New-Object System.Windows.Forms.RadioButton
+        $radioButton.Text = $env
+        $radioButton.Left = $xOffset
+        $radioButton.Top = 20
+        $radioButton.AutoSize = $true
+        $envGroupBox.Controls.Add($radioButton)
+        $envRadioButtons[$env] = $radioButton
+        $xOffset += 100
+    }
+    $envRadioButtons["dev"].Checked = $true # Default to "dev"
+
+    # Attach event handlers to radio buttons
+    foreach ($radioButton in $envRadioButtons.Values) {
+        $radioButton.Add_CheckedChanged({ Update-VisibleControls })
+    }
+
+    # Call the function initially to set visibility
+    Update-VisibleControls
 
     # Show the form
     $form.ShowDialog()
@@ -304,7 +370,7 @@ Write-Host "Running in non-GUI mode..."
 
 # non-GUI Mode
 foreach ($param in $parameters.Keys) {
-    if (-not (GetParamMetadataValue -param $param -metadata "MSPChallengeServerParam")) {
+    if (-not (GetParamMetadataValue -param $param -metadata "Tab")) {
         continue
     }
     # Fallback to user input if no value is set
