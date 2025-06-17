@@ -18,6 +18,7 @@
        url('../fonts/cabin-v34-latin-regular.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5+, IE 9+, Safari 3.1+, iOS 4.2+, Android Browser 2.2+ */
 }
 
+// Below font is for tata-js
 /* material-icons-regular - latin - downloaded using https://gwfh.mranftl.com/fonts/material-icons?subsets=latin */
 @font-face {
   font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
@@ -27,7 +28,6 @@
   src: url('../fonts/material-icons-v143-latin-regular.woff2') format('woff2'), /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
        url('../fonts/material-icons-v143-latin-regular.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5+, IE 9+, Safari 3.1+, iOS 4.2+, Android Browser 2.2+ */
 }
-
 // this is copied from the css file downloaded using:
 //   curl -o material-icons.css "https://fonts.googleapis.com/icon?family=Material+Icons"
 .material-icons {
