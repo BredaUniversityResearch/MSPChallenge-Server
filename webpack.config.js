@@ -25,6 +25,10 @@ Encore
         // only copy files matching this pattern
         //pattern: /\.(png|jpg|jpeg)$/
     })
+    .copyFiles({
+        from: './assets/fonts',
+        to: 'fonts/[path][name].[ext]'
+    })
 
     /*
      * ENTRY CONFIG

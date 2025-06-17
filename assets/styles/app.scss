@@ -9,6 +9,18 @@
 //@import "~@fortawesome/fontawesome-free/scss/solid";
 //@import "~@fortawesome/fontawesome-free/scss/brands";
 
+/* cabin-regular - latin - downloaded using https://gwfh.mranftl.com/fonts/cabin?subsets=latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Cabin';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/cabin-v34-latin-regular.woff2') format('woff2'), /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+       // for legacy support, you can also include the TTF version
+       url('../fonts/cabin-v34-latin-regular.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5+, IE 9+, Safari 3.1+, iOS 4.2+, Android Browser 2.2+ */
+}
+
+
 // https://symfony.com/doc/current/frontend/encore/bootstrap.html#importing-bootstrap-styles
 // *** Bootstrap **** SCSS variables overrides BEGIN
 $light: #ffffff;
@@ -32,7 +44,7 @@ $modal-md: 750px;
 $toast-max-width: 700px;
 
 $body-bg: $light;
-$font-family-base: 'Cabin';
+$font-family-base: 'Cabin', sans-serif;
 $font-size-base: 1rem;
 $h1-font-size: 1.625rem;
 $h2-font-size: 1.3125rem;
