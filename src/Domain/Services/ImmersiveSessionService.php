@@ -123,6 +123,12 @@ class ImmersiveSessionService
                 'tag' => 'latest',
             ],
         ]);
+        // if $_ENV['URL_WEB_SERVER_HOST'] is a hostname, not a IP address, not a FQDN, then add it to the ExtraHosts
+        if (filter_var($_ENV['URL_WEB_SERVER_HOST'], FILTER_VALIDATE_IP) === false &&
+            !str_contains($_ENV['URL_WEB_SERVER_HOST'], '.')
+        ) {
+            $extraHosts[$_ENV['URL_WEB_SERVER_HOST']] = 'host-gateway';
+        }
         $responseContent = $this->dockerApiCall('POST', '/containers/create', [
             'json' => [
                'Image' => 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:latest',
@@ -134,7 +140,8 @@ class ImmersiveSessionService
                         '50123/udp' => [
                             ['HostPort' => (string)$conn->getPort()]
                         ]
-                    ]
+                    ],
+                    'ExtraHosts' => $extraHosts ?? []
                 ],
                 'Env' => [
                     'MSP_CHALLENGE_SESSION_ID='.$gameSessionId,
