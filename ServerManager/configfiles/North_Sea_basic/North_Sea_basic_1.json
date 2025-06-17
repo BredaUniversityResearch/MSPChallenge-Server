@@ -34581,7 +34581,8 @@
         ],
         "layer_tags": [
           "Point",
-          "ShippingGates"
+          "ShippingGates",
+          "Invisible"
         ]
       },
       {
@@ -34745,7 +34746,8 @@
         ],
         "layer_tags": [
           "Point",
-          "ConnectionPoints"
+          "ConnectionPoints",
+          "Invisible"
         ]
       },
       {
