@@ -31,6 +31,6 @@
         "font-awesome": "^4.7.0",
         "jquery": "^3.6.4",
         "stimulus": "^3.2.1",
-        "tata-js": "^0.1.5"
+        "tata-js": "git+https://github.com/BredaUniversityResearch/tata.git#master"
     }
 }
