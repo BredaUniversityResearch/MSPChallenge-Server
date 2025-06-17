@@ -42,12 +42,18 @@ if (Test-Path ".env.local") {
     }
 }
 
+Read-Host "Please switch and connect to the Wi-Fi network to be used for your 'augGIS' session and then press enter to continue"
+# Get the IP address of the Wi-Fi network interface
+$wifiAdapter = Get-NetIPAddress | Where-Object { $_.InterfaceAlias -like "*Wi-Fi*" -and $_.AddressFamily -eq "IPv4" }
+$wifiAdapter.IPAddress
+Write-Host "Gonna use $($wifiAdapter.IPAddress) for the MSP server connections"
+Read-Host "If needed, switch to a network that has an internet connection and then press enter to continue"
+
 docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.yml" -OutFile "docker-compose.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
 
-$env:SERVER_NAME = "host.docker.internal"
-
+$env:SERVER_NAME = $wifiAdapter.IPAddress
 if (-not $env:CADDY_MERCURE_JWT_SECRET) {
     $secret = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 32 | ForEach-Object {[char]$_})
     $env:CADDY_MERCURE_JWT_SECRET = $secret
