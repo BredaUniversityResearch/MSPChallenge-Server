@@ -124,11 +124,12 @@ class ImmersiveSessionService
             ],
         ]);
         $reservedHostnames = ['localhost', 'host-gateway'];
+        $extraHosts = [];
         if (!in_array($_ENV['URL_WEB_SERVER_HOST'], $reservedHostnames, true) &&
             filter_var($_ENV['URL_WEB_SERVER_HOST'], FILTER_VALIDATE_IP) === false &&
             !str_contains($_ENV['URL_WEB_SERVER_HOST'], '.')
         ) {
-            $extraHosts[$_ENV['URL_WEB_SERVER_HOST']] = 'host-gateway';
+            $extraHosts[] = $_ENV['URL_WEB_SERVER_HOST'] . ':host-gateway';
         }
         $responseContent = $this->dockerApiCall('POST', '/containers/create', [
             'json' => [
@@ -142,7 +143,7 @@ class ImmersiveSessionService
                             ['HostPort' => (string)$conn->getPort()]
                         ]
                     ],
-                    'ExtraHosts' => $extraHosts ?? []
+                    'ExtraHosts' => $extraHosts
                 ],
                 'Env' => [
                     'MSP_CHALLENGE_SESSION_ID='.$gameSessionId,
