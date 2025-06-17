@@ -123,8 +123,9 @@ class ImmersiveSessionService
                 'tag' => 'latest',
             ],
         ]);
-        // if $_ENV['URL_WEB_SERVER_HOST'] is a hostname, not a IP address, not a FQDN, then add it to the ExtraHosts
-        if (filter_var($_ENV['URL_WEB_SERVER_HOST'], FILTER_VALIDATE_IP) === false &&
+        $reservedHostnames = ['localhost', 'host-gateway'];
+        if (!in_array($_ENV['URL_WEB_SERVER_HOST'], $reservedHostnames, true) &&
+            filter_var($_ENV['URL_WEB_SERVER_HOST'], FILTER_VALIDATE_IP) === false &&
             !str_contains($_ENV['URL_WEB_SERVER_HOST'], '.')
         ) {
             $extraHosts[$_ENV['URL_WEB_SERVER_HOST']] = 'host-gateway';
