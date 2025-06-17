@@ -57,7 +57,7 @@ if (-not $env:CADDY_MERCURE_JWT_SECRET) {
 
 # Append variables to .env.local
 Set-Content -Path ".env.local" -Value @"
-SERVER_NAME=$env:SERVER_NAME
+SERVER_NAME=:80
 URL_WEB_SERVER_HOST=$env:SERVER_NAME
 URL_WS_SERVER_HOST=$env:SERVER_NAME
 CADDY_MERCURE_JWT_SECRET=$env:CADDY_MERCURE_JWT_SECRET
