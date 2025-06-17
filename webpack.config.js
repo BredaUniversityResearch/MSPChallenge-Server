@@ -29,6 +29,10 @@ Encore
         from: './assets/fonts',
         to: 'fonts/[path][name].[ext]'
     })
+    .copyFiles({
+        from: './vendor/nelmio/api-doc-bundle/public',
+        to: '../bundles/nelmioapidoc/[path][name].[ext]'
+    })
 
     /*
      * ENTRY CONFIG
