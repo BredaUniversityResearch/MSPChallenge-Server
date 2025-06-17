@@ -49,7 +49,6 @@ docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/do
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.yml" -OutFile "docker-compose.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
 
-$env:SERVER_NAME = $deviceName
 if (-not $env:CADDY_MERCURE_JWT_SECRET) {
     $secret = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 32 | ForEach-Object {[char]$_})
     $env:CADDY_MERCURE_JWT_SECRET = $secret
@@ -58,8 +57,8 @@ if (-not $env:CADDY_MERCURE_JWT_SECRET) {
 # Append variables to .env.local
 Set-Content -Path ".env.local" -Value @"
 SERVER_NAME=:80
-URL_WEB_SERVER_HOST=$env:SERVER_NAME
-URL_WS_SERVER_HOST=$env:SERVER_NAME
+URL_WEB_SERVER_HOST=$deviceName
+URL_WS_SERVER_HOST=$deviceName
 CADDY_MERCURE_JWT_SECRET=$env:CADDY_MERCURE_JWT_SECRET
 "@
 
