@@ -1,4 +1,4 @@
-param([switch]$elevated)
+param([switch]$elevated, [string]$tag = "latest")
 
 function Test-Admin {
     $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
@@ -11,7 +11,7 @@ if ((Test-Admin) -eq $false)  {
         Write-Host "Failed to elevate privileges. Exiting..."
     } else {
         Write-Host "This script requires administrative privileges. Relaunching as admin..."
-        Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file "{0}" -elevated' -f ($myinvocation.MyCommand.Definition))
+        Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file "{0}" -elevated -tag {1}' -f ($myinvocation.MyCommand.Definition, $tag))
     }
     exit
 }
@@ -45,7 +45,7 @@ if (Test-Path ".env.local") {
 $deviceName = (Get-CimInstance -ClassName Win32_ComputerSystem).Name
 Write-Host "Gonna use $deviceName for the MSP server connections"
 
-docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
+docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:$tag
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.yml" -OutFile "docker-compose.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
 
