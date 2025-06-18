@@ -123,17 +123,21 @@ class ImmersiveSessionService
                 'tag' => 'latest',
             ],
         ]);
-        $reservedHostnames = ['localhost', 'host-gateway'];
-        $extraHosts = [];
-        if (!in_array($_ENV['URL_WEB_SERVER_HOST'], $reservedHostnames, true) &&
-            filter_var($_ENV['URL_WEB_SERVER_HOST'], FILTER_VALIDATE_IP) === false &&
-            !str_contains($_ENV['URL_WEB_SERVER_HOST'], '.')
-        ) {
-            $extraHosts[] = $_ENV['URL_WEB_SERVER_HOST'] . ':host-gateway';
-        }
         $responseContent = $this->dockerApiCall('POST', '/containers/create', [
             'json' => [
-               'Image' => 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:latest',
+               'Image' => 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:'.
+                   ($_ENV['IMMERSIVE_TWINS_DOCKER_HUB_TAG'] ?? 'latest'),
+                'name' => 'immersive-session-'.$sess->getId(),
+                'Tty' => true,
+                'OpenStdin' => true,
+                'Cmd' => [
+                    '/bin/sh', '-c', 'cd /app && ./start.sh'
+                ],
+                'Labels' => [
+                    'mspchallenge.immersive_session_id' => $sess->getId(),
+                    'mspchallenge.game_session_id' => $gameSessionId,
+                    'mspchallenge.docker_api_id' => $this->getDockerApi()->getId(),
+                ],
                'ExposedPorts' => [
                     $conn->getPort().'/udp' => new \stdClass() // Explicitly expose the port
                 ],
