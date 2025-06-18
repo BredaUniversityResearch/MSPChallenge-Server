@@ -131,7 +131,7 @@ class ImmersiveSessionService
                     $conn->getPort().'/udp' => new \stdClass() // Explicitly expose the port
                 ],
                 'HostConfig' => [
-                    'network_mode' => 'host'
+                    'NetworkMode' => 'host'
                 ],
                 'Env' => [
                     'MSP_CHALLENGE_SESSION_ID='.$gameSessionId,
