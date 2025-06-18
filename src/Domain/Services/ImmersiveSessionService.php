@@ -135,15 +135,10 @@ class ImmersiveSessionService
             'json' => [
                'Image' => 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:latest',
                'ExposedPorts' => [
-                    '50123/udp' => new \stdClass() // Explicitly expose the port
+                    $conn->getPort().'/udp' => new \stdClass() // Explicitly expose the port
                 ],
                 'HostConfig' => [
-                    'PortBindings' => [
-                        '50123/udp' => [
-                            ['HostPort' => (string)$conn->getPort()]
-                        ]
-                    ],
-                    'ExtraHosts' => $extraHosts
+                    'network_mode' => 'host',
                 ],
                 'Env' => [
                     'MSP_CHALLENGE_SESSION_ID='.$gameSessionId,
@@ -155,7 +150,9 @@ class ImmersiveSessionService
                         'region_top_right_y' => $sess->getRegion()->getTopRightY()
                     ]),
                     'IMMERSIVE_SESSION_MONTH='.$conn->getSession()->getMonth(),
-                    'IMMERSIVE_SESSION_DATA='.json_encode($data) // like require_username, require_team, gamemaster_pick
+                    // like require_username, require_team, gamemaster_pick
+                    'IMMERSIVE_SESSION_DATA='.json_encode($data),
+                    'MSPXRClientPort='. $conn->getPort()
                 ],
             ],
         ]);
