@@ -42,8 +42,12 @@ if (Test-Path ".env.local") {
     }
 }
 
-$deviceName = (Get-CimInstance -ClassName Win32_ComputerSystem).Name
-Write-Host "Gonna use $deviceName for the MSP server connections"
+Read-Host "Please switch and connect to the Wi-Fi network to be used for your 'augGIS' session and then press enter to continue"
+# Get the IP address of the Wi-Fi network interface
+$wifiAdapter = Get-NetIPAddress | Where-Object { $_.InterfaceAlias -like "*Wi-Fi*" -and $_.AddressFamily -eq "IPv4" }
+$wifiAdapter.IPAddress
+Write-Host "Gonna use $($wifiAdapter.IPAddress) for the MSP server connections"
+Read-Host "If needed, switch to a network that has an internet connection and then press enter to continue"
 
 docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.yml" -OutFile "docker-compose.yml"
@@ -57,8 +61,8 @@ if (-not $env:CADDY_MERCURE_JWT_SECRET) {
 # Append variables to .env.local
 Set-Content -Path ".env.local" -Value @"
 SERVER_NAME=:80
-URL_WEB_SERVER_HOST=$deviceName
-URL_WS_SERVER_HOST=$deviceName
+URL_WEB_SERVER_HOST=$($wifiAdapter.IPAddress)
+URL_WS_SERVER_HOST=$($wifiAdapter.IPAddress)
 CADDY_MERCURE_JWT_SECRET=$env:CADDY_MERCURE_JWT_SECRET
 GEO_SERVER_DOWNLOADS_CACHE_LIFETIME=1209600
 GEO_SERVER_RESULTS_CACHE_LIFETIME=1209600

@@ -92,7 +92,7 @@ services:
       # other
       APP_ENV: ${APP_ENV:-dev}
       FRAMEWORK_CACHE_APP: ${FRAMEWORK_CACHE_APP:-cache.adapter.redis}
-      IMMERSIVE_TWINS_DOCKER_BRANCH: ${IMMERSIVE_TWINS_DOCKER_BRANCH:-main}
+      IMMERSIVE_TWINS_DOCKER_HUB_TAG: ${IMMERSIVE_TWINS_DOCKER_HUB_TAG:-latest}
     ports:
       # Websocket server
       - "${WS_SERVER_PORT:-45001}:${WS_SERVER_PORT:-45001}"
