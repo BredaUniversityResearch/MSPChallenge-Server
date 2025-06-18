@@ -117,16 +117,16 @@ class ImmersiveSessionService
             $sess->getData() ?? []
         );
         // Pull the image before creating the container
+        $tag = $_ENV['IMMERSIVE_TWINS_DOCKER_HUB_TAG'] ?? 'latest';
         $this->dockerApiCall('POST', '/images/create', [
             'query' => [
                 'fromImage' => 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server',
-                'tag' => 'latest',
+                'tag' => $tag
             ],
         ]);
         $responseContent = $this->dockerApiCall('POST', '/containers/create', [
             'json' => [
-               'Image' => 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:'.
-                   ($_ENV['IMMERSIVE_TWINS_DOCKER_HUB_TAG'] ?? 'latest'),
+               'Image' => 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:'.$tag,
                'ExposedPorts' => [
                     $conn->getPort().'/udp' => new \stdClass() // Explicitly expose the port
                 ],
