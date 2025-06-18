@@ -45,7 +45,7 @@ if (Test-Path ".env.local") {
 $deviceName = (Get-CimInstance -ClassName Win32_ComputerSystem).Name
 Write-Host "Gonna use $deviceName for the MSP server connections"
 
-docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:$tag
+docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.yml" -OutFile "docker-compose.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
 
@@ -62,6 +62,7 @@ URL_WS_SERVER_HOST=$deviceName
 CADDY_MERCURE_JWT_SECRET=$env:CADDY_MERCURE_JWT_SECRET
 GEO_SERVER_DOWNLOADS_CACHE_LIFETIME=1209600
 GEO_SERVER_RESULTS_CACHE_LIFETIME=1209600
+IMMERSIVE_TWINS_DOCKER_BRANCH=$tag
 "@
 
 docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.prod.yml" up -d
