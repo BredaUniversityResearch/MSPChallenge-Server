@@ -12,6 +12,12 @@ nelmio_api_doc:
                     default: '1'
                     description: The session ID
                     pattern: '^\d+$' # Regular expression to validate as an integer
+          - url: 'http://localhost:%env(default:app.default_port:WEB_SERVER_PORT)%/{sessionId}'
+            variables:
+                sessionId:
+                    default: '1'
+                    description: The session ID
+                    pattern: '^\d+$' # Regular expression to validate as an integer
         info:
             title: MSP Challenge API
             # description: This is an awesome app!
