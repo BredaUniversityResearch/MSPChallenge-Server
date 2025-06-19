@@ -16,13 +16,13 @@ if ((Test-Admin) -eq $false)  {
     exit
 }
 
-function IfNull {
+function IfEmpty {
     param (
         $Value,
         [Parameter(Mandatory=$true)]
         $DefaultValue
     )
-    if ($null -eq $Value) {
+    if ($null -eq $Value -or $Value -eq "") {
         return $DefaultValue
     }
     return $Value
@@ -65,11 +65,11 @@ if (Test-Path ".env.local") {
 }
 
 # Override with environment variables if they exist
-$serverName = IfNull $env:SERVER_NAME (IfNull $envVars['SERVER_NAME'] ":80")
-$urlWebServerHost = IfNull $env:URL_WEB_SERVER_HOST (IfNull $envVars['URL_WEB_SERVER_HOST'] $($wifiAdapter.IPAddress))
-$urlWsServerHost = IfNull $env:URL_WS_SERVER_HOST (IfNull $envVars['URL_WS_SERVER_HOST'] $($wifiAdapter.IPAddress))
-$geoServerDownloadsCacheLifetime = IfNull $env:GEO_SERVER_DOWNLOADS_CACHE_LIFETIME (IfNull $envVars['GEO_SERVER_DOWNLOADS_CACHE_LIFETIME'] "1209600")
-$geoServerResultsCacheLifetime = IfNull $env:GEO_SERVER_RESULTS_CACHE_LIFETIME (IfNull $envVars['GEO_SERVER_RESULTS_CACHE_LIFETIME'] "1209600")
+$serverName = IfEmpty $env:SERVER_NAME (IfEmpty $envVars['SERVER_NAME'] ":80")
+$urlWebServerHost = IfEmpty $env:URL_WEB_SERVER_HOST (IfEmpty $envVars['URL_WEB_SERVER_HOST'] $($wifiAdapter.IPAddress))
+$urlWsServerHost = IfEmpty $env:URL_WS_SERVER_HOST (IfEmpty $envVars['URL_WS_SERVER_HOST'] $($wifiAdapter.IPAddress))
+$geoServerDownloadsCacheLifetime = IfEmpty $env:GEO_SERVER_DOWNLOADS_CACHE_LIFETIME (IfEmpty $envVars['GEO_SERVER_DOWNLOADS_CACHE_LIFETIME'] "1209600")
+$geoServerResultsCacheLifetime = IfEmpty $env:GEO_SERVER_RESULTS_CACHE_LIFETIME (IfEmpty $envVars['GEO_SERVER_RESULTS_CACHE_LIFETIME'] "1209600")
 
 # Write variables to .env.local
 Set-Content -Path ".env.local" -Value @"
