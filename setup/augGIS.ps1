@@ -58,7 +58,7 @@ if (-not $env:CADDY_MERCURE_JWT_SECRET) {
     $env:CADDY_MERCURE_JWT_SECRET = $secret
 }
 
-# Append variables to .env.local
+# Write variables to .env.local
 Set-Content -Path ".env.local" -Value @"
 SERVER_NAME=:80
 URL_WEB_SERVER_HOST=$($wifiAdapter.IPAddress)
@@ -68,6 +68,9 @@ GEO_SERVER_DOWNLOADS_CACHE_LIFETIME=1209600
 GEO_SERVER_RESULTS_CACHE_LIFETIME=1209600
 IMMERSIVE_TWINS_DOCKER_HUB_TAG=$tag
 "@
+
+# allow .env.local to be written
+Start-Sleep -s 3
 
 docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.prod.yml" up -d
 exit 0
