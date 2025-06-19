@@ -26,22 +26,6 @@ if ($args.Count -gt 0) {
     $branch_name = $args[0]
 }
 
-# Check if .env exists and copy it to .env.local
-if (Test-Path ".env") {
-    Copy-Item -Path ".env" -Destination ".env.local" -Force
-}
-
-# Load environment variables from .env.local if it exists
-if (Test-Path ".env.local") {
-    Get-Content ".env.local" | ForEach-Object {
-        if ($_ -match "^(.*?)=(.*)$") {
-            if ($matches.Count -ge 3) {
-                [Environment]::SetEnvironmentVariable($matches[1], $matches[2])
-            }
-        }
-    }
-}
-
 Read-Host "Please switch and connect to the Wi-Fi network to be used for your 'augGIS' session and then press enter to continue"
 # Get the IP address of the Wi-Fi network interface
 $wifiAdapter = Get-NetIPAddress | Where-Object { $_.InterfaceAlias -like "*Wi-Fi*" -and $_.AddressFamily -eq "IPv4" }
@@ -68,9 +52,6 @@ GEO_SERVER_DOWNLOADS_CACHE_LIFETIME=1209600
 GEO_SERVER_RESULTS_CACHE_LIFETIME=1209600
 IMMERSIVE_TWINS_DOCKER_HUB_TAG=$tag
 "@
-
-# allow .env.local to be written
-Start-Sleep -s 3
 
 docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.prod.yml" up -d
 exit 0
