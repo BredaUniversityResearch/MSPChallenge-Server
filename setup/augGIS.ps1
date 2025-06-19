@@ -16,6 +16,19 @@ if ((Test-Admin) -eq $false)  {
     exit
 }
 
+function IfNull {
+    param (
+        [Parameter(Mandatory=$true)]
+        $Value,
+        [Parameter(Mandatory=$true)]
+        $DefaultValue
+    )
+    if ($null -eq $Value) {
+        return $DefaultValue
+    }
+    return $Value
+}
+
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
 
 # Change to the script's directory
@@ -38,8 +51,8 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearc
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
 
 if (-not $env:CADDY_MERCURE_JWT_SECRET) {
-    $secret = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 32 | ForEach-Object {[char]$_})
-    $env:CADDY_MERCURE_JWT_SECRET = $secret
+    $caddyMercureJwtSecret = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 32 | ForEach-Object {[char]$_})
+    $env:CADDY_MERCURE_JWT_SECRET = $caddyMercureJwtSecret
 }
 
 # Read existing .env.local variables
@@ -53,18 +66,22 @@ if (Test-Path ".env.local") {
 }
 
 # Override with environment variables if they exist
-$envVars["SERVER_NAME"] = if ($env:SERVER_NAME) { $env:SERVER_NAME } else { ":80" }
-$envVars["URL_WEB_SERVER_HOST"] = if ($env:URL_WEB_SERVER_HOST) { $env:URL_WEB_SERVER_HOST } else { $wifiAdapter.IPAddress }
-$envVars["URL_WS_SERVER_HOST"] = if ($env:URL_WS_SERVER_HOST) { $env:URL_WS_SERVER_HOST } else { $wifiAdapter.IPAddress }
-$envVars["CADDY_MERCURE_JWT_SECRET"] = $env:CADDY_MERCURE_JWT_SECRET
-$envVars["GEO_SERVER_DOWNLOADS_CACHE_LIFETIME"] = if ($env:GEO_SERVER_DOWNLOADS_CACHE_LIFETIME) { $env:GEO_SERVER_DOWNLOADS_CACHE_LIFETIME } else { "1209600" }
-$envVars["GEO_SERVER_RESULTS_CACHE_LIFETIME"] = if ($env:GEO_SERVER_RESULTS_CACHE_LIFETIME) { $env:GEO_SERVER_RESULTS_CACHE_LIFETIME } else { "1209600" }
-$envVars["IMMERSIVE_TWINS_DOCKER_HUB_TAG"] = if ($env:IMMERSIVE_TWINS_DOCKER_HUB_TAG) { $env:IMMERSIVE_TWINS_DOCKER_HUB_TAG } else { $tag }
+$serverName = IfNull $env:SERVER_NAME (IfNull $envVars['SERVER_NAME'] ":80")
+$urlWebServerHost = IfNull $env:URL_WEB_SERVER_HOST (IfNull $envVars['URL_WEB_SERVER_HOST'] $($wifiAdapter.IPAddress))
+$urlWsServerHost = IfNull $env:URL_WS_SERVER_HOST (IfNull $envVars['URL_WS_SERVER_HOST'] $($wifiAdapter.IPAddress))
+$geoServerDownloadsCacheLifetime = IfNull $env:GEO_SERVER_DOWNLOADS_CACHE_LIFETIME (IfNull $envVars['GEO_SERVER_DOWNLOADS_CACHE_LIFETIME'] "1209600")
+$geoServerResultsCacheLifetime = IfNull $env:GEO_SERVER_RESULTS_CACHE_LIFETIME (IfNull $envVars['GEO_SERVER_RESULTS_CACHE_LIFETIME'] "1209600")
 
-# Write updated variables to .env.local
-$envVars.GetEnumerator() | ForEach-Object {
-    "$($_.Key)=$($_.Value)"
-} | Set-Content -Path ".env.local"
+# Write variables to .env.local
+Set-Content -Path ".env.local" -Value @"
+SERVER_NAME=$serverName
+URL_WEB_SERVER_HOST=$urlWebServerHost
+URL_WS_SERVER_HOST=$urlWsServerHost
+CADDY_MERCURE_JWT_SECRET=$env:CADDY_MERCURE_JWT_SECRET
+GEO_SERVER_DOWNLOADS_CACHE_LIFETIME=$geoServerDownloadsCacheLifetime
+GEO_SERVER_RESULTS_CACHE_LIFETIME=$geoServerResultsCacheLifetime
+IMMERSIVE_TWINS_DOCKER_HUB_TAG=$tag
+"@
 
 docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.prod.yml" up -d
 exit 0
