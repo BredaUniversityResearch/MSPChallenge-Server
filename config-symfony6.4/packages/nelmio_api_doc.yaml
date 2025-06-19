@@ -12,7 +12,7 @@ nelmio_api_doc:
                     default: '1'
                     description: The session ID
                     pattern: '^\d+$' # Regular expression to validate as an integer
-          - url: 'http://localhost/{sessionId}'
+          - url: 'http://localhost:80/{sessionId}'
             variables:
                 sessionId:
                     default: '1'
