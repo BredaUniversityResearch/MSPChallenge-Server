@@ -139,7 +139,10 @@ class ImmersiveSessionService
                 ],
                 'Env' => [
                     'MSP_CHALLENGE_SESSION_ID='.$gameSessionId,
-                    'MSP_CHALLENGE_API_BASE_URL='.WatchdogCommunicationMessageHandler::getSessionAPIBaseUrl($gameList),
+                    'MSP_CHALLENGE_API_BASE_URL='.WatchdogCommunicationMessageHandler::getSessionAPIBaseUrl(
+                        $gameList,
+                        $this->getDockerApi()->getAddress() == 'host.docker.internal' ? 'host.docker.internal' : null
+                    ),
                     'IMMERSIVE_SESSION_REGION_COORDS='.json_encode([
                         'region_bottom_left_x' => $sess->getRegion()->getBottomLeftX(),
                         'region_bottom_left_y' => $sess->getRegion()->getBottomLeftY(),
