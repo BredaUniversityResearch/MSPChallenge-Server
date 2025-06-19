@@ -124,18 +124,18 @@ class ImmersiveSessionService
                 'tag' => $tag
             ],
         ]);
-        $hostWifiIP = ($_ENV['HOST_WIFI_IP'] ?? '') ?: null;
-        // assuming the docker api address are IPs, except "host.docker.internal"
-        $augGISServerIP = ($this->getDockerApi()->getAddress() == 'host.docker.internal') ?
-            ($hostWifiIP ?? $this->getDockerApi()->getAddress()) : $this->getDockerApi()->getAddress();
         $responseContent = $this->dockerApiCall('POST', '/containers/create', [
             'json' => [
                'Image' => 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:'.$tag,
                'ExposedPorts' => [
-                    $conn->getPort().'/udp' => new \stdClass() // Explicitly expose the port
+                    '50123/udp' => new \stdClass() // Explicitly expose the port
                 ],
                 'HostConfig' => [
-                    'NetworkMode' => 'host'
+                   'PortBindings' => [
+                        '50123/udp' => [
+                            ['HostPort' => (string)$conn->getPort()]
+                        ]
+                    ]
                 ],
                 'Env' => [
                     'MSP_CHALLENGE_SESSION_ID='.$gameSessionId,
@@ -148,9 +148,7 @@ class ImmersiveSessionService
                     ]),
                     'IMMERSIVE_SESSION_MONTH='.$conn->getSession()->getMonth(),
                     // like require_username, require_team, gamemaster_pick
-                    'IMMERSIVE_SESSION_DATA='.json_encode($data),
-                    'MSPXRClientAddress='.$augGISServerIP,
-                    'MSPXRClientPort='.$conn->getPort()
+                    'IMMERSIVE_SESSION_DATA='.json_encode($data)
                 ],
             ],
         ]);
