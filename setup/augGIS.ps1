@@ -80,7 +80,7 @@ URL_WS_SERVER_HOST=$urlWsServerHost
 CADDY_MERCURE_JWT_SECRET=$env:CADDY_MERCURE_JWT_SECRET
 GEO_SERVER_DOWNLOADS_CACHE_LIFETIME=$geoServerDownloadsCacheLifetime
 GEO_SERVER_RESULTS_CACHE_LIFETIME=$geoServerResultsCacheLifetime
-IMMERSIVE_TWINS_DOCKER_HUB_TAG=$tag
+IMMERSIVE_TWINS_DOCKER_HUB_TAG=$immersiveTwinsDockerHubTag
 "@
 
 docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.prod.yml" up -d
