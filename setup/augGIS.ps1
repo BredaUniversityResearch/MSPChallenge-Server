@@ -53,13 +53,13 @@ if (Test-Path ".env.local") {
 }
 
 # Override with environment variables if they exist
-$envVars["SERVER_NAME"] = ":80"
-$envVars["URL_WEB_SERVER_HOST"] = $wifiAdapter.IPAddress
-$envVars["URL_WS_SERVER_HOST"] = $wifiAdapter.IPAddress
+$envVars["SERVER_NAME"] = $env:SERVER_NAME ?? ":80"
+$envVars["URL_WEB_SERVER_HOST"] = $env::URL_WEB_SERVER_HOST ?? $wifiAdapter.IPAddress
+$envVars["URL_WS_SERVER_HOST"] = $env::URL_WS_SERVER_HOST ?? $wifiAdapter.IPAddress
 $envVars["CADDY_MERCURE_JWT_SECRET"] = $env:CADDY_MERCURE_JWT_SECRET
-$envVars["GEO_SERVER_DOWNLOADS_CACHE_LIFETIME"] = "1209600"
-$envVars["GEO_SERVER_RESULTS_CACHE_LIFETIME"] = "1209600"
-$envVars["IMMERSIVE_TWINS_DOCKER_HUB_TAG"] = $tag
+$envVars["GEO_SERVER_DOWNLOADS_CACHE_LIFETIME"] = $env::GEO_SERVER_DOWNLOADS_CACHE_LIFETIME ?? "1209600"
+$envVars["GEO_SERVER_RESULTS_CACHE_LIFETIME"] = $env::GEO_SERVER_RESULTS_CACHE_LIFETIME ?? "1209600"
+$envVars["IMMERSIVE_TWINS_DOCKER_HUB_TAG"] = $env::IMMERSIVE_TWINS_DOCKER_HUB_TAG ?? $tag
 
 # Write updated variables to .env.local
 $envVars.GetEnumerator() | ForEach-Object {
