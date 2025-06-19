@@ -65,22 +65,18 @@ if (Test-Path ".env.local") {
 }
 
 # Override with environment variables if they exist
-$serverName = IfEmpty $env:SERVER_NAME (IfEmpty $envVars['SERVER_NAME'] ":80")
-$urlWebServerHost = IfEmpty $env:URL_WEB_SERVER_HOST (IfEmpty $envVars['URL_WEB_SERVER_HOST'] $($wifiAdapter.IPAddress))
-$urlWsServerHost = IfEmpty $env:URL_WS_SERVER_HOST (IfEmpty $envVars['URL_WS_SERVER_HOST'] $($wifiAdapter.IPAddress))
 $geoServerDownloadsCacheLifetime = IfEmpty $env:GEO_SERVER_DOWNLOADS_CACHE_LIFETIME (IfEmpty $envVars['GEO_SERVER_DOWNLOADS_CACHE_LIFETIME'] "1209600")
 $geoServerResultsCacheLifetime = IfEmpty $env:GEO_SERVER_RESULTS_CACHE_LIFETIME (IfEmpty $envVars['GEO_SERVER_RESULTS_CACHE_LIFETIME'] "1209600")
-$immersiveTwinsDockerHubTag = IfEmpty $envVars['IMMERSIVE_TWINS_DOCKER_HUB_TAG'] $tag
 
 # Write variables to .env.local
 Set-Content -Path ".env.local" -Value @"
-SERVER_NAME=$serverName
-URL_WEB_SERVER_HOST=$urlWebServerHost
-URL_WS_SERVER_HOST=$urlWsServerHost
+SERVER_NAME=:80
+URL_WEB_SERVER_HOST=$($wifiAdapter.IPAddress)
+URL_WS_SERVER_HOST=$($wifiAdapter.IPAddress)
 CADDY_MERCURE_JWT_SECRET=$env:CADDY_MERCURE_JWT_SECRET
 GEO_SERVER_DOWNLOADS_CACHE_LIFETIME=$geoServerDownloadsCacheLifetime
 GEO_SERVER_RESULTS_CACHE_LIFETIME=$geoServerResultsCacheLifetime
-IMMERSIVE_TWINS_DOCKER_HUB_TAG=$immersiveTwinsDockerHubTag
+IMMERSIVE_TWINS_DOCKER_HUB_TAG=$tag
 "@
 
 docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.prod.yml" up -d
