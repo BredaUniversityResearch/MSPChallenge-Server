@@ -42,16 +42,29 @@ if (-not $env:CADDY_MERCURE_JWT_SECRET) {
     $env:CADDY_MERCURE_JWT_SECRET = $secret
 }
 
-# Write variables to .env.local
-Set-Content -Path ".env.local" -Value @"
-SERVER_NAME=:80
-URL_WEB_SERVER_HOST=$($wifiAdapter.IPAddress)
-URL_WS_SERVER_HOST=$($wifiAdapter.IPAddress)
-CADDY_MERCURE_JWT_SECRET=$env:CADDY_MERCURE_JWT_SECRET
-GEO_SERVER_DOWNLOADS_CACHE_LIFETIME=1209600
-GEO_SERVER_RESULTS_CACHE_LIFETIME=1209600
-IMMERSIVE_TWINS_DOCKER_HUB_TAG=$tag
-"@
+# Read existing .env.local variables
+$envVars = @{}
+if (Test-Path ".env.local") {
+    Get-Content ".env.local" | ForEach-Object {
+        if ($_ -match "^(.*?)=(.*)$") {
+            $envVars[$matches[1]] = $matches[2]
+        }
+    }
+}
+
+# Override with environment variables if they exist
+$envVars["SERVER_NAME"] = ":80"
+$envVars["URL_WEB_SERVER_HOST"] = $wifiAdapter.IPAddress
+$envVars["URL_WS_SERVER_HOST"] = $wifiAdapter.IPAddress
+$envVars["CADDY_MERCURE_JWT_SECRET"] = $env:CADDY_MERCURE_JWT_SECRET
+$envVars["GEO_SERVER_DOWNLOADS_CACHE_LIFETIME"] = "1209600"
+$envVars["GEO_SERVER_RESULTS_CACHE_LIFETIME"] = "1209600"
+$envVars["IMMERSIVE_TWINS_DOCKER_HUB_TAG"] = $tag
+
+# Write updated variables to .env.local
+$envVars.GetEnumerator() | ForEach-Object {
+    "$($_.Key)=$($_.Value)"
+} | Set-Content -Path ".env.local"
 
 docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.prod.yml" up -d
 exit 0
