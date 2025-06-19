@@ -70,6 +70,7 @@ $urlWebServerHost = IfEmpty $env:URL_WEB_SERVER_HOST (IfEmpty $envVars['URL_WEB_
 $urlWsServerHost = IfEmpty $env:URL_WS_SERVER_HOST (IfEmpty $envVars['URL_WS_SERVER_HOST'] $($wifiAdapter.IPAddress))
 $geoServerDownloadsCacheLifetime = IfEmpty $env:GEO_SERVER_DOWNLOADS_CACHE_LIFETIME (IfEmpty $envVars['GEO_SERVER_DOWNLOADS_CACHE_LIFETIME'] "1209600")
 $geoServerResultsCacheLifetime = IfEmpty $env:GEO_SERVER_RESULTS_CACHE_LIFETIME (IfEmpty $envVars['GEO_SERVER_RESULTS_CACHE_LIFETIME'] "1209600")
+$immersiveTwinsDockerHubTag = IfEmpty $envVars['IMMERSIVE_TWINS_DOCKER_HUB_TAG'] $tag
 
 # Write variables to .env.local
 Set-Content -Path ".env.local" -Value @"
