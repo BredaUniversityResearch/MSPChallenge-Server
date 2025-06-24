@@ -22628,7 +22628,9 @@
                 {
                     "name": "Ecological fishing Unreported fishery Latvia",
                     "policy_filters": {
-                        "fleets": []
+                        "fleets": [
+                            "22"
+                        ]
                     }
                 }
             ]
