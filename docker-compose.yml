@@ -157,6 +157,7 @@ services:
       - "${WATCHDOG_PORT:-45000}:${WATCHDOG_PORT:-45000}"
     restart: always
     environment:
+      DOCKER: 1
       WATCHDOG_PORT: ${WATCHDOG_PORT:-45000}
       MSP_MEL_EWE_DUMP_ENABLED: "${MSP_MEL_EWE_DUMP_ENABLED:-0}"
     logging:
