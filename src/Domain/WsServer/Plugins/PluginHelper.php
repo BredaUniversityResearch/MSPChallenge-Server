@@ -45,15 +45,13 @@ class PluginHelper
         $clientInfo = $this->clientConnectionResourceManager->getClientInfo($connResourceId);
         $clientInfo['conn_resource_id'] = $connResourceId;
         $data['debug']['client_info'] = $clientInfo;
-        if (!(array_key_exists('WS_SERVER_PAYLOAD_DUMP', $_ENV) && $_ENV['WS_SERVER_PAYLOAD_DUMP'])) {
-            return;
+        if (array_key_exists('WS_SERVER_PAYLOAD_DUMP', $_ENV) && $_ENV['WS_SERVER_PAYLOAD_DUMP']) {
+            @mkdir($this->dumpDir, 0777, true);
+            file_put_contents(
+                $this->dumpDir . date('YmdHis') . 'payload' . ($this->nextDumpNo++) . '.log',
+                json_encode($data, JSON_PRETTY_PRINT)
+            );
         }
-        @mkdir($this->dumpDir, 0777, true);
-        file_put_contents(
-            $this->dumpDir . date('YmdHis') . 'payload' . ($this->nextDumpNo++) . '.log',
-            json_encode($data, JSON_PRETTY_PRINT)
-        );
-
         // remove any debug info not matching client needs after dump
         unset($data['debug']);
     }
