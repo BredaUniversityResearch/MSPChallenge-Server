@@ -1,4 +1,7 @@
 services:
+  database:
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: no
   php:
     image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest
     volumes:
