@@ -17,6 +17,8 @@ Enable GUI mode for input (default: 0).
 
 # Define parameters
 param(
+    [ValidateSet("ProdDirect", "ProdProxy")]
+    [string]$Preset = "ProdDirect",
     [string]$ServerName = "",
     [int]$ServerPort = 443,
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
@@ -73,9 +75,9 @@ $parameterMetadata = @{
         ForceInput = $true
         EnvVar = "SERVER_NAME"
         Tab = "MSP Challenge Server"
-        Presets = @(
-            @{ "prod-proxy" = ":80" }
-        )
+        Presets = @{
+            ProdProxy = ":80"
+        }
     }
     ServerPort = @{
         EnvVar = "WEB_SERVER_PORT"
@@ -147,7 +149,7 @@ $parameterMetadata = @{
 }
 
 # Function to update visible controls based on the selected environment
-function Update-ByPreset {
+function Update-ControlsByPreset {
     param (
         [hashtable]$controls,
         [hashtable]$presetRadioButtons,
@@ -159,16 +161,17 @@ function Update-ByPreset {
         $container = $controls[$param]
         # check if $presetValues is an array and contains the selected preset, if so assign the value
         if ($presetValues -and $presetValues.Count -gt 0) {
-            $presetValue = $presetValues | Where-Object { $_.ContainsKey($selectedPreset) }
-            if ($presetValue) {
-                $value = $presetValue[$selectedPreset]
-                if ($container.Controls[1] -is [System.Windows.Forms.TextBox]) {
-                    $container.Controls[1].Text = $value
-                } elseif ($container.Controls[1] -is [System.Windows.Forms.NumericUpDown]) {
-                    $container.Controls[1].Value = [int]$value
-                } elseif ($container.Controls[1] -is [System.Windows.Forms.CheckBox]) {
-                    $container.Controls[1].Checked = [bool]$value
-                }
+            if ($presetValues.ContainsKey($selectedPreset)) {
+                $presetValue = $presetValues[$selectedPreset]
+            } else {
+                $presetValue = (Get-Variable -Name $param -ErrorAction SilentlyContinue).Value
+            }
+            if ($container.Controls[1] -is [System.Windows.Forms.TextBox]) {
+                $container.Controls[1].Text = $presetValue
+            } elseif ($container.Controls[1] -is [System.Windows.Forms.NumericUpDown]) {
+                $container.Controls[1].Value = [int]$presetValue
+            } elseif ($container.Controls[1] -is [System.Windows.Forms.CheckBox]) {
+                $container.Controls[1].Checked = [bool]$presetValue
             }
         }
     }
@@ -228,6 +231,13 @@ function Initialize-Parameters {
                 } else {
                     $resolvedParameters.Value[$param] = $null
                 }
+            }
+        }
+        if (-not $resolvedParameters.Value[$param]) {
+            $selectedPreset = (Get-Variable -Name "Preset" -ErrorAction SilentlyContinue).Value
+            $presetValues = GetParamMetadataValue -param $param -metadata "Presets" -parameterMetadata $parameterMetadata
+            if ($presetValues -and $presetValues.Count -gt 0 -and $presetValues.ContainsKey($selectedPreset)) {
+                 $resolvedParameters.Value[$param] = $presetValues[$selectedPreset]
             }
         }
         if (-not $resolvedParameters.Value[$param]) {
@@ -322,6 +332,7 @@ function New-ParameterControls {
 
 function New-PresetRadioButtons {
     param (
+        [hashtable]$parameters,
         [System.Windows.Forms.Form]$form,
         [hashtable]$parameterMetadata
     )
@@ -331,20 +342,23 @@ function New-PresetRadioButtons {
     $presetGroupBox.Height = 60
     $form.Controls.Add($presetGroupBox)
 
-    $presets = @("prod-direct", "prod-proxy")
     $presetRadioButtons = @{}
     $xOffset = 10
-    foreach ($preset in $presets) {
+
+    $validateSetAttr = $parameters["Preset"].Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+    foreach ($p in $validateSetAttr.ValidValues) {
         $radioButton = New-Object System.Windows.Forms.RadioButton
-        $radioButton.Text = $preset
+        $radioButton.Text = $p
         $radioButton.Left = $xOffset
         $radioButton.Top = 20
         $radioButton.AutoSize = $true
         $presetGroupBox.Controls.Add($radioButton)
-        $presetRadioButtons[$preset] = $radioButton
+        $presetRadioButtons[$p] = $radioButton
         $xOffset += 100
     }
-    $presetRadioButtons["prod-direct"].Checked = $true
+    $preset = (Get-Variable -Name "Preset" -ErrorAction SilentlyContinue).Value
+    $presetRadioButtons[$preset].Checked = $true
+
     return $presetRadioButtons
 }
 
@@ -410,7 +424,7 @@ function Show-GuiParameterForm {
     Add-Type -AssemblyName System.Windows.Forms
 
     $form = New-Object System.Windows.Forms.Form
-    $form.Text = "Input Parameters"
+    $form.Text = "MSP Challenge Server setup"
     $form.Width = 1024
     $form.Height = 768
 
@@ -439,11 +453,11 @@ function Show-GuiParameterForm {
     $button.Dock = [System.Windows.Forms.DockStyle]::Bottom
     $button.Height = 50
 
-    $presetRadioButtons = New-PresetRadioButtons $form $parameterMetadata
+    $presetRadioButtons = New-PresetRadioButtons $parameters $form $parameterMetadata
     foreach ($radioButton in $presetRadioButtons.Values) {
-       #  $radioButton.Add_CheckedChanged({ Update-ByPreset $controls $presetRadioButtons $parameterMetadata })
+       $radioButton.Add_CheckedChanged({ Update-ControlsByPreset $controls $presetRadioButtons $parameterMetadata })
     }
-    # Update-ByPreset $controls $presetRadioButtons $parameterMetadata
+    Update-ControlsByPreset $controls $presetRadioButtons $parameterMetadata
 
     $button.Add_Click({
         Submit-SubmitClick $controls ([ref]$resolvedParameters.Value) $parameterMetadata $errorProvider $errorLabel $form
