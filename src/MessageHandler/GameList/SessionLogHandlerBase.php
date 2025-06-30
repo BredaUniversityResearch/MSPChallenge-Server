@@ -6,7 +6,7 @@ use Psr\Log\LoggerInterface;
 
 abstract class SessionLogHandlerBase
 {
-    private ?int $gameSessionId;
+    private ?int $gameSessionId = null;
 
     public function __construct(
         protected readonly LoggerInterface $gameSessionLogger

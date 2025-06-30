@@ -22307,7 +22307,7 @@
                     ]
                 },
                 {
-                    "categoryName": "Fishery",
+                    "categoryName": "Fleets Catch",
                     "categoryColor": "#FDAE61FF",
                     "unit": "g\/m2",
                     "valueDefinitions": [
@@ -22334,7 +22334,14 @@
                             "valueColor": "#73FFBCFF",
                             "unit": "g\/m2",
                             "valueDependentCountry": -1
-                        },
+                        }
+					]
+				},
+			    {
+                    "categoryName": "Species Catch",
+				    "categoryColor": "#FDAE61FF",
+                    "unit": "g\/m2",
+                    "valueDefinitions": [
                         {
                             "valueName": "Other Pelagic Fish Catch",
                             "valueColor": "#73FFBCFF",
@@ -22628,7 +22635,9 @@
                 {
                     "name": "Ecological fishing Unreported fishery Latvia",
                     "policy_filters": {
-                        "fleets": []
+                        "fleets": [
+                            "22"
+                        ]
                     }
                 }
             ]
@@ -43483,9 +43492,9 @@
                 "layer_raster_pattern": "Default",
                 "layer_raster_minimum_value_cutoff": 0.05,
                 "layer_active": 1,
-                "layer_selectable": 0,
+                "layer_selectable": 1,
                 "layer_editable": 0,
-                "layer_toggleable": 0,
+                "layer_toggleable": 1,
                 "layer_active_on_start": 0,
                 "layer_green": 0,
                 "layer_tooltip": "Unreported Catches",
@@ -43671,9 +43680,9 @@
                 "layer_raster_pattern": "Default",
                 "layer_raster_minimum_value_cutoff": 0.05,
                 "layer_active": 1,
-                "layer_selectable": 0,
+                "layer_selectable": 1,
                 "layer_editable": 0,
-                "layer_toggleable": 0,
+                "layer_toggleable": 1,
                 "layer_active_on_start": 0,
                 "layer_green": 0,
                 "layer_tooltip": "Recreational Catches",
@@ -43859,9 +43868,9 @@
                 "layer_raster_pattern": "Default",
                 "layer_raster_minimum_value_cutoff": 0.05,
                 "layer_active": 1,
-                "layer_selectable": 0,
+                "layer_selectable": 1,
                 "layer_editable": 0,
-                "layer_toggleable": 0,
+                "layer_toggleable": 1,
                 "layer_active_on_start": 0,
                 "layer_green": 0,
                 "layer_tooltip": "Demersal Catches",
@@ -44049,7 +44058,7 @@
                 "layer_active": 1,
                 "layer_selectable": 0,
                 "layer_editable": 0,
-                "layer_toggleable": 0,
+                "layer_toggleable": 1,
                 "layer_active_on_start": 0,
                 "layer_green": 0,
                 "layer_tooltip": "Pelagic Catches",

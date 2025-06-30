@@ -9,6 +9,8 @@ services:
       APP_SECRET: ${APP_SECRET}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
+      URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-host.docker.internal}
+      URL_WS_SERVER_HOST: ${URL_WS_SERVER_HOST:-host.docker.internal}
     ports:
       # HTTP
       - target: 80
