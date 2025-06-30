@@ -17,12 +17,14 @@ Enable GUI mode for input (default: 0).
 
 # Define parameters
 param(
-    [string]$ServerName = "localhost",
+    [string]$ServerName = "",
     [int]$ServerPort = 443,
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
     [int]$TestSwitch = 0,
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
     [int]$EnableGui = 1,
+    [string]$DatabasePassword = -join ((48..57) + (65..90) + (97..122) + (33..47) | Get-Random -Count 20 | % {[char]$_}),
+    [string]$CaddyMercureJwtSecret = ([guid]::NewGuid().ToString("N")),
     [string]$Var1 = "default1",
     [string]$Var2 = "default2",
     [string]$Var3 = "default3",
@@ -71,10 +73,12 @@ $parameterMetadata = @{
         ForceInput = $true
         EnvVar = "SERVER_NAME"
         Tab = "MSP Challenge Server"
-        Environments = @("production")
+        Presets = @(
+            @{ "prod-proxy" = ":80" }
+        )
     }
     ServerPort = @{
-        EnvVar = "SERVER_PORT"
+        EnvVar = "WEB_SERVER_PORT"
         Tab = "MSP Challenge Server"
     }
     TestSwitch = @{
@@ -83,6 +87,22 @@ $parameterMetadata = @{
     }
     EnableGui = @{
         ActAsBoolean = $true
+    }
+    DatabasePassword = @{
+        EnvVar = "DATABASE_PASSWORD"
+        Tab = "Database"
+        Validate = @(
+            @{ "Password cannot be empty." = { param($v) -not [string]::IsNullOrWhiteSpace($v) } },
+            @{ "Password must be at least 8 characters." = { param($v) $v.Length -ge 8 } }
+        )
+    }
+    CaddyMercureJwtSecret = @{
+        EnvVar = "CADDY_MERCURE_JWT_SECRET"
+        Tab = "MSP Challenge Server"
+        Validate = @(
+            @{ "JWT Secret cannot be empty." = { param($v) -not [string]::IsNullOrWhiteSpace($v) } },
+            @{ "JWT Secret must be 32 characters." = { param($v) $v.Length -eq 32 } }
+        )
     }
     Var1 = @{ Tab="Test" }
     Var2 = @{ Tab="Test" }
@@ -127,15 +147,29 @@ $parameterMetadata = @{
 }
 
 # Function to update visible controls based on the selected environment
-function Update-VisibleControls {
-    $selectedEnv = $envRadioButtons.Keys | Where-Object { $envRadioButtons[$_].Checked }
+function Update-ByPreset {
+    param (
+        [hashtable]$controls,
+        [hashtable]$presetRadioButtons,
+        [hashtable]$parameterMetadata
+    )
+    $selectedPreset = $presetRadioButtons.Keys | Where-Object { $presetRadioButtons[$_].Checked }
     foreach ($param in $controls.Keys) {
-        $validEnvs = $parameterMetadata[$param]["Environments"]
+        $presetValues = $parameterMetadata[$param]["Presets"]
         $container = $controls[$param]
-        if ($validEnvs -and -not ($validEnvs -contains $selectedEnv)) {
-            $container.Visible = $false
-        } else {
-            $container.Visible = $true
+        # check if $presetValues is an array and contains the selected preset, if so assign the value
+        if ($presetValues -and $presetValues.Count -gt 0) {
+            $presetValue = $presetValues | Where-Object { $_.ContainsKey($selectedPreset) }
+            if ($presetValue) {
+                $value = $presetValue[$selectedPreset]
+                if ($container.Controls[1] -is [System.Windows.Forms.TextBox]) {
+                    $container.Controls[1].Text = $value
+                } elseif ($container.Controls[1] -is [System.Windows.Forms.NumericUpDown]) {
+                    $container.Controls[1].Value = [int]$value
+                } elseif ($container.Controls[1] -is [System.Windows.Forms.CheckBox]) {
+                    $container.Controls[1].Checked = [bool]$value
+                }
+            }
         }
     }
 }
@@ -176,66 +210,63 @@ function Read-Prompt
     return Read-Host
 }
 
-$parameters = $MyInvocation.MyCommand.Parameters
-foreach ($param in $parameters.Keys) {
-    if (-not $PSBoundParameters[$param]) {
-        $envVar = GetParamMetadataValue -param $param -metadata "EnvVar"
-        if ($envVar) {
-            $envValue = Get-ChildItem Env:$envVar -ErrorAction SilentlyContinue
-            $PSBoundParameters[$param] = if ($envValue) { $envValue.Value } else { $null }
+function Initialize-Parameters {
+    param (
+        [hashtable]$parameters,
+        [ref]$resolvedParameters,
+        [hashtable]$parameterMetadata
+    )
+    foreach ($param in $parameters.Keys) {
+        if (-not $resolvedParameters.Value[$param]) {
+            $envVar = GetParamMetadataValue -param $param -metadata "EnvVar" -parameterMetadata $parameterMetadata
+            if ($envVar) {
+                $envValue = Get-ChildItem Env:$envVar -ErrorAction SilentlyContinue
+                if ($envValue -and $envValue.Value -like "*ChangeThisMercureHubJWTSecretKey*") {
+                    $resolvedParameters.Value[$param] = $null
+                } elseif ($envValue) {
+                    $resolvedParameters.Value[$param] = $envValue.Value
+                } else {
+                    $resolvedParameters.Value[$param] = $null
+                }
+            }
         }
-    }
-    if (-not $PSBoundParameters[$param]) {
-        $PSBoundParameters[$param] = (Get-Variable -Name $param -ErrorAction SilentlyContinue).Value
+        if (-not $resolvedParameters.Value[$param]) {
+            $resolvedParameters.Value[$param] = (Get-Variable -Name $param -ErrorAction SilentlyContinue).Value
+        }
     }
 }
 
-# GUI Mode
-if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
-    Write-Host "Running in GUI mode..."
-    Add-Type -AssemblyName System.Windows.Forms
-
-    # Create the main form
-    $form = New-Object System.Windows.Forms.Form
-    $form.Text = "Input Parameters"
-    $form.Width = 1024
-    $form.Height = 768
-
-    # Create a Panel to hold the TabControl and Button
-    $mainPanel = New-Object System.Windows.Forms.Panel
-    $mainPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
-    $form.Controls.Add($mainPanel)
-
-    # Create a TabControl
-    $tabControl = New-Object System.Windows.Forms.TabControl
-    $tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
-    $mainPanel.Controls.Add($tabControl)
-
-    # Define categories for grouping parameters
+function Get-ParameterCategories {
+    param (
+        [hashtable]$parameters,
+        [hashtable]$parameterMetadata
+    )
     $categories = @{}
-
     foreach ($param in $parameters.Keys) {
-        if (-not (GetParamMetadataValue -param $param -metadata "Tab")) {
-            continue
+        $tab = GetParamMetadataValue -param $param -metadata "Tab" -parameterMetadata $parameterMetadata
+        if ($tab) {
+            if (-not $categories.ContainsKey($tab)) { $categories[$tab] = @() }
+            $categories[$tab] += $param
         }
-        $category = (GetParamMetadataValue -param $param -metadata "Tab")
-        if (-not $categories.ContainsKey($category)) {
-            $categories[$category] = @()
-        }
-        $categories[$category] += $param
-    }    
+    }
+    return $categories
+}
 
-    # Initialize the controls hashtable
+function New-ParameterControls {
+    param (
+        [hashtable]$categories,
+        [hashtable]$parameters,
+        [ref]$resolvedParameters,
+        [hashtable]$parameterMetadata,
+        [System.Windows.Forms.TabControl]$tabControl
+    )
     $controls = @{}
-
     foreach ($category in $categories.Keys) {
-        # Create a TabPage for each category
         $tabPage = New-Object System.Windows.Forms.TabPage
         $tabPage.Text = $category
         $tabPage.Dock = [System.Windows.Forms.DockStyle]::Fill
         $tabControl.TabPages.Add($tabPage)
 
-        # Create a parent FlowLayoutPanel for all parameters
         $parentPanel = New-Object System.Windows.Forms.FlowLayoutPanel
         $parentPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
         $parentPanel.FlowDirection = [System.Windows.Forms.FlowDirection]::TopDown
@@ -243,143 +274,211 @@ if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
         $parentPanel.AutoScroll = $true
         $tabPage.Controls.Add($parentPanel)
 
-        # calculate the max. width the label
-        # Initialize a variable to track the maximum label width
         $maxLabelWidth = 0
-        foreach ($param in $categories[$category])
-        {
-            if (-not (GetParamMetadataValue -param $param -metadata "Tab")) {
-                continue
-            }
+        foreach ($param in $categories[$category]) {
             $label = New-Object System.Windows.Forms.Label
             $label.Text = $param
-            # Measure the width of the label text
             $textSize = [System.Windows.Forms.TextRenderer]::MeasureText($label.Text, $label.Font)
-            $currentLabelWidth = $textSize.Width
-            # Update the maximum label width
-            if ($currentLabelWidth -gt $maxLabelWidth) {
-                $maxLabelWidth = $currentLabelWidth
-            }
+            if ($textSize.Width -gt $maxLabelWidth) { $maxLabelWidth = $textSize.Width }
         }
 
         foreach ($param in $categories[$category]) {
-            if (-not (GetParamMetadataValue -param $param -metadata "Tab")) {
-                continue
-            }
-
-            # Create a container FlowLayoutPanel for each parameter
             $linePanel = New-Object System.Windows.Forms.FlowLayoutPanel
             $linePanel.FlowDirection = [System.Windows.Forms.FlowDirection]::LeftToRight
             $linePanel.WrapContents = $false
             $linePanel.Width = $parentPanel.ClientSize.Width - 20
             $linePanel.Height = 30
             $parentPanel.Controls.Add($linePanel)
-
-            # Store the container for visibility updates
             $controls[$param] = $linePanel
 
-            # Create a Label
             $label = New-Object System.Windows.Forms.Label
             $label.Text = $param
-            $label.Width = $maxLabelWidth+10
+            $label.Width = $maxLabelWidth + 10
             $label.Anchor = [System.Windows.Forms.AnchorStyles]::None
-            $label.Margin = [System.Windows.Forms.Padding]::new(0, 5, 5, 5) # Adjust vertical alignment
+            $label.Margin = [System.Windows.Forms.Padding]::new(0, 5, 5, 5)
             $linePanel.Controls.Add($label)
 
-            if (($PSBoundParameters[$param] -is [bool]) -or (GetParamMetadataValue -param $param -metadata "ActAsBoolean")) {
+            if (($resolvedParameters.Value[$param] -is [bool]) -or (GetParamMetadataValue -param $param -metadata "ActAsBoolean" -parameterMetadata $parameterMetadata)) {
                 $checkbox = New-Object System.Windows.Forms.CheckBox
-                $checkbox.Checked = $PSBoundParameters[$param]
+                $checkbox.Checked = $resolvedParameters.Value[$param]
                 $linePanel.Controls.Add($checkbox)
-            } elseif ($PSBoundParameters[$param] -is [int]) {
+            } elseif ($resolvedParameters.Value[$param] -is [int]) {
                 $numericUpDown = New-Object System.Windows.Forms.NumericUpDown
                 $numericUpDown.Width = 200
                 $numericUpDown.Minimum = 1
                 $numericUpDown.Maximum = 65535
-                $numericUpDown.Value = $PSBoundParameters[$param]
+                $numericUpDown.Value = $resolvedParameters.Value[$param]
                 $linePanel.Controls.Add($numericUpDown)
             } else {
-                # Create a TextBox
                 $textbox = New-Object System.Windows.Forms.TextBox
                 $textbox.Width = 200
-                $textbox.Text = $PSBoundParameters[$param]
+                $textbox.Text = $resolvedParameters.Value[$param]
                 $linePanel.Controls.Add($textbox)
             }
         }
     }
+    return $controls
+}
 
-    # Create a Button
+function New-PresetRadioButtons {
+    param (
+        [System.Windows.Forms.Form]$form,
+        [hashtable]$parameterMetadata
+    )
+    $presetGroupBox = New-Object System.Windows.Forms.GroupBox
+    $presetGroupBox.Text = "Preset Selection"
+    $presetGroupBox.Dock = [System.Windows.Forms.DockStyle]::Top
+    $presetGroupBox.Height = 60
+    $form.Controls.Add($presetGroupBox)
+
+    $presets = @("prod-direct", "prod-proxy")
+    $presetRadioButtons = @{}
+    $xOffset = 10
+    foreach ($preset in $presets) {
+        $radioButton = New-Object System.Windows.Forms.RadioButton
+        $radioButton.Text = $preset
+        $radioButton.Left = $xOffset
+        $radioButton.Top = 20
+        $radioButton.AutoSize = $true
+        $presetGroupBox.Controls.Add($radioButton)
+        $presetRadioButtons[$preset] = $radioButton
+        $xOffset += 100
+    }
+    $presetRadioButtons["prod-direct"].Checked = $true
+    return $presetRadioButtons
+}
+
+function Submit-SubmitClick {
+    param (
+        [hashtable]$controls,
+        [ref]$resolvedParameters,
+        [hashtable]$parameterMetadata,
+        [System.Windows.Forms.ErrorProvider]$errorProvider,
+        [System.Windows.Forms.Label]$errorLabel,
+        [System.Windows.Forms.Form]$form
+    )
+    $hasError = $false
+    $errorLabel.Text = ""
+    $errorProvider.Clear()
+    foreach ($param in $controls.Keys) {
+        if ($controls[$param] -is [System.Windows.Forms.CheckBox]) {
+            $resolvedParameters.Value[$param] = $controls[$param].Checked
+            continue
+        }
+        if ($controls[$param] -is [System.Windows.Forms.NumericUpDown]) {
+            $resolvedParameters.Value[$param] = $controls[$param].Value
+            continue
+        }
+        $inputControl = $controls[$param].Controls | Where-Object { $_ -is [System.Windows.Forms.TextBox] }
+        $value = $inputControl.Text
+        $validateArr = GetParamMetadataValue -param $param -metadata "Validate" -parameterMetadata $parameterMetadata
+        $errorMsg = ""
+        if ($validateArr) {
+            foreach ($validateObj in $validateArr) {
+                foreach ($msg in $validateObj.Keys) {
+                    $fn = $validateObj[$msg]
+                    if (-not (& $fn $value)) {
+                        $errorMsg = $msg
+                        break
+                    }
+                }
+                if ($errorMsg) { break }
+            }
+        }
+        if ($errorMsg) {
+            $errorProvider.SetError($inputControl, $errorMsg)
+            $hasError = $true
+        } else {
+            $errorProvider.SetError($inputControl, "")
+        }
+        $resolvedParameters.Value[$param] = $value
+    }
+    if ($hasError) {
+        $errorLabel.Text = "Please correct the highlighted errors."
+        return
+    }
+    $form.Close()
+}
+
+function Show-GuiParameterForm {
+    param (
+        [hashtable]$parameters,
+        [ref]$resolvedParameters,
+        [hashtable]$parameterMetadata
+    )
+
+    Add-Type -AssemblyName System.Windows.Forms
+
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = "Input Parameters"
+    $form.Width = 1024
+    $form.Height = 768
+
+    $mainPanel = New-Object System.Windows.Forms.Panel
+    $mainPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+    $form.Controls.Add($mainPanel)
+
+    $tabControl = New-Object System.Windows.Forms.TabControl
+    $tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
+    $mainPanel.Controls.Add($tabControl)
+
+    $categories = Get-ParameterCategories $parameters $parameterMetadata
+    $controls = New-ParameterControls $categories $parameters ([ref]$resolvedParameters.Value) $parameterMetadata $tabControl
+
+    $errorProvider = New-Object System.Windows.Forms.ErrorProvider
+    $errorProvider.BlinkStyle = 'NeverBlink'
+    $errorLabel = New-Object System.Windows.Forms.Label
+    $errorLabel.Dock = [System.Windows.Forms.DockStyle]::Bottom
+    $errorLabel.ForeColor = 'Red'
+    $errorLabel.Height = 30
+    $errorLabel.TextAlign = 'MiddleCenter'
+    $mainPanel.Controls.Add($errorLabel)
+
     $button = New-Object System.Windows.Forms.Button
     $button.Text = "Submit"
     $button.Dock = [System.Windows.Forms.DockStyle]::Bottom
     $button.Height = 50
+
+    $presetRadioButtons = New-PresetRadioButtons $form $parameterMetadata
+    foreach ($radioButton in $presetRadioButtons.Values) {
+       #  $radioButton.Add_CheckedChanged({ Update-ByPreset $controls $presetRadioButtons $parameterMetadata })
+    }
+    # Update-ByPreset $controls $presetRadioButtons $parameterMetadata
+
     $button.Add_Click({
-        foreach ($param in $controls.Keys) {
-            if ($controls[$param].Visible) { # exclude hidden parameters
-                if ($controls[$param] -is [System.Windows.Forms.CheckBox]) {
-                    $PSBoundParameters[$param] = $controls[$param].Checked
-                } else {
-                    $PSBoundParameters[$param] = $controls[$param].Text
-                }
-            }
-        }
-        $form.Close()
+        Submit-SubmitClick $controls ([ref]$resolvedParameters.Value) $parameterMetadata $errorProvider $errorLabel $form
     })
     $mainPanel.Controls.Add($button)
 
-    # Add a GroupBox for environment selection
-    $envGroupBox = New-Object System.Windows.Forms.GroupBox
-    $envGroupBox.Text = "Target Environment"
-    $envGroupBox.Dock = [System.Windows.Forms.DockStyle]::Top
-    $envGroupBox.Height = 60
-    $form.Controls.Add($envGroupBox)
-
-    # Add radio buttons for environments
-    $environments = @("dev", "staging", "production")
-    $envRadioButtons = @{}
-    $xOffset = 10
-    foreach ($env in $environments) {
-        $radioButton = New-Object System.Windows.Forms.RadioButton
-        $radioButton.Text = $env
-        $radioButton.Left = $xOffset
-        $radioButton.Top = 20
-        $radioButton.AutoSize = $true
-        $envGroupBox.Controls.Add($radioButton)
-        $envRadioButtons[$env] = $radioButton
-        $xOffset += 100
-    }
-    $envRadioButtons["dev"].Checked = $true # Default to "dev"
-
-    # Attach event handlers to radio buttons
-    foreach ($radioButton in $envRadioButtons.Values) {
-        $radioButton.Add_CheckedChanged({ Update-VisibleControls })
-    }
-
-    # Call the function initially to set visibility
-    Update-VisibleControls
-
-    # Show the form
     $form.ShowDialog()
-
-    # Output resolved parameters
-    Write-Output "Resolved Parameters:"
-    $PSBoundParameters
-    exit 0
 }
 
-Write-Host "Running in non-GUI mode..."
+# Make a copy of PSBoundParameters to avoid modifying the original
+$resolvedParameters = @{}
+foreach ($key in $PSBoundParameters.Keys) {
+    $resolvedParameters[$key] = $PSBoundParameters[$key]
+}
 
-# non-GUI Mode
-foreach ($param in $parameters.Keys) {
-    if (-not (GetParamMetadataValue -param $param -metadata "Tab")) {
-        continue
-    }
-    # Fallback to user input if no value is set
-    $defaultValue = (Get-Variable -Name $param -EA SilentlyContinue).Value
-    if (-not $PSBoundParameters[$param] -or ($PSBoundParameters[$param] -eq $defaultValue -and (GetParamMetadataValue -param $param -metadata "ForceInput"))) {
-        $PSBoundParameters[$param] = Read-InputWithDefault -prompt "Enter value for $param" -defaultValue $defaultValue
+Initialize-Parameters $MyInvocation.MyCommand.Parameters ([ref]$resolvedParameters) $parameterMetadata
+
+if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
+    Write-Host "Running in GUI mode..."
+    Show-GuiParameterForm $MyInvocation.MyCommand.Parameters ([ref]$resolvedParameters) $parameterMetadata
+} else {
+    Write-Host "Running in non-GUI mode..."
+    foreach ($param in $parameters.Keys) {
+        if (-not (GetParamMetadataValue -param $param -metadata "Tab")) {
+            continue
+        }
+        # Fallback to user input if no value is set
+        $defaultValue = (Get-Variable -Name $param -EA SilentlyContinue).Value
+        if (-not $resolvedParameters[$param] -or ($resolvedParameters[$param] -eq $defaultValue -and (GetParamMetadataValue -param $param -metadata "ForceInput"))) {
+            $resolvedParameters[$param] = Read-InputWithDefault -prompt "Enter value for $param" -defaultValue $defaultValue
+        }
     }
 }
 
 # Output resolved parameters
 Write-Output "Resolved Parameters:"
-$PSBoundParameters
+$resolvedParameters
+exit 0
