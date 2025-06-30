@@ -145,8 +145,9 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         $postValues = [
             'game_session_api' => self::getSessionAPIBaseUrl(
                 $gameList,
-                $watchdog->getServerId() == Watchdog::getInternalServerId() ? 'php' : null,
-                $watchdog->getServerId() == Watchdog::getInternalServerId() ? 80 : null,
+                $watchdog->getServerId() == Watchdog::getInternalServerId() ?
+                    ($_ENV['MITMPROXY_PORT'] ? 'mitmproxy' : 'php') : null,
+                $watchdog->getServerId() == Watchdog::getInternalServerId() ? ($_ENV['MITMPROXY_PORT'] ?? 80) : null,
                 $watchdog->getServerId() == Watchdog::getInternalServerId() ? 'http' : null
             ),
             'game_session_token' => (string)$watchdog->getToken(),
