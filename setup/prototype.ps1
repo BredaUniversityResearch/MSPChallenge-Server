@@ -19,54 +19,20 @@ Enable GUI mode for input (default: 0).
 param(
     [ValidateSet("ProdDirect", "ProdProxy")]
     [string]$Preset = "ProdDirect",
-    [string]$ServerName = "",
+    [string]$ServerName = "www.example.com",
+    [string]$UrlWebServerHost = "www.example.com",
+    [string]$UrlWebServerScheme = "https",
+    [int]$UrlWsServerPort = 443,
+    [string]$UrlWsServerHost = "www.example.com",
+    [string]$UrlWsServerScheme = "wss",
+    [string]$UrlWsServerUri = "/ws/",
     [int]$ServerPort = 443,
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
     [int]$TestSwitch = 0,
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
     [int]$EnableGui = 1,
     [string]$DatabasePassword = -join ((48..57) + (65..90) + (97..122) + (33..47) | Get-Random -Count 20 | % {[char]$_}),
-    [string]$CaddyMercureJwtSecret = ([guid]::NewGuid().ToString("N")),
-    [string]$Var1 = "default1",
-    [string]$Var2 = "default2",
-    [string]$Var3 = "default3",
-    [string]$Var4 = "default4",
-    [string]$Var5 = "default5",
-    [string]$Var6 = "default6",
-    [string]$Var7 = "default7",
-    [string]$Var8 = "default8",
-    [string]$Var9 = "default9",
-    [string]$Var10 = "default10",
-    [string]$Var11 = "default11",
-    [string]$Var12 = "default12",
-    [string]$Var13 = "default13",
-    [string]$Var14 = "default14",
-    [string]$Var15 = "default15",
-    [string]$Var16 = "default16",
-    [string]$Var17 = "default17",
-    [string]$Var18 = "default18",
-    [string]$Var19 = "default19",
-    [string]$Var20 = "default20",
-    [string]$Var21 = "default21",
-    [string]$Var22 = "default22",
-    [string]$Var23 = "default23",
-    [string]$Var24 = "default24",
-    [string]$Var25 = "default25",
-    [string]$Var26 = "default26",
-    [string]$Var27 = "default27",
-    [string]$Var28 = "default28",
-    [string]$Var29 = "default29",
-    [string]$Var30 = "default30",
-    [string]$Var31 = "default31",
-    [string]$Var32 = "default32",
-    [string]$Var33 = "default33",
-    [string]$Var34 = "default34",
-    [string]$Var35 = "default35",
-    [string]$Var36 = "default36",
-    [string]$Var37 = "default37",
-    [string]$Var38 = "default38",
-    [string]$Var39 = "default39",
-    [string]$Var40 = "default40"
+    [string]$CaddyMercureJwtSecret = ([guid]::NewGuid().ToString("N"))
 )
 
 # Define metadata for parameters
@@ -76,8 +42,33 @@ $parameterMetadata = @{
         EnvVar = "SERVER_NAME"
         Tab = "MSP Challenge Server"
         Presets = @{
+            ProdDirect = "www.example.com"
             ProdProxy = ":80"
         }
+    }
+    UrlWebServerHost = @{
+        EnvVar = "URL_WEB_SERVER_HOST"
+        Tab = "MSP Challenge Server"
+    }
+    UrlWsServerHost = @{
+        EnvVar = "URL_WS_SERVER_HOST"
+        Tab = "MSP Challenge Server"
+    }
+    UrlWebServerScheme = @{
+        EnvVar = "URL_WEB_SERVER_SCHEME"
+        Tab = "MSP Challenge Server"
+    }
+    $UrlWsServerPort = @{
+        EnvVar = "URL_WS_SERVER_PORT"
+        Tab = "MSP Challenge Server"
+    }
+    UrlWsServerScheme = @{
+        EnvVar = "URL_WS_SERVER_SCHEME"
+        Tab = "MSP Challenge Server"
+    }
+    UrlWsServerUri = @{
+        EnvVar = "URL_WS_SERVER_URI"
+        Tab = "MSP Challenge Server"
     }
     ServerPort = @{
         EnvVar = "WEB_SERVER_PORT"
@@ -106,46 +97,6 @@ $parameterMetadata = @{
             @{ "JWT Secret must be 32 characters." = { param($v) $v.Length -eq 32 } }
         )
     }
-    Var1 = @{ Tab="Test" }
-    Var2 = @{ Tab="Test" }
-    Var3 = @{ Tab="Test" }
-    Var4 = @{ Tab="Test" }
-    Var5 = @{ Tab="Test" }
-    Var6 = @{ Tab="Test" }
-    Var7 = @{ Tab="Test" }
-    Var8 = @{ Tab="Test" }
-    Var9 = @{ Tab="Test" }
-    Var10 = @{ Tab="Test" }
-    Var11 = @{ Tab="Test" }
-    Var12 = @{ Tab="Test" }
-    Var13 = @{ Tab="Test" }
-    Var14 = @{ Tab="Test" }
-    Var15 = @{ Tab="Test" }
-    Var16 = @{ Tab="Test" }
-    Var17 = @{ Tab="Test" }
-    Var18 = @{ Tab="Test" }
-    Var19 = @{ Tab="Test" }
-    Var20 = @{ Tab="Test" }
-    Var21 = @{ Tab="Test" }
-    Var22 = @{ Tab="Test" }
-    Var23 = @{ Tab="Test" }
-    Var24 = @{ Tab="Test" }
-    Var25 = @{ Tab="Test" }
-    Var26 = @{ Tab="Test" }
-    Var27 = @{ Tab="Test" }
-    Var28 = @{ Tab="Test" }
-    Var29 = @{ Tab="Test" }
-    Var30 = @{ Tab="Test" }
-    Var31 = @{ Tab="Test" }
-    Var32 = @{ Tab="Test" }
-    Var33 = @{ Tab="Test" }
-    Var34 = @{ Tab="Test" }
-    Var35 = @{ Tab="Test" }
-    Var36 = @{ Tab="Test" }
-    Var37 = @{ Tab="Test" }
-    Var38 = @{ Tab="Test" }
-    Var39 = @{ Tab="Test" }
-    Var40 = @{ Tab="Test" }
 }
 
 # Function to update visible controls based on the selected environment
@@ -308,9 +259,11 @@ function New-ParameterControls {
             $label.Margin = [System.Windows.Forms.Padding]::new(0, 5, 5, 5)
             $linePanel.Controls.Add($label)
 
+            $isReadOnly = (GetParamMetadataValue -param $param -metadata "ReadOnly" -parameterMetadata $parameterMetadata)
             if (($resolvedParameters.Value[$param] -is [bool]) -or (GetParamMetadataValue -param $param -metadata "ActAsBoolean" -parameterMetadata $parameterMetadata)) {
                 $checkbox = New-Object System.Windows.Forms.CheckBox
                 $checkbox.Checked = $resolvedParameters.Value[$param]
+                $checkbox.Enabled = !$isReadOnly
                 $linePanel.Controls.Add($checkbox)
             } elseif ($resolvedParameters.Value[$param] -is [int]) {
                 $numericUpDown = New-Object System.Windows.Forms.NumericUpDown
@@ -318,11 +271,13 @@ function New-ParameterControls {
                 $numericUpDown.Minimum = 1
                 $numericUpDown.Maximum = 65535
                 $numericUpDown.Value = $resolvedParameters.Value[$param]
+                $numericUpDown.Enabled = !$isReadOnly
                 $linePanel.Controls.Add($numericUpDown)
             } else {
                 $textbox = New-Object System.Windows.Forms.TextBox
                 $textbox.Width = 200
                 $textbox.Text = $resolvedParameters.Value[$param]
+                $textbox.ReadOnly = $isReadOnly
                 $linePanel.Controls.Add($textbox)
             }
         }
