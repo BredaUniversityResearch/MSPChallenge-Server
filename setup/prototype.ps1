@@ -330,15 +330,16 @@ function Submit-SubmitClick {
     $errorLabel.Text = ""
     $errorProvider.Clear()
     foreach ($param in $controls.Keys) {
-        if ($controls[$param] -is [System.Windows.Forms.CheckBox]) {
-            $resolvedParameters.Value[$param] = $controls[$param].Checked
+        $inputControl = $controls[$param].Controls[1]
+        if ($inputControl -is [System.Windows.Forms.CheckBox]) {
+            $resolvedParameters.Value[$param] = $inputControl.Checked
             continue
         }
-        if ($controls[$param] -is [System.Windows.Forms.NumericUpDown]) {
-            $resolvedParameters.Value[$param] = $controls[$param].Value
+        if ($inputControl -is [System.Windows.Forms.NumericUpDown]) {
+            $resolvedParameters.Value[$param] = $inputControl.Value
             continue
         }
-        $inputControl = $controls[$param].Controls | Where-Object { $_ -is [System.Windows.Forms.TextBox] }
+        # System.Windows.Forms.TextBox
         $value = $inputControl.Text
         $validateArr = GetParamMetadataValue -param $param -metadata "Validate" -parameterMetadata $parameterMetadata
         $errorMsg = ""
