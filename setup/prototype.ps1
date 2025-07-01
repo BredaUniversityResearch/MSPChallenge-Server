@@ -17,7 +17,7 @@ Enable GUI mode for input (default: 0).
 
 # Define parameters
 param(
-    [ValidateSet("Direct", "Proxy", "Local")]
+    [ValidateSet("Direct", "Proxy", "LAN", "Local")]
     [string]$Preset = "Direct",
     [string]$ServerName = "www.example.com",
     [string]$UrlWebServerHost = "www.example.com",
@@ -28,7 +28,7 @@ param(
     [string]$UrlWsServerUri = "/ws/",
     [int]$ServerPort = 443,
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
-    [int]$TestSwitch = 0,
+#    [int]$TestSwitch = 0,
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
     [int]$EnableGui = 1,
     [string]$DatabasePassword = -join ((48..57) + (65..90) + (97..122) + (33..47) | Get-Random -Count 20 | % {[char]$_}),
@@ -42,12 +42,27 @@ $presetsConfiguration = @{
     }
     Proxy  = @{
         Text = "Behind a proxy"
-        Desr = "The docker container running the MSP Challenge server is behind a reverse proxy, e.g. Nginx, etc. The proxy is responsible for handling the server name requests on https, port 443, e.g. www.example.com, as well as the TLS certificate, and forwarding those to the MSP Challenge server running on http (port 80)."
+        Desr = "The docker container running the MSP Challenge server is behind a reverse proxy, e.g. Nginx, etc. The proxy is responsible for handling the server name requests on https, port 443, e.g. www.example.com, as well as the TLS certificate, and forwarding those to the MSP Challenge server running on http (port 80). Example nginx proxy setup: https://community.mspchallenge.info/wiki/Docker_server_installation#Nginx_proxy_example"
+    }
+    LAN = @{
+        Text = "Network (LAN) setup"
+        Desr = "The docker container running the MSP Challenge server is exposed to the local area network, by the machine's IP address."
     }
     Local = @{
-        Text = "Local (network) setup"
-        Desr = "Local development environment."
+        Text = "Local setup"
+        Desr = "The docker container running MSP Challenge server and locally available on the host machine, e.g. host.docker.internal, or localhost."
     }
+}
+
+function Get-FirstLanIPv4Address {
+    Get-NetIPInterface -AddressFamily IPv4 |
+        Where-Object { $_.InterfaceAlias -match '^(Ethernet|Wi-Fi)' -and $_.ConnectionState -eq 'Connected' } |
+        Sort-Object -Property InterfaceMetric |
+        ForEach-Object {
+            Get-NetIPAddress -InterfaceIndex $_.InterfaceIndex -AddressFamily IPv4 |
+            Where-Object { $_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.254.*' }
+        } |
+        Select-Object -First 1 -ExpandProperty IPAddress
 }
 
 # Define metadata for parameters
@@ -62,8 +77,15 @@ $parameterMetadata = @{
         Presets = @{
             Direct = "www.example.com"
             Proxy = ":80"
+            LAN = ":80"
+            Local = ":80"
         }
-        Text = "Server domain name"
+        ReadOnly = @{
+            Direct = $false
+            Proxy = $true
+            LAN = $true
+            Local = $true
+        }
         Link = @{
             Direct = @("UrlWebServerHost", "UrlWsServerHost")            
         }
@@ -71,43 +93,105 @@ $parameterMetadata = @{
     UrlWebServerHost = @{
         EnvVar = "URL_WEB_SERVER_HOST"
         Tab = "Basic setup"
+        Presets = @{
+            Local = "host.docker.internal"
+            LAN = (Get-FirstLanIPv4Address)
+        }
         Link = @{
             Direct = @("ServerName", "UrlWsServerHost")
             Proxy = @("UrlWsServerHost")
+            LAM = @("UrlWsServerHost")
+            Local = @("UrlWsServerHost")
         }        
     }
     UrlWsServerHost = @{
         EnvVar = "URL_WS_SERVER_HOST"
         Tab = "Basic setup"
+        Presets = @{
+            Local = "host.docker.internal"
+            LAN = (Get-FirstLanIPv4Address)
+        }
         Link = @{
             Direct = @("UrlWebServerHost", "ServerName")
             Proxy = @("UrlWebServerHost")
+            LAN = @("UrlWebServerHost")
+            Local = @("UrlWebServerHost")
         }        
     }
     UrlWebServerScheme = @{
         EnvVar = "URL_WEB_SERVER_SCHEME"
         Tab = "Advanced settings"
+        Presets = @{
+            Local = "http"
+            LAN = "http"
+        }
+        ReadOnly = @{
+            Direct = $true
+            Proxy = $true
+            LAN = $true
+            Local = $true
+        }        
     }
-    $UrlWsServerPort = @{
+    UrlWsServerPort = @{
         EnvVar = "URL_WS_SERVER_PORT"
         Tab = "Advanced settings"
+        Presets = @{
+            Local = 45001
+            LAN = 45001            
+        }
+        ReadOnly = @{
+            Direct = $true
+            Proxy = $true
+            LAN = $false
+            Local = $false
+        }          
     }
     UrlWsServerScheme = @{
         EnvVar = "URL_WS_SERVER_SCHEME"
         Tab = "Advanced settings"
+        Presets = @{
+            Local = "ws"
+            LAN = "ws"           
+        }        
+        ReadOnly = @{
+            Direct = $true
+            Proxy = $true
+            LAN = $true
+            Local = $true
+        }  
     }
     UrlWsServerUri = @{
         EnvVar = "URL_WS_SERVER_URI"
         Tab = "Advanced settings"
+        Presets = @{
+            Local = ""
+            LAN = ""
+        }
+        ReadOnly = @{
+            Direct = $true
+            Proxy = $true
+            LAN = $false
+            Local = $false
+        }        
     }
     ServerPort = @{
         EnvVar = "WEB_SERVER_PORT"
         Tab = "Advanced settings"
+        Presets = @{
+            Local = 80
+            LAN = 80
+        }
+        ReadOnly = @{
+            Direct = $true
+            Proxy = $true
+            LAN = $false
+            Local = $false
+        }        
     }
-    TestSwitch = @{
-        ActAsBoolean = $true
-        Tab = "Advanced settings"
-    }
+#    TestSwitch = @{
+#        ActAsBoolean = $true
+#        Tab = "Advanced settings"
+#    }
     EnableGui = @{
         ActAsBoolean = $true
         ScriptArgument = $true
@@ -142,16 +226,22 @@ function Update-ControlsByPreset {
         $presetValues = $parameterMetadata[$param]["Presets"]
         $container = $controls[$param]        
         $presetValue = (Get-Variable -Name $param -ErrorAction SilentlyContinue).Value
+        $readOnly = (GetParamMetadataValue -param $param -metadata "ReadOnly" -parameterMetadata $parameterMetadata)
+        $isReadOnly = $readOnly -and $readOnly.ContainsKey($selectedPreset) -and $readOnly[$selectedPreset]
+
         # check if $presetValues is an array and contains the selected preset, if so assign the value
         if ($presetValues -and $presetValues.Count -gt 0 -and $presetValues.ContainsKey($selectedPreset)) {
             $presetValue = $presetValues[$selectedPreset]
         }
         if ($container.Controls[1] -is [System.Windows.Forms.TextBox]) {
             $container.Controls[1].Text = $presetValue
-        } elseif ($container.Controls[1] -is [System.Windows.Forms.NumericUpDown]) {
+            $container.Controls[1].ReadOnly = $isReadOnly
+        } elseif ($container.Controls[1] -is [System.Windows.Forms.NumericUpDown]) {            
             $container.Controls[1].Value = [int]$presetValue
+            $container.Controls[1].Enabled = -not $isReadOnly
         } elseif ($container.Controls[1] -is [System.Windows.Forms.CheckBox]) {
             $container.Controls[1].Checked = [bool]$presetValue
+            $container.Controls[1].Enabled = -not $isReadOnly
         }        
     }
 }
@@ -309,12 +399,20 @@ function New-ParameterControls {
         $parentPanel.AutoScroll = $true
         $tabPage.Controls.Add($parentPanel)
 
+        $labels = @{}
         $maxLabelWidth = 0
         foreach ($param in $categories[$category]) {
             $label = New-Object System.Windows.Forms.Label
-            $label.Text = $param
+            $labelText = (GetParamMetadataValue -param $param -metadata "Text" -parameterMetadata $parameterMetadata)
+            if (-not $labelText) {
+                $labelText = (GetParamMetadataValue -param $param -metadata "EnvVar" -parameterMetadata $parameterMetadata)
+            }            
+            $label.Text = $labelText
+            $label.Anchor = [System.Windows.Forms.AnchorStyles]::None
+            $label.Margin = [System.Windows.Forms.Padding]::new(0, 5, 5, 5)
             $textSize = [System.Windows.Forms.TextRenderer]::MeasureText($label.Text, $label.Font)
             if ($textSize.Width -gt $maxLabelWidth) { $maxLabelWidth = $textSize.Width }
+            $labels[$param] = $label
         }
 
         foreach ($param in $categories[$category]) {
@@ -326,22 +424,13 @@ function New-ParameterControls {
             $parentPanel.Controls.Add($linePanel)
             $controls[$param] = $linePanel
 
-            $label = New-Object System.Windows.Forms.Label
-            $labelText = (GetParamMetadataValue -param $param -metadata "Text" -parameterMetadata $parameterMetadata)
-            if (-not $labelText) {
-                $labelText = $param
-            }
-            $label.Text = $labelText
+            $label = $labels[$param]
             $label.Width = $maxLabelWidth + 10
-            $label.Anchor = [System.Windows.Forms.AnchorStyles]::None
-            $label.Margin = [System.Windows.Forms.Padding]::new(0, 5, 5, 5)
             $linePanel.Controls.Add($label)
             
-            $isReadOnly = (GetParamMetadataValue -param $param -metadata "ReadOnly" -parameterMetadata $parameterMetadata)
             if (($resolvedParameters.Value[$param] -is [bool]) -or (GetParamMetadataValue -param $param -metadata "ActAsBoolean" -parameterMetadata $parameterMetadata)) {
                 $checkbox = New-Object System.Windows.Forms.CheckBox
                 $checkbox.Checked = $resolvedParameters.Value[$param]
-                $checkbox.Enabled = !$isReadOnly
                 $linePanel.Controls.Add($checkbox)
             } elseif ($resolvedParameters.Value[$param] -is [int]) {
                 $numericUpDown = New-Object System.Windows.Forms.NumericUpDown
@@ -349,13 +438,11 @@ function New-ParameterControls {
                 $numericUpDown.Minimum = 1
                 $numericUpDown.Maximum = 65535
                 $numericUpDown.Value = $resolvedParameters.Value[$param]
-                $numericUpDown.Enabled = !$isReadOnly
                 $linePanel.Controls.Add($numericUpDown)
             } else {
                 $textbox = New-Object System.Windows.Forms.TextBox
                 $textbox.Width = 200
                 $textbox.Text = $resolvedParameters.Value[$param]
-                $textbox.ReadOnly = $isReadOnly
                 $handler = {
                     param($src, $args)
                     $selectedPreset = (Get-Variable -Name "Preset" -ErrorAction SilentlyContinue).Value
