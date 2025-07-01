@@ -195,10 +195,6 @@ $parameterMetadata = @{
     UrlWsServerUri = @{
         EnvVar = "URL_WS_SERVER_URI"
         Tab = "Advanced settings"
-        Presets = @{
-            Local = ""
-            LAN = ""
-        }
         ReadOnly = @{
             Direct = $true
             Proxy = $true
@@ -232,7 +228,6 @@ $parameterMetadata = @{
         EnvVar = "DATABASE_PASSWORD"
         Tab = "Basic setup"
         Validate = @(
-            @{ "Password cannot be empty." = { param($v) -not [string]::IsNullOrWhiteSpace($v) } },
             @{ "Password must be at least 8 characters." = { param($v) $v.Length -ge 8 } }
         )
     }
@@ -240,7 +235,6 @@ $parameterMetadata = @{
         EnvVar = "CADDY_MERCURE_JWT_SECRET"
         Tab = "Basic setup"
         Validate = @(
-            @{ "JWT Secret cannot be empty." = { param($v) -not [string]::IsNullOrWhiteSpace($v) } },
             @{ "JWT Secret must be 32 characters." = { param($v) $v.Length -eq 32 } }
         )
     }
@@ -587,7 +581,18 @@ function Submit-SubmitClick {
         $value = $inputControl.Text
         $validateArr = GetParamMetadataValue -param $param -metadata "Validate" -parameterMetadata $parameterMetadata
         $errorMsg = ""
-        if ($validateArr) {
+
+        # Default validation: empty values not allowed unless EmptyValuesAllowed is $true
+        $emptyAllowed = $false
+        if ($parameterMetadata.ContainsKey($param) -and $parameterMetadata[$param].ContainsKey("EmptyValuesAllowed")) {
+            $emptyAllowed = $parameterMetadata[$param]["EmptyValuesAllowed"]
+        }
+        if (-not $emptyAllowed -and ([string]::IsNullOrWhiteSpace($value))) {
+            $errorMsg = "Value cannot be empty."
+        }
+
+        # Custom validation from Validate property
+        if (-not $errorMsg -and $validateArr) {
             foreach ($validateObj in $validateArr) {
                 foreach ($msg in $validateObj.Keys) {
                     $fn = $validateObj[$msg]
@@ -599,6 +604,7 @@ function Submit-SubmitClick {
                 if ($errorMsg) { break }
             }
         }
+
         if ($errorMsg) {
             $errorProvider.SetError($inputControl, $errorMsg)
             $hasError = $true
