@@ -55,14 +55,46 @@ $presetsConfiguration = @{
 }
 
 function Get-FirstLanIPv4Address {
-    Get-NetIPInterface -AddressFamily IPv4 |
-        Where-Object { $_.InterfaceAlias -match '^(Ethernet|Wi-Fi)' -and $_.ConnectionState -eq 'Connected' } |
-        Sort-Object -Property InterfaceMetric |
-        ForEach-Object {
-            Get-NetIPAddress -InterfaceIndex $_.InterfaceIndex -AddressFamily IPv4 |
-            Where-Object { $_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.254.*' }
-        } |
-        Select-Object -First 1 -ExpandProperty IPAddress
+    # Cross-platform: Try to get the first non-loopback IPv4 address
+    $ip = $null
+
+    # Windows
+    try {
+        $ip = Get-NetIPInterface -AddressFamily IPv4 |
+            Where-Object { $_.InterfaceAlias -match '^(Ethernet|Wi-Fi)' -and $_.ConnectionState -eq 'Connected' } |
+            Sort-Object -Property InterfaceMetric |
+            ForEach-Object {
+                Get-NetIPAddress -InterfaceIndex $_.InterfaceIndex -AddressFamily IPv4 |
+                Where-Object { $_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.254.*' }
+            } |
+            Select-Object -First 1 -ExpandProperty IPAddress
+    } catch {}
+
+    # Try Get-NetIPAddress (some modern Linux)
+    try {
+        if (-not $ip) {
+            $ip = Get-NetIPAddress -AddressFamily IPv4 -ErrorAction Stop |
+                Where-Object { $_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.254.*' -and $_.PrefixOrigin -ne 'WellKnown' } |
+                Select-Object -First 1 -ExpandProperty IPAddress
+        }
+    } catch {}
+
+
+    # Fallback: Try ip command (Linux)
+    if (-not $ip -and (Get-Command ip -ErrorAction SilentlyContinue)) {
+        $ip = & ip -4 addr show | Select-String -Pattern 'inet (\d+\.\d+\.\d+\.\d+)' | ForEach-Object {
+            if ($_ -match 'inet (\d+\.\d+\.\d+\.\d+)') { $matches[1] }
+        } | Where-Object { $_ -ne '127.0.0.1' } | Select-Object -First 1
+    }
+
+    # Fallback: Try ifconfig (older Linux/macOS)
+    if (-not $ip -and (Get-Command ifconfig -ErrorAction SilentlyContinue)) {
+        $ip = & ifconfig | Select-String -Pattern 'inet (\d+\.\d+\.\d+\.\d+)' | ForEach-Object {
+            if ($_ -match 'inet (\d+\.\d+\.\d+\.\d+)') { $matches[1] }
+        } | Where-Object { $_ -ne '127.0.0.1' } | Select-Object -First 1
+    }
+
+    return $ip
 }
 
 # Define metadata for parameters
