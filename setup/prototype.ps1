@@ -17,8 +17,8 @@ Enable GUI mode for input (default: 0).
 
 # Define parameters
 param(
-    [ValidateSet("ProdDirect", "ProdProxy")]
-    [string]$Preset = "ProdDirect",
+    [ValidateSet("Direct", "Proxy", "Local")]
+    [string]$Preset = "Direct",
     [string]$ServerName = "www.example.com",
     [string]$UrlWebServerHost = "www.example.com",
     [string]$UrlWebServerScheme = "https",
@@ -35,55 +35,86 @@ param(
     [string]$CaddyMercureJwtSecret = ([guid]::NewGuid().ToString("N"))
 )
 
+$presetsConfiguration = @{
+    Direct = @{
+        Text = "Directly exposed"
+        Desr = "The docker container running the MSP Challenge server is directly exposed to the internet on port 443 given the server name, e.g. www.example.com. Caddy will automatically obtain a TLS certificate for the server name."
+    }
+    Proxy  = @{
+        Text = "Behind a proxy"
+        Desr = "The docker container running the MSP Challenge server is behind a reverse proxy, e.g. Nginx, etc. The proxy is responsible for handling the server name requests on https, port 443, e.g. www.example.com, as well as the TLS certificate, and forwarding those to the MSP Challenge server running on http (port 80)."
+    }
+    Local = @{
+        Text = "Local (network) setup"
+        Desr = "Local development environment."
+    }
+}
+
 # Define metadata for parameters
 $parameterMetadata = @{
+    Preset = @{
+        ForceInput = $true # in non-gui mode, always prompt for input
+    }
     ServerName = @{
-        ForceInput = $true
+        ForceInput = $true # in non-gui mode, always prompt for input
         EnvVar = "SERVER_NAME"
-        Tab = "MSP Challenge Server"
+        Tab = "Basic setup"
         Presets = @{
-            ProdDirect = "www.example.com"
-            ProdProxy = ":80"
+            Direct = "www.example.com"
+            Proxy = ":80"
+        }
+        Text = "Server domain name"
+        Link = @{
+            Direct = @("UrlWebServerHost", "UrlWsServerHost")            
         }
     }
     UrlWebServerHost = @{
         EnvVar = "URL_WEB_SERVER_HOST"
-        Tab = "MSP Challenge Server"
+        Tab = "Basic setup"
+        Link = @{
+            Direct = @("ServerName", "UrlWsServerHost")
+            Proxy = @("UrlWsServerHost")
+        }        
     }
     UrlWsServerHost = @{
         EnvVar = "URL_WS_SERVER_HOST"
-        Tab = "MSP Challenge Server"
+        Tab = "Basic setup"
+        Link = @{
+            Direct = @("UrlWebServerHost", "ServerName")
+            Proxy = @("UrlWebServerHost")
+        }        
     }
     UrlWebServerScheme = @{
         EnvVar = "URL_WEB_SERVER_SCHEME"
-        Tab = "MSP Challenge Server"
+        Tab = "Advanced settings"
     }
     $UrlWsServerPort = @{
         EnvVar = "URL_WS_SERVER_PORT"
-        Tab = "MSP Challenge Server"
+        Tab = "Advanced settings"
     }
     UrlWsServerScheme = @{
         EnvVar = "URL_WS_SERVER_SCHEME"
-        Tab = "MSP Challenge Server"
+        Tab = "Advanced settings"
     }
     UrlWsServerUri = @{
         EnvVar = "URL_WS_SERVER_URI"
-        Tab = "MSP Challenge Server"
+        Tab = "Advanced settings"
     }
     ServerPort = @{
         EnvVar = "WEB_SERVER_PORT"
-        Tab = "MSP Challenge Server"
+        Tab = "Advanced settings"
     }
     TestSwitch = @{
         ActAsBoolean = $true
-        Tab = "Other"
+        Tab = "Advanced settings"
     }
     EnableGui = @{
         ActAsBoolean = $true
+        ScriptArgument = $true
     }
     DatabasePassword = @{
         EnvVar = "DATABASE_PASSWORD"
-        Tab = "Database"
+        Tab = "Basic setup"
         Validate = @(
             @{ "Password cannot be empty." = { param($v) -not [string]::IsNullOrWhiteSpace($v) } },
             @{ "Password must be at least 8 characters." = { param($v) $v.Length -ge 8 } }
@@ -91,7 +122,7 @@ $parameterMetadata = @{
     }
     CaddyMercureJwtSecret = @{
         EnvVar = "CADDY_MERCURE_JWT_SECRET"
-        Tab = "MSP Challenge Server"
+        Tab = "Basic setup"
         Validate = @(
             @{ "JWT Secret cannot be empty." = { param($v) -not [string]::IsNullOrWhiteSpace($v) } },
             @{ "JWT Secret must be 32 characters." = { param($v) $v.Length -eq 32 } }
@@ -109,22 +140,19 @@ function Update-ControlsByPreset {
     $selectedPreset = $presetRadioButtons.Keys | Where-Object { $presetRadioButtons[$_].Checked }
     foreach ($param in $controls.Keys) {
         $presetValues = $parameterMetadata[$param]["Presets"]
-        $container = $controls[$param]
+        $container = $controls[$param]        
+        $presetValue = (Get-Variable -Name $param -ErrorAction SilentlyContinue).Value
         # check if $presetValues is an array and contains the selected preset, if so assign the value
-        if ($presetValues -and $presetValues.Count -gt 0) {
-            if ($presetValues.ContainsKey($selectedPreset)) {
-                $presetValue = $presetValues[$selectedPreset]
-            } else {
-                $presetValue = (Get-Variable -Name $param -ErrorAction SilentlyContinue).Value
-            }
-            if ($container.Controls[1] -is [System.Windows.Forms.TextBox]) {
-                $container.Controls[1].Text = $presetValue
-            } elseif ($container.Controls[1] -is [System.Windows.Forms.NumericUpDown]) {
-                $container.Controls[1].Value = [int]$presetValue
-            } elseif ($container.Controls[1] -is [System.Windows.Forms.CheckBox]) {
-                $container.Controls[1].Checked = [bool]$presetValue
-            }
+        if ($presetValues -and $presetValues.Count -gt 0 -and $presetValues.ContainsKey($selectedPreset)) {
+            $presetValue = $presetValues[$selectedPreset]
         }
+        if ($container.Controls[1] -is [System.Windows.Forms.TextBox]) {
+            $container.Controls[1].Text = $presetValue
+        } elseif ($container.Controls[1] -is [System.Windows.Forms.NumericUpDown]) {
+            $container.Controls[1].Value = [int]$presetValue
+        } elseif ($container.Controls[1] -is [System.Windows.Forms.CheckBox]) {
+            $container.Controls[1].Checked = [bool]$presetValue
+        }        
     }
 }
 
@@ -142,17 +170,63 @@ function GetParamMetadataValue {
 function Read-InputWithDefault {
     param (
         [string]$prompt,
-        [string]$defaultValue
+        [string]$defaultValue,
+        [System.Management.Automation.ParameterMetadata]$paramDef,
+        [hashtable]$parameterMetadata
     )
-    if ($defaultValue -eq "") {
-        $inputValue = Read-Prompt "${prompt}:"
-    } else {
-        $inputValue = Read-Prompt "$prompt ($defaultValue): "
+    while ($true) {
+        if ($defaultValue -eq "") {
+            $inputValue = Read-Prompt "${prompt}:"
+        } else {
+            $inputValue = Read-Prompt "$prompt ($defaultValue): "
+        }
+
+        if ($inputValue -eq "") {
+            $inputValue = $defaultValue
+        }
+
+        if ($inputValue -eq "") {
+            continue
+        }
+
+        # ValidateSet/ValidateRange from parameter definition
+        foreach ($attr in $paramDef.Attributes) {
+            if ($attr -is [System.Management.Automation.ValidateSetAttribute]) {
+                if ($attr.ValidValues -notcontains $inputValue) {
+                    Write-Host "Invalid value. Allowed values: $($attr.ValidValues -join ', ')" -ForegroundColor Red
+                    $retry = $true
+                    break
+                }
+            }
+            if ($attr -is [System.Management.Automation.ValidateRangeAttribute]) {
+                $num = $inputValue -as [int]
+                if ($num -lt $attr.MinRange -or $num -gt $attr.MaxRange) {
+                    Write-Host "Value must be between $($attr.MinRange) and $($attr.MaxRange)." -ForegroundColor Red
+                    $retry = $true
+                    break
+                }
+            }
+        }
+        if ($retry) { continue }
+
+        # Custom validation from parameterMetadata
+        if ($parameterMetadata.ContainsKey("Validate")) {
+            $validateArr = $parameterMetadata["Validate"]
+            foreach ($validateObj in $validateArr) {
+                foreach ($msg in $validateObj.Keys) {
+                    $fn = $validateObj[$msg]
+                    if (-not (& $fn $inputValue)) {
+                        Write-Host $msg -ForegroundColor Red
+                        $retry = $true
+                        break 2
+                    }
+                }
+            }
+        }
+        if ($retry) { continue }
+
+        return $inputValue
     }
-    if ($inputValue -eq "") {
-        return $defaultValue
-    }
-    return $inputValue
 }
 
 function Read-Prompt
@@ -202,11 +276,11 @@ function Get-ParameterCategories {
         [hashtable]$parameters,
         [hashtable]$parameterMetadata
     )
-    $categories = @{}
+    $categories = [ordered]@{}
     foreach ($param in $parameters.Keys) {
         $tab = GetParamMetadataValue -param $param -metadata "Tab" -parameterMetadata $parameterMetadata
         if ($tab) {
-            if (-not $categories.ContainsKey($tab)) { $categories[$tab] = @() }
+            if (-not ($categories.Keys -contains $tab)) { $categories[$tab] = @() }
             $categories[$tab] += $param
         }
     }
@@ -215,7 +289,7 @@ function Get-ParameterCategories {
 
 function New-ParameterControls {
     param (
-        [hashtable]$categories,
+        [System.Collections.Specialized.OrderedDictionary]$categories,
         [hashtable]$parameters,
         [ref]$resolvedParameters,
         [hashtable]$parameterMetadata,
@@ -253,12 +327,16 @@ function New-ParameterControls {
             $controls[$param] = $linePanel
 
             $label = New-Object System.Windows.Forms.Label
-            $label.Text = $param
+            $labelText = (GetParamMetadataValue -param $param -metadata "Text" -parameterMetadata $parameterMetadata)
+            if (-not $labelText) {
+                $labelText = $param
+            }
+            $label.Text = $labelText
             $label.Width = $maxLabelWidth + 10
             $label.Anchor = [System.Windows.Forms.AnchorStyles]::None
             $label.Margin = [System.Windows.Forms.Padding]::new(0, 5, 5, 5)
             $linePanel.Controls.Add($label)
-
+            
             $isReadOnly = (GetParamMetadataValue -param $param -metadata "ReadOnly" -parameterMetadata $parameterMetadata)
             if (($resolvedParameters.Value[$param] -is [bool]) -or (GetParamMetadataValue -param $param -metadata "ActAsBoolean" -parameterMetadata $parameterMetadata)) {
                 $checkbox = New-Object System.Windows.Forms.CheckBox
@@ -278,7 +356,25 @@ function New-ParameterControls {
                 $textbox.Width = 200
                 $textbox.Text = $resolvedParameters.Value[$param]
                 $textbox.ReadOnly = $isReadOnly
-                $linePanel.Controls.Add($textbox)
+                $handler = {
+                    param($src, $args)
+                    $selectedPreset = (Get-Variable -Name "Preset" -ErrorAction SilentlyContinue).Value
+                    if ($parameterMetadata[$param].ContainsKey("Link") -and $parameterMetadata[$param]["Link"].ContainsKey($selectedPreset)) {
+                        $linkedParams = $parameterMetadata[$param]["Link"][$selectedPreset]
+                        foreach ($linkedParam in $linkedParams) {
+                            if ($controls.ContainsKey($linkedParam)) {
+                                $controls[$linkedParam].Controls[1].Text = $src.Text
+                            }
+                        }                        
+                    }
+                }.GetNewClosure();
+                $textbox.Add_Leave($handler)
+                $textbox.Add_KeyDown({
+                    if ($_.KeyCode -eq 'Enter') {
+                        $handler.Invoke($this, $null)
+                    }
+                }.GetNewClosure())
+                $linePanel.Controls.Add($textbox)                
             }
         }
     }
@@ -288,31 +384,60 @@ function New-ParameterControls {
 function New-PresetRadioButtons {
     param (
         [hashtable]$parameters,
-        [System.Windows.Forms.Form]$form,
+        [System.Windows.Forms.Panel]$panel,
         [hashtable]$parameterMetadata
     )
     $presetGroupBox = New-Object System.Windows.Forms.GroupBox
     $presetGroupBox.Text = "Preset Selection"
-    $presetGroupBox.Dock = [System.Windows.Forms.DockStyle]::Top
-    $presetGroupBox.Height = 60
-    $form.Controls.Add($presetGroupBox)
+    $presetGroupBox.Dock = [System.Windows.Forms.DockStyle]::Fill
+    $presetGroupBox.Height = 120
+    $panel.Controls.Add($presetGroupBox)
 
     $presetRadioButtons = @{}
     $xOffset = 10
 
     $validateSetAttr = $parameters["Preset"].Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }
+
+    # Add a multi-line, wrappable, scrollable text area for the description
+    $descriptionTextBox = New-Object System.Windows.Forms.TextBox
+    $descriptionTextBox.Top = 45
+    $descriptionTextBox.Left = 10
+    $descriptionTextBox.Anchor = 'Top,Left,Right'
+    $descriptionTextBox.Width = $presetGroupBox.ClientSize.Width - 20
+    $descriptionTextBox.Height = 50
+    $descriptionTextBox.Multiline = $true
+    $descriptionTextBox.ScrollBars = 'Vertical'
+    $descriptionTextBox.WordWrap = $true
+    $descriptionTextBox.ReadOnly = $true
+    $presetGroupBox.Controls.Add($descriptionTextBox)
+    # Handle resizing to keep width in sync with parent
+    $presetGroupBox.Add_Resize({
+        $descriptionTextBox.Width = $presetGroupBox.ClientSize.Width - 20
+    })
+
+    $presetsConfiguration = (Get-Variable -Name "presetsConfiguration" -ErrorAction SilentlyContinue).Value
     foreach ($p in $validateSetAttr.ValidValues) {
         $radioButton = New-Object System.Windows.Forms.RadioButton
-        $radioButton.Text = $p
+        $radioButton.Text = $presetsConfiguration[$p].Text
+        $radioButton.Tag = $p
         $radioButton.Left = $xOffset
         $radioButton.Top = 20
         $radioButton.AutoSize = $true
         $presetGroupBox.Controls.Add($radioButton)
         $presetRadioButtons[$p] = $radioButton
-        $xOffset += 100
+        $xOffset += $radioButton.Width + 20
+ 
+        $radioButton.Add_CheckedChanged({
+            if ($this.Checked) {
+                $presetsConfiguration = (Get-Variable -Name "presetsConfiguration" -ErrorAction SilentlyContinue).Value
+                $this.Parent.Controls[0].Text = $presetsConfiguration[$this.Tag].Desr
+                Set-Variable -Name "Preset" -Value $this.Tag -Scope Global -Force
+            }
+        })
     }
     $preset = (Get-Variable -Name "Preset" -ErrorAction SilentlyContinue).Value
     $presetRadioButtons[$preset].Checked = $true
+    $descriptionTextBox.Text = $presetsConfiguration[$preset].Desr
 
     return $presetRadioButtons
 }
@@ -384,12 +509,23 @@ function Show-GuiParameterForm {
     $form.Width = 1024
     $form.Height = 768
 
-    $mainPanel = New-Object System.Windows.Forms.Panel
+    # Use a FlowLayoutPanel to stack all elements vertically (no overlap)
+    $mainPanel = New-Object System.Windows.Forms.FlowLayoutPanel
     $mainPanel.Dock = [System.Windows.Forms.DockStyle]::Fill
+    $mainPanel.FlowDirection = [System.Windows.Forms.FlowDirection]::TopDown
+    $mainPanel.WrapContents = $false
+    $mainPanel.AutoScroll = $true
     $form.Controls.Add($mainPanel)
 
+    # Create a top panel for the preset group (radio + description)
+    $topPanel = New-Object System.Windows.Forms.Panel
+    $topPanel.Width = 980
+    $topPanel.Height = 130
+    $mainPanel.Controls.Add($topPanel)
+
     $tabControl = New-Object System.Windows.Forms.TabControl
-    $tabControl.Dock = [System.Windows.Forms.DockStyle]::Fill
+    $tabControl.Width = 980
+    $tabControl.Height = 500
     $mainPanel.Controls.Add($tabControl)
 
     $categories = Get-ParameterCategories $parameters $parameterMetadata
@@ -398,7 +534,7 @@ function Show-GuiParameterForm {
     $errorProvider = New-Object System.Windows.Forms.ErrorProvider
     $errorProvider.BlinkStyle = 'NeverBlink'
     $errorLabel = New-Object System.Windows.Forms.Label
-    $errorLabel.Dock = [System.Windows.Forms.DockStyle]::Bottom
+    $errorLabel.Width = 980
     $errorLabel.ForeColor = 'Red'
     $errorLabel.Height = 30
     $errorLabel.TextAlign = 'MiddleCenter'
@@ -406,10 +542,11 @@ function Show-GuiParameterForm {
 
     $button = New-Object System.Windows.Forms.Button
     $button.Text = "Submit"
-    $button.Dock = [System.Windows.Forms.DockStyle]::Bottom
+    $button.Width = 980
     $button.Height = 50
+    $mainPanel.Controls.Add($button)
 
-    $presetRadioButtons = New-PresetRadioButtons $parameters $form $parameterMetadata
+    $presetRadioButtons = New-PresetRadioButtons $parameters $topPanel $parameterMetadata
     foreach ($radioButton in $presetRadioButtons.Values) {
        $radioButton.Add_CheckedChanged({ Update-ControlsByPreset $controls $presetRadioButtons $parameterMetadata })
     }
@@ -418,7 +555,6 @@ function Show-GuiParameterForm {
     $button.Add_Click({
         Submit-SubmitClick $controls ([ref]$resolvedParameters.Value) $parameterMetadata $errorProvider $errorLabel $form
     })
-    $mainPanel.Controls.Add($button)
 
     $form.ShowDialog()
 }
@@ -436,14 +572,14 @@ if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
     Show-GuiParameterForm $MyInvocation.MyCommand.Parameters ([ref]$resolvedParameters) $parameterMetadata
 } else {
     Write-Host "Running in non-GUI mode..."
-    foreach ($param in $parameters.Keys) {
-        if (-not (GetParamMetadataValue -param $param -metadata "Tab")) {
+    foreach ($param in $MyInvocation.MyCommand.Parameters.Keys) {
+        if (GetParamMetadataValue -param $param -metadata "ScriptArgument") {
             continue
         }
         # Fallback to user input if no value is set
         $defaultValue = (Get-Variable -Name $param -EA SilentlyContinue).Value
         if (-not $resolvedParameters[$param] -or ($resolvedParameters[$param] -eq $defaultValue -and (GetParamMetadataValue -param $param -metadata "ForceInput"))) {
-            $resolvedParameters[$param] = Read-InputWithDefault -prompt "Enter value for $param" -defaultValue $defaultValue
+            $resolvedParameters[$param] = Read-InputWithDefault -prompt "Enter value for $param" -defaultValue $defaultValue -paramDef $MyInvocation.MyCommand.Parameters[$param] -parameterMetadata $parameterMetadata[$param]
         }
     }
 }
