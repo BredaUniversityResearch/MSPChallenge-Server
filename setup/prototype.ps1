@@ -168,12 +168,13 @@ $parameterMetadata = @{
         EnvVar = "URL_WS_SERVER_PORT"
         Tab = "Advanced settings"
         Presets = @{
+            Proxy = 45001
             Local = 45001
             LAN = 45001            
         }
         ReadOnly = @{
             Direct = $true
-            Proxy = $true
+            Proxy = $false
             LAN = $false
             Local = $false
         }          
@@ -195,6 +196,7 @@ $parameterMetadata = @{
     UrlWsServerUri = @{
         EnvVar = "URL_WS_SERVER_URI"
         Tab = "Advanced settings"
+        EmptyValuesAllowed = $true
         ReadOnly = @{
             Direct = $true
             Proxy = $true
@@ -206,12 +208,13 @@ $parameterMetadata = @{
         EnvVar = "WEB_SERVER_PORT"
         Tab = "Advanced settings"
         Presets = @{
+            Proxy = 80
             Local = 80
             LAN = 80
         }
         ReadOnly = @{
             Direct = $true
-            Proxy = $true
+            Proxy = $false
             LAN = $false
             Local = $false
         }        
