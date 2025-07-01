@@ -896,6 +896,12 @@ EwEUtils
 <member name="F:EwEUtils.Core.eVarNameFlags.DiscardFate">
  <summary>To document</summary>
 </member>
+<member name="F:EwEUtils.Core.eVarNameFlags.Energy">
+ <summary>Group energy content scalar</summary>
+</member>
+<member name="F:EwEUtils.Core.eVarNameFlags.GroupUsedInIndicators">
+ <summary>Is a group used in the calculation of inidicators</summary>
+</member>
 <member name="F:EwEUtils.Core.eVarNameFlags.EcopathStatsTotalConsumption">
  <summary>Sum of all consumption</summary>
 </member>
@@ -4091,6 +4097,9 @@ EwEUtils
 <member name="F:EwEUtils.Core.eDatasourceAccessType.Success">
  <summary>Database operation successful</summary>
 </member>
+<member name="F:EwEUtils.Core.eDatasourceAccessType.Failed_AlreadyInUse">
+ <summary>Database is already open elsewhere</summary>
+</member>
 <member name="F:EwEUtils.Core.eDatasourceAccessType.Failed_CannotSave">
  <summary>Database could not be saved in the indicated location</summary>
 </member>
@@ -4486,6 +4495,13 @@ EwEUtils
 </member>
 <member name="F:EwEUtils.Core.eExploitationTypes.Recovering">
  <summary>Catches are again increasing after having been depleted</summary>
+</member>
+<member name="T:EwEUtils.Core.eFeedingGuild">
+ -----------------------------------------------------------------------
+ <summary>
+ Enumerated type stating the feeding guild
+</summary>
+ -----------------------------------------------------------------------
 </member>
 <member name="T:EwEUtils.Core.eAutoUpdateTypes">
  -----------------------------------------------------------------------
@@ -5345,16 +5361,6 @@ types.</remarks>
  </summary>
  -------------------------------------------------------------------
 </member>
-<member name="M:EwEUtils.Database.cEwEDatabase.ReleaseCachedWriters">
- -------------------------------------------------------------------
- <summary>
- Helper method; release the cache of database writers.
- </summary>
- <seealso cref="M:EwEUtils.Database.cEwEDatabase.BeginTransaction"/>
- <seealso cref="M:EwEUtils.Database.cEwEDatabase.RollbackTransaction"/>
- <seealso cref="M:EwEUtils.Database.cEwEDatabase.CommitTransaction(System.Boolean)"/>
- -------------------------------------------------------------------
-</member>
 <member name="M:EwEUtils.Database.cEwEDatabase.CreateDBCommand(System.String)">
  -------------------------------------------------------------------
  <summary>
@@ -5494,7 +5500,7 @@ types.</remarks>
  <param name="reader">The <see cref="T:System.Data.IDataReader">IDataReader</see> to read from.</param>
  <param name="strField">The name of the DB field (column) to read.</param>
  <param name="objValueDefault">A default value to return if the field could not be read.</param>
- <param name="objValueIgnore">Value to interpret as 'no value. When encountered, the default value will be returned.</param>
+ <param name="objValueIgnore">Value to interpret as 'no value'. When encountered, the default value will be returned.</param>
  <returns>The value of the requested column, or the provided default if an error occurred.</returns>
  -----------------------------------------------------------------------
 </member>
@@ -8660,24 +8666,6 @@ types.</remarks>
  <returns></returns>
  -------------------------------------------------------------------
 </member>
-<member name="M:EwEUtils.Utilities.cDateUtils.Easter(System.Int32)">
- -------------------------------------------------------------------
- <summary>
- Calculate the date of Easter for a given year in Gregorian calendars.
- </summary>
- <param name="y">The Gregorian year to calculate easter for [1583, 4099]</param>
- <returns>The date of Easter Sunday.</returns>
- <remarks>
- This algorithm is adapted from http://www.gmarts.org/index.php?go=415, 
- whcih in turn is adapted from a faq document by Claus Tondering
- URL: http://www.pip.dknet.dk/~pip10160/calendar.faq2.txt
- E-mail: c-t@pip.dknet.dk.
- The FAQ algorithm is based in part on the algorithm of Oudin (1940)
- as quoted in "Explanatory Supplement to the Astronomical Almanac",
- P. Kenneth Seidelmann, editor.
- </remarks>
- -------------------------------------------------------------------
-</member>
 <member name="M:EwEUtils.Utilities.cDateUtils.MonthDifference(System.DateTime,System.DateTime)">
  -------------------------------------------------------------------
  <summary>
@@ -8719,6 +8707,47 @@ types.</remarks>
  <param name="d1"></param>
  <param name="d2"></param>
  <returns></returns>
+ -------------------------------------------------------------------
+</member>
+<member name="T:EwEUtils.Utilities.cDateUtils.eNextEvent">
+ <summary>
+ Enum with impossible to miss oncoming events. And of course this should 
+ become a Web API call so we can tickle the system remotely whenever we 
+ feel like. Yummy.
+ </summary>
+</member>
+<member name="M:EwEUtils.Utilities.cDateUtils.Easter(System.Int32)">
+ -------------------------------------------------------------------
+ <summary>
+ Calculate the date of Easter for a given year in Gregorian calendars.
+ </summary>
+ <param name="y">The Gregorian year to calculate easter for [1583, 4099]</param>
+ <returns>The date of Easter Sunday.</returns>
+ <remarks>
+ This algorithm is adapted from http://www.gmarts.org/index.php?go=415, 
+ whcih in turn is adapted from a faq document by Claus Tondering
+ URL: http://www.pip.dknet.dk/~pip10160/calendar.faq2.txt
+ E-mail: c-t@pip.dknet.dk.
+ The FAQ algorithm is based in part on the algorithm of Oudin (1940)
+ as quoted in "Explanatory Supplement to the Astronomical Almanac",
+ P. Kenneth Seidelmann, editor.
+ </remarks>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEUtils.Utilities.cDateUtils.Fools">
+ -------------------------------------------------------------------
+ <summary>
+ You want to know this, do you?
+ </summary>
+ <returns>April fools' day, or the local equivalent.</returns>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEUtils.Utilities.cDateUtils.BlackFriday">
+ -------------------------------------------------------------------
+ <summary>
+ Another highly valuable date to obtain.
+ </summary>
+ <returns>Do we really need this? Of course!</returns>
  -------------------------------------------------------------------
 </member>
 <member name="T:EwEUtils.Utilities.cDrawingUtils">

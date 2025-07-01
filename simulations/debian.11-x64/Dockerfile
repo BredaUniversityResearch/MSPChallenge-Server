@@ -1,6 +1,3 @@
-# build a local image using the following command:
-#   docker build -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:5.2.0-alpha -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:latest -f Dockerfile .
-
 # Use a minimal Debian-based image for the runtime
 FROM debian:11-slim
 

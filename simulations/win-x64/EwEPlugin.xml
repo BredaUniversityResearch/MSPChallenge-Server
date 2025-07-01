@@ -452,6 +452,8 @@ EwEPlugin
  <param name="disabledPlugins">Array with file names of plug-ins that should 
  NOT be enabled. These assemblies will still have to be known by the manager 
  in case the user wants to enable the assemblies  in the future.</param>
+ <returns>-1 if plug-ins were already loaded, or an actual load count if a true
+ load attempt was made.</returns>
  <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins(System.String,System.Boolean)"/>
  <seealso cref="M:EwEPlugin.cPluginManager.LoadPlugins"/>
  -----------------------------------------------------------------------
