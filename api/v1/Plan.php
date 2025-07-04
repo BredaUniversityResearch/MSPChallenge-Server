@@ -9,6 +9,7 @@ use Drift\DBAL\Result;
 use Exception;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
+use function App\chain;
 use function App\parallel;
 use function App\resolveOnFutureTick;
 use function App\tpf;
@@ -1003,7 +1004,7 @@ class Plan extends Base
                     ]
                 );
             });
-            return parallel($toPromiseFunctions);
+            return chain($toPromiseFunctions);
         });
     }
 
