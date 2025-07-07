@@ -10,6 +10,7 @@
       "EwEPlugin/1.0.0": {
         "dependencies": {
           "EwEUtils": "1.0.0",
+          "EwEUtils.Reference": "6.7.0.19431",
           "runtimepack.Microsoft.NETCore.App.Runtime.linux-x64": "6.0.36"
         },
         "runtime": {
@@ -1433,6 +1434,13 @@
         },
         "runtime": {
           "EwEUtils.dll": {
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "EwEUtils.Reference/6.7.0.19431": {
+        "runtime": {
+          "EwEUtils.dll": {
             "assemblyVersion": "6.7.0.19431",
             "fileVersion": "6.7.0.19431"
           }
@@ -1971,6 +1979,11 @@
     },
     "EwEUtils/1.0.0": {
       "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "EwEUtils.Reference/6.7.0.19431": {
+      "type": "reference",
       "serviceable": false,
       "sha512": ""
     }

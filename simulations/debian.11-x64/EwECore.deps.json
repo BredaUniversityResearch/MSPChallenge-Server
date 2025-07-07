@@ -18,6 +18,8 @@
           "System.Text.Json": "9.0.1",
           "EPPlus": "4.1.0.0",
           "EwELicense": "6.7.0.18060",
+          "EwEPlugin.Reference": "6.7.0.19431",
+          "EwEUtils.Reference": "6.7.0.19431",
           "Interop.JRO": "2.6.0.0",
           "Microsoft.Office.interop.access.dao": "12.0.0.0",
           "ProjNet": "1.2.3432.30659",
@@ -1489,8 +1491,7 @@
         },
         "runtime": {
           "EwEPlugin.dll": {
-            "assemblyVersion": "6.7.0.19431",
-            "fileVersion": "6.7.0.19431"
+            "fileVersion": "0.0.0.0"
           }
         }
       },
@@ -1500,8 +1501,7 @@
         },
         "runtime": {
           "EwEUtils.dll": {
-            "assemblyVersion": "6.7.0.19431",
-            "fileVersion": "6.7.0.19431"
+            "fileVersion": "0.0.0.0"
           }
         }
       },
@@ -1518,6 +1518,22 @@
           "EwELicense.dll": {
             "assemblyVersion": "6.7.0.18060",
             "fileVersion": "6.7.0.18060"
+          }
+        }
+      },
+      "EwEPlugin.Reference/6.7.0.19431": {
+        "runtime": {
+          "EwEPlugin.dll": {
+            "assemblyVersion": "6.7.0.19431",
+            "fileVersion": "6.7.0.19431"
+          }
+        }
+      },
+      "EwEUtils.Reference/6.7.0.19431": {
+        "runtime": {
+          "EwEUtils.dll": {
+            "assemblyVersion": "6.7.0.19431",
+            "fileVersion": "6.7.0.19431"
           }
         }
       },
@@ -2135,6 +2151,16 @@
       "sha512": ""
     },
     "EwELicense/6.7.0.18060": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "EwEPlugin.Reference/6.7.0.19431": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "EwEUtils.Reference/6.7.0.19431": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""

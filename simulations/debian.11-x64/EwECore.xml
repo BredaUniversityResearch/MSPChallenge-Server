@@ -9032,6 +9032,14 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
   </returns>
  -----------------------------------------------------------------------
 </member>
+<member name="P:EwECore.cCore.EcospacePaused">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set Ecospace to pause
+ </summary>
+ <returns>True if Ecosapce is set to pause.</returns>
+ -----------------------------------------------------------------------
+</member>
 <member name="M:EwECore.cCore.CheckHabitats">
  -----------------------------------------------------------------------
  <summary>

@@ -10,8 +10,9 @@
       "EwEMSPLink/1.0.0": {
         "dependencies": {
           "EwECore": "1.0.0",
-          "EwEPlugin": "1.0.0",
-          "EwEUtils": "1.0.0",
+          "EwECore.Reference": "6.7.0.19431",
+          "EwEPlugin.Reference": "6.7.0.19431",
+          "EwEUtils.Reference": "6.7.0.19431",
           "runtimepack.Microsoft.NETCore.App.Runtime.linux-x64": "6.0.36"
         },
         "runtime": {
@@ -1485,8 +1486,7 @@
         },
         "runtime": {
           "EwECore.dll": {
-            "assemblyVersion": "6.7.0.19431",
-            "fileVersion": "6.7.0.19431"
+            "fileVersion": "0.0.0.0"
           }
         }
       },
@@ -1496,8 +1496,7 @@
         },
         "runtime": {
           "EwEPlugin.dll": {
-            "assemblyVersion": "6.7.0.19431",
-            "fileVersion": "6.7.0.19431"
+            "fileVersion": "0.0.0.0"
           }
         }
       },
@@ -1505,6 +1504,29 @@
         "dependencies": {
           "Microsoft.Windows.Compatibility": "9.0.0"
         },
+        "runtime": {
+          "EwEUtils.dll": {
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "EwECore.Reference/6.7.0.19431": {
+        "runtime": {
+          "EwECore.dll": {
+            "assemblyVersion": "6.7.0.19431",
+            "fileVersion": "6.7.0.19431"
+          }
+        }
+      },
+      "EwEPlugin.Reference/6.7.0.19431": {
+        "runtime": {
+          "EwEPlugin.dll": {
+            "assemblyVersion": "6.7.0.19431",
+            "fileVersion": "6.7.0.19431"
+          }
+        }
+      },
+      "EwEUtils.Reference/6.7.0.19431": {
         "runtime": {
           "EwEUtils.dll": {
             "assemblyVersion": "6.7.0.19431",
@@ -2122,6 +2144,21 @@
     },
     "EwEUtils/1.0.0": {
       "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "EwECore.Reference/6.7.0.19431": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "EwEPlugin.Reference/6.7.0.19431": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "EwEUtils.Reference/6.7.0.19431": {
+      "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
