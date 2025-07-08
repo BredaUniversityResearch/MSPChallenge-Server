@@ -756,6 +756,7 @@
           }
         }
       },
+      "Microsoft.VisualBasic/10.3.0": {},
       "Microsoft.Win32.Registry/5.0.0": {
         "dependencies": {
           "System.Security.AccessControl": "6.0.0",
@@ -1478,6 +1479,7 @@
         "dependencies": {
           "EwEPlugin": "1.0.0",
           "EwEUtils": "1.0.0",
+          "Microsoft.VisualBasic": "10.3.0",
           "Microsoft.Windows.Compatibility": "9.0.0",
           "Newtonsoft.Json": "13.0.3",
           "System.Data.DataSetExtensions": "4.5.0",
@@ -1534,14 +1536,6 @@
           }
         }
       },
-      "EwELicense/6.7.0.18060": {
-        "runtime": {
-          "EwELicense.dll": {
-            "assemblyVersion": "6.7.0.18060",
-            "fileVersion": "6.7.0.18060"
-          }
-        }
-      },
       "Microsoft.Office.Interop.Access.Dao/12.0.0.0": {
         "runtime": {
           "Microsoft.Office.Interop.Access.Dao.dll": {
@@ -1555,14 +1549,6 @@
           "Interop.JRO.dll": {
             "assemblyVersion": "2.6.0.0",
             "fileVersion": "2.6.0.0"
-          }
-        }
-      },
-      "TreeksLicensingLibrary2/2.1.7916.36068": {
-        "runtime": {
-          "TreeksLicensingLibrary2.dll": {
-            "assemblyVersion": "2.1.7916.36068",
-            "fileVersion": "2.1.0.0"
           }
         }
       }
@@ -1599,6 +1585,13 @@
       "sha512": "sha512-pp9tbGqIhdEXL6Q1yJl+zevAJSq4BsxqhS1GXzBvEsEz9DDNu9GLNzgUy2xyFc4YjB4m4Ff2YEWTnvQvVYdkvQ==",
       "path": "microsoft.extensions.objectpool/5.0.10",
       "hashPath": "microsoft.extensions.objectpool.5.0.10.nupkg.sha512"
+    },
+    "Microsoft.VisualBasic/10.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-AvMDjmJHjz9bdlvxiSdEHHcWP+sZtp7zwule5ab6DaUbgoBnwCsd7nymj69vSz18ypXuEv3SI7ZUNwbIKrvtMA==",
+      "path": "microsoft.visualbasic/10.3.0",
+      "hashPath": "microsoft.visualbasic.10.3.0.nupkg.sha512"
     },
     "Microsoft.Win32.Registry/5.0.0": {
       "type": "package",
@@ -2162,22 +2155,12 @@
       "serviceable": false,
       "sha512": ""
     },
-    "EwELicense/6.7.0.18060": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
     "Microsoft.Office.Interop.Access.Dao/12.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
     "Interop.JRO/2.6.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "TreeksLicensingLibrary2/2.1.7916.36068": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
