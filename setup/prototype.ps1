@@ -31,8 +31,10 @@ param(
     #[int]$TestSwitch = 0,
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
     [int]$EnableGui = 1,
-    [string]$DatabasePassword = -join ((48..57) + (65..90) + (97..122) + (33..47) | Get-Random -Count 20 | % {[char]$_}),
-    [string]$CaddyMercureJwtSecret = ([guid]::NewGuid().ToString("N"))
+    [string]$DatabasePassword = -join ((48..57) + (65..90) + (97..122) + (33..47) | Where-Object { $_ -ne 36 } | Get-Random -Count 20 | % {[char]$_}),
+    [string]$CaddyMercureJwtSecret = ([guid]::NewGuid().ToString("N")),
+    [string]$BranchName = "msp-ar",
+    [string]$AppSecret = -join ((0..255) | Get-Random -Count 16 | ForEach-Object { "{0:x2}" -f $_ })
 )
 
 $presetsConfiguration = @{
@@ -120,6 +122,9 @@ function Get-FirstLanIPv4Address {
 
 # Define metadata for parameters
 $parameterMetadata = @{
+    BranchName = @{
+        ScriptArgument = $true
+    }
     ServerName = @{
         EnvVar = "SERVER_NAME"
         Tab = "Basic setup"
@@ -136,7 +141,7 @@ $parameterMetadata = @{
             Local = $true
         }
         Link = @{
-            Direct = @("UrlWebServerHost", "UrlWsServerHost")            
+            Direct = @("UrlWebServerHost", "UrlWsServerHost")
         }
     }
     UrlWebServerHost = @{
@@ -151,7 +156,7 @@ $parameterMetadata = @{
             Proxy = @("UrlWsServerHost")
             LAM = @("UrlWsServerHost")
             Local = @("UrlWsServerHost")
-        }        
+        }
     }
     UrlWsServerHost = @{
         EnvVar = "URL_WS_SERVER_HOST"
@@ -165,7 +170,7 @@ $parameterMetadata = @{
             Proxy = @("UrlWebServerHost")
             LAN = @("UrlWebServerHost")
             Local = @("UrlWebServerHost")
-        }        
+        }
     }
     UrlWebServerScheme = @{
         EnvVar = "URL_WEB_SERVER_SCHEME"
@@ -179,7 +184,7 @@ $parameterMetadata = @{
             Proxy = $true
             LAN = $true
             Local = $true
-        }        
+        }
     }
     UrlWsServerPort = @{
         EnvVar = "URL_WS_SERVER_PORT"
@@ -187,28 +192,28 @@ $parameterMetadata = @{
         Presets = @{
             Proxy = 45001
             Local = 45001
-            LAN = 45001            
+            LAN = 45001
         }
         ReadOnly = @{
             Direct = $true
             Proxy = $false
             LAN = $false
             Local = $false
-        }          
+        }
     }
     UrlWsServerScheme = @{
         EnvVar = "URL_WS_SERVER_SCHEME"
         Tab = "Advanced settings"
         Presets = @{
             Local = "ws"
-            LAN = "ws"           
-        }        
+            LAN = "ws"
+        }
         ReadOnly = @{
             Direct = $true
             Proxy = $true
             LAN = $true
             Local = $true
-        }  
+        }
     }
     UrlWsServerUri = @{
         EnvVar = "URL_WS_SERVER_URI"
@@ -219,7 +224,7 @@ $parameterMetadata = @{
             Proxy = $true
             LAN = $false
             Local = $false
-        }        
+        }
     }
     ServerPort = @{
         EnvVar = "WEB_SERVER_PORT"
@@ -234,7 +239,7 @@ $parameterMetadata = @{
             Proxy = $false
             LAN = $false
             Local = $false
-        }        
+        }
     }
 #   TestSwitch = @{
 #       ActAsBoolean = $true
@@ -248,16 +253,23 @@ $parameterMetadata = @{
         EnvVar = "DATABASE_PASSWORD"
         Tab = "Basic setup"
         Validate = @(
-            @{ "Password must be at least 8 characters." = { param($v) $v.Length -ge 8 } }
+            @{ "The database password must be at least 8 characters." = { param($v) $v.Length -ge 8 } }
         )
     }
     CaddyMercureJwtSecret = @{
         EnvVar = "CADDY_MERCURE_JWT_SECRET"
         Tab = "Basic setup"
         Validate = @(
-            @{ "JWT Secret must be 32 characters." = { param($v) $v.Length -eq 32 } }
+            @{ "CADDY_MERCURE_JWT_SECRET must be 32 characters." = { param($v) $v.Length -eq 32 } }
         )
     }
+    CaddyMercureJwtSecret = @{
+        EnvVar = "APP_SECRET"
+        Tab = "Basic setup"
+        Validate = @(
+            @{ "APP_SECRET must be 32 characters." = { param($v) $v.Length -eq 32 } }
+        )
+    }    
 }
 
 # Function to update visible controls based on the selected environment
@@ -270,7 +282,7 @@ function Update-ControlsByPreset {
     $selectedPreset = $presetRadioButtons.Keys | Where-Object { $presetRadioButtons[$_].Checked }
     foreach ($param in $controls.Keys) {
         $presetValues = $parameterMetadata[$param]["Presets"]
-        $container = $controls[$param]        
+        $container = $controls[$param]
         $presetValue = (Get-Variable -Name $param -ErrorAction SilentlyContinue).Value
         $readOnly = (GetParamMetadataValue -param $param -metadata "ReadOnly" -parameterMetadata $parameterMetadata)
         $isReadOnly = $readOnly -and $readOnly.ContainsKey($selectedPreset) -and $readOnly[$selectedPreset]
@@ -282,13 +294,13 @@ function Update-ControlsByPreset {
         if ($container.Controls[1] -is [System.Windows.Forms.TextBox]) {
             $container.Controls[1].Text = $presetValue
             $container.Controls[1].ReadOnly = $isReadOnly
-        } elseif ($container.Controls[1] -is [System.Windows.Forms.NumericUpDown]) {            
+        } elseif ($container.Controls[1] -is [System.Windows.Forms.NumericUpDown]) {
             $container.Controls[1].Value = [int]$presetValue
             $container.Controls[1].Enabled = -not $isReadOnly
         } elseif ($container.Controls[1] -is [System.Windows.Forms.CheckBox]) {
             $container.Controls[1].Checked = [bool]$presetValue
             $container.Controls[1].Enabled = -not $isReadOnly
-        }        
+        }
     }
 }
 
@@ -460,12 +472,12 @@ function New-ParameterControls {
             }
             if (-not $labelText) {
                 $labelText = $param
-            }            
+            }
             $label.AutoSize = $true
             $label.Anchor = [System.Windows.Forms.AnchorStyles]::Left
             $label.Text = $labelText
             $linePanel.Controls.Add($label)
-            
+
             $controlWidth = 400
             if (($resolvedParameters[$param] -is [bool]) -or (GetParamMetadataValue -param $param -metadata "ActAsBoolean" -parameterMetadata $parameterMetadata)) {
                 $checkbox = New-Object System.Windows.Forms.CheckBox
@@ -492,7 +504,7 @@ function New-ParameterControls {
                             if ($controls.ContainsKey($linkedParam)) {
                                 $controls[$linkedParam].Controls[1].Text = $src.Text
                             }
-                        }                        
+                        }
                     }
                 }.GetNewClosure();
                 $textbox.Add_Leave($handler)
@@ -501,7 +513,7 @@ function New-ParameterControls {
                         $handler.Invoke($this, $null)
                     }
                 }.GetNewClosure())
-                $linePanel.Controls.Add($textbox)                
+                $linePanel.Controls.Add($textbox)
             }
         }
     }
@@ -536,7 +548,7 @@ function Search-ChildControl {
 }
 
 function New-PresetRadioButtons {
-    param (        
+    param (
         [System.Windows.Forms.FlowLayoutPanel]$parent,
         [System.Windows.Forms.RichTextBox]$textBox,
         [hashtable]$parameters,
@@ -552,7 +564,7 @@ function New-PresetRadioButtons {
         $radioButton.Tag = $p
         $parent.Controls.Add($radioButton)
         $presetRadioButtons[$p] = $radioButton
- 
+
         $radioButton.Add_CheckedChanged({
             if ($this.Checked) {
                 $presetsConfiguration = (Get-Variable -Name "presetsConfiguration" -ErrorAction SilentlyContinue).Value
@@ -651,7 +663,7 @@ function Show-GuiParameterForm {
     $form = New-Object System.Windows.Forms.Form
     $form.Text = "MSP Challenge Server setup"
     $form.Width = 1024
-    $form.Height = 768    
+    $form.Height = 768
 
     $mainPanel = New-Object System.Windows.Forms.FlowLayoutPanel
     $mainPAnel.AutoSizeMode = [System.Windows.Forms.AutoSizeMode]::GrowAndShrink
@@ -708,7 +720,7 @@ function Show-GuiParameterForm {
     $mainPanel.Add_Resize($resizeHandler)
     $form.Add_Shown({
         $resizeHandler.Invoke()
-    })        
+    })
     $mainPanel.Controls.Add($tabControl)
     $categories = Get-ParameterCategories $parameters $parameterMetadata
     $controls = New-ParameterControls $categories $parameters $resolvedParameters $parameterMetadata $tabControl
@@ -745,7 +757,7 @@ function Invoke-NonGuiMode {
     $defaultValue = (Get-Variable -Name $presetParam -EA SilentlyContinue).Value
     $selectedPreset = $resolvedParameters[$presetParam] = Read-InputWithDefault -prompt "Enter value for $presetParam" -defaultValue $defaultValue -paramDef $parameters[$presetParam]
     Set-Variable -Name "Preset" -Value $selectedPreset -Scope Global -Force
-    Initialize-Parameters $parameters ([ref]$resolvedParameters) $parameterMetadata    
+    Initialize-Parameters $parameters ([ref]$resolvedParameters) $parameterMetadata
     foreach ($param in $parameters.Keys) {
         # param is already set from command line, skip it
         if ($boundParameters.ContainsKey($param)) {
@@ -784,6 +796,22 @@ function Invoke-NonGuiMode {
     }
 }
 
+# Check if .env exists and copy it to .env.local
+if (Test-Path ".env") {
+    Copy-Item -Path ".env" -Destination ".env.local" -Force
+}
+
+# Load environment variables from .env.local if it exists
+if (Test-Path ".env.local") {
+    Get-Content ".env.local" | ForEach-Object {
+        if ($_ -match "^(.*?)=(.*)$") {
+            if ($matches.Count -ge 3) {
+                [Environment]::SetEnvironmentVariable($matches[1], $matches[2])
+            }
+        }
+    }
+}
+
 # Make a copy of PSBoundParameters to avoid modifying the original
 $resolvedParameters = @{}
 
@@ -799,7 +827,42 @@ if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
     Invoke-NonGuiMode $MyInvocation.MyCommand.Parameters $parameterMetadata $resolvedParameters $PSBoundParameters
 }
 
-# Output resolved parameters
-Write-Output "Resolved Parameters:"
-$resolvedParameters
+# Remove from $resolvedParameters those params that do not have an EnvVar metadata
+# Build all lines first, then write at once with Set-Content (avoids BOM issues in PowerShell Core and always writes the file)
+$envLines = @()
+foreach ($param in $resolvedParameters.Keys.Clone()) {
+    $envVar = GetParamMetadataValue -param $param -metadata "EnvVar" -parameterMetadata $parameterMetadata
+    if (-not $envVar) {
+        $resolvedParameters.Remove($param)
+        continue
+    }
+    $envLines += "$envVar=$($resolvedParameters[$param])"
+}
+Set-Content -Path ".env.local" -Value $envLines -Encoding UTF8
+
+Write-Host "Written .env.local:" -ForegroundColor Green
+Get-Content ".env.local" | ForEach-Object { Write-Host $_ -ForegroundColor Cyan }
+Write-Host "Do you want to continue with the installation? (Y/N)" -ForegroundColor Yellow
+$continue = Read-Host
+if ($continue -ne "Y" -and $continue -ne "y") {
+    Write-Host "Installation aborted." -ForegroundColor Red
+    exit 1
+}
+# Check if Docker is installed
+if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+    Write-Host "Docker is not installed. Please install Docker and try again." -ForegroundColor Red
+    exit 1
+}
+Write-Host "Downloading docker-compose files for branch '$BranchName'..." -ForegroundColor Cyan
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$BranchName/docker-compose.yml" -OutFile "docker-compose.yml"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$BranchName/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
+
+# Check if docker-compose.yml and docker-compose.prod.yml exist
+if (-not (Test-Path "docker-compose.yml") -or -not (Test-Path "docker-compose.prod.yml")) {
+    Write-Host "Error: docker-compose files not found. Please check the branch name." -ForegroundColor Red
+    exit 1
+}
+Write-Host "Starting Docker containers..." -ForegroundColor Cyan
+
+docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.prod.yml" up -d
 exit 0
