@@ -30,7 +30,7 @@ param(
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
     #[int]$TestSwitch = 0,
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
-    [int]$EnableGui = 1,
+    [int]$EnableGui = 0,
     [string]$DatabasePassword = ([guid]::NewGuid().ToString("N")),
     [string]$CaddyMercureJwtSecret = ([guid]::NewGuid().ToString("N")),
     [string]$BranchName = "msp-ar",
@@ -757,7 +757,7 @@ function Invoke-NonGuiMode {
     $defaultValue = (Get-Variable -Name $presetParam -EA SilentlyContinue).Value
     $selectedPreset = $resolvedParameters[$presetParam] = Read-InputWithDefault -prompt "Enter value for $presetParam" -defaultValue $defaultValue -paramDef $parameters[$presetParam]
     Set-Variable -Name "Preset" -Value $selectedPreset -Scope Global -Force
-    Initialize-Parameters $parameters ([ref]$resolvedParameters) $parameterMetadata
+    Initialize-Parameters $parameters $resolvedParameters $parameterMetadata
     foreach ($param in $parameters.Keys) {
         # param is already set from command line, skip it
         if ($boundParameters.ContainsKey($param)) {
@@ -793,22 +793,6 @@ function Invoke-NonGuiMode {
         }
         # Prompt for input
         $resolvedParameters[$param] = Read-InputWithDefault -prompt "Enter value for $param" -defaultValue $resolvedParameters[$param] -paramDef $parameters[$param] -parameterMetadata $parameterMetadata[$param]
-    }
-}
-
-# Check if .env exists and copy it to .env.local
-if (Test-Path ".env") {
-    Copy-Item -Path ".env" -Destination ".env.local" -Force
-}
-
-# Load environment variables from .env.local if it exists
-if (Test-Path ".env.local") {
-    Get-Content ".env.local" | ForEach-Object {
-        if ($_ -match "^(.*?)=(.*)$") {
-            if ($matches.Count -ge 3) {
-                [Environment]::SetEnvironmentVariable($matches[1], $matches[2])
-            }
-        }
     }
 }
 
