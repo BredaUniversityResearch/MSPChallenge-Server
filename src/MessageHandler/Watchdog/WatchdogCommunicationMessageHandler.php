@@ -160,8 +160,7 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             ]),
             'month' => $message->getMonth()
         ];
-        if ($message->getGameState() == GameStateValue::SETUP &&
-            // only add game_info if not the internal watchdog. This is because the internal watchdog does not handle it
+        if (// only add game_info if not the internal watchdog. This is because the internal watchdog does not handle it
             $watchdog->getServerId() != Watchdog::getInternalServerId()
         ) {
             $postValues['game_session_info'] = $this->getSessionInfo($gameList);
