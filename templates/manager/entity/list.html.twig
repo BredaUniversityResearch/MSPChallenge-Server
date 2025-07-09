@@ -1,0 +1,51 @@
+<turbo-frame id="modalDefaultBody">
+    {% if entityList is not empty %}
+    <div class="modal-body" data-modal-entity-target="modalEntityList">
+        <table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    {% for propertyName, header in headers|filter(h => not h.action) %}
+                    <th>{{ header.label ?: propertyName }}</th>
+                    {% endfor %}
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entity in entityList %}
+                <tr>
+                    {% for propertyName, header in headers|filter(h => not h.action) %}
+                    <td>{{ attribute(entity, propertyName) }}</td>
+                    {% endfor %}
+                    <td>
+                    {% if attribute(entity, idPropertyName) not in readonlyEntityIDs %}
+                    <button type="button" class="btn btn-primary btn-sm"
+                        data-action="modal-entity#editEntityInModal"
+                        data-modal-entity-entity-name-param="{{ entityName }}"
+                        data-modal-entity-entity-id-param="{{ attribute(entity, idPropertyName) }}">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                    {% endif %}
+                    {% for propertyName, header in headers|filter(h => h.action) %}
+                        {% if header.toggleable %}
+                        <button type="button" class="btn btn-primary btn-sm"
+                            data-action="modal-entity#toggleEntityProperty"
+                            data-modal-entity-entity-name-param="{{ entityName }}"
+                            data-modal-entity-property-name-param="{{ propertyName }}"
+                            data-modal-entity-entity-desc-param="{{ entity.plurals.value(1) }}"
+                            data-modal-entity-entity-id-param="{{ attribute(entity, idPropertyName) }}">
+                            {% if attribute(entity, propertyName) %}
+                                <i class="fa fa-eye"></i>
+                            {% else %}
+                                <i class="fa fa-eye-slash"></i>
+                            {% endif %}
+                        </button>
+                        {% endif %}
+                    {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</turbo-frame>

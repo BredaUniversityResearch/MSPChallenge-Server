@@ -3,8 +3,8 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Common\EntityEnums\EventLogSeverity;
-use App\Entity\EventLog;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\SessionAPI\EventLog;
 use DateTime;
 use Exception;
 use React\Promise\Deferred;

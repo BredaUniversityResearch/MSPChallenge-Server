@@ -2,25 +2,26 @@
 
 namespace App\Controller\ServerManager;
 
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 use App\Controller\BaseController;
 use App\Domain\Communicator\Auth2Communicator;
-use App\Entity\ServerManager\GameGeoServer;
+use App\Domain\Helper\Util;
+use App\Entity\EntityBase;
+use App\Entity\Mapping as AppMappings;
 use App\Entity\ServerManager\GameServer;
-use App\Entity\ServerManager\GameWatchdogServer;
 use App\Entity\ServerManager\Setting;
 use App\Entity\ServerManager\User;
 use App\Form\SettingEditFormType;
 use App\Form\SettingUsersFormType;
-use Doctrine\ORM\EntityManagerInterface;
+use ReflectionClass;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Throwable;
 
@@ -55,33 +56,58 @@ class SettingController extends BaseController
         ]);
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/list', name: 'manager_setting_list')]
-    public function settingList(EntityManagerInterface $entityManager): Response
+    public function settingList(): Response
     {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $setting = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
         $gameServer = $entityManager->getRepository(GameServer::class)->find(1);
-        $gameGeoServersAll = count($entityManager->getRepository(GameGeoServer::class)->findAll());
-        $gameGeoServersAvailable = count(
-            $entityManager->getRepository(GameGeoServer::class)->findBy(['available' => 1])
-        );
-        $gameWatchdogServersAll = count($entityManager->getRepository(GameWatchdogServer::class)->findAll());
-        $gameWatchdogServersAvailable = count(
-            $entityManager->getRepository(GameWatchdogServer::class)->findBy(['available' => 1])
-        );
+        $entities = [];
+        foreach (EntityController::getSupportedEntityClasses() as $entityClass) {
+            $reflectionClass = new ReflectionClass($entityClass);
+            /** @var EntityBase $entity */
+            $entity = (new $entityClass());
+            $entities[$reflectionClass->getShortName()]['plurals'] = $entity->getPlurals();
+            $entities[$reflectionClass->getShortName()]['total'] =
+                count($entityManager->getRepository($entityClass)->findAll());
+            $availabilityPropertyName = null;
+            foreach ($reflectionClass->getProperties() as $property) {
+                $attribute = Util::getPropertyAttribute($property, AppMappings\Property\TableColumn::class);
+                if (null === $attribute) {
+                    continue;
+                }
+                /** @var AppMappings\Property\TableColumn $attribute */
+                if ($attribute->availability) {
+                    $availabilityPropertyName = $property->getName();
+                    break;
+                }
+            }
+            if (!$availabilityPropertyName) {
+                continue;
+            }
+            $entities[$reflectionClass->getShortName()]['available'] =
+                count($entityManager->getRepository($entityClass)->findBy([$availabilityPropertyName => 1]));
+        }
         return $this->render(
             'manager/Setting/setting.html.twig',
             [
                 'setting' => $setting,
                 'gameServer' => $gameServer,
-                'gameGeoServers' => [$gameGeoServersAll, $gameGeoServersAvailable],
-                'gameWatchdogServers' => [$gameWatchdogServersAll, $gameWatchdogServersAvailable]
+                'entities' => $entities
             ]
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/{settingId}/form', name: 'manager_setting_form', requirements: ['settingId' => '\d+'])]
-    public function settingForm(EntityManagerInterface $entityManager, Request $request, int $settingId): Response
+    public function settingForm(Request $request, int $settingId): Response
     {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $setting = $entityManager->getRepository(Setting::class)->find($settingId);
         $form = $this->createForm(
             SettingEditFormType::class,
@@ -100,12 +126,15 @@ class SettingController extends BaseController
         );
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/users/list', name: 'manager_setting_users')]
     public function settingUsers(
-        EntityManagerInterface $entityManager,
         HttpClientInterface $client,
         Security $security
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $auth2Communicator = new Auth2Communicator($client);
         /** @var User $user */
         $user = $security->getUser();
@@ -136,13 +165,16 @@ class SettingController extends BaseController
         return new Response(null, 204);
     }
 
+    /**
+     * @throws \Exception
+     */
     #[Route('/users/form', name: 'manager_setting_users_form')]
     public function settingUsersForm(
         HttpClientInterface $client,
-        EntityManagerInterface $entityManager,
         Security $security,
         Request $request
     ): Response {
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $form = $this->createForm(
             SettingUsersFormType::class,
             null,

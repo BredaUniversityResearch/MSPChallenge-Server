@@ -2,6 +2,7 @@
 
 namespace App\Entity\ServerManager;
 
+use App\Entity\EntityBase;
 use App\Repository\ServerManager\UserRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -9,7 +10,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Table(name: 'users')]
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-class User implements UserInterface
+class User extends EntityBase implements UserInterface
 {
     #[ORM\Id]
     #[ORM\Column]

@@ -19,26 +19,20 @@
                     </button>
                 </td>
             </tr>
+            {% for entityName, entity in entities %}
             <tr>
-                <td>GeoServers</td>
-                <td>Currently {{ gameGeoServers[0] }} defined, of which {{ gameGeoServers[1] }} available for use.
+                <td>{{ entity.plurals.value(2) }}</td>
+                <td>Currently {{ entity.total }} defined{% if entity.available is defined %}, of which {{ entity.available }} available for use{% endif %}.
                 <td class="text-center" style="width: 125px;">
                     <button class="btn btn-secondary btn-sm"
-                        data-action="modal-gamegeoserver#openGameGeoServerModal">
+                        data-action="modal-entity#openEntityModal"
+                        data-modal-entity-entity-name-param="{{ entityName }}"
+                        data-modal-entity-entity-desc-param="{{ entity.plurals.value(1) }}">
                         <i class="fa fa-info-circle" title= "More details"></i>
                     </button>
                 </td>
             </tr>
-            <tr>
-                <td>Watchdog servers</td>
-                <td>Currently {{ gameWatchdogServers[0] }} defined, of which {{ gameWatchdogServers[1] }} available for use.
-                <td class="text-center" style="width: 125px;">
-                    <button class="btn btn-secondary btn-sm"
-                        data-action="modal-gamewatchdogserver#openGameWatchdogServerModal">
-                        <i class="fa fa-info-circle" title= "More details"></i>
-                    </button>
-                </td>
-            </tr>
+            {% endfor %}
             <tr>
                 <td>User access</td>
                 <td>Note that only this server's administrator(s) can change this.

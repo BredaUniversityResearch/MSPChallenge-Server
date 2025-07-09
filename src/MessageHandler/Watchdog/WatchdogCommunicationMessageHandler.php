@@ -2,22 +2,21 @@
 
 namespace App\MessageHandler\Watchdog;
 
-use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Simulation;
 use App\Domain\API\v1\User;
 use App\Domain\Common\EntityEnums\EventLogSeverity;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Domain\Services\ConnectionManager;
-use App\Entity\EventLog;
 use App\Entity\ServerManager\GameList;
-use App\Entity\Simulation as SimulationEntity;
-use App\Entity\Watchdog;
 use App\Message\Watchdog\Message\GameMonthChangedMessage;
 use App\Message\Watchdog\Message\GameStateChangedMessage;
 use App\Message\Watchdog\Message\WatchdogPingMessage;
 use App\Message\Watchdog\Token;
 use App\MessageHandler\GameList\SessionLogHandlerBase;
+use App\Entity\SessionAPI\EventLog;
+use App\Entity\SessionAPI\Simulation as SimulationEntity;
+use App\Entity\SessionAPI\Watchdog;
 use App\VersionsProvider;
 use DateTime;
 use Doctrine\ORM\AbstractQuery;
@@ -30,13 +29,11 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use function App\await;
 
 #[AsMessageHandler]
 class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase

@@ -1,51 +1,15 @@
 services:
-  node:
-    build:
-      context: .
-      target: node_base
-    user: "node"
-    working_dir: /home/node/app
-    environment:
-      NODE_ENV: ${APP_ENV:-dev}
-    volumes:
-      - ./:/home/node/app
-      - ./yarn.lock:/home/node/app/yarn.lock:rw
-      - ./package.json:/home/node/app/package.json:rw
-      - vendor_data:/home/node/app/vendor:ro
-      - node_modules_data:/home/node/app/node_modules:rw
-      - public_build_data:/home/node/app/public/build:rw
-    # wait for x sec before starting, see deploy.restart_policy.delay
-    command: bash -c "sleep 5 && yarn install && yarn encore ${APP_ENV:-dev}"
-    restart: on-failure
-    deploy:
-      restart_policy:
-        condition: on-failure
-        # we cannot use delay: x because it is only supported in swarm mode
-        #   see: https://github.com/docker/docs/issues/11777
-        # delay: 5s
-        max_attempts: 10
-    networks:
-      - php
-    depends_on:
-      - php
-    logging:
-        driver: "local"
-
   redis:
-    build:
-      context: .
-      target: redis_base
+    image: redis:7.2.4-alpine
     restart: always
     networks:
-      - redis
+      - app_network
     logging:
       driver: "local"
 
   database:
     # check https://hub.docker.com/_/mariadb for info.
-    build:
-      context: .
-      target: mariadb_base
+    image: mariadb:10.11.10
     restart: unless-stopped
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: yes
@@ -67,7 +31,7 @@ services:
       '--myisam-sort-buffer-size=67108864'
     ]
     networks:
-      - database
+      - app_network
     volumes:
       - ./docker/database/my2_80.sql:/root/my2_80.sql:ro
       - mariadb_data:/var/lib/mysql
@@ -84,15 +48,12 @@ services:
       - caddy_config:/config
       - ./var/docker/.bash_history:/root/.bash_history
       - vendor_data:/app/vendor:rw
-      - node_modules_data:/app/node_modules:ro
-      - public_build_data:/app/public/build:ro
-      - /app/var/cache
+      - node_modules_data:/app/node_modules:rw
+      - public_build_data:/app/public/build:rw
       - /app/var/log
+      - /var/run/docker.sock:/var/run/docker.sock # to communicate with the Docker daemon
     networks:
-      - database
-      - php
-      - redis
-      - simulations
+      - app_network
     environment:
       SERVER_NAME: ${SERVER_NAME:-localhost}, localhost:80
       DOCKER: 1
@@ -103,9 +64,8 @@ services:
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://php/.well-known/mercure}
       MERCURE_PUBLIC_URL: ${CADDY_MERCURE_PUBLIC_URL:-https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}/.well-known/mercure}
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
-      # The two next lines can be removed after initial installation
+      # For /app/set_symfony_version.sh
       SYMFONY_VERSION: ${SYMFONY_VERSION:-6.4}
-      STABILITY: ${STABILITY:-stable}
       # Exposes BLACKFIRE_CLIENT_* environment variables allowing the client to communicate with Blackfire's API:
       BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED:-0}
       BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID:-}
@@ -132,6 +92,7 @@ services:
       # other
       APP_ENV: ${APP_ENV:-dev}
       FRAMEWORK_CACHE_APP: ${FRAMEWORK_CACHE_APP:-cache.adapter.redis}
+      IMMERSIVE_TWINS_DOCKER_HUB_TAG: ${IMMERSIVE_TWINS_DOCKER_HUB_TAG:-latest}
     ports:
       # Websocket server
       - "${WS_SERVER_PORT:-45001}:${WS_SERVER_PORT:-45001}"
@@ -148,11 +109,6 @@ services:
       driver: "local"
 
   simulations:
-    build:
-      context: .
-      dockerfile: simulations/debian.11-x64/Dockerfile
-      args:
-        source_dir: simulations/debian.11-x64
     ports:
       - "${WATCHDOG_PORT:-45000}:${WATCHDOG_PORT:-45000}"
     restart: always
@@ -163,12 +119,10 @@ services:
     logging:
       driver: "local"
     networks:
-      - php
+      - app_network
 
   blackfire:
-    build:
-      context: .
-      target: blackfire_base
+    image: blackfire/blackfire:2
     ports:
       - "${BLACKFIRE_PORT:-}:8307"
     environment:
@@ -184,7 +138,7 @@ services:
         BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID:-}
         BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
     networks:
-      - php
+      - app_network
     logging:
       driver: "local"
 
@@ -207,7 +161,4 @@ volumes:
 ###< doctrine/doctrine-bundle ###
 
 networks:
-  database:
-  php:
-  redis:
-  simulations:
+  app_network:

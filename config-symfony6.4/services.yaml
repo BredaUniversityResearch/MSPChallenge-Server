@@ -11,8 +11,8 @@ parameters:
     app.default_host: 'localhost'
     app.default_port: '80'
     app.api_path_patterns:
-        - ^/api/(?!doc(\.json)?$) # Accepts routes under /api except /api/doc(.json)
-
+        - ^/api/(?!doc?(\.json)?$) # Accepts routes under /api except /api/doc(.json)
+    app.firewall_api_pattern: ^/\/*\d+/\/*api/\/*.*
     # URL to the MSP Challenge download page
     app.clients_url: 'https://community.mspchallenge.info/wiki/Download'
     # directory to store and from which to retrieve game session raster files
@@ -113,27 +113,27 @@ services:
 
     App\Entity\ServerManager\Listener\GameListListener:
         tags:
-            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameList' }
-            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameList' }
-            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameList' }
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameList', entity_manager: 'msp_server_manager' }
+            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameList', entity_manager: 'msp_server_manager' }
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameList', entity_manager: 'msp_server_manager' }
 
     App\Entity\ServerManager\Listener\GameSaveListener:
         tags:
-            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameSave' }
-            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameSave' }
-            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameSave' }
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameSave', entity_manager: 'msp_server_manager' }
+            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameSave', entity_manager: 'msp_server_manager' }
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameSave', entity_manager: 'msp_server_manager' }
 
     App\Entity\ServerManager\Listener\GameConfigVersionListener:
         tags:
-            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameConfigVersion' }
-            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameConfigVersion' }
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameConfigVersion', entity_manager: 'msp_server_manager' }
+            - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameConfigVersion', entity_manager: 'msp_server_manager' }
 
     App\Entity\ServerManager\Listener\GameGeoServerListener:
         arguments:
             $client: '@Symfony\Contracts\HttpClient\HttpClientInterface'
         tags:
-            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameGeoServer' }
-            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameGeoServer' }
+            - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameGeoServer', entity_manager: 'msp_server_manager' }
+            - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameGeoServer', entity_manager: 'msp_server_manager' }
 
     App\Entity\Listener\WatchdogListener:
     App\Entity\Listener\GameListener:
@@ -158,6 +158,9 @@ services:
     App\Domain\Communicator\WatchdogCommunicator:
     App\Security\MSPAuth2Authenticator:
     App\MessageHandler\Watchdog\WatchdogCommunicationMessageHandler:
+    App\MessageHandler\Docker\DockerCommunicationMessageHandler:
+        arguments:
+            $dockerLogger: '@monolog.logger.docker'
 
     App\Domain\Services\SimulationHelper:
         public: true
@@ -196,6 +199,16 @@ services:
     App\EventListener\FailedMessageListener:
         tags:
             - { name: 'kernel.event_listener' }
+
+    Predis\Client:
+        arguments:
+            $parameters: 'tcp://redis:6379'
+
+    App\Validator\ImmersiveSessionTypeJsonSchemaValidator:
+
+    App\Domain\Services\ImmersiveSessionService:
+        arguments:
+            $dockerLogger: '@monolog.logger.docker'
 
 when@dev:
     parameters:
