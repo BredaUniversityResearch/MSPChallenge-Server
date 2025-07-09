@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "6/11/2025",
-    "data_model_hash": "18C89593EC7AA6FCCA87B6DC0377072148E0EED802BF087BACA522DBC234C51E",
+    "date_modified": "7/1/2025",
+    "data_model_hash": "903C4298C3043FE6A88B6BD1DEFFBA09F5CAB4F5A6C3CBEE09A5D361767D2421",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -2528,9 +2528,9 @@
     },
     "CEL": {
       "grey_centerpoint_color": "#3D1C04FF",
-      "grey_centerpoint_sprite": "oilbarrel",
+      "grey_centerpoint_sprite": "Oilbarrel",
       "green_centerpoint_color": "#18840AFF",
-      "green_centerpoint_sprite": "lightning"
+      "green_centerpoint_sprite": "Lightning"
     },
     "SEL": {
       "shipping_lane_layers": [
@@ -10048,7 +10048,7 @@
           "name": "Ecological fishing Cy- Artisanal",
           "policy_filters": {
             "fleets": [
-              "12"
+              "8"
             ]
           }
         },
@@ -10056,7 +10056,7 @@
           "name": "Ecological fishing Cy- Industrial",
           "policy_filters": {
             "fleets": [
-              "13"
+              "9"
             ]
           }
         },
@@ -10064,7 +10064,7 @@
           "name": "Ecological fishing Cy- Recreational",
           "policy_filters": {
             "fleets": [
-              "14"
+              "10"
             ]
           }
         },
@@ -10072,7 +10072,7 @@
           "name": "Ecological fishing Cy- Subsistence",
           "policy_filters": {
             "fleets": [
-              "15"
+              "11"
             ]
           }
         },
@@ -10080,7 +10080,7 @@
           "name": "Ecological fishing Sy- Artisanal",
           "policy_filters": {
             "fleets": [
-              "20"
+              "12"
             ]
           }
         },
@@ -10088,7 +10088,7 @@
           "name": "Ecological fishing Sy- Industrial",
           "policy_filters": {
             "fleets": [
-              "21"
+              "13"
             ]
           }
         },
@@ -10096,7 +10096,7 @@
           "name": "Ecological fishing Sy-Recreational",
           "policy_filters": {
             "fleets": [
-              "22"
+              "14"
             ]
           }
         },
@@ -10104,7 +10104,7 @@
           "name": "Ecological Sy-Subsistence",
           "policy_filters": {
             "fleets": [
-              "23"
+              "15"
             ]
           }
         },
@@ -10112,7 +10112,7 @@
           "name": "Ecological fishing Le- Artisanal",
           "policy_filters": {
             "fleets": [
-              "24"
+              "16"
             ]
           }
         },
@@ -10120,7 +10120,7 @@
           "name": "Ecological fishing Le- Industrial",
           "policy_filters": {
             "fleets": [
-              "25"
+              "17"
             ]
           }
         },
@@ -10128,7 +10128,7 @@
           "name": "Ecological fishing Le- Recreational",
           "policy_filters": {
             "fleets": [
-              "26"
+              "18"
             ]
           }
         },
@@ -10136,7 +10136,7 @@
           "name": "Ecological fishing Le- Subsistence",
           "policy_filters": {
             "fleets": [
-              "27"
+              "19"
             ]
           }
         },
@@ -10144,7 +10144,7 @@
           "name": "Ecological fishing IL-Artisanal",
           "policy_filters": {
             "fleets": [
-              "28"
+              "20"
             ]
           }
         },
@@ -10152,7 +10152,7 @@
           "name": "Ecological fishing IL-Industrial",
           "policy_filters": {
             "fleets": [
-              "29"
+              "21"
             ]
           }
         },
@@ -10160,7 +10160,7 @@
           "name": "Ecological fishing IL-Recreational",
           "policy_filters": {
             "fleets": [
-              "30"
+              "22"
             ]
           }
         },
@@ -10168,7 +10168,7 @@
           "name": "Ecological fishing IL-Subsistence",
           "policy_filters": {
             "fleets": [
-              "31"
+              "23"
             ]
           }
         },
@@ -10176,7 +10176,7 @@
           "name": "Ecological fishing Eg-Artisanal",
           "policy_filters": {
             "fleets": [
-              "32"
+              "24"
             ]
           }
         },
@@ -10184,7 +10184,7 @@
           "name": "Ecological fishing Eg-Industrial",
           "policy_filters": {
             "fleets": [
-              "33"
+              "25"
             ]
           }
         },
@@ -10192,7 +10192,7 @@
           "name": "Ecological fishing Eg-Recreational",
           "policy_filters": {
             "fleets": [
-              "34"
+              "26"
             ]
           }
         },
@@ -10200,7 +10200,7 @@
           "name": "Ecological fishing Eg-Subsistence",
           "policy_filters": {
             "fleets": [
-              "35"
+              "27"
             ]
           }
         }
@@ -15125,7 +15125,7 @@
         "layer_name": "ems_treatmentplants_emodnet",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
-        "layer_short": "Treatment Plants",
+        "layer_short": "Treatment Plants (2020)",
         "layer_category": "management",
         "layer_subcategory": "governance",
         "layer_download_from_geoserver": 1,
@@ -15142,7 +15142,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Urban waste treatment plants",
+        "layer_tooltip": "Urban waste treatment plants in 2020",
         "layer_information": "",
         "layer_media": "wiki://Treatment_Plants",
         "layer_text_info": null,
@@ -15272,7 +15272,7 @@
         "layer_name": "ems_dischargepoints_emodnet",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
-        "layer_short": "Discharge Points",
+        "layer_short": "Discharge Points (2020)",
         "layer_category": "management",
         "layer_subcategory": "governance",
         "layer_download_from_geoserver": 1,
@@ -15289,7 +15289,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Coastal Discharge Points from Urban Waste Water Treatment Plant",
+        "layer_tooltip": "Coastal Discharge Points from Urban Waste Water Treatment Plant in 2020",
         "layer_information": "",
         "layer_media": "wiki://Discharge_Points",
         "layer_text_info": null,
@@ -15331,7 +15331,7 @@
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#D7191CE3",
+            "pointColor": "#0090F5FF",
             "pointSize": 0.4,
             "pointSpriteName": "Dischargepoint",
             "description": "",
@@ -15359,7 +15359,7 @@
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#0090F5FF",
+            "pointColor": "#D7191CFF",
             "pointSize": 0.4,
             "pointSpriteName": "Dischargepoint",
             "description": "",
