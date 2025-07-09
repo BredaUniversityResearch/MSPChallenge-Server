@@ -260,6 +260,140 @@ EwEMSPLink
  Aargh! Aarghaargh!
  </summary>
 </member>
+<member name="T:EwEMSPLink.IO.cEcospaceImportExportBitmap">
+ -----------------------------------------------------------------------
+ <summary>
+ Ecospace import/export class for accessing bitmap files. MEL uses TIF files
+ for caching computed pressure layers, which can be read via this class.
+ </summary>
+ <seealso cref="T:EwEUtils.Core.IEcospaceImportExport" />
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwEMSPLink.IO.cEcospaceImportExportBitmap.eBands">
+ <summary>Enumerated type, defining the colour bands contained in bitmap data.</summary>
+ <remarks>Aplha channel access is not supported.</remarks>
+</member>
+<member name="F:EwEMSPLink.IO.cEcospaceImportExportBitmap.eBands.Red">
+ <summary>Red pixel value</summary>
+</member>
+<member name="F:EwEMSPLink.IO.cEcospaceImportExportBitmap.eBands.Green">
+ <summary>Green pixel value</summary>
+</member>
+<member name="F:EwEMSPLink.IO.cEcospaceImportExportBitmap.eBands.Blue">
+ <summary>Blue pixel value</summary>
+</member>
+<member name="M:EwEMSPLink.IO.cEcospaceImportExportBitmap.#ctor(EwECore.cCore)">
+ -------------------------------------------------------------------
+ <summary>
+ Create a new instance.
+ </summary>
+ <param name="core">The EwE core to operate onto.</param>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEMSPLink.IO.cEcospaceImportExportBitmap.Load(System.String)">
+ -------------------------------------------------------------------
+ <summary>
+ Import the specified file with default options: the <see cref="F:EwEMSPLink.IO.cEcospaceImportExportBitmap.eBands.Red"/>
+ band is used, and bands are presumed to have 256 colour values.
+ </summary>
+ <seealso cref="M:EwEMSPLink.IO.cEcospaceImportExportBitmap.Load(System.String,EwEMSPLink.IO.cEcospaceImportExportBitmap.eBands,System.Single)"/>
+ <param name="strFile">The file to import.</param>
+ <returns>
+ True if successful.
+ </returns>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEMSPLink.IO.cEcospaceImportExportBitmap.Load(System.String,EwEMSPLink.IO.cEcospaceImportExportBitmap.eBands,System.Single)">
+ -------------------------------------------------------------------
+ <summary>
+ Load the map from a bitmap file.
+ </summary>
+ <param name="strFile">The file to import.</param>
+ <param name="band">The <see cref="T:EwEMSPLink.IO.cEcospaceImportExportBitmap.eBands">band</see> to read.</param>
+ <param name="sScale">The conversion factor to convert pixel band colours 
+ to data values.</param>
+ <returns>True if successful.</returns>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEMSPLink.IO.cEcospaceImportExportBitmap.Save(System.String)">
+ -------------------------------------------------------------------
+ <summary>
+ Save the map to a bitmap file.
+ </summary>
+ <param name="strFile">The file to import.</param>
+ <returns>True if successful.</returns>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEMSPLink.IO.cEcospaceImportExportBitmap.Value(System.Int32,System.Int32,System.String)">
+ -------------------------------------------------------------------
+ <summary>
+ Get/set a grid value.
+ </summary>
+ <param name="iRow">One-based row index to access a value for.</param>
+ <param name="iCol">One-based column index to access a value for.</param>
+ <param name="strField">Optional field to access a value for.</param>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEMSPLink.IO.cEcospaceImportExportBitmap.CellSize">
+ -------------------------------------------------------------------
+ <summary>
+ Get the size of a cell in the Ecospace basemap.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEMSPLink.IO.cEcospaceImportExportBitmap.InCol">
+ -------------------------------------------------------------------
+ <summary>
+ Get the number of columns in the Ecospace basemap.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEMSPLink.IO.cEcospaceImportExportBitmap.InRow">
+ -------------------------------------------------------------------
+ <summary>
+ Get the number of rows in the Ecospace basemap.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEMSPLink.IO.cEcospaceImportExportBitmap.NoDataValue">
+ -------------------------------------------------------------------
+ <summary>
+ Get the NoData value to use.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEMSPLink.IO.cEcospaceImportExportBitmap.PosTopLeft">
+ -------------------------------------------------------------------
+ <summary>
+ Get the top-left (lon, lat) location of the Ecospace basemap.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEMSPLink.IO.cEcospaceImportExportBitmap.ProjectionString">
+ -------------------------------------------------------------------
+ <summary>
+ Get the WKT projection string of the Ecospace basemap.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwEMSPLink.IO.cEcospaceImportExportBitmap.ToRaster(System.String)">
+ -------------------------------------------------------------------
+ <summary>
+ Convert the buffered data to a <see cref="T:EwEUtils.SpatialData.ISpatialRaster"/> for use
+ by EwE.
+ </summary>
+ <param name="strField">Ignored.</param>
+ <returns>A populated raster.</returns>
+ <seealso cref="T:EwEUtils.SpatialData.ISpatialRaster"/>
+ -------------------------------------------------------------------
+</member>
+<member name="P:EwEMSPLink.IO.cEcospaceImportExportBitmap.Basemap">
+ -------------------------------------------------------------------
+ <summary>
+ Get the Ecospace basemap to operate onto.
+ </summary>
+ -------------------------------------------------------------------
+</member>
 <member name="T:EwEMSPLink.cEwEMSPLinkData">
  ---------------------------------------------------------------------------
  <summary>

@@ -25,6 +25,14 @@ Encore
         // only copy files matching this pattern
         //pattern: /\.(png|jpg|jpeg)$/
     })
+    .copyFiles({
+        from: './assets/fonts',
+        to: 'fonts/[path][name].[ext]'
+    })
+    .copyFiles({
+        from: './vendor/nelmio/api-doc-bundle/public',
+        to: '../bundles/nelmioapidoc/[path][name].[ext]'
+    })
 
     /*
      * ENTRY CONFIG
@@ -53,6 +61,7 @@ Encore
      * https://symfony.com/doc/current/frontend.html#adding-more-features
      */
     .cleanupOutputBeforeBuild()
+    // Displays build status system notifications to the user
     .enableBuildNotifications()
     .enableSourceMaps(!Encore.isProduction())
     // enables hashed filenames (e.g. app.abc123.css)
@@ -69,21 +78,30 @@ Encore
         config.corejs = '3.23';
     })
 
-// enables Sass/SCSS support
-.enableSassLoader()
+    // enables Sass/SCSS support
+    .enableSassLoader()
 
-// uncomment if you use TypeScript
-//.enableTypeScriptLoader()
+    // uncomment if you use TypeScript
+    //.enableTypeScriptLoader()
 
-// uncomment if you use React
-//.enableReactPreset()
+    // uncomment if you use React
+    //.enableReactPreset()
 
-// uncomment to get integrity="..." attributes on your script & link tags
-// requires WebpackEncoreBundle 1.4 or higher
-//.enableIntegrityHashes(Encore.isProduction())
+    // uncomment to get integrity="..." attributes on your script & link tags
+    // requires WebpackEncoreBundle 1.4 or higher
+    //.enableIntegrityHashes(Encore.isProduction())
 
-// uncomment if you're having problems with a jQuery plugin
-//.autoProvidejQuery()
+    // uncomment if you're having problems with a jQuery plugin
+    // see:
+    // - https://symfony.com/doc/current/frontend/encore/bootstrap.html#using-other-bootstrap-jquery-plugins
+    // - https://symfony.com/doc/current/frontend/encore/legacy-applications.html
+    // .autoProvidejQuery()
 ;
 
-module.exports = Encore.getWebpackConfig();
+// Use polling instead of inotify
+const config = Encore.getWebpackConfig();
+config.watchOptions = {
+    poll: true,
+};
+
+module.exports = config;

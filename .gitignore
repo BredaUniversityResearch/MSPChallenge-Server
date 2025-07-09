@@ -124,3 +124,9 @@ auth.json
 
 # to ignore all the files in the public/downloads folder
 public/downloads/**
+
+# local composer installation
+composer.phar
+
+# local xdebug files
+xdebug.log

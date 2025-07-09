@@ -1,0 +1,8 @@
+api_platform:
+    enable_swagger_ui: false # since we already have our own nelmio api/doc
+    title: Hello API Platform
+    version: 1.0.0
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
