@@ -31,10 +31,10 @@ param(
     #[int]$TestSwitch = 0,
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
     [int]$EnableGui = 1,
-    [string]$DatabasePassword = -join ((48..57) + (65..90) + (97..122) + (33..47) | Where-Object { $_ -ne 36 } | Get-Random -Count 20 | % {[char]$_}),
+    [string]$DatabasePassword = ([guid]::NewGuid().ToString("N")),
     [string]$CaddyMercureJwtSecret = ([guid]::NewGuid().ToString("N")),
     [string]$BranchName = "msp-ar",
-    [string]$AppSecret = -join ((0..255) | Get-Random -Count 16 | ForEach-Object { "{0:x2}" -f $_ })
+    [string]$AppSecret = ([guid]::NewGuid().ToString("N"))
 )
 
 $presetsConfiguration = @{
@@ -263,7 +263,7 @@ $parameterMetadata = @{
             @{ "CADDY_MERCURE_JWT_SECRET must be 32 characters." = { param($v) $v.Length -eq 32 } }
         )
     }
-    CaddyMercureJwtSecret = @{
+    AppSecret = @{
         EnvVar = "APP_SECRET"
         Tab = "Basic setup"
         Validate = @(
