@@ -5,10 +5,9 @@ namespace App\Domain\API\v1;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameWatchdogServer;
-use App\Entity\Watchdog;
+use App\Entity\SessionAPI\Watchdog;
 use Drift\DBAL\Result;
 use Exception;
-
 use React\Promise\PromiseInterface;
 use function App\await;
 
@@ -318,7 +317,7 @@ class Game extends Base
      * @noinspection PhpUnused
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Meta(int $user, bool $sort = false, bool $onlyActiveLayers = false)
+    public function Meta(int $user, bool $sort = false, bool $onlyActiveLayers = true)
     {
         $this->getDatabase()->query("UPDATE user SET user_lastupdate=? WHERE user_id=?", array(0, $user));
 

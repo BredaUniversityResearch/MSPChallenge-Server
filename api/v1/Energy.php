@@ -1058,7 +1058,7 @@ class Energy extends Base
             }
             return parallel($toPromiseFunctions)
                 ->then(function (/*array $qResults*/) use (&$result) {
-                    $result = array_unique($result);
+                    $result = array_values(array_unique($result));
                 });
         });
         return $this->isAsync() ? $promise : await($promise);

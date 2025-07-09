@@ -2,30 +2,30 @@
 
 namespace App\Controller\SessionAPI;
 
-use App\Domain\Services\ConnectionManager;
 use App\Controller\BaseController;
 use App\Domain\API\APIHelper;
 use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Plan;
 use App\Domain\API\v1\Router;
+use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\LayerTags;
 use App\Domain\POV\Region;
+use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
-use App\Entity\Game as GameEntity;
+use App\Entity\SessionAPI\Game as GameEntity;
+use App\Repository\SessionAPI\GameRepository;
 use Exception;
 use OpenApi\Attributes as OA;
-use App\Domain\Common\EntityEnums\GameStateValue;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Domain\Communicator\WatchdogCommunicator;
-
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -34,15 +34,20 @@ use function App\await;
 #[Route('/api/{game}', requirements: ['game' => '[gG]ame'])]
 #[OA\Tag(
     name: 'Game',
-    description: '<u>{game} being either Game or game</u>. Operations related to game management.'
+    description: 'Operations related to game management.'
+)]
+#[OA\Parameter(
+    name: 'game',
+    in: 'path',
+    required: true,
+    schema: new OA\Schema(
+        type: 'string',
+        default: 'game',
+        enum: ['game', 'Game']
+    )
 )]
 class GameController extends BaseController
 {
-    public function __construct(
-        private readonly string $projectDir
-    ) {
-    }
-
     // not a route yet, should replace /[sessionId]/api/Game/State one day
 
     /**
@@ -54,14 +59,13 @@ class GameController extends BaseController
     public function state(
         int $sessionId,
         string $state,
-        WatchdogCommunicator $watchdogCommunicator,
-        // below is required by legacy to be auto-wire, has its own ::getInstance()
-        SymfonyToLegacyHelper $symfonyToLegacyHelper
+        WatchdogCommunicator $watchdogCommunicator
     ): void {
         $state = new GameStateValue(strtolower($state));
         $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
-        /** @var GameEntity $game */
-        $game = $em->getRepository(GameEntity::class)->retrieve();
+        /** @var GameRepository $repo */
+        $repo = $em->getRepository(GameEntity::class);
+        $game = $repo->retrieve();
         $currentState = $game->getGameState();
         if ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION) {
             throw new Exception("Invalid current state of ".$currentState);

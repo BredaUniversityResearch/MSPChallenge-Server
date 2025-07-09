@@ -38,3 +38,19 @@ vendor/
 .env.local.php
 .env.test
 node_modules/
+
+# composer/symfony symlinks by "bash install.sh"
+config/
+composer.json
+composer.lock
+symfony.lock
+
+public/build/
+public/downloads/
+raster/*
+running_session_config/*
+ServerManager/log/*
+ServerManager/saves/*
+ServerManager/session_archive/*
+session_archive/*
+exports/*

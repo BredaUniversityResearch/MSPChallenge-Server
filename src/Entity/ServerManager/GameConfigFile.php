@@ -2,6 +2,7 @@
 
 namespace App\Entity\ServerManager;
 
+use App\Entity\EntityBase;
 use App\Repository\ServerManager\GameConfigFileRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -11,7 +12,7 @@ use Doctrine\ORM\Mapping\OneToMany;
 
 #[ORM\Table(name: 'game_config_files')]
 #[ORM\Entity(repositoryClass: GameConfigFileRepository::class)]
-class GameConfigFile
+class GameConfigFile extends EntityBase
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -27,7 +28,7 @@ class GameConfigFile
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
-    #[OneToMany(targetEntity: GameConfigVersion::class, mappedBy: 'gameConfigFile', cascade: ['persist'])]
+    #[OneToMany(mappedBy: 'gameConfigFile', targetEntity: GameConfigVersion::class, cascade: ['persist'])]
     private Collection $gameConfigVersion;
 
     public function __construct()

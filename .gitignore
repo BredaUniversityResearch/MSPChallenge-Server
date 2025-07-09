@@ -14,6 +14,8 @@
 ![Ss]erverManager/[Cc]onfigfiles/[Ee]astern_Med_Sea_basic/Eastern_Med_Sea_basic_1.json**
 ![Ss]erverManager/[Cc]onfigfiles/Western_Baltic_Sea_basic**
 ![Ss]erverManager/[Cc]onfigfiles/Western_Baltic_Sea_basic/Western_Baltic_Sea_basic_1.json**
+![Ss]erverManager/[Cc]onfigfiles/Northern_Mozambique_Channel_basic**
+![Ss]erverManager/[Cc]onfigfiles/Northern_Mozambique_Channel_basic/Northern_Mozambique_Channel_basic_1.json**
 [Ff]iles/**
 [Ss]cripts/**
 [Ss]imulations/**/*_[Ll]og.*
@@ -122,3 +124,9 @@ auth.json
 
 # to ignore all the files in the public/downloads folder
 public/downloads/**
+
+# local composer installation
+composer.phar
+
+# local xdebug files
+xdebug.log

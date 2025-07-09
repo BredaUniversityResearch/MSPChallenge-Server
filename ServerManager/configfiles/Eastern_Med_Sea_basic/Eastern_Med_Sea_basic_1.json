@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "3/24/2025",
-    "data_model_hash": "A828F91EF66D3436E87C618C06F64ED208711EEDBCFBB9EA7ED4F791A6530792",
+    "date_modified": "7/1/2025",
+    "data_model_hash": "903C4298C3043FE6A88B6BD1DEFFBA09F5CAB4F5A6C3CBEE09A5D361767D2421",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -759,110 +759,7 @@
         }
       ]
     },
-    "plans": [
-      {
-        "plan_id": 1,
-        "plan_country_id": 1,
-        "plan_name": "shipping starting plan",
-        "plan_gametime": -1,
-        "plan_type": "0",
-        "plan_alters_energy_distribution": 0,
-        "layers": [
-          {
-            "layer_id": 84,
-            "name": "ems_IMO_Routes",
-            "layer_editing_type": "multitype",
-            "geometry": [
-              {
-                "geometry_id": 8077,
-                "FID": "",
-                "geometry_persistent": 8077,
-                "geometry": "[[6038144.5,1511472.63],[5989545.0,1530912.38],[5915525.0,1569044.0]]",
-                "data": {
-                  "ShippingWidth": "3"
-                },
-                "country": 3,
-                "type": "0,1,2,3",
-                "base_geometry_info": {
-                  "geometry_id": 8077,
-                  "geometry_mspid": 0,
-                  "geometry_persistent": 8077
-                },
-                "cable": null,
-                "energy_output": null
-              },
-              {
-                "geometry_id": 8078,
-                "FID": "",
-                "geometry_persistent": 8078,
-                "geometry": "[[5878140.5,1332029.63],[5692716.5,1331282.0]]",
-                "data": {
-                  "ShippingWidth": "5"
-                },
-                "country": 3,
-                "type": "0,1,2,3",
-                "base_geometry_info": {
-                  "geometry_id": 8078,
-                  "geometry_mspid": 0,
-                  "geometry_persistent": 8078
-                },
-                "cable": null,
-                "energy_output": null
-              },
-              {
-                "geometry_id": 8079,
-                "FID": "",
-                "geometry_persistent": 8079,
-                "geometry": "[[6498715.0,1563810.25],[6379086.0,1454649.0]]",
-                "data": {
-                  "ShippingWidth": "2"
-                },
-                "country": 3,
-                "type": "0,1,2,3",
-                "base_geometry_info": {
-                  "geometry_id": 8079,
-                  "geometry_mspid": 0,
-                  "geometry_persistent": 8079
-                },
-                "cable": null,
-                "energy_output": null
-              },
-              {
-                "geometry_id": 8080,
-                "FID": "",
-                "geometry_persistent": 8080,
-                "geometry": "[[6367871.0,1341749.38],[6408993.0,1258009.25]]",
-                "data": {
-                  "ShippingWidth": "7"
-                },
-                "country": 3,
-                "type": "0,1,2,3",
-                "base_geometry_info": {
-                  "geometry_id": 8080,
-                  "geometry_mspid": 0,
-                  "geometry_persistent": 8080
-                },
-                "cable": null,
-                "energy_output": null
-              }
-            ],
-            "warnings": [],
-            "deleted": []
-          }
-        ],
-        "grids": [],
-        "fishing": [],
-        "messages": [
-          {
-            "country_id": 1,
-            "user_name": "magali",
-            "text": "Changed the plans status to: Approved",
-            "time": 1704971755.1206269
-          }
-        ],
-        "restriction_settings": []
-      }
-    ],
+    "plans": [],
     "dependencies": {
       "groups": [
         {
@@ -1590,6 +1487,12 @@
           "description": "All the port infrastructure in the water and on the seabed. "
         },
         {
+          "fromId": 11,
+          "toId": 26,
+          "severity": 3,
+          "description": "Sand & gravel extraction cause bottom disturbance"
+        },
+        {
           "fromId": 12,
           "toId": 17,
           "severity": -3,
@@ -1698,10 +1601,100 @@
           "description": "Cargo shipping avoids shallow waters "
         },
         {
+          "fromId": 24,
+          "toId": 51,
+          "severity": -3,
+          "description": "Recreational fishing is not allowed in Marine Protected Areas. "
+        },
+        {
+          "fromId": 24,
+          "toId": 54,
+          "severity": -3,
+          "description": "Artisanal fishing is not allowed in Marine Protected Areas. "
+        },
+        {
+          "fromId": 24,
+          "toId": 87,
+          "severity": -3,
+          "description": "Industrial fishing is not allowed in Marine Protected Areas. "
+        },
+        {
+          "fromId": 24,
+          "toId": 86,
+          "severity": -3,
+          "description": "Subsistence fishing is not allowed in Marine Protected Areas. "
+        },
+        {
           "fromId": 26,
           "toId": 31,
           "severity": -1,
           "description": "Flatfish avoids surface disturbance "
+        },
+        {
+          "fromId": 26,
+          "toId": 55,
+          "severity": -1,
+          "description": "Dolphins avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 56,
+          "severity": -1,
+          "description": "Whales avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 33,
+          "severity": -3,
+          "description": "Mackerel avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 61,
+          "severity": -3,
+          "description": "Horse mackerel avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 63,
+          "severity": -3,
+          "description": "Benthopelagic fish avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 66,
+          "severity": -3,
+          "description": "Large demersal fish avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 67,
+          "severity": -3,
+          "description": "Medium demersal fish avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 31,
+          "severity": -3,
+          "description": "Flatfish avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 69,
+          "severity": -3,
+          "description": "Bathydemersal fish avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 70,
+          "severity": -3,
+          "description": "Demersal sharks avoid Bottom Disturbance. "
+        },
+        {
+          "fromId": 26,
+          "toId": 79,
+          "severity": -3,
+          "description": "Mobile benthos avoid Bottom Disturbance. "
         },
         {
           "fromId": 27,
@@ -1716,10 +1709,82 @@
           "description": "Flatfish avoids noisy areas "
         },
         {
-          "fromId": 28,
-          "toId": 33,
+          "fromId": 27,
+          "toId": 55,
           "severity": -1,
-          "description": "Mackerel avoids surface disturbance "
+          "description": "Dolphins avoid noisy areas."
+        },
+        {
+          "fromId": 27,
+          "toId": 56,
+          "severity": -3,
+          "description": "Whales avoid noisy areas. "
+        },
+        {
+          "fromId": 27,
+          "toId": 57,
+          "severity": -3,
+          "description": "Turtles avoid noisy areas."
+        },
+        {
+          "fromId": 27,
+          "toId": 58,
+          "severity": -3,
+          "description": "Large pelagic fish avoid noisy areas."
+        },
+        {
+          "fromId": 27,
+          "toId": 59,
+          "severity": -3,
+          "description": "Medium pelagic fish avoid noisy areas."
+        },
+        {
+          "fromId": 27,
+          "toId": 60,
+          "severity": -1,
+          "description": "Small pelagic fish avoid noisy areas."
+        },
+        {
+          "fromId": 27,
+          "toId": 66,
+          "severity": -1,
+          "description": "Large demersal fish avoid noisy areas."
+        },
+        {
+          "fromId": 28,
+          "toId": 55,
+          "severity": -3,
+          "description": "Dolphins avoid Surface Disturbance."
+        },
+        {
+          "fromId": 28,
+          "toId": 56,
+          "severity": -3,
+          "description": "Whales avoid Surface Disturbance."
+        },
+        {
+          "fromId": 28,
+          "toId": 57,
+          "severity": -3,
+          "description": "Turtles avoid Surface Disturbance."
+        },
+        {
+          "fromId": 28,
+          "toId": 58,
+          "severity": -3,
+          "description": "Large pelagic fish avoid Surface Disturbance."
+        },
+        {
+          "fromId": 28,
+          "toId": 59,
+          "severity": -3,
+          "description": "Medium pelagic fish avoid Surface Disturbance."
+        },
+        {
+          "fromId": 28,
+          "toId": 60,
+          "severity": -3,
+          "description": "Small pelagic fish avoid Surface Disturbance."
         },
         {
           "fromId": 31,
@@ -1784,7 +1849,7 @@
         {
           "fromId": 47,
           "toId": 82,
-          "severity": -1,
+          "severity": -2,
           "description": "Seabirds prey on Zooplankton. "
         },
         {
@@ -1952,7 +2017,7 @@
         {
           "fromId": 56,
           "toId": 82,
-          "severity": -1,
+          "severity": -2,
           "description": "Whales mainly feed on Zooplankton. "
         },
         {
@@ -1984,6 +2049,30 @@
           "toId": 83,
           "severity": -1,
           "description": "Turtles prey on Seagrass & Seaweed."
+        },
+        {
+          "fromId": 58,
+          "toId": 59,
+          "severity": -1,
+          "description": "Large Pelagic Fish prey on Medium Pelagic Fish"
+        },
+        {
+          "fromId": 58,
+          "toId": 60,
+          "severity": -1,
+          "description": "Large Pelagic Fish prey on Small Pelagic Fish"
+        },
+        {
+          "fromId": 58,
+          "toId": 79,
+          "severity": -1,
+          "description": "Large Pelagic Fish prey on Mobile Benthos"
+        },
+        {
+          "fromId": 58,
+          "toId": 82,
+          "severity": -1,
+          "description": "Large Pelagic Fish prey on Zooplankton"
         },
         {
           "fromId": 59,
@@ -2434,38 +2523,14 @@
           "toId": 33,
           "severity": -3,
           "description": "Mackerel is caught by Industrial fleets. "
-        },
-        {
-          "fromId": 24,
-          "toId": 51,
-          "severity": -3,
-          "description": "Recreational fishing is not allowed in Marine Protected Areas. "
-        },
-        {
-          "fromId": 24,
-          "toId": 54,
-          "severity": -3,
-          "description": "Artisanal fishing is not allowed in Marine Protected Areas. "
-        },
-        {
-          "fromId": 24,
-          "toId": 87,
-          "severity": -3,
-          "description": "Industrial fishing is not allowed in Marine Protected Areas. "
-        },
-        {
-          "fromId": 24,
-          "toId": 86,
-          "severity": -3,
-          "description": "Subsistence fishing is not allowed in Marine Protected Areas. "
         }
       ]
     },
     "CEL": {
       "grey_centerpoint_color": "#3D1C04FF",
-      "grey_centerpoint_sprite": "oilbarrel",
+      "grey_centerpoint_sprite": "Oilbarrel",
       "green_centerpoint_color": "#18840AFF",
-      "green_centerpoint_sprite": "lightning"
+      "green_centerpoint_sprite": "Lightning"
     },
     "SEL": {
       "shipping_lane_layers": [
@@ -6080,6 +6145,11 @@
               "name": "Ems_Shipping_Intensity_raster",
               "influence": 0.3,
               "construction": false
+            },
+            {
+              "name": "ems_sand_and_gravel_extraction",
+              "influence": 0.03,
+              "construction": false
             }
           ],
           "policy_filters": {
@@ -6132,6 +6202,11 @@
             {
               "name": "ems_munitionspoly_emodnet",
               "influence": 0.8,
+              "construction": false
+            },
+            {
+              "name": "ems_sand_and_gravel_extraction",
+              "influence": 1.0,
               "construction": false
             }
           ],
@@ -9973,7 +10048,7 @@
           "name": "Ecological fishing Cy- Artisanal",
           "policy_filters": {
             "fleets": [
-              "12"
+              "8"
             ]
           }
         },
@@ -9981,7 +10056,7 @@
           "name": "Ecological fishing Cy- Industrial",
           "policy_filters": {
             "fleets": [
-              "13"
+              "9"
             ]
           }
         },
@@ -9989,7 +10064,7 @@
           "name": "Ecological fishing Cy- Recreational",
           "policy_filters": {
             "fleets": [
-              "14"
+              "10"
             ]
           }
         },
@@ -9997,7 +10072,7 @@
           "name": "Ecological fishing Cy- Subsistence",
           "policy_filters": {
             "fleets": [
-              "15"
+              "11"
             ]
           }
         },
@@ -10005,7 +10080,7 @@
           "name": "Ecological fishing Sy- Artisanal",
           "policy_filters": {
             "fleets": [
-              "20"
+              "12"
             ]
           }
         },
@@ -10013,7 +10088,7 @@
           "name": "Ecological fishing Sy- Industrial",
           "policy_filters": {
             "fleets": [
-              "21"
+              "13"
             ]
           }
         },
@@ -10021,7 +10096,7 @@
           "name": "Ecological fishing Sy-Recreational",
           "policy_filters": {
             "fleets": [
-              "22"
+              "14"
             ]
           }
         },
@@ -10029,7 +10104,7 @@
           "name": "Ecological Sy-Subsistence",
           "policy_filters": {
             "fleets": [
-              "23"
+              "15"
             ]
           }
         },
@@ -10037,7 +10112,7 @@
           "name": "Ecological fishing Le- Artisanal",
           "policy_filters": {
             "fleets": [
-              "24"
+              "16"
             ]
           }
         },
@@ -10045,7 +10120,7 @@
           "name": "Ecological fishing Le- Industrial",
           "policy_filters": {
             "fleets": [
-              "25"
+              "17"
             ]
           }
         },
@@ -10053,7 +10128,7 @@
           "name": "Ecological fishing Le- Recreational",
           "policy_filters": {
             "fleets": [
-              "26"
+              "18"
             ]
           }
         },
@@ -10061,7 +10136,7 @@
           "name": "Ecological fishing Le- Subsistence",
           "policy_filters": {
             "fleets": [
-              "27"
+              "19"
             ]
           }
         },
@@ -10069,7 +10144,7 @@
           "name": "Ecological fishing IL-Artisanal",
           "policy_filters": {
             "fleets": [
-              "28"
+              "20"
             ]
           }
         },
@@ -10077,7 +10152,7 @@
           "name": "Ecological fishing IL-Industrial",
           "policy_filters": {
             "fleets": [
-              "29"
+              "21"
             ]
           }
         },
@@ -10085,7 +10160,7 @@
           "name": "Ecological fishing IL-Recreational",
           "policy_filters": {
             "fleets": [
-              "30"
+              "22"
             ]
           }
         },
@@ -10093,7 +10168,7 @@
           "name": "Ecological fishing IL-Subsistence",
           "policy_filters": {
             "fleets": [
-              "31"
+              "23"
             ]
           }
         },
@@ -10101,7 +10176,7 @@
           "name": "Ecological fishing Eg-Artisanal",
           "policy_filters": {
             "fleets": [
-              "32"
+              "24"
             ]
           }
         },
@@ -10109,7 +10184,7 @@
           "name": "Ecological fishing Eg-Industrial",
           "policy_filters": {
             "fleets": [
-              "33"
+              "25"
             ]
           }
         },
@@ -10117,7 +10192,7 @@
           "name": "Ecological fishing Eg-Recreational",
           "policy_filters": {
             "fleets": [
-              "34"
+              "26"
             ]
           }
         },
@@ -10125,7 +10200,7 @@
           "name": "Ecological fishing Eg-Subsistence",
           "policy_filters": {
             "fleets": [
-              "35"
+              "27"
             ]
           }
         }
@@ -10223,7 +10298,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -10300,9 +10375,9 @@
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
-        "layer_selectable": 1,
+        "layer_selectable": 0,
         "layer_editable": 0,
-        "layer_toggleable": 1,
+        "layer_toggleable": 0,
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "",
@@ -10807,8 +10882,8 @@
         "layer_tags": []
       },
       {
-        "layer_name": "ems_territorial_waters",
-        "layer_geotype": "polygon",
+        "layer_name": "ems_territorial_waters_lines",
+        "layer_geotype": "line",
         "layer_entity_value_max": null,
         "layer_short": "Territorial Waters",
         "layer_category": "management",
@@ -10835,24 +10910,248 @@
         "layer_editing_type": "",
         "layer_special_entity_type": "Default",
         "layer_depth": 1,
-        "layer_property_as_type": null,
+        "layer_property_as_type": "type",
         "layer_type": {
           "0": {
-            "displayName": "default",
+            "displayName": "Orange",
             "approval": "NotDependent",
             "value": 0,
-            "map_type": null,
+            "map_type": "0",
             "displayPolygon": 1,
-            "polygonColor": "#C0A3F6FF",
+            "polygonColor": "#FF7B2CFF",
             "polygonPatternName": "1",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 0.0,
-            "displayLines": 0,
-            "lineColor": "#000000FF",
-            "lineWidth": 0.0,
+            "displayLines": 1,
+            "lineColor": "#FF7B2CFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": "wiki://Territorial_Waters"
+          },
+          "1": {
+            "displayName": "Red",
+            "approval": "NotDependent",
+            "value": 0,
+            "map_type": "1",
+            "displayPolygon": 1,
+            "polygonColor": "#DC2D2AFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 1,
+            "lineColor": "#DC2D2AFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": "wiki://Territorial_Waters"
+          },
+          "2": {
+            "displayName": "Green",
+            "approval": "NotDependent",
+            "value": 0,
+            "map_type": "2",
+            "displayPolygon": 1,
+            "polygonColor": "#007A03FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 1,
+            "lineColor": "#007A03FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": "wiki://Territorial_Waters"
+          },
+          "3": {
+            "displayName": "Grey",
+            "approval": "NotDependent",
+            "value": 0,
+            "map_type": "3",
+            "displayPolygon": 1,
+            "polygonColor": "#ACACAC80",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 1,
+            "lineColor": "#ACACAC80",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": "wiki://Territorial_Waters"
+          },
+          "4": {
+            "displayName": "Purple",
+            "approval": "NotDependent",
+            "value": 0,
+            "map_type": "4",
+            "displayPolygon": 1,
+            "polygonColor": "#932385FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 1,
+            "lineColor": "#932385FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": "wiki://Territorial_Waters"
+          },
+          "5": {
+            "displayName": "Pink",
+            "approval": "NotDependent",
+            "value": 0,
+            "map_type": "5",
+            "displayPolygon": 1,
+            "polygonColor": "#E252BBFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 1,
+            "lineColor": "#E252BBFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": "wiki://Territorial_Waters"
+          },
+          "6": {
+            "displayName": "Yellow",
+            "approval": "NotDependent",
+            "value": 0,
+            "map_type": "6",
+            "displayPolygon": 1,
+            "polygonColor": "#FECC2FFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 1,
+            "lineColor": "#FECC2FFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": "wiki://Territorial_Waters"
+          },
+          "7": {
+            "displayName": "Blue",
+            "approval": "NotDependent",
+            "value": 0,
+            "map_type": "7",
+            "displayPolygon": 1,
+            "polygonColor": "#4778F8FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 1,
+            "lineColor": "#4778F8FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": "wiki://Territorial_Waters"
+          },
+          "8": {
+            "displayName": "Navy",
+            "approval": "NotDependent",
+            "value": 0,
+            "map_type": "8",
+            "displayPolygon": 1,
+            "polygonColor": "#0B2B81FF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 1,
+            "lineColor": "#0B2B81FF",
+            "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
@@ -10888,7 +11187,7 @@
         "layer_selectable": 1,
         "layer_editable": 0,
         "layer_toggleable": 1,
-        "layer_active_on_start": 0,
+        "layer_active_on_start": 1,
         "layer_green": 0,
         "layer_tooltip": "Main cities",
         "layer_information": null,
@@ -11592,32 +11891,88 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Cables",
+            "displayName": "Operational",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#845629FF",
-            "polygonPatternName": "5",
+            "polygonColor": "#3D3D3DFF",
+            "polygonPatternName": "0",
             "innerGlowEnabled": 0,
-            "innerGlowRadius": 5,
-            "innerGlowIterations": 2,
-            "innerGlowMultiplier": 2.5,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#505050FF",
+            "lineColor": "#7A0177FF",
             "lineWidth": 1.0,
             "lineIcon": null,
-            "linePatternType": "LongDash",
+            "linePatternType": "Solid",
             "displayPoints": 0,
-            "pointColor": "#FF00FFAA",
-            "pointSize": 0.0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.4,
             "pointSpriteName": "None",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
-            "media": ""
+            "media": "wiki://Telecom_Cables"
+          },
+          "1": {
+            "displayName": "Planned",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#3D3D3DFF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#7A0177FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "LongDash",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Telecom_Cables"
+          },
+          "2": {
+            "displayName": "Abandoned",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#3D3D3DFF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#7A0177FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "ShortDash",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Telecom_Cables"
           }
         },
         "layer_info_properties": [],
@@ -11709,7 +12064,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#555555FF",
+            "lineColor": "#AAAAAAFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -11737,7 +12092,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#555555FF",
+            "lineColor": "#FFFFFFFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -11799,7 +12154,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -11953,7 +12308,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#1156A2FF",
-            "pointSize": 0.8,
+            "pointSize": 0.5,
             "pointSpriteName": "Ship",
             "description": "",
             "capacity": 0,
@@ -12414,10 +12769,10 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
-        "layer_selectable": 1,
-        "layer_editable": 1,
-        "layer_toggleable": 1,
+        "layer_active": 1,
+        "layer_selectable": 0,
+        "layer_editable": 0,
+        "layer_toggleable": 0,
         "layer_active_on_start": 0,
         "layer_green": 1,
         "layer_tooltip": "Location of Wind Farms",
@@ -12530,10 +12885,10 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
-        "layer_selectable": 1,
-        "layer_editable": 1,
-        "layer_toggleable": 1,
+        "layer_active": 1,
+        "layer_selectable": 0,
+        "layer_editable": 0,
+        "layer_toggleable": 0,
         "layer_active_on_start": 0,
         "layer_green": 1,
         "layer_tooltip": "Location of wave farms",
@@ -13507,6 +13862,34 @@
             "investmentCost": 0.0,
             "availability": -12,
             "media": "wiki://No_shipping_zones"
+          },
+          "3": {
+            "displayName": "Maintenance",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#2B8FFFFF",
+            "polygonPatternName": "26",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#210B2CFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#BC96E6FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://No_shipping_zones"
           }
         },
         "layer_info_properties": [
@@ -13598,8 +13981,8 @@
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#210B2CFF",
+            "displayLines": 1,
+            "lineColor": "#1156A2FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -13618,7 +14001,7 @@
             "approval": "AllCountries",
             "value": 0,
             "map_type": null,
-            "displayPolygon": 1,
+            "displayPolygon": 0,
             "polygonColor": "#55286FFF",
             "polygonPatternName": "5",
             "innerGlowEnabled": 0,
@@ -13627,7 +14010,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#55286FFF",
+            "lineColor": "#1156A2FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -13655,7 +14038,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#BC96E6FF",
+            "lineColor": "#1156A2FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -13683,7 +14066,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#D8B4E2FF",
+            "lineColor": "#1156A2FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -13711,7 +14094,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#AE759FFF",
+            "lineColor": "#1156A2FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -14123,7 +14506,7 @@
             "value": 1,
             "map_type": "Exploration",
             "displayPolygon": 1,
-            "polygonColor": "#D6000080",
+            "polygonColor": "#EF5A5FFF",
             "polygonPatternName": "27",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14151,7 +14534,7 @@
             "value": 0,
             "map_type": "Exploitation",
             "displayPolygon": 1,
-            "polygonColor": "#7D1717FF",
+            "polygonColor": "#EF5A5FFF",
             "polygonPatternName": "27",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14159,7 +14542,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#000000FF",
+            "lineColor": "#FFFFFFFF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -14241,7 +14624,7 @@
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
-            "displayPolygon": 1,
+            "displayPolygon": 0,
             "polygonColor": "#353635FF",
             "polygonPatternName": "27",
             "innerGlowEnabled": 0,
@@ -14249,15 +14632,15 @@
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
+            "displayLines": 0,
             "lineColor": "#000000FF",
             "lineWidth": 1.0,
-            "lineIcon": null,
+            "lineIcon": "Null",
             "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#00A854FF",
+            "displayPoints": 1,
+            "pointColor": "#202924FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Borehole",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -14424,7 +14807,7 @@
             "value": 0,
             "map_type": "SPA (Special Protection Areas)",
             "displayPolygon": 1,
-            "polygonColor": "#058117FF",
+            "polygonColor": "#00590DFF",
             "polygonPatternName": "18",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14432,7 +14815,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#0B6C19FF",
+            "lineColor": "#004C12FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -14460,7 +14843,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#00590DFF",
+            "lineColor": "#80FF95FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -14480,7 +14863,7 @@
             "value": 2,
             "map_type": "Both SPA and SCI",
             "displayPolygon": 1,
-            "polygonColor": "#05450EFF",
+            "polygonColor": "#00590DFF",
             "polygonPatternName": "18",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14488,7 +14871,7 @@
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#05450EFF",
+            "lineColor": "#C8FFD1FF",
             "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -14742,7 +15125,7 @@
         "layer_name": "ems_treatmentplants_emodnet",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
-        "layer_short": "Treatment Plants",
+        "layer_short": "Treatment Plants (2020)",
         "layer_category": "management",
         "layer_subcategory": "governance",
         "layer_download_from_geoserver": 1,
@@ -14759,7 +15142,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Urban waste treatment plants",
+        "layer_tooltip": "Urban waste treatment plants in 2020",
         "layer_information": "",
         "layer_media": "wiki://Treatment_Plants",
         "layer_text_info": null,
@@ -14803,7 +15186,7 @@
             "displayPoints": 1,
             "pointColor": "#0090F5FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Treatmentplant",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -14829,9 +15212,9 @@
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#FEFE12B4",
+            "pointColor": "#D7191CFF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Treatmentplant",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -14857,9 +15240,9 @@
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#D7191CB4",
+            "pointColor": "#FEFE12FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Treatmentplant",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -14889,7 +15272,7 @@
         "layer_name": "ems_dischargepoints_emodnet",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
-        "layer_short": "Discharge Points",
+        "layer_short": "Discharge Points (2020)",
         "layer_category": "management",
         "layer_subcategory": "governance",
         "layer_download_from_geoserver": 1,
@@ -14906,7 +15289,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Coastal Discharge Points from Urban Waste Water Treatment Plant",
+        "layer_tooltip": "Coastal Discharge Points from Urban Waste Water Treatment Plant in 2020",
         "layer_information": "",
         "layer_media": "wiki://Discharge_Points",
         "layer_text_info": null,
@@ -14950,7 +15333,7 @@
             "displayPoints": 1,
             "pointColor": "#0090F5FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Dischargepoint",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -14963,7 +15346,7 @@
             "value": 0,
             "map_type": "Inactive",
             "displayPolygon": 0,
-            "polygonColor": "#00590DFF",
+            "polygonColor": "#0090F5FF",
             "polygonPatternName": "27",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -14978,7 +15361,7 @@
             "displayPoints": 1,
             "pointColor": "#D7191CFF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Dischargepoint",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -15006,7 +15389,7 @@
             "displayPoints": 1,
             "pointColor": "#FEFE12FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Dischargepoint",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -15188,7 +15571,7 @@
             "displayPoints": 1,
             "pointColor": "#DC1515FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Radiation",
             "description": "",
             "capacity": 1000000000,
             "investmentCost": 100000.0,
@@ -15216,7 +15599,7 @@
             "displayPoints": 1,
             "pointColor": "#3F3E3EFF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Radiation",
             "description": "",
             "capacity": 1000000000,
             "investmentCost": 100000.0,
@@ -15244,7 +15627,7 @@
             "displayPoints": 1,
             "pointColor": "#000000FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Radiation",
             "description": "",
             "capacity": 1000000000,
             "investmentCost": 100000.0,
@@ -15272,7 +15655,7 @@
             "displayPoints": 1,
             "pointColor": "#E67731FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Radiation",
             "description": "",
             "capacity": 1000000000,
             "investmentCost": 100000.0,
@@ -15376,16 +15759,16 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#000000FF",
+            "polygonColor": "#00346EFF",
             "polygonPatternName": "7",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 0.0,
-            "displayLines": 0,
-            "lineColor": "#000000FF",
-            "lineWidth": 0.0,
+            "displayLines": 1,
+            "lineColor": "#7FD4FFFF",
+            "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
@@ -15417,7 +15800,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -16580,15 +16963,15 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#000000FF",
-            "polygonPatternName": "17",
+            "polygonColor": "#8200C5FF",
+            "polygonPatternName": "30",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 0.0,
-            "displayLines": 0,
-            "lineColor": "#000000FF",
+            "displayLines": 1,
+            "lineColor": "#0080FFFF",
             "lineWidth": 0.0,
             "lineIcon": null,
             "linePatternType": "Solid",
@@ -16610,7 +16993,7 @@
         "layer_name": "ems_Offshore_Oil_and_Gas_Installations",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
-        "layer_short": "Offshore Oil & Gas Platforms",
+        "layer_short": "Oil & Gas Platforms",
         "layer_category": "activities",
         "layer_subcategory": "energy",
         "layer_download_from_geoserver": 0,
@@ -16840,21 +17223,21 @@
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "Sand & Gravel Extraction",
+            "displayName": "Extraction 100 m3/km2",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#000000FF",
+            "polygonColor": "#72320CFF",
             "polygonPatternName": "28",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 0.0,
-            "displayLines": 0,
-            "lineColor": "#000000FF",
-            "lineWidth": 0.0,
+            "displayLines": 1,
+            "lineColor": "#72320CFF",
+            "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
@@ -16936,7 +17319,7 @@
             "displayPoints": 1,
             "pointColor": "#5C6CE6FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Desalinationplant",
             "description": "",
             "capacity": 1000000000,
             "investmentCost": 100000.0,
@@ -17375,9 +17758,9 @@
             "approval": "NotDependent",
             "value": 0,
             "map_type": "emodnet_finfish",
-            "displayPolygon": 0,
-            "polygonColor": "#00590DFF",
-            "polygonPatternName": "0",
+            "displayPolygon": 1,
+            "polygonColor": "#0D8FEAFF",
+            "polygonPatternName": "22",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -17432,7 +17815,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -25887,7 +26270,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Turtles (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "other",
+        "layer_subcategory": "turtles_&_octopuses",
         "layer_download_from_geoserver": 0,
         "layer_width": 131,
         "layer_height": 113,
@@ -29459,7 +29842,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Cephalopods (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "other",
+        "layer_subcategory": "turtles_&_octopuses",
         "layer_download_from_geoserver": 0,
         "layer_width": 131,
         "layer_height": 113,
@@ -31724,7 +32107,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -31912,7 +32295,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -32100,7 +32483,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -32288,7 +32671,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -32476,7 +32859,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -32664,7 +33047,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -32852,7 +33235,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -33040,7 +33423,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -33228,7 +33611,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -33416,7 +33799,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -33604,7 +33987,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -33792,7 +34175,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -33980,7 +34363,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -34168,7 +34551,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -34356,7 +34739,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -34544,7 +34927,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -34732,7 +35115,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -34920,7 +35303,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -35108,7 +35491,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -35296,7 +35679,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -35484,7 +35867,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,
@@ -35672,7 +36055,7 @@
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 0,
+        "layer_active": 1,
         "layer_selectable": 0,
         "layer_editable": 0,
         "layer_toggleable": 0,

@@ -2,22 +2,21 @@
 
 namespace App\MessageHandler\Watchdog;
 
-use App\Domain\API\v1\GameSession;
 use App\Domain\API\v1\Simulation;
 use App\Domain\API\v1\User;
 use App\Domain\Common\EntityEnums\EventLogSeverity;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Domain\Services\ConnectionManager;
-use App\Entity\EventLog;
 use App\Entity\ServerManager\GameList;
-use App\Entity\Simulation as SimulationEntity;
-use App\Entity\Watchdog;
 use App\Message\Watchdog\Message\GameMonthChangedMessage;
 use App\Message\Watchdog\Message\GameStateChangedMessage;
 use App\Message\Watchdog\Message\WatchdogPingMessage;
 use App\Message\Watchdog\Token;
 use App\MessageHandler\GameList\SessionLogHandlerBase;
+use App\Entity\SessionAPI\EventLog;
+use App\Entity\SessionAPI\Simulation as SimulationEntity;
+use App\Entity\SessionAPI\Watchdog;
 use App\VersionsProvider;
 use DateTime;
 use Doctrine\ORM\AbstractQuery;
@@ -30,13 +29,11 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use function App\await;
 
 #[AsMessageHandler]
 class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
@@ -145,7 +142,10 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         $postValues = [
             'game_session_api' => self::getSessionAPIBaseUrl(
                 $gameList,
-                $watchdog->getServerId() == Watchdog::getInternalServerId() ? 'host.docker.internal' : null
+                $watchdog->getServerId() == Watchdog::getInternalServerId() ?
+                    ($_ENV['MITMPROXY_PORT'] ? 'mitmproxy' : 'php') : null,
+                $watchdog->getServerId() == Watchdog::getInternalServerId() ? ($_ENV['MITMPROXY_PORT'] ?? 80) : null,
+                $watchdog->getServerId() == Watchdog::getInternalServerId() ? 'http' : null
             ),
             'game_session_token' => (string)$watchdog->getToken(),
             'game_state' => $message->getGameState()->__toString(),
@@ -371,12 +371,17 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
      *
      * @throws Exception
      */
-    public static function getSessionAPIBaseUrl(GameList $gameList, ?string $address = null): string
-    {
-        $protocol = str_replace('://', '', $_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http').'://';
+    public static function getSessionAPIBaseUrl(
+        GameList $gameList,
+        ?string $address = null,
+        ?int $port = null,
+        ?string $scheme = null
+    ): string {
+        $scheme ??= ($_ENV['URL_WEB_SERVER_SCHEME'] ?? 'http');
+        $protocol = str_replace('://', '', $scheme).'://';
         $address ??= ($_ENV['URL_WEB_SERVER_HOST'] ?? null) ?: $gameList->getGameServer()->getAddress() ??
             gethostname();
-        $port = ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
+        $port ??= ($_ENV['URL_WEB_SERVER_PORT'] ?? 80);
         return $protocol.$address.':'.$port.'/'.$gameList->getId().'/';
     }
 }

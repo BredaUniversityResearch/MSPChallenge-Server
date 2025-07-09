@@ -3,6 +3,7 @@
 namespace App\Domain\PolicyData;
 
 use App\Domain\Common\EntityEnums\PolicyTypeName;
+use Swaggest\JsonSchema\Context;
 use Swaggest\JsonSchema\Schema;
 
 class BufferZonePolicyData extends PressuredPolicyDataBase
@@ -14,6 +15,12 @@ class BufferZonePolicyData extends PressuredPolicyDataBase
     public function __construct()
     {
         $this->policy_type = PolicyTypeName::BUFFER_ZONE->value;
+    }
+
+    public static function import($data, Context $options = null)
+    {
+        $data->radius ??= self::DEFAULT_VALUE_RADIUS;
+        return parent::import($data, $options);
     }
 
     public function getRadius(): float

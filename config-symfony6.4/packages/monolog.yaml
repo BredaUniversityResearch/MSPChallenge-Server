@@ -3,6 +3,23 @@ monolog:
         - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
         - game_session # file-based game session creation and loading log
         - analytics
+        - docker
+    handlers:
+        docker:
+            type: stream
+            path: '%kernel.logs_dir%/docker.log'
+            level: debug
+            channels: ['docker']
+        docker_stdout:
+            type: stream
+            path: "php://stdout"
+            level: debug
+            channels: ['docker']
+        docker_stderr:
+            type: stream
+            path: "php://stderr"
+            level: error
+            channels: ['docker']
 
 when@dev:
     monolog:

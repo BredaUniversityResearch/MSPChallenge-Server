@@ -228,4 +228,28 @@ class Util
             }
         }
     }
+
+    public static function getClassAttribute(\ReflectionClass $class, string $attributeClass)
+    {
+        if (!class_exists($attributeClass)) {
+            throw new \InvalidArgumentException("Attribute class $attributeClass does not exist.");
+        }
+        $attributes = $class->getAttributes($attributeClass);
+        if (empty($attributes)) {
+            return null; // No attributes found
+        }
+        return $attributes[0]->newInstance();
+    }
+
+    public static function getPropertyAttribute(\ReflectionProperty $property, string $attributeClass)
+    {
+        if (!class_exists($attributeClass)) {
+            throw new \InvalidArgumentException("Attribute class $attributeClass does not exist.");
+        }
+        $attributes = $property->getAttributes($attributeClass);
+        if (empty($attributes)) {
+            return null; // No attributes found
+        }
+        return $attributes[0]->newInstance();
+    }
 }

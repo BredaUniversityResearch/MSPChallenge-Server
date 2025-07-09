@@ -9,14 +9,13 @@ use App\Domain\Common\GameSaveZipFileValidator;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SimulationHelper;
-use App\Entity\Game;
 use App\Entity\ServerManager\GameSave;
 use App\Logger\GameSessionLogger;
-use App\MessageHandler\GameList\CommonSessionHandlerBase;
 use App\Message\GameSave\GameSaveLoadMessage;
-use App\Repository\GameRepository;
+use App\MessageHandler\GameList\CommonSessionHandlerBase;
+use App\Entity\SessionAPI\Game;
+use App\Repository\SessionAPI\GameRepository;
 use App\VersionsProvider;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
@@ -43,7 +42,6 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
     public function __construct(
         KernelInterface $kernel,
         LoggerInterface $gameSessionLogger,
-        EntityManagerInterface $mspServerManagerEntityManager,
         ConnectionManager $connectionManager,
         ContainerBagInterface $params,
         GameSessionLogger $gameSessionLogFileHandler,
@@ -155,7 +153,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
         $this->validator = new GameSaveZipFileValidator(
             $saveZipStore,
             $this->kernel,
-            $this->mspServerManagerEntityManager
+            $this->connectionManager
         );
         if (!$this->validator->isValid()) {
             throw new Exception("ZIP file {$saveZipStore} is invalid: {$this->validator->getErrorsAsString()}.");
@@ -216,7 +214,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
             '--user='.$_ENV['DATABASE_USER'],
             '--password='.$_ENV['DATABASE_PASSWORD'],
             ($_ENV['APP_ENV'] == 'test') ? $this->database.'_test' : $this->database
-        ], $this->kernel->getProjectDir(), null, "source {$tempDumpFile}");
+        ], $this->kernel->getProjectDir(), null, "source {$tempDumpFile}", 300);
         $process->mustRun(fn($type, $buffer) => $this->info($buffer));
         // as usually nothing comes out of the buffer...
         $this->debug('Session database dump import attempt completed.');

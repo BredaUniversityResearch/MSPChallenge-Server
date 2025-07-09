@@ -3,40 +3,39 @@
 namespace App\MessageHandler\GameList;
 
 use App\Controller\SessionAPI\SELController;
+use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityEnums\PlanState;
 use App\Domain\Common\EntityEnums\RestrictionSort;
 use App\Domain\Common\EntityEnums\RestrictionType;
+use App\Domain\Communicator\GeoServerCommunicator;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Helper\Util;
-use App\Domain\Services\SimulationHelper;
-use App\Entity\Country;
-use App\Entity\EnergyConnection;
-use App\Entity\EnergyOutput;
-use App\Entity\Fishing;
-use App\Entity\Game;
-use App\Domain\Common\EntityEnums\GameSessionStateValue;
-use App\Domain\Communicator\GeoServerCommunicator;
 use App\Domain\Services\ConnectionManager;
-use App\Entity\Geometry;
-use App\Entity\Grid;
-use App\Entity\GridEnergy;
-use App\Entity\Layer;
-use App\Entity\Objective;
-use App\Entity\Plan;
-use App\Entity\PlanDelete;
-use App\Entity\PlanLayer;
-use App\Entity\PlanMessage;
-use App\Entity\PlanRestrictionArea;
-use App\Entity\Restriction;
+use App\Domain\Services\SimulationHelper;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListCreationMessage;
 use App\Message\GameSave\GameSaveLoadMessage;
-use App\Repository\LayerRepository;
+use App\Entity\SessionAPI\Country;
+use App\Entity\SessionAPI\EnergyConnection;
+use App\Entity\SessionAPI\EnergyOutput;
+use App\Entity\SessionAPI\Fishing;
+use App\Entity\SessionAPI\Game;
+use App\Entity\SessionAPI\Geometry;
+use App\Entity\SessionAPI\Grid;
+use App\Entity\SessionAPI\GridEnergy;
+use App\Entity\SessionAPI\Layer;
+use App\Entity\SessionAPI\Objective;
+use App\Entity\SessionAPI\Plan;
+use App\Entity\SessionAPI\PlanDelete;
+use App\Entity\SessionAPI\PlanLayer;
+use App\Entity\SessionAPI\PlanMessage;
+use App\Entity\SessionAPI\PlanRestrictionArea;
+use App\Entity\SessionAPI\Restriction;
+use App\Repository\SessionAPI\LayerRepository;
 use App\VersionsProvider;
 use Doctrine\DBAL\Exception;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Psr\Cache\InvalidArgumentException;
@@ -44,20 +43,20 @@ use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
-use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 
 #[AsMessageHandler]
 class GameListCreationMessageHandler extends CommonSessionHandlerBase
@@ -67,7 +66,6 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         // https://symfony.com/doc/6.4/logging/channels_handlers.html#how-to-autowire-logger-channels:
         //   $<camelCased channel name> + Logger
         LoggerInterface $gameSessionLogger,
-        EntityManagerInterface $mspServerManagerEntityManager,
         ConnectionManager $connectionManager,
         ContainerBagInterface $params,
         GameSessionLogger $gameSessionLogFileHandler,
@@ -1017,8 +1015,8 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
                     $grid->addSocketGeometry($this->findNewGeometry($gridSocketConfig['geometry'], $context));
                 }
             }
-            if (is_array($gridConfig['sources'])) {
-                foreach ($gridConfig['sources'] as $gridSourceConfig) {
+            if (is_array($gridConfig['sources'] ?? [])) {
+                foreach ($gridConfig['sources'] ?? [] as $gridSourceConfig) {
                     $grid->addSourceGeometry($this->findNewGeometry($gridSourceConfig['geometry'], $context));
                 }
             }

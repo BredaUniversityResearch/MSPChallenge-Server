@@ -8,17 +8,18 @@ use App\Domain\Common\GameListAndSaveSerializer;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SimulationHelper;
-use App\Entity\Layer;
 use App\Entity\ServerManager\GameSave;
 use App\Logger\GameSessionLogger;
-use App\MessageHandler\GameList\CommonSessionHandlerBase;
 use App\Message\GameSave\GameSaveCreationMessage;
+use App\MessageHandler\GameList\CommonSessionHandlerBase;
+use App\Entity\SessionAPI\Layer;
+use App\Repository\SessionAPI\LayerRepository;
 use App\VersionsProvider;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
+use ReflectionException;
 use Shapefile\Shapefile;
 use Shapefile\ShapefileException;
 use Shapefile\ShapefileWriter;
@@ -38,7 +39,6 @@ class GameSaveCreationMessageHandler extends CommonSessionHandlerBase
     public function __construct(
         KernelInterface $kernel,
         LoggerInterface $gameSessionLogger,
-        EntityManagerInterface $mspServerManagerEntityManager,
         ConnectionManager $connectionManager,
         ContainerBagInterface $params,
         GameSessionLogger $gameSessionLogFileHandler,
@@ -202,14 +202,14 @@ class GameSaveCreationMessageHandler extends CommonSessionHandlerBase
     }
 
     /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      * @throws Exception
      */
     private function addLayerShapeFilesExportsToZip(): void
     {
         $this->createShapeFilesTempStore();
-        $layerGeometry = $this->entityManager->getRepository(Layer::class)->getAllGeometryDecodedGeoJSON();
+        /** @var LayerRepository $repo */
+        $repo = $this->entityManager->getRepository(Layer::class);
+        $layerGeometry = $repo->getAllGeometryDecodedGeoJSON();
         foreach ($layerGeometry as $layerName => $geometryContent) {
             $this->createLayerShapeFilesAndStore($layerName, $geometryContent);
         }
@@ -234,9 +234,13 @@ class GameSaveCreationMessageHandler extends CommonSessionHandlerBase
         }
     }
 
+    /**
+     * @throws ReflectionException
+     * @throws Exception
+     */
     private function addGameListRecordToZip(): void
     {
-        $serializer = new GameListAndSaveSerializer($this->mspServerManagerEntityManager);
+        $serializer = new GameListAndSaveSerializer($this->connectionManager->getServerManagerEntityManager());
         $gameList = $serializer->createJsonFromGameSave($this->gameSave);
         $this->saveZip->addFromString('game_list.json', $gameList);
     }
