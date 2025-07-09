@@ -3,6 +3,9 @@
 namespace App\EventListener;
 
 use App\Domain\API\v1\Router;
+use App\Domain\Services\ConnectionManager;
+use Doctrine\DBAL\Exception;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,11 +14,17 @@ class CheckApiSessionIdListener
 {
     private array $pathPatterns;
 
-    public function __construct(array $pathPatterns)
-    {
+    public function __construct(
+        array $pathPatterns,
+        private readonly EntityManagerInterface $em,
+        private readonly ConnectionManager $connectionManager
+    ) {
         $this->pathPatterns = $pathPatterns;
     }
 
+    /**
+     * @throws Exception
+     */
     public function onKernelRequest(RequestEvent $event): void
     {
         $request = $event->getRequest();
@@ -39,6 +48,20 @@ class CheckApiSessionIdListener
                     Response::HTTP_BAD_REQUEST
                 ));
             }
+
+            // since api platform uses the default entity manager,
+            //  we need to set the connection to the msp_session_$sessionId
+            $connection = $this->em->getConnection();
+            if ($connection->isConnected()) {
+                throw new \RuntimeException('Connection is already established.');
+            }
+
+            $otherConnection = $this->connectionManager->getCachedGameSessionDbConnection($sessionId);
+            $connection->__construct(
+                $otherConnection->getParams(),
+                $otherConnection->getDriver(),
+                $otherConnection->getConfiguration()
+            );
             return;
         }
     }

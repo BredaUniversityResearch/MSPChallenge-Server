@@ -4,8 +4,8 @@ namespace App\Domain\API\v1;
 
 use App\Domain\Common\InternalSimulationName;
 use App\Domain\Services\ConnectionManager;
-use App\Entity\Simulation;
-use App\Repository\SimulationRepository;
+use App\Entity\SessionAPI\Simulation;
+use App\Repository\SessionAPI\SimulationRepository;
 use Exception;
 use stdClass;
 

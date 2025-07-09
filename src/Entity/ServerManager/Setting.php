@@ -2,13 +2,14 @@
 
 namespace App\Entity\ServerManager;
 
+use App\Entity\EntityBase;
 use App\Repository\ServerManager\SettingRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Table(name: 'settings')]
 #[ORM\Entity(repositoryClass: SettingRepository::class)]
-class Setting
+class Setting extends EntityBase
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

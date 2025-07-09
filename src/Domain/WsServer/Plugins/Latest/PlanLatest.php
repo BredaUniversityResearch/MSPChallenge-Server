@@ -62,7 +62,7 @@ class PlanLatest extends CommonBase
                     $po,
                     "pp.policy_id = $po.id and $po.type = ".$qb->createPositionalParameter($policyTypeName->value)
                 )
-                ->addSelect($po.'.data as ' . $policyTypeName->value.'_data');
+                ->addSelect('MAX('.$po.'.data) as ' . $policyTypeName->value.'_data');
         }
         $qb
             ->where('pl.plan_lastupdate >= ' . $qb->createPositionalParameter($lastupdate))
@@ -274,7 +274,12 @@ class PlanLatest extends CommonBase
                 if (!empty($plan['energy_error'])) {
                     $policy['energy_error'] = $plan['energy_error'];
                 }
-                unset($plan['grids'], $plan['deleted_grids'], $plan['energy_error']);
+                unset(
+                    $plan['alters_energy_distribution'],
+                    $plan['grids'],
+                    $plan['deleted_grids'],
+                    $plan['energy_error']
+                );
                 break;
             case PolicyTypeName::FISHING_EFFORT: // PolicyUpdateFishingPlan
                 if (!empty($plan['fishing'])) {
@@ -289,28 +294,19 @@ class PlanLatest extends CommonBase
                 unset($plan['restriction_settings']);
                 break;
             default:
+                $policyObj = new \stdClass();
+                $policyObj->policy_type = $policyType->value;
                 if (!empty($plan[$policyType->value.'_data'])) {
-                    $policy = array_merge($policy, json_decode($plan[$policyType->value.'_data'] ?? [], true));
+                    $policyObj = PolicyDataFactory::createPolicyDataByJsonObject(
+                        json_decode($plan[$policyType->value.'_data'])
+                    );
                 }
-                $policyObj = PolicyDataFactory::createPolicyDataByJsonObject((object)$policy);
-                $policy = (array)PolicyDataBase::export($policyObj);
+                $policy = PolicyDataBase::export($policyObj);
                 break;
         }
 
         $plan['policies'][] = $policy;
-
-        unset(
-            $plan[$policyType->value.'_data'],
-            // PolicyUpdateEnergyPlan
-            $plan['alters_energy_distribution'],
-            $plan['grids'],
-            $plan['deleted_grids'],
-            $plan['energy_error'],
-            // PolicyUpdateFishingPlan
-            $plan['fishing'],
-            // PolicyUpdateShippingPlan
-            $plan['restriction_settings']
-        );
+        unset($plan[$policyType->value.'_data']);
     }
 
     /**

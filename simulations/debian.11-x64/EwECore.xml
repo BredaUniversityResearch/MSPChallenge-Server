@@ -984,7 +984,7 @@ EwECore
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_CIMMIG">
 <summary>
-  Looks up a localized string similar to CImmig.
+  Looks up a localized string similar to C. immig||Conc. in immigrating biomass|Concentration in immigrating biomass.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_CINFLOW">
@@ -1124,7 +1124,7 @@ EwECore
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_CZERO">
 <summary>
-  Looks up a localized string similar to CZero.
+  Looks up a localized string similar to CZero||Initial conc.|Initial concentration.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_DATAQ">
@@ -1962,6 +1962,11 @@ EwECore
   Looks up a localized string similar to End age.
 </summary>
 </member>
+<member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_ENERGY">
+<summary>
+  Looks up a localized string similar to Energy|||Energy content multiplier.
+</summary>
+</member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_EPOWER">
 <summary>
   Looks up a localized string similar to Effort response power.
@@ -2549,7 +2554,7 @@ EwECore
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_LAYERREGION">
 <summary>
-  Looks up a localized string similar to Regions||Map of statistical regions.
+  Looks up a localized string similar to Regions||Regions map.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreDefaults.VARIABLE_LAYERRELPP">
@@ -6041,6 +6046,16 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
   Looks up a localized string similar to Failed to set the value. Fix F and Fixed escapement cannot both contain a value..
 </summary>
 </member>
+<member name="P:EwECore.My.Resources.CoreMessages.MSE_FLEETTRADEOFF_SAVE_ERROR">
+<summary>
+  Looks up a localized string similar to Unable to save fleet trade-off output to &apos;{0}&apos;.
+</summary>
+</member>
+<member name="P:EwECore.My.Resources.CoreMessages.MSE_FLEETTRADEOFF_SAVED">
+<summary>
+  Looks up a localized string similar to Fleet trade-off output saved to &apos;{0}&apos;.
+</summary>
+</member>
 <member name="P:EwECore.My.Resources.CoreMessages.MSE_LPSOLVER_NONOPTIMAL">
 <summary>
   Looks up a localized string similar to MSE Linear Programing Solution failed to find an optimal solution for &apos;{0}&apos; time steps. Check your target fishing mortality rates to make sure you have not overly constrained your model..
@@ -6199,6 +6214,26 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
 <member name="P:EwECore.My.Resources.CoreMessages.QB_RANGE">
 <summary>
   Looks up a localized string similar to QB must be greater then zero..
+</summary>
+</member>
+<member name="P:EwECore.My.Resources.CoreMessages.REGIONS_PRERUN_WARNING">
+<summary>
+  Looks up a localized string similar to There may be some issues with regions. Do you want to continue running Ecospace?.
+</summary>
+</member>
+<member name="P:EwECore.My.Resources.CoreMessages.REGIONS_WARNING_NOCELLS">
+<summary>
+  Looks up a localized string similar to The regions map is missing values for {0} region(s).
+</summary>
+</member>
+<member name="P:EwECore.My.Resources.CoreMessages.REGIONS_WARNING_TOOMANY">
+<summary>
+  Looks up a localized string similar to There are a relatively high number of regions defined.
+</summary>
+</member>
+<member name="P:EwECore.My.Resources.CoreMessages.REGIONS_WARNING_UNUSED">
+<summary>
+  Looks up a localized string similar to There are {0} region(s) defined that will not be used by Ecospace.
 </summary>
 </member>
 <member name="P:EwECore.My.Resources.CoreMessages.RELOAD_ECOSPACE">
@@ -7038,13 +7073,6 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  <inheritdoc cref="P:EwECore.ICoreInterface.Name" />
  -----------------------------------------------------------------------
 </member>
-<member name="T:EwECore.Auxiliary.cVisualStyle.eVisualStyleTypes">
- -----------------------------------------------------------------------
- <summary>
- Helper class, stores custom visualization information for data entities.
- </summary>
- -----------------------------------------------------------------------
-</member>
 <member name="F:EwECore.Auxiliary.cVisualStyle.m_gradientID">
  <summary>To identify stock gradients</summary>
 </member>
@@ -7059,6 +7087,13 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  -----------------------------------------------------------------------
  <summary>
  Create a clone of a Visual Style instance.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwECore.Auxiliary.cVisualStyle.eVisualStyleTypes">
+ -----------------------------------------------------------------------
+ <summary>
+ Helper class, stores custom visualization information for data entities.
  </summary>
  -----------------------------------------------------------------------
 </member>
@@ -7081,6 +7116,14 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  <summary>
  Get/set the image for a visual style, if any.
  </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwECore.Auxiliary.cVisualStyle.ImageString">
+ -----------------------------------------------------------------------
+ <summary>
+ Serialize an image to and from a Hex string.
+ </summary>
+ <returns></returns>
  -----------------------------------------------------------------------
 </member>
 <member name="P:EwECore.Auxiliary.cVisualStyle.HatchStyle">
@@ -8358,19 +8401,6 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  <returns>True if the model was loaded successfully. False otherwise</returns>
  -----------------------------------------------------------------------
 </member>
-<member name="M:EwECore.cCore.LoadModel(EwECore.DataSources.IEwEDataSource)">
- -----------------------------------------------------------------------
- <summary>
- Load the Ecopath model from a given Datasource.
- </summary>
- <param name="ds">A <see cref="T:EwECore.DataSources.IEwEDataSource">IEwEDataSource</see>-derived
- object that provides access to the model. Note that the datasource must
- already be <see cref="M:EwECore.DataSources.IEwEDataSource.Open(System.String,EwECore.cCore,EwEUtils.Core.eDataSourceTypes,System.Boolean)">opened</see>.</param>
- <returns>True if the model was loaded successfully. False otherwise</returns>
- <remarks>The given data source will be remembered here for subsequent 
- <see cref="M:EwECore.cCore.SaveModel">SaveModel</see> and SaveEcosimScenario calls.</remarks>
- -----------------------------------------------------------------------
-</member>
 <member name="M:EwECore.cCore.CanSave(System.Boolean)">
  -----------------------------------------------------------------------
  <summary>
@@ -8408,13 +8438,6 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  -----------------------------------------------------------------------
  <summary>
  Close the Ecopath model and terminate the core.
- </summary>
- -----------------------------------------------------------------------
-</member>
-<member name="M:EwECore.cCore.CloseModel(System.Boolean)">
- -----------------------------------------------------------------------
- <summary>
- Close the model and optionally terminate the datasource
  </summary>
  -----------------------------------------------------------------------
 </member>
@@ -9007,6 +9030,14 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  If RunOnThread = True then True if a new thread was started. False otherwise. 
  If RunOnThread = False then True when the run has completed. False otherwise.
   </returns>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwECore.cCore.EcospacePaused">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set Ecospace to pause
+ </summary>
+ <returns>True if Ecosapce is set to pause.</returns>
  -----------------------------------------------------------------------
 </member>
 <member name="M:EwECore.cCore.CheckHabitats">
@@ -10883,6 +10914,12 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
 <member name="F:EwECore.eTimeSeriesType.FixedCost">
  <summary>Absolute fixed cost (by fleet x driver)</summary>
 </member>
+<member name="F:EwECore.eTimeSeriesType.DiscardsTotalAbs">
+ <summary>Total discards on a group across all fleets Relative values</summary>
+</member>
+<member name="F:EwECore.eTimeSeriesType.DiscardsTotalRel">
+ <summary>Total discards on a group across all fleets Absolute values</summary>
+</member>
 <member name="F:EwECore.eTimeSeriesType.FixedCostRel">
  <summary>Fixed cost multiplier (by fleet x driver)</summary>
 </member>
@@ -10962,6 +10999,19 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  <summary>
  Selected biodiversity index to display in the UI
  </summary>
+</member>
+<member name="T:EwECore.eScaleType">
+ -------------------------------------------------------------------
+ <summary>
+ Supported value conversion modes for spatial data.
+ </summary>
+ -------------------------------------------------------------------
+</member>
+<member name="F:EwECore.eScaleType.Absolute">
+ <summary>Values are applied as-is: no scaling is performed.</summary>
+</member>
+<member name="F:EwECore.eScaleType.Relative">
+ <summary>Value are scaled before being applied.</summary>
 </member>
 <member name="T:EwECore.ValueWrapper.eValueTypes">
  <summary>
@@ -17305,6 +17355,95 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  </summary>
  -----------------------------------------------------------------------
 </member>
+<member name="T:EwECore.cDBUpdate6_70_00_16">
+ --------------------------------------------------------------------------
+ <summary>
+ <para>Database update 6.70.0.16:</para>
+ <para>
+ Changed cVisualStyle serialization format.
+ </para>
+ </summary>
+ --------------------------------------------------------------------------
+</member>
+<member name="T:EwECore.cDBUpdate6_70_00_16.cVisualStyleConverter">
+ ===========================================================================
+ <summary>
+ Helper class for converting a visual style from the old deprecated
+ binary serialization style to the new JSON serialization style.
+ </summary>
+ ===========================================================================
+</member>
+<member name="P:EwECore.cDBUpdate6_70_00_16.UpdateVersion">
+ -----------------------------------------------------------------------
+ <inheritdocs cref="P:EwECore.cDBUpdate.UpdateVersion"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwECore.cDBUpdate6_70_00_16.UpdateDescription">
+ -----------------------------------------------------------------------
+ <inheritdocs cref="P:EwECore.cDBUpdate.UpdateDescription"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwECore.cDBUpdate6_70_00_16.ApplyUpdate(EwEUtils.Database.cEwEDatabase@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Go for it.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwECore.cDBUpdate6_70_00_17">
+ --------------------------------------------------------------------------
+ <summary>
+ <para>Database update 6.70.0.17:</para>
+ <para>
+ Added Energy content to Ecopath groups.
+ </para>
+ </summary>
+ --------------------------------------------------------------------------
+</member>
+<member name="P:EwECore.cDBUpdate6_70_00_17.UpdateVersion">
+ -----------------------------------------------------------------------
+ <inheritdocs cref="P:EwECore.cDBUpdate.UpdateVersion"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwECore.cDBUpdate6_70_00_17.UpdateDescription">
+ -----------------------------------------------------------------------
+ <inheritdocs cref="P:EwECore.cDBUpdate.UpdateDescription"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwECore.cDBUpdate6_70_00_17.ApplyUpdate(EwEUtils.Database.cEwEDatabase@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Go for it.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwECore.cDBUpdate6_70_00_18">
+ --------------------------------------------------------------------------
+ <summary>
+ <para>Database update 6.70.0.18:</para>
+ <para>
+ Added mediation function units.
+ </para>
+ </summary>
+ --------------------------------------------------------------------------
+</member>
+<member name="P:EwECore.cDBUpdate6_70_00_18.UpdateVersion">
+ -----------------------------------------------------------------------
+ <inheritdocs cref="P:EwECore.cDBUpdate.UpdateVersion"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwECore.cDBUpdate6_70_00_18.UpdateDescription">
+ -----------------------------------------------------------------------
+ <inheritdocs cref="P:EwECore.cDBUpdate.UpdateDescription"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwECore.cDBUpdate6_70_00_18.ApplyUpdate(EwEUtils.Database.cEwEDatabase@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Go for it.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
 <member name="T:EwECore.DataSources.cDataSourceFactory">
  =======================================================================
  <summary>
@@ -19558,17 +19697,12 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  <inheritdocs cref="M:EwECore.DataSources.IEcospaceDatasource.AddEcospaceDriverLayer(System.String,System.String,System.String,System.Int32@)" />"
  -------------------------------------------------------------------
 </member>
-<member name="P:EwECore.DataSources.cDBDataSource.getLayerIDs(EwEUtils.Core.eVarNameFlags)">
- -------------------------------------------------------------------
+<member name="M:EwECore.DataSources.cDBDataSource.SaveEcospaceDataConnections(EwECore.DataSources.cDBDataSource.cIDMappings)">
  <summary>
- Obtain a layer DBID for any varname and index.
+ This also saves the layer disabled state
  </summary>
- <param name="varname"></param>
- <remarks>
- This method is robust to any type of abuse; non-registered <paramref name="varname">variables</paramref>
- are dealt with properly.
- </remarks>
- -------------------------------------------------------------------
+ <param name="idm"></param>
+ <returns></returns>
 </member>
 <member name="M:EwECore.DataSources.cDBDataSource.IsEcotracerModified">
  -------------------------------------------------------------------
@@ -21136,6 +21270,14 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  </summary>
  -----------------------------------------------------------------------
 </member>
+<member name="P:EwECore.cEcoPathGroupInput.Energy">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the relative <see cref="F:EwECore.cEcopathDataStructures.Energy">energy</see>
+ contant for this group.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
 <member name="P:EwECore.cEcoPathGroupInput.IsFished">
  -----------------------------------------------------------------------
  <summary>
@@ -21268,6 +21410,14 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  <summary>
  Get/set the <see cref="T:EwEUtils.Core.eStatusFlags">status</see> of the 
  <see cref="P:EwECore.cEcoPathGroupInput.Emigration">Emigration value</see> of this group.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwECore.cEcoPathGroupInput.EnergyStatus">
+ -----------------------------------------------------------------------
+ <summary>
+ Get/set the <see cref="T:EwEUtils.Core.eStatusFlags">status</see> of the 
+ <see cref="P:EwECore.cEcoPathGroupInput.Energy">energy value</see> of this group.
  </summary>
  -----------------------------------------------------------------------
 </member>
@@ -21578,6 +21728,9 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
 </member>
 <member name="F:EwECore.cEcopathDataStructures.DietsModified">
  <summary>Flag stating whether diets have been modified since the last time Ecopath has ran.</summary>
+</member>
+<member name="F:EwECore.cEcopathDataStructures.UsedInIndicators">
+ <summary>Is group used for indicator calculations</summary>
 </member>
 <member name="F:EwECore.cEcopathDataStructures.fCatch">
  <summary>Sum (per <see cref="F:EwECore.cEcopathDataStructures.NumGroups">NumGroups</see>) of landings + discards.</summary>
@@ -27151,6 +27304,9 @@ min_B_QB: minimum B*QB.
 <member name="F:EwECore.cEcospaceDataStructures.Lon1">
  <summary>Longitude of upper left coordinate of the current basemap.</summary>
 </member>
+<member name="F:EwECore.cEcospaceDataStructures.IsGlobalMap">
+ <summary>Flag, states whether the map represents the global ocean.</summary>
+</member>
 <member name="F:EwECore.cEcospaceDataStructures.Nvarsplit">
  <summary> Total number of stanza groups </summary>
  <remarks>Sum of nStanza(isplit) for each stanza. Set in RedimMapVars()</remarks>
@@ -27194,8 +27350,16 @@ min_B_QB: minimum B*QB.
  <summary>Catch by Row, Col, Fleet.</summary>
 </member>
 <member name="F:EwECore.cEcospaceDataStructures.DiscardsMap">
- <summary>Discards (all? mortality?) by Row, Col, Group.</summary>
- <remarks>This is not exposed by the interface at this time. It was included for the Biodiversity plugin and can only be accessed via code.</remarks>
+ <summary>All discards by Row, Col, Group.</summary>
+</member>
+<member name="F:EwECore.cEcospaceDataStructures.CatchGroupFleetMap">
+ <summary>Catch by (Fleet, Group)(row, col)</summary>
+</member>
+<member name="F:EwECore.cEcospaceDataStructures.DiscardMortGroupFleetMap">
+ <summary>Discard mortality by (Fleet, Group)(row, col)</summary>
+</member>
+<member name="F:EwECore.cEcospaceDataStructures.DiscardSurviveGroupFleetMap">
+ <summary>Discard survival by (Fleet, Group)(row, col)</summary>
 </member>
 <member name="F:EwECore.cEcospaceDataStructures.DepthInput">
  <summary>User-entered depth map</summary>
@@ -27488,6 +27652,11 @@ min_B_QB: minimum B*QB.
 <member name="F:EwECore.cEcospaceDataStructures.MaxHabCap">
 <summary>max capacity by group</summary>
  <remarks>Used to check that the user has set capacities for all groups </remarks>
+</member>
+<member name="F:EwECore.cEcospaceDataStructures.RelativeCellWidth">
+ <summary>
+ Relative cell width due to lattitude tapering, unless <see cref="F:EwECore.cEcospaceDataStructures.AssumeSquareCells"/> is set.
+ </summary>
 </member>
 <member name="F:EwECore.cEcospaceDataStructures.UseCoreOutputDir">
  <summary>
@@ -27858,6 +28027,13 @@ min_B_QB: minimum B*QB.
  </summary>
  <remarks>Do garbage collection on the discarded memory so memory in never allocated twice.</remarks>
 </member>
+<member name="M:EwECore.cEcospaceDataStructures.CalculateRelCellWidths">
+ <summary>
+ Simplified algorithm to calculate the relative cell widths in
+ the assumed WGS84 projection. This code assumes that the model 
+ uses km
+ </summary>
+</member>
 <member name="M:EwECore.cEcospaceDataStructures.redimTimeStepResults(System.Int32)">
  <summary>
  Redim the data that saves the Ecospace results over time
@@ -27958,7 +28134,7 @@ min_B_QB: minimum B*QB.
  <returns></returns>
  <remarks></remarks>
 </member>
-<member name="M:EwECore.cEcospaceDataStructures.getLayerID(EwEUtils.Core.eVarNameFlags,System.Int32)">
+<member name="M:EwECore.cEcospaceDataStructures.GetLayerID(EwEUtils.Core.eVarNameFlags,System.Int32)">
  -------------------------------------------------------------------
  <summary>
  Return the <see cref="P:EwECore.cCoreInputOutputBase.DBID">unique database ID</see>
@@ -27974,7 +28150,7 @@ min_B_QB: minimum B*QB.
  </remarks>
  -------------------------------------------------------------------
 </member>
-<member name="P:EwECore.cEcospaceDataStructures.getLayerIDs(EwEUtils.Core.eVarNameFlags)">
+<member name="P:EwECore.cEcospaceDataStructures.GetLayerIDs(EwEUtils.Core.eVarNameFlags)">
  -------------------------------------------------------------------
  <summary>
  Obtain a layer DBID for any varname and index.
@@ -28203,6 +28379,35 @@ min_B_QB: minimum B*QB.
  <param name="Consumpt">Consumption by consumer,prey  </param>
  <param name="EatenBy">Total biomass consumed by a group </param>
  <remarks>Trophic level is only calculated if <see cref="F:EwECore.cEcospaceDataStructures.bCalTrophicLevel">bCalTrophicLevel</see> = True</remarks>
+</member>
+<member name="T:EwECore.cSailCostCalculator">
+ -----------------------------------------------------------------------------
+ <summary>
+ Utility class to calculate sailing costs for each fleet based on the location
+ of their ports. Costs are calculated as port distances in km, working around 
+ land masses.
+ </summary>
+ -----------------------------------------------------------------------------
+</member>
+<member name="T:EwECore.cSailCostCalculatorPriorityQueue">
+ <summary>
+ Helper class for sorting a number of <see cref="T:EwECore.cSailCostCalculatorPriorityQueue.cCostPoint">cost-at-location</see>
+ data points, sorted by cost, to speed up the sailing cost calculations.
+ </summary>
+</member>
+<member name="T:EwECore.cSailCostCalculatorPriorityQueue.cCostPoint">
+ -----------------------------------------------------------------------
+ <summary>
+ Helper class for remembering a single cost-at-location data point.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
+<member name="T:EwECore.cSailCostCalculatorPriorityQueue.cCostPointComparer">
+ -----------------------------------------------------------------------
+ <summary>
+ Helper class for comparing <see cref="T:EwECore.cSailCostCalculatorPriorityQueue.cCostPoint">cost-at-location</see> data points.
+ </summary>
+ -----------------------------------------------------------------------
 </member>
 <member name="M:EwECore.cENAData.Populate(EwECore.cEcospaceDataStructures,System.Single[],System.Single[],System.Single[0:,0:],System.Single[],System.Single[],System.Single[],System.Single[],System.Single)">
  -----------------------------------------------------------------------
@@ -29659,6 +29864,7 @@ pass in params that this method needs instead of obtaining them from the manager
  <summary>
  Save data to file.
  </summary>
+ <param name="iTrial">THe trial number, where 0 is the baseline.</param>
 </member>
 <member name="T:EwECore.cMonteCarloResultsWriterOneFile">
  <summary>
@@ -30338,6 +30544,11 @@ pass in params that this method needs instead of obtaining them from the manager
  </summary>
  <remarks>Economic data caculated by ecosim at the end of a run</remarks>
 </member>
+<member name="M:EwECore.MSE.cMSE.RunFleetTradeoffs(System.String)">
+ <summary>
+ Run fleet tradeoff analysis
+ </summary>
+</member>
 <member name="M:EwECore.MSE.cMSE.RandomNormal">
  <summary>
  Normally distrubute random number where mean = 0 std = 1
@@ -30400,7 +30611,7 @@ pass in params that this method needs instead of obtaining them from the manager
 <member name="F:EwECore.MSE.cMSEDataStructures.sumEmployVal">
  <summary>sum of employment value over all the completed trials</summary>
 </member>
-<member name="F:EwECore.MSE.cMSEDataStructures.SumTotVal">
+<member name="F:EwECore.MSE.cMSEDataStructures.SumProfit">
  <summary>sum of economic over all the completed trials</summary>
 </member>
 <member name="F:EwECore.MSE.cMSEDataStructures.sumManVal">
@@ -32359,15 +32570,15 @@ pass in params that this method needs instead of obtaining them from the manager
  <returns></returns>
  -------------------------------------------------------------------
 </member>
-<member name="M:EwECore.Samples.cEcopathSampleManager.Record(System.String,EwECore.cEcosimMonteCarlo)">
+<member name="M:EwECore.Samples.cEcopathSampleManager.Record(System.String)">
  -------------------------------------------------------------------
  <summary>
- Record an <see cref="T:EwECore.Samples.cEcopathSample"/> from the current values in Ecopath.
- <seealso cref="T:EwECore.Samples.cEcopathSample"/>
+ Record an <see cref="T:EwECore.Samples.cEcopathSample"/> in response to Monte Carlo
+ resampling.
  </summary>
  <param name="strBaseHash">The hash code for the original model.</param>
- <param name="mc">Monte Carlo to obtain values from.</param>
  <returns>A valid sample, or Nothing if an error occurred.</returns>
+ <seealso cref="T:EwECore.Samples.cEcopathSample"/>
  -------------------------------------------------------------------
 </member>
 <member name="M:EwECore.Samples.cEcopathSampleManager.StoreEcosimDiagnostics(EwECore.Samples.cEcopathSample,EwECore.cEcosimMonteCarlo,EwECore.cEcosimDatastructures)">
@@ -32467,13 +32678,13 @@ pass in params that this method needs instead of obtaining them from the manager
  <param name="iStartAt">One-based sample index to start at</param>
  <param name="bRandomize"></param>
 </member>
-<member name="M:EwECore.Samples.cEcopathSampleManager.MakeSnapshot(System.Boolean,EwECore.cEcosimMonteCarlo)">
+<member name="M:EwECore.Samples.cEcopathSampleManager.MakeSnapshot(EwECore.Samples.cEcopathSampleManager.eSnapshotMode)">
  -------------------------------------------------------------------
  <summary>
- Create a model snapshot from Ecopath.
+ Create a model snapshot, either an Ecopath backup sample or a sample
+ triggered by a Monte Carlo search.
  </summary>
- <param name="bMustBalance"></param>
- <param name="mc"></param>
+ <param name="mode"></param>
  <returns></returns>
  -------------------------------------------------------------------
 </member>
@@ -32624,23 +32835,22 @@ pass in params that this method needs instead of obtaining them from the manager
  The Fishing Policy Search needs Ecosim to run for an additional 20 years
  </summary>
 </member>
-<member name="M:EwECore.cSearchDatastructures.setDefaultOptimizationValues">
+<member name="M:EwECore.cSearchDatastructures.SetDefaultOptimizationValues">
  <summary>
  Set default values for the optimiation. These are values that are set the same for every run.
  </summary>
  <remarks>from frmOptF.Load_Form() </remarks>
 </member>
-<member name="M:EwECore.cSearchDatastructures.setMinSearchBlocks">
+<member name="M:EwECore.cSearchDatastructures.SetMinSearchBlocks">
  <summary>
  Sets the search blocks to the minimum number needed to have the search turned on
  </summary>
  <remarks>Used when the search blocks need to be dimensioned but not used e.g. Ecoseed</remarks>
 </member>
-<member name="M:EwECore.cSearchDatastructures.setDefaultFBlockCodes">
+<member name="M:EwECore.cSearchDatastructures.SetDefaultFBlockCodes">
  <summary>
  Set default FBlockCodes to a unique code for each fleet
  </summary>
- <remarks></remarks>
 </member>
 <member name="M:EwECore.cSearchDatastructures.saveInitialFishingRate(EwECore.cEcosimDatastructures@)">
  <summary>
@@ -33086,6 +33296,12 @@ Manager for the Egg Production Shapes
  Left margin of the X Axis considered to be inbounds of the response function.
  Updates <see cref="F:EwECore.cMediationDataStructures.XAxisMin">cMediationDataStructures.XAxisMin</see>
  </remarks>
+</member>
+<member name="P:EwECore.cEnviroResponseFunction.Units">
+ <summary>
+ Get/set the units of the response function. These will be inert in the model,
+ units only serve to advice the user on response application.
+ </summary>
 </member>
 <member name="P:EwECore.cEnviroResponseFunction.ResponseRightLimit">
  <summary>
@@ -36288,22 +36504,9 @@ Passed into the Constructor
  Derived spatial data adapter to insert scaled external spatial/temporal map data into
  the Ecospace data structures at any given moment. This adapter maintains a scale
  for every map layer attached to the adapter, and will translate map values
- to relative values when <see cref="T:EwECore.SpatialData.cSpatialScalarDataAdapterBase.eScaleType"/> is set to
- <see cref="F:EwECore.SpatialData.cSpatialScalarDataAdapterBase.eScaleType.Relative">relative</see>.
+ to relative values when <see cref="!:cSpatialScalarDataAdapter.eScaleType"/> is set to
+ <see cref="!:cSpatialScalarDataAdapter.eScaleType.Relative">relative</see>.
  </summary>
-</member>
-<member name="T:EwECore.SpatialData.cSpatialScalarDataAdapterBase.eScaleType">
- -------------------------------------------------------------------
- <summary>
- Supported value conversion modes for a <see cref="T:EwECore.SpatialData.cSpatialScalarDataAdapter"/>.
- </summary>
- -------------------------------------------------------------------
-</member>
-<member name="F:EwECore.SpatialData.cSpatialScalarDataAdapterBase.eScaleType.Absolute">
- <summary>Values are applied as-is: no scaling is performed.</summary>
-</member>
-<member name="F:EwECore.SpatialData.cSpatialScalarDataAdapterBase.eScaleType.Relative">
- <summary>Value are scaled before being applied.</summary>
 </member>
 <member name="M:EwECore.SpatialData.cSpatialScalarDataAdapterBase.CanCalculateScalar">
  -------------------------------------------------------------------
@@ -36489,10 +36692,10 @@ Passed into the Constructor
  </summary>
  -------------------------------------------------------------------
 </member>
-<member name="M:EwECore.SpatialData.cSpatialDataConfigFile.Load(EwECore.cCore,EwECore.SpatialData.cSpatialDataSetManager)">
+<member name="M:EwECore.SpatialData.cSpatialDataConfigFile.Load(System.String)">
  -------------------------------------------------------------------
  <summary>
- Initializes the manager with datasets, loaded from persistent storage.
+ Load the spatial datasets from a config file.
  </summary>
  <returns>False if the config file is corrupted, True otherwise.</returns>
  <remarks>This method can also be used to import extra datasets.</remarks>
@@ -36591,7 +36794,7 @@ Passed into the Constructor
 <member name="T:EwECore.SpatialData.cSpatialDataConnectionManager">
  -----------------------------------------------------------------------
  <summary>
- Manages the connections between available <see cref="T:EwECore.SpatialData.cSpatialDataAdapter"/>s 
+ Manages the connections of available <see cref="T:EwECore.SpatialData.cSpatialDataAdapter"/>s 
  and <see cref="T:EwEUtils.SpatialData.ISpatialDataSet"/>s
  </summary>
  -----------------------------------------------------------------------
@@ -36784,9 +36987,39 @@ Passed into the Constructor
  <returns>True if a dataset is being indexed.</returns>
  -------------------------------------------------------------------
 </member>
+<member name="M:EwECore.SpatialData.cSpatialDataSetManager.Contains(System.Collections.Generic.ICollection{EwEUtils.SpatialData.ISpatialDataSet})">
+ -------------------------------------------------------------------
+ <summary>
+ Determine if one or more datasets are already defined. The dataset check
+ is performed by checking the <see cref="P:EwEUtils.SpatialData.ISpatialDataSet.GUID"/>.
+ </summary>
+ <param name="datasets">The dataset(s) to check.</param>
+ <returns>True if one or more dataset(s) are already present.</returns>
+ -------------------------------------------------------------------
+</member>
 <member name="M:EwECore.SpatialData.cSpatialDataSetManager.Add(EwEUtils.SpatialData.ISpatialDataSet)">
  -------------------------------------------------------------------
  <inheritdocs cref="M:System.Collections.Generic.ICollection`1.Add(`0)"/>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwECore.SpatialData.cSpatialDataSetManager.AddRange(System.Collections.Generic.ICollection{EwEUtils.SpatialData.ISpatialDataSet},System.Boolean)">
+ -------------------------------------------------------------------
+ <summary>
+ <see cref="M:EwECore.SpatialData.cSpatialDataSetManager.Add(EwEUtils.SpatialData.ISpatialDataSet)"/> a range of spatial datasets.
+ </summary>
+ <param name="datasets">The dataset(s) to add.</param>
+ <param name="bInvalidateCore">Flag, states whether to flag the EwE
+ database as needing for saving.</param>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwECore.SpatialData.cSpatialDataSetManager.RemoveRange(System.Collections.Generic.ICollection{EwEUtils.SpatialData.ISpatialDataSet},System.Boolean)">
+ -------------------------------------------------------------------
+ <summary>
+ <see cref="M:EwECore.SpatialData.cSpatialDataSetManager.Remove(EwEUtils.SpatialData.ISpatialDataSet)"/> a range of spatial datasets.
+ </summary>
+ <param name="datasets">The dataset(s) to add.</param>
+ <param name="bInvalidateCore">Flag, states whether to flag the EwE
+ database as needing for saving.</param>
  -------------------------------------------------------------------
 </member>
 <member name="M:EwECore.SpatialData.cSpatialDataSetManager.Clear">
@@ -37171,6 +37404,12 @@ Passed into the Constructor
  <summary>
  
  </summary>
+</member>
+<member name="F:EwECore.SpatialData.cSpatialDataStructures.m_pathDS">
+ <summary>Defined just in case ever needed</summary>
+</member>
+<member name="F:EwECore.SpatialData.cSpatialDataStructures.m_spaceDS">
+ <summary>Defined just in case ever needed</summary>
 </member>
 <member name="F:EwECore.SpatialData.cSpatialDataStructures.DataAdapters">
  <summary>Availalable data adapters</summary>

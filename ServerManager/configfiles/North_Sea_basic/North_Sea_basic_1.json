@@ -34579,7 +34579,12 @@
             "default_value": null
           }
         ],
-        "layer_tags": []
+        "layer_tags": [
+          "Point",
+          "Shipping",
+          "Gate",
+          "Invisible"
+        ]
       },
       {
         "layer_name": "NS_Connection_Points_25km_2",
@@ -34740,7 +34745,11 @@
             "default_value": null
           }
         ],
-        "layer_tags": []
+        "layer_tags": [
+          "Point",
+          "Shipping",
+          "Invisible"
+        ]
       },
       {
         "layer_name": "NS_Shipping_Invisible_Lanes",
@@ -34845,7 +34854,12 @@
             "default_value": null
           }
         ],
-        "layer_tags": []
+        "layer_tags": [
+          "Line",
+          "Shipping",
+          "Lane",
+          "Invisible"
+        ]
       },
       {
         "layer_name": "NS_Lighthouses",
@@ -41959,7 +41973,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "ValueMap",
+          "FishCatch"
+        ]
       },
       {
         "layer_name": "mel_Cod_Catch",
@@ -42147,7 +42164,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "ValueMap",
+          "FishCatch"
+        ]
       },
       {
         "layer_name": "mel_Demersal_Fish_Catch",
@@ -42335,7 +42355,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "ValueMap",
+          "FishCatch"
+        ]
       },
       {
         "layer_name": "mel_Flatfish_Catch",
@@ -42523,7 +42546,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "ValueMap",
+          "FishCatch"
+        ]
       },
       {
         "layer_name": "mel_Herring_Catch",
@@ -42711,7 +42737,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "ValueMap",
+          "FishCatch"
+        ]
       },
       {
         "layer_name": "mel_Mackerel_Catch",
@@ -42899,7 +42928,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "ValueMap",
+          "FishCatch"
+        ]
       },
       {
         "layer_name": "mel_Sandeel_Catch",
@@ -43087,7 +43119,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "ValueMap",
+          "FishCatch"
+        ]
       },
       {
         "layer_name": "mel_Benthic_Invertebrates_Catch",
@@ -43275,7 +43310,10 @@
           }
         },
         "layer_info_properties": null,
-        "layer_tags": []
+        "layer_tags": [
+          "ValueMap",
+          "FishCatch"
+        ]
       }
     ],
     "expertise_definitions": [],

@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "5/7/2025",
-    "data_model_hash": "8D145CA06E12BA56997D3720C79BAE4E66A56F005C2E7E1B5B0439C6D0F2803A",
+    "date_modified": "7/1/2025",
+    "data_model_hash": "903C4298C3043FE6A88B6BD1DEFFBA09F5CAB4F5A6C3CBEE09A5D361767D2421",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -1487,6 +1487,12 @@
           "description": "All the port infrastructure in the water and on the seabed. "
         },
         {
+          "fromId": 11,
+          "toId": 26,
+          "severity": 3,
+          "description": "Sand & gravel extraction cause bottom disturbance"
+        },
+        {
           "fromId": 12,
           "toId": 17,
           "severity": -3,
@@ -1595,10 +1601,100 @@
           "description": "Cargo shipping avoids shallow waters "
         },
         {
+          "fromId": 24,
+          "toId": 51,
+          "severity": -3,
+          "description": "Recreational fishing is not allowed in Marine Protected Areas. "
+        },
+        {
+          "fromId": 24,
+          "toId": 54,
+          "severity": -3,
+          "description": "Artisanal fishing is not allowed in Marine Protected Areas. "
+        },
+        {
+          "fromId": 24,
+          "toId": 87,
+          "severity": -3,
+          "description": "Industrial fishing is not allowed in Marine Protected Areas. "
+        },
+        {
+          "fromId": 24,
+          "toId": 86,
+          "severity": -3,
+          "description": "Subsistence fishing is not allowed in Marine Protected Areas. "
+        },
+        {
           "fromId": 26,
           "toId": 31,
           "severity": -1,
           "description": "Flatfish avoids surface disturbance "
+        },
+        {
+          "fromId": 26,
+          "toId": 55,
+          "severity": -1,
+          "description": "Dolphins avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 56,
+          "severity": -1,
+          "description": "Whales avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 33,
+          "severity": -3,
+          "description": "Mackerel avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 61,
+          "severity": -3,
+          "description": "Horse mackerel avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 63,
+          "severity": -3,
+          "description": "Benthopelagic fish avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 66,
+          "severity": -3,
+          "description": "Large demersal fish avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 67,
+          "severity": -3,
+          "description": "Medium demersal fish avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 31,
+          "severity": -3,
+          "description": "Flatfish avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 69,
+          "severity": -3,
+          "description": "Bathydemersal fish avoid Bottom Disturbance."
+        },
+        {
+          "fromId": 26,
+          "toId": 70,
+          "severity": -3,
+          "description": "Demersal sharks avoid Bottom Disturbance. "
+        },
+        {
+          "fromId": 26,
+          "toId": 79,
+          "severity": -3,
+          "description": "Mobile benthos avoid Bottom Disturbance. "
         },
         {
           "fromId": 27,
@@ -1611,6 +1707,84 @@
           "toId": 31,
           "severity": -1,
           "description": "Flatfish avoids noisy areas "
+        },
+        {
+          "fromId": 27,
+          "toId": 55,
+          "severity": -1,
+          "description": "Dolphins avoid noisy areas."
+        },
+        {
+          "fromId": 27,
+          "toId": 56,
+          "severity": -3,
+          "description": "Whales avoid noisy areas. "
+        },
+        {
+          "fromId": 27,
+          "toId": 57,
+          "severity": -3,
+          "description": "Turtles avoid noisy areas."
+        },
+        {
+          "fromId": 27,
+          "toId": 58,
+          "severity": -3,
+          "description": "Large pelagic fish avoid noisy areas."
+        },
+        {
+          "fromId": 27,
+          "toId": 59,
+          "severity": -3,
+          "description": "Medium pelagic fish avoid noisy areas."
+        },
+        {
+          "fromId": 27,
+          "toId": 60,
+          "severity": -1,
+          "description": "Small pelagic fish avoid noisy areas."
+        },
+        {
+          "fromId": 27,
+          "toId": 66,
+          "severity": -1,
+          "description": "Large demersal fish avoid noisy areas."
+        },
+        {
+          "fromId": 28,
+          "toId": 55,
+          "severity": -3,
+          "description": "Dolphins avoid Surface Disturbance."
+        },
+        {
+          "fromId": 28,
+          "toId": 56,
+          "severity": -3,
+          "description": "Whales avoid Surface Disturbance."
+        },
+        {
+          "fromId": 28,
+          "toId": 57,
+          "severity": -3,
+          "description": "Turtles avoid Surface Disturbance."
+        },
+        {
+          "fromId": 28,
+          "toId": 58,
+          "severity": -3,
+          "description": "Large pelagic fish avoid Surface Disturbance."
+        },
+        {
+          "fromId": 28,
+          "toId": 59,
+          "severity": -3,
+          "description": "Medium pelagic fish avoid Surface Disturbance."
+        },
+        {
+          "fromId": 28,
+          "toId": 60,
+          "severity": -3,
+          "description": "Small pelagic fish avoid Surface Disturbance."
         },
         {
           "fromId": 31,
@@ -1675,7 +1849,7 @@
         {
           "fromId": 47,
           "toId": 82,
-          "severity": -1,
+          "severity": -2,
           "description": "Seabirds prey on Zooplankton. "
         },
         {
@@ -1843,7 +2017,7 @@
         {
           "fromId": 56,
           "toId": 82,
-          "severity": -1,
+          "severity": -2,
           "description": "Whales mainly feed on Zooplankton. "
         },
         {
@@ -1875,6 +2049,30 @@
           "toId": 83,
           "severity": -1,
           "description": "Turtles prey on Seagrass & Seaweed."
+        },
+        {
+          "fromId": 58,
+          "toId": 59,
+          "severity": -1,
+          "description": "Large Pelagic Fish prey on Medium Pelagic Fish"
+        },
+        {
+          "fromId": 58,
+          "toId": 60,
+          "severity": -1,
+          "description": "Large Pelagic Fish prey on Small Pelagic Fish"
+        },
+        {
+          "fromId": 58,
+          "toId": 79,
+          "severity": -1,
+          "description": "Large Pelagic Fish prey on Mobile Benthos"
+        },
+        {
+          "fromId": 58,
+          "toId": 82,
+          "severity": -1,
+          "description": "Large Pelagic Fish prey on Zooplankton"
         },
         {
           "fromId": 59,
@@ -2325,188 +2523,14 @@
           "toId": 33,
           "severity": -3,
           "description": "Mackerel is caught by Industrial fleets. "
-        },
-        {
-          "fromId": 24,
-          "toId": 51,
-          "severity": -3,
-          "description": "Recreational fishing is not allowed in Marine Protected Areas. "
-        },
-        {
-          "fromId": 24,
-          "toId": 54,
-          "severity": -3,
-          "description": "Artisanal fishing is not allowed in Marine Protected Areas. "
-        },
-        {
-          "fromId": 24,
-          "toId": 87,
-          "severity": -3,
-          "description": "Industrial fishing is not allowed in Marine Protected Areas. "
-        },
-        {
-          "fromId": 24,
-          "toId": 86,
-          "severity": -3,
-          "description": "Subsistence fishing is not allowed in Marine Protected Areas. "
-        },
-        {
-          "fromId": 27,
-          "toId": 55,
-          "severity": -1,
-          "description": "Dolphins avoid noisy areas."
-        },
-        {
-          "fromId": 27,
-          "toId": 56,
-          "severity": -3,
-          "description": "Whales avoid noisy areas. "
-        },
-        {
-          "fromId": 27,
-          "toId": 57,
-          "severity": -3,
-          "description": "Turtles avoid noisy areas."
-        },
-        {
-          "fromId": 27,
-          "toId": 58,
-          "severity": -3,
-          "description": "Large pelagic fish avoid noisy areas."
-        },
-        {
-          "fromId": 27,
-          "toId": 59,
-          "severity": -3,
-          "description": "Medium pelagic fish avoid noisy areas."
-        },
-        {
-          "fromId": 27,
-          "toId": 60,
-          "severity": -1,
-          "description": "Small pelagic fish avoid noisy areas."
-        },
-        {
-          "fromId": 27,
-          "toId": 66,
-          "severity": -1,
-          "description": "Large demersal fish avoid noisy areas."
-        },
-        {
-          "fromId": 28,
-          "toId": 55,
-          "severity": -3,
-          "description": "Dolphins avoid Surface Disturbance."
-        },
-        {
-          "fromId": 28,
-          "toId": 56,
-          "severity": -3,
-          "description": "Whales avoid Surface Disturbance."
-        },
-        {
-          "fromId": 28,
-          "toId": 57,
-          "severity": -3,
-          "description": "Turtles avoid Surface Disturbance."
-        },
-        {
-          "fromId": 28,
-          "toId": 58,
-          "severity": -3,
-          "description": "Large pelagic fish avoid Surface Disturbance."
-        },
-        {
-          "fromId": 28,
-          "toId": 59,
-          "severity": -3,
-          "description": "Medium pelagic fish avoid Surface Disturbance."
-        },
-        {
-          "fromId": 28,
-          "toId": 60,
-          "severity": -3,
-          "description": "Small pelagic fish avoid Surface Disturbance."
-        },
-        {
-          "fromId": 26,
-          "toId": 55,
-          "severity": -1,
-          "description": "Dolphins avoid Bottom Disturbance."
-        },
-        {
-          "fromId": 26,
-          "toId": 56,
-          "severity": -1,
-          "description": "Whales avoid Bottom Disturbance."
-        },
-        {
-          "fromId": 26,
-          "toId": 33,
-          "severity": -3,
-          "description": "Mackerel avoid Bottom Disturbance."
-        },
-        {
-          "fromId": 26,
-          "toId": 61,
-          "severity": -3,
-          "description": "Horse mackerel avoid Bottom Disturbance."
-        },
-        {
-          "fromId": 26,
-          "toId": 63,
-          "severity": -3,
-          "description": "Benthopelagic fish avoid Bottom Disturbance."
-        },
-        {
-          "fromId": 26,
-          "toId": 66,
-          "severity": -3,
-          "description": "Large demersal fish avoid Bottom Disturbance."
-        },
-        {
-          "fromId": 26,
-          "toId": 67,
-          "severity": -3,
-          "description": "Medium demersal fish avoid Bottom Disturbance."
-        },
-        {
-          "fromId": 26,
-          "toId": 31,
-          "severity": -3,
-          "description": "Flatfish avoid Bottom Disturbance."
-        },
-        {
-          "fromId": 26,
-          "toId": 69,
-          "severity": -3,
-          "description": "Bathydemersal fish avoid Bottom Disturbance."
-        },
-        {
-          "fromId": 26,
-          "toId": 70,
-          "severity": -3,
-          "description": "Demersal sharks avoid Bottom Disturbance. "
-        },
-        {
-          "fromId": 26,
-          "toId": 79,
-          "severity": -3,
-          "description": "Mobile benthos avoid Bottom Disturbance. "
-        },
-        {
-          "fromId": 11,
-          "toId": 26,
-          "severity": 3,
-          "description": "Sand & gravel extraction cause bottom disturbance"
         }
       ]
     },
     "CEL": {
       "grey_centerpoint_color": "#3D1C04FF",
-      "grey_centerpoint_sprite": "oilbarrel",
+      "grey_centerpoint_sprite": "Oilbarrel",
       "green_centerpoint_color": "#18840AFF",
-      "green_centerpoint_sprite": "lightning"
+      "green_centerpoint_sprite": "Lightning"
     },
     "SEL": {
       "shipping_lane_layers": [
@@ -10024,7 +10048,7 @@
           "name": "Ecological fishing Cy- Artisanal",
           "policy_filters": {
             "fleets": [
-              "12"
+              "8"
             ]
           }
         },
@@ -10032,7 +10056,7 @@
           "name": "Ecological fishing Cy- Industrial",
           "policy_filters": {
             "fleets": [
-              "13"
+              "9"
             ]
           }
         },
@@ -10040,7 +10064,7 @@
           "name": "Ecological fishing Cy- Recreational",
           "policy_filters": {
             "fleets": [
-              "14"
+              "10"
             ]
           }
         },
@@ -10048,7 +10072,7 @@
           "name": "Ecological fishing Cy- Subsistence",
           "policy_filters": {
             "fleets": [
-              "15"
+              "11"
             ]
           }
         },
@@ -10056,7 +10080,7 @@
           "name": "Ecological fishing Sy- Artisanal",
           "policy_filters": {
             "fleets": [
-              "20"
+              "12"
             ]
           }
         },
@@ -10064,7 +10088,7 @@
           "name": "Ecological fishing Sy- Industrial",
           "policy_filters": {
             "fleets": [
-              "21"
+              "13"
             ]
           }
         },
@@ -10072,7 +10096,7 @@
           "name": "Ecological fishing Sy-Recreational",
           "policy_filters": {
             "fleets": [
-              "22"
+              "14"
             ]
           }
         },
@@ -10080,7 +10104,7 @@
           "name": "Ecological Sy-Subsistence",
           "policy_filters": {
             "fleets": [
-              "23"
+              "15"
             ]
           }
         },
@@ -10088,7 +10112,7 @@
           "name": "Ecological fishing Le- Artisanal",
           "policy_filters": {
             "fleets": [
-              "24"
+              "16"
             ]
           }
         },
@@ -10096,7 +10120,7 @@
           "name": "Ecological fishing Le- Industrial",
           "policy_filters": {
             "fleets": [
-              "25"
+              "17"
             ]
           }
         },
@@ -10104,7 +10128,7 @@
           "name": "Ecological fishing Le- Recreational",
           "policy_filters": {
             "fleets": [
-              "26"
+              "18"
             ]
           }
         },
@@ -10112,7 +10136,7 @@
           "name": "Ecological fishing Le- Subsistence",
           "policy_filters": {
             "fleets": [
-              "27"
+              "19"
             ]
           }
         },
@@ -10120,7 +10144,7 @@
           "name": "Ecological fishing IL-Artisanal",
           "policy_filters": {
             "fleets": [
-              "28"
+              "20"
             ]
           }
         },
@@ -10128,7 +10152,7 @@
           "name": "Ecological fishing IL-Industrial",
           "policy_filters": {
             "fleets": [
-              "29"
+              "21"
             ]
           }
         },
@@ -10136,7 +10160,7 @@
           "name": "Ecological fishing IL-Recreational",
           "policy_filters": {
             "fleets": [
-              "30"
+              "22"
             ]
           }
         },
@@ -10144,7 +10168,7 @@
           "name": "Ecological fishing IL-Subsistence",
           "policy_filters": {
             "fleets": [
-              "31"
+              "23"
             ]
           }
         },
@@ -10152,7 +10176,7 @@
           "name": "Ecological fishing Eg-Artisanal",
           "policy_filters": {
             "fleets": [
-              "32"
+              "24"
             ]
           }
         },
@@ -10160,7 +10184,7 @@
           "name": "Ecological fishing Eg-Industrial",
           "policy_filters": {
             "fleets": [
-              "33"
+              "25"
             ]
           }
         },
@@ -10168,7 +10192,7 @@
           "name": "Ecological fishing Eg-Recreational",
           "policy_filters": {
             "fleets": [
-              "34"
+              "26"
             ]
           }
         },
@@ -10176,7 +10200,7 @@
           "name": "Ecological fishing Eg-Subsistence",
           "policy_filters": {
             "fleets": [
-              "35"
+              "27"
             ]
           }
         }
@@ -14600,7 +14624,7 @@
             "approval": "NotDependent",
             "value": 0,
             "map_type": null,
-            "displayPolygon": 1,
+            "displayPolygon": 0,
             "polygonColor": "#353635FF",
             "polygonPatternName": "27",
             "innerGlowEnabled": 0,
@@ -14608,15 +14632,15 @@
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
+            "displayLines": 0,
             "lineColor": "#000000FF",
             "lineWidth": 1.0,
-            "lineIcon": null,
+            "lineIcon": "Null",
             "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#00A854FF",
+            "displayPoints": 1,
+            "pointColor": "#202924FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Borehole",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -15101,7 +15125,7 @@
         "layer_name": "ems_treatmentplants_emodnet",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
-        "layer_short": "Treatment Plants",
+        "layer_short": "Treatment Plants (2020)",
         "layer_category": "management",
         "layer_subcategory": "governance",
         "layer_download_from_geoserver": 1,
@@ -15118,7 +15142,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Urban waste treatment plants",
+        "layer_tooltip": "Urban waste treatment plants in 2020",
         "layer_information": "",
         "layer_media": "wiki://Treatment_Plants",
         "layer_text_info": null,
@@ -15162,7 +15186,7 @@
             "displayPoints": 1,
             "pointColor": "#0090F5FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Treatmentplant",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -15188,9 +15212,9 @@
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#FEFE12B4",
+            "pointColor": "#D7191CFF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Treatmentplant",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -15216,9 +15240,9 @@
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 1,
-            "pointColor": "#D7191CB4",
+            "pointColor": "#FEFE12FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Treatmentplant",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -15248,7 +15272,7 @@
         "layer_name": "ems_dischargepoints_emodnet",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
-        "layer_short": "Discharge Points",
+        "layer_short": "Discharge Points (2020)",
         "layer_category": "management",
         "layer_subcategory": "governance",
         "layer_download_from_geoserver": 1,
@@ -15265,7 +15289,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Coastal Discharge Points from Urban Waste Water Treatment Plant",
+        "layer_tooltip": "Coastal Discharge Points from Urban Waste Water Treatment Plant in 2020",
         "layer_information": "",
         "layer_media": "wiki://Discharge_Points",
         "layer_text_info": null,
@@ -15309,7 +15333,7 @@
             "displayPoints": 1,
             "pointColor": "#0090F5FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Dischargepoint",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -15322,7 +15346,7 @@
             "value": 0,
             "map_type": "Inactive",
             "displayPolygon": 0,
-            "polygonColor": "#00590DFF",
+            "polygonColor": "#0090F5FF",
             "polygonPatternName": "27",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -15337,7 +15361,7 @@
             "displayPoints": 1,
             "pointColor": "#D7191CFF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Dischargepoint",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -15365,7 +15389,7 @@
             "displayPoints": 1,
             "pointColor": "#FEFE12FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Dischargepoint",
             "description": "",
             "capacity": 0,
             "investmentCost": 0.0,
@@ -15547,7 +15571,7 @@
             "displayPoints": 1,
             "pointColor": "#DC1515FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Radiation",
             "description": "",
             "capacity": 1000000000,
             "investmentCost": 100000.0,
@@ -15575,7 +15599,7 @@
             "displayPoints": 1,
             "pointColor": "#3F3E3EFF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Radiation",
             "description": "",
             "capacity": 1000000000,
             "investmentCost": 100000.0,
@@ -15603,7 +15627,7 @@
             "displayPoints": 1,
             "pointColor": "#000000FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Radiation",
             "description": "",
             "capacity": 1000000000,
             "investmentCost": 100000.0,
@@ -15631,7 +15655,7 @@
             "displayPoints": 1,
             "pointColor": "#E67731FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Radiation",
             "description": "",
             "capacity": 1000000000,
             "investmentCost": 100000.0,
@@ -17295,7 +17319,7 @@
             "displayPoints": 1,
             "pointColor": "#5C6CE6FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Dot",
+            "pointSpriteName": "Desalinationplant",
             "description": "",
             "capacity": 1000000000,
             "investmentCost": 100000.0,
@@ -17734,9 +17758,9 @@
             "approval": "NotDependent",
             "value": 0,
             "map_type": "emodnet_finfish",
-            "displayPolygon": 0,
-            "polygonColor": "#00590DFF",
-            "polygonPatternName": "0",
+            "displayPolygon": 1,
+            "polygonColor": "#0D8FEAFF",
+            "polygonPatternName": "22",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -26246,7 +26270,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Turtles (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "other",
+        "layer_subcategory": "turtles_&_octopuses",
         "layer_download_from_geoserver": 0,
         "layer_width": 131,
         "layer_height": 113,
@@ -29818,7 +29842,7 @@
         "layer_entity_value_max": null,
         "layer_short": "Cephalopods (Simulated)",
         "layer_category": "ecology",
-        "layer_subcategory": "other",
+        "layer_subcategory": "turtles_&_octopuses",
         "layer_download_from_geoserver": 0,
         "layer_width": 131,
         "layer_height": 113,

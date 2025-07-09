@@ -2,10 +2,10 @@
 
 namespace ServerManager;
 
+use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameServer;
 use App\Entity\ServerManager\Setting;
 use App\VersionsProvider;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 
 class ServerManager
@@ -25,15 +25,18 @@ class ServerManager
      * @throws Exception
      */
     public function __construct(
-        private readonly EntityManagerInterface $em,
+        private readonly ConnectionManager $connectionManager,
         private readonly VersionsProvider $versionProvider
     ) {
         self::$instance = $this;
     }
 
+    /**
+     * @throws Exception
+     */
     private function completePropertiesFromDB(): void
     {
-        $manager = $this->em;
+        $manager = $this->connectionManager->getServerManagerEntityManager();
         $settings = $manager->getRepository(Setting::class)->findAll();
         foreach ($settings as $setting) {
             $name = $setting->getName();
@@ -65,6 +68,9 @@ class ServerManager
         return $this->versionProvider->getVersion();
     }
 
+    /**
+     * @throws Exception
+     */
     public function getServerUuid(): ?string
     {
         if (is_null($this->serverUuid)) {

@@ -3,6 +3,7 @@
 namespace App\Entity\ServerManager;
 
 use App\Domain\Common\EntityEnums\GameConfigVersionVisibilityValue;
+use App\Entity\EntityBase;
 use App\Entity\Trait\LazyLoadersTrait;
 use App\Repository\ServerManager\GameConfigVersionRepository;
 use Doctrine\DBAL\Types\Types;
@@ -11,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\UniqueConstraint(name: 'uq_game_config_version', columns: ['game_config_files_id', 'version'])]
 #[ORM\Entity(repositoryClass: GameConfigVersionRepository::class)]
-class GameConfigVersion
+class GameConfigVersion extends EntityBase
 {
     use LazyLoadersTrait;
 

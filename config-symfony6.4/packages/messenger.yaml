@@ -7,6 +7,13 @@ framework:
         failure_transport: failed
 
         transports:
+            docker:
+                dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
+                options:
+                    table_name: 'messenger_docker'
+                    queue_name: 'docker'
+                retry_strategy:
+                    max_retries: 0 # no retries
             watchdog:
                 dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
                 options:
@@ -37,6 +44,7 @@ framework:
 #            Symfony\Component\Notifier\Message\SmsMessage: async
 
             # Route your messages to the transports
+            'App\Message\Docker\DockerCommunicationMessageBase': docker
             'App\Message\Analytics\AnalyticsMessageBase': analytics
             'App\Message\GameList\GameListCreationMessage': async            
             'App\Message\GameList\GameListArchiveMessage': async

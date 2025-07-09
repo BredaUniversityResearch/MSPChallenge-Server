@@ -1,5 +1,14 @@
 #syntax=docker/dockerfile:1
 
+# build a local image using the following command:
+#   docker build -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:5.2.0-alpha -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
+# how to run it:
+#  (replace [branch_name] with the branch you want to run, e.g. `main` or `dev`)
+#  * from Linux:
+#    curl -s https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/[branch_name]/setup/prod.sh | bash -s [branch_name]
+#  * from Windows:
+#    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/[branch_name]/setup/prod.ps1" -OutFile "prod.ps1"; .\prod.ps1 [branch_name]
+
 FROM dunglas/frankenphp:1-php8.3 AS frankenphp_upstream
 
 # The different stages of this Dockerfile are meant to be built into separate images
@@ -15,6 +24,7 @@ VOLUME /app/var/
 
 # persistent / runtime deps
 # hadolint ignore=DL3008
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
 		acl \
 		file \
@@ -26,19 +36,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         default-mysql-client \
         procps \
         nano \
+        gnupg \
         && rm -rf /var/lib/apt/lists/*
 
+# Add Yarn APT repository and install Yarn
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
+    apt-get update && \
+    apt-get install -y yarn && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
 RUN set -eux; \
-	install-php-extensions \
-        @composer \
-		apcu \
-		intl \
-		opcache \
-		zip \
-        pcntl \
-        imagick \
-        gd \
-	;
+    install-php-extensions @composer apcu intl opcache zip pcntl imagick gd; \
+    rm -rf /tmp/*
 
 # if you want to debug on prod, enable below lines:
 ##   Also check ./frankenphp/conf.d/app.prod.ini
@@ -101,6 +112,9 @@ FROM frankenphp_base AS frankenphp_dev
 
 ENV APP_ENV=dev XDEBUG_MODE=off
 
+# dev-only supervisor config
+COPY --link docker/supervisor/supervisor.d/dev/*.ini /etc/supervisor.d/
+
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 
 RUN set -eux; \
@@ -131,33 +145,25 @@ COPY --link composer-symfony6.4.json composer.json
 COPY --link composer-symfony6.4.lock composer.lock
 COPY --link symfony6.4.lock symfony.lock
 COPY --link package.json package.json
-# copy sources
 COPY --link . ./
 
 # Install dependencies
 RUN set -eux; \
   composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress
 
+# Install dependencies and build assets
+RUN set -eux; \
+    yarn install --frozen-lockfile; \
+    yarn encore production; \
+    rm -rf node_modules; \
+    rm -rf /tmp/*
+
 # Install PHP dependencies
 RUN set -eux; \
-	mkdir -p var/cache var/log; \
-	composer dump-autoload --classmap-authoritative --no-dev; \
-	composer dump-env prod; \
-	composer run-script --no-dev post-install-cmd; \
-	chmod +x bin/console; sync;
+    composer dump-autoload --classmap-authoritative --no-dev; \
+    composer dump-env prod; \
+    composer run-script --no-dev post-install-cmd; \
+    chmod +x bin/console; sync;
 
 # Clean up unnecessary files
 RUN rm -rf frankenphp/
-
-FROM node:22.6 as node_base
-
-RUN mkdir -p /home/node/app/node_modules /home/node/app/public/build \
-    && chown -R node:node /home/node/app/node_modules \
-    && chown -R node:node /home/node/app/public/build
-
-FROM mariadb:10.11.10 AS mariadb_base
-FROM blackfire/blackfire:2 AS blackfire_base
-FROM shyim/adminerevo AS adminer_base
-FROM mitmproxy/mitmproxy:10.3.1 as mitmproxy_base
-FROM redis:7.2.4-alpine AS redis_base
-FROM erikdubbelboer/phpredisadmin as phpredisadmin_base

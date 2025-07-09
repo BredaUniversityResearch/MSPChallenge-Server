@@ -1,4 +1,51 @@
-// Bootstrap SCSS variables overrides:
+// font awesome 4
+@import '~font-awesome';
+
+// font awesome 6
+//   don't forget to install yarn package @fortawesome/fontawesome-free
+//@import "~@fortawesome/fontawesome-free/scss/fontawesome";
+//@import "~@fortawesome/fontawesome-free/scss/solid";
+//@import "~@fortawesome/fontawesome-free/scss/brands";
+
+/* cabin-regular - latin - downloaded using https://gwfh.mranftl.com/fonts/cabin?subsets=latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Cabin';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/cabin-v34-latin-regular.woff2') format('woff2'), /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+       // for legacy support, you can also include the TTF version
+       url('../fonts/cabin-v34-latin-regular.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5+, IE 9+, Safari 3.1+, iOS 4.2+, Android Browser 2.2+ */
+}
+
+// Below font is for tata-js
+/* material-icons-regular - latin - downloaded using https://gwfh.mranftl.com/fonts/material-icons?subsets=latin */
+@font-face {
+  font-display: swap; /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/material-icons-v143-latin-regular.woff2') format('woff2'), /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+       url('../fonts/material-icons-v143-latin-regular.ttf') format('truetype'); /* Chrome 4+, Firefox 3.5+, IE 9+, Safari 3.1+, iOS 4.2+, Android Browser 2.2+ */
+}
+// this is copied from the css file downloaded using:
+//   curl -o material-icons.css "https://fonts.googleapis.com/icon?family=Material+Icons"
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+}
+
+// https://symfony.com/doc/current/frontend/encore/bootstrap.html#importing-bootstrap-styles
+// *** Bootstrap **** SCSS variables overrides BEGIN
 $light: #ffffff;
 $lightAlternate1: #f5f5f5;
 $lightAlternate2: #f7a02b;
@@ -20,7 +67,7 @@ $modal-md: 750px;
 $toast-max-width: 700px;
 
 $body-bg: $light;
-$font-family-base: 'Cabin';
+$font-family-base: 'Cabin', sans-serif;
 $font-size-base: 1rem;
 $h1-font-size: 1.625rem;
 $h2-font-size: 1.3125rem;
@@ -34,9 +81,8 @@ $link-decoration: none;
 
 $table-bg: none;
 
-@import 'http://fonts.googleapis.com/css?family=Cabin';
-@import '~bootstrap';
-@import '~font-awesome';
+@import "~bootstrap/scss/bootstrap";
+// *** Bootstrap **** SCSS variables overrides EMD
 
 html, body {
     height: 100%;

@@ -2,7 +2,7 @@
 
 namespace App\Entity\Listener;
 
-use App\Entity\Game;
+use App\Entity\SessionAPI\Game;
 use Doctrine\ORM\Event\PostLoadEventArgs;
 use Doctrine\ORM\Event\PrePersistEventArgs;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
