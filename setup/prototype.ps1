@@ -99,11 +99,7 @@ function Get-FirstLanIPv4Address {
 
 # Define metadata for parameters
 $parameterMetadata = @{
-    Preset = @{
-        ForceInput = $true # in non-gui mode, always prompt for input
-    }
     ServerName = @{
-        ForceInput = $true # in non-gui mode, always prompt for input
         EnvVar = "SERVER_NAME"
         Tab = "Basic setup"
         Presets = @{
@@ -291,7 +287,7 @@ function Read-InputWithDefault {
         [string]$prompt,
         [string]$defaultValue,
         [System.Management.Automation.ParameterMetadata]$paramDef,
-        [hashtable]$parameterMetadata
+        [hashtable]$parameterMetadata = @{}
     )
     while ($true) {
         if ($defaultValue -eq "") {
@@ -448,7 +444,7 @@ function New-ParameterControls {
             $linePanel = New-Object System.Windows.Forms.FlowLayoutPanel
             $linePanel.FlowDirection = [System.Windows.Forms.FlowDirection]::LeftToRight
             $linePanel.WrapContents = $false
-            $linePanel.Width = $parentPanel.ClientSize.Width - 20
+            $linePanel.AutoSize = $true
             $linePanel.Height = 30
             $parentPanel.Controls.Add($linePanel)
             $controls[$param] = $linePanel
@@ -692,23 +688,51 @@ $resolvedParameters = @{}
 foreach ($key in $PSBoundParameters.Keys) {
     $resolvedParameters[$key] = $PSBoundParameters[$key]
 }
-
-Initialize-Parameters $MyInvocation.MyCommand.Parameters ([ref]$resolvedParameters) $parameterMetadata
-
 if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
     Write-Host "Running in GUI mode..."
+    Initialize-Parameters $MyInvocation.MyCommand.Parameters ([ref]$resolvedParameters) $parameterMetadata
     Show-GuiParameterForm $MyInvocation.MyCommand.Parameters ([ref]$resolvedParameters) $parameterMetadata
 } else {
     Write-Host "Running in non-GUI mode..."
+    $presetParam = "Preset"
+    $defaultValue = (Get-Variable -Name $presetParam -EA SilentlyContinue).Value
+    $selectedPreset = $resolvedParameters[$presetParam] = Read-InputWithDefault -prompt "Enter value for $presetParam" -defaultValue $defaultValue -paramDef $MyInvocation.MyCommand.Parameters[$presetParam]
+    Set-Variable -Name "Preset" -Value $selectedPreset -Scope Global -Force
+    Initialize-Parameters $MyInvocation.MyCommand.Parameters ([ref]$resolvedParameters) $parameterMetadata    
     foreach ($param in $MyInvocation.MyCommand.Parameters.Keys) {
+        # param is already set from command line, skip it
+        if ($PSBoundParameters.ContainsKey($param)) {
+            continue
+        }
+        # if param is Preset, skip it
+        if ($param -eq $presetParam) {
+            continue
+        }
         if (GetParamMetadataValue -param $param -metadata "ScriptArgument") {
             continue
         }
-        # Fallback to user input if no value is set
-        $defaultValue = (Get-Variable -Name $param -EA SilentlyContinue).Value
-        if (-not $resolvedParameters[$param] -or ($resolvedParameters[$param] -eq $defaultValue -and (GetParamMetadataValue -param $param -metadata "ForceInput"))) {
-            $resolvedParameters[$param] = Read-InputWithDefault -prompt "Enter value for $param" -defaultValue $defaultValue -paramDef $MyInvocation.MyCommand.Parameters[$param] -parameterMetadata $parameterMetadata[$param]
+        # if the param is set to read-only for the current preset, skip it
+        $readOnly = GetParamMetadataValue -param $param -metadata "ReadOnly" -parameterMetadata $parameterMetadata
+        if ($readOnly -and $readOnly.ContainsKey($selectedPreset) -and $readOnly[$selectedPreset]) {
+            Write-Host "$param is read-only for preset '$selectedPreset'. Skipping..."
+            continue
         }
+        # Check if any previous param links to this param for the current preset
+        $linked = $false
+        foreach ($prevParam in $MyInvocation.MyCommand.Parameters.Keys) {
+            if ($prevParam -eq $param) { break }
+            $linkMeta = GetParamMetadataValue -param $prevParam -metadata "Link"
+            if ($linkMeta -and $linkMeta.ContainsKey($selectedPreset) -and $linkMeta[$selectedPreset] -contains $param) {
+                $resolvedParameters[$param] = $resolvedParameters[$prevParam]
+                Write-Host "Linked $param to $prevParam value: $($resolvedParameters[$param])"
+                $linked = $true
+                break
+            }        }
+        if ($linked) {
+            continue
+        }
+        # Prompt for input
+        $resolvedParameters[$param] = Read-InputWithDefault -prompt "Enter value for $param" -defaultValue $resolvedParameters[$param] -paramDef $MyInvocation.MyCommand.Parameters[$param] -parameterMetadata $parameterMetadata[$param]
     }
 }
 
