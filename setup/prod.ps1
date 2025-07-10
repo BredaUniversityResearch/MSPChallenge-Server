@@ -36,7 +36,6 @@ param(
     #[int]$TestSwitch = 0,
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
     [int]$EnableGui = 1,
-    [string]$DatabasePassword = ([guid]::NewGuid().ToString("N")),
     [string]$CaddyMercureJwtSecret = ([guid]::NewGuid().ToString("N")),
     [string]$BranchName = "dev",
     [string]$AppSecret = ([guid]::NewGuid().ToString("N"))
@@ -315,13 +314,6 @@ $parameterMetadata = @{
     EnableGui = @{
         ActAsBoolean = $true
         ScriptArgument = $true
-    }
-    DatabasePassword = @{
-        EnvVar = "DATABASE_PASSWORD"
-        Tab = "Basic setup"
-        Validate = @(
-            @{ "The database password must be at least 8 characters." = { param($v) $v.Length -ge 8 } }
-        )
     }
     CaddyMercureJwtSecret = @{
         EnvVar = "CADDY_MERCURE_JWT_SECRET"
