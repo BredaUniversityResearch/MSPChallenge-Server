@@ -12,7 +12,6 @@
           "Newtonsoft.Json": "13.0.3",
           "System.Drawing.Common": "7.0.0",
           "EwECore": "6.7.0.19431",
-          "EwELicense": "6.7.0.18060",
           "EwEMSPLink": "6.7.0.19431",
           "EwEPlugin": "6.7.0.19431",
           "EwEUtils": "6.7.0.19431",
@@ -766,14 +765,6 @@
           }
         }
       },
-      "EwELicense/6.7.0.18060": {
-        "runtime": {
-          "EwELicense.dll": {
-            "assemblyVersion": "6.7.0.18060",
-            "fileVersion": "6.7.0.18060"
-          }
-        }
-      },
       "EwEMSPLink/6.7.0.19431": {
         "runtime": {
           "EwEMSPLink.dll": {
@@ -857,11 +848,6 @@
       "hashPath": "system.drawing.common.7.0.0.nupkg.sha512"
     },
     "EwECore/6.7.0.19431": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "EwELicense/6.7.0.18060": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
