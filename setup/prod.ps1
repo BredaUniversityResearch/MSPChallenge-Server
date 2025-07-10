@@ -22,15 +22,20 @@ param(
     [string]$ServerName = "www.example.com",
     [string]$UrlWebServerHost = "www.example.com",
     [string]$UrlWebServerScheme = "https",
+    [int]$UrlWebServerPort = 443,
     [int]$UrlWsServerPort = 443,
     [string]$UrlWsServerHost = "www.example.com",
     [string]$UrlWsServerScheme = "wss",
     [string]$UrlWsServerUri = "/ws/",
     [int]$ServerPort = 443,
+    [int]$WsServerPort = 45001,
+    [int]$HttpsPort = 443,
+    [int]$Http3Port = 443,
+    [int]$WatchdogPort = 45000,
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
     #[int]$TestSwitch = 0,
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
-    [int]$EnableGui = 0,
+    [int]$EnableGui = 1,
     [string]$DatabasePassword = ([guid]::NewGuid().ToString("N")),
     [string]$CaddyMercureJwtSecret = ([guid]::NewGuid().ToString("N")),
     [string]$BranchName = "msp-ar",
@@ -120,6 +125,8 @@ function Get-FirstLanIPv4Address {
     return $ip
 }
 
+$tabOrdering = @("Basic setup", "Advanced settings")
+
 # Define metadata for parameters
 $parameterMetadata = @{
     BranchName = @{
@@ -172,6 +179,10 @@ $parameterMetadata = @{
             Local = @("UrlWebServerHost")
         }
     }
+    WatchdogPort = @{
+        EnvVar = "WATCHDOG_PORT"
+        Tab = "Advanced settings"
+    }
     UrlWebServerScheme = @{
         EnvVar = "URL_WEB_SERVER_SCHEME"
         Tab = "Advanced settings"
@@ -184,6 +195,21 @@ $parameterMetadata = @{
             Proxy = $true
             LAN = $true
             Local = $true
+        }
+    }
+    UrlWebServerPort = @{
+        EnvVar = "URL_WEB_SERVER_PORT"
+        Tab = "Advanced settings"
+        Presets = @{
+            Proxy = 80
+            Local = 80
+            LAN = 80
+        }
+        ReadOnly = @{
+            Direct = $true
+            Proxy = $false
+            LAN = $false
+            Local = $false
         }
     }
     UrlWsServerPort = @{
@@ -239,6 +265,47 @@ $parameterMetadata = @{
             Proxy = $false
             LAN = $false
             Local = $false
+        }
+    }
+    WsServerPort = @{
+        EnvVar = "WS_SERVER_PORT"
+        Tab = "Advanced settings"
+        Presets = @{
+            Proxy = 45001
+            Local = 45001
+            LAN = 45001
+        }
+        ReadOnly = @{
+            Direct = $true
+            Proxy = $false
+            LAN = $false
+            Local = $false
+        }
+    }
+    HttpsPort = @{
+        EnvVar = "HTTPS_PORT"
+        Tab = "Advanced settings"
+        ReadOnly = @{
+            Direct = $true
+            Proxy = $false
+            LAN = $false
+            Local = $false
+        }
+        Link = @{
+            Direct = @("Http3Port")
+        }
+    }
+    Http3Port = @{
+        EnvVar = "HTTP3_PORT"
+        Tab = "Advanced settings"
+        ReadOnly = @{
+            Direct = $true
+            Proxy = $false
+            LAN = $false
+            Local = $false
+        }
+        Link = @{
+            Direct = @("HttpsPort")
         }
     }
 #   TestSwitch = @{
@@ -425,6 +492,10 @@ function Get-ParameterCategories {
         [hashtable]$parameterMetadata
     )
     $categories = [ordered]@{}
+    $tabOrdering = Get-Variable -Name "tabOrdering" -ErrorAction SilentlyContinue
+    foreach ($tab in $tabOrdering.Value) {
+        $categories[$tab] = @()
+    }  
     foreach ($param in $parameters.Keys) {
         $tab = GetParamMetadataValue -param $param -metadata "Tab" -parameterMetadata $parameterMetadata
         if ($tab) {
@@ -701,7 +772,6 @@ function Show-GuiParameterForm {
     foreach ($radioButton in $presetRadioButtons.Values) {
        $radioButton.Add_CheckedChanged({ Update-ControlsByPreset $controls $presetRadioButtons $parameterMetadata })
     }
-    Update-ControlsByPreset $controls $presetRadioButtons $parameterMetadata
 
     $tabControl = New-Object System.Windows.Forms.TabControl
     # note that the width and height will automatically adjust based on the main panel size below
@@ -724,6 +794,7 @@ function Show-GuiParameterForm {
     $mainPanel.Controls.Add($tabControl)
     $categories = Get-ParameterCategories $parameters $parameterMetadata
     $controls = New-ParameterControls $categories $parameters $resolvedParameters $parameterMetadata $tabControl
+    Update-ControlsByPreset $controls $presetRadioButtons $parameterMetadata
 
     $errorProvider = New-Object System.Windows.Forms.ErrorProvider
     $errorProvider.BlinkStyle = 'NeverBlink'
