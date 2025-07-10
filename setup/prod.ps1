@@ -38,7 +38,7 @@ param(
     [int]$EnableGui = 1,
     [string]$DatabasePassword = ([guid]::NewGuid().ToString("N")),
     [string]$CaddyMercureJwtSecret = ([guid]::NewGuid().ToString("N")),
-    [string]$BranchName = "msp-ar",
+    [string]$BranchName = "dev",
     [string]$AppSecret = ([guid]::NewGuid().ToString("N"))
 )
 
