@@ -8986,6 +8986,29 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  </summary>
  -----------------------------------------------------------------------
 </member>
+<member name="M:EwECore.cCore.EcosimTimestepToAbsoluteTime(System.Int32)">
+ -------------------------------------------------------------------
+ <summary>
+ Convert an Ecospace time step to absolute time.
+ </summary>
+ <param name="iTime">The Ecospace time step to convert.</param>
+ <returns>The absolute time represented by a time step.</returns>
+ <remarks>The absolute time is based on the <see cref="M:EwECore.cCore.EcosimFirstYear"/>, to
+ which the time represented by a given time step is added. The resulting 
+ date is rounded to the first day of the month.</remarks>
+ -------------------------------------------------------------------
+</member>
+<member name="M:EwECore.cCore.AbsoluteTimeToEcosimTimestep(System.DateTime)">
+ -------------------------------------------------------------------
+ <summary>
+ Convert an absolute time to an Ecospace time step.
+ </summary>
+ <param name="dt">The date to convert to a time step.</param>
+ <returns></returns>
+ <remarks>The resulting time step is calculated from difference in time steps,
+ rounded to months, between the given time and the <see cref="M:EwECore.cCore.EcosimFirstYear"/>.</remarks>
+ -------------------------------------------------------------------
+</member>
 <member name="M:EwECore.cCore.EcospaceTimestepToAbsoluteTime(System.Int32)">
  -------------------------------------------------------------------
  <summary>
@@ -27226,6 +27249,12 @@ min_B_QB: minimum B*QB.
  WKT projection string for the Ecospace coordinate system
  </summary>
 </member>
+<member name="P:EwECore.cEcospaceDataStructures.PreserveLayerData">
+ <summary>
+ Flag to disable preserving and restoring layer data when working with external data.
+ This flag can save timne when running Ecospace experiments without saving the model.
+ </summary>
+</member>
 <member name="F:EwECore.cEcospaceDataStructures.TimeNow">
  <summary>Current model time step in years. Incremented by <see cref="F:EwECore.cEcospaceDataStructures.TimeStep">TimeStep</see> at the end of the timestep.</summary>
  <remarks>This is the time in years, not the array index.</remarks>
@@ -36052,7 +36081,7 @@ Passed into the Constructor
  <seealso cref="M:EwECore.SpatialData.cSpatialScalarDataAdapterBase.CalculateScalar(System.Double,System.Double)" />
  -------------------------------------------------------------------
 </member>
-<member name="M:EwECore.SpatialData.cAdvectionAdapter.InitRun">
+<member name="M:EwECore.SpatialData.cAdvectionAdapter.InitRun(System.Boolean)">
  -------------------------------------------------------------------
  <summary>
  Initialize the run, overridden to disable some core logic if 
@@ -36274,9 +36303,9 @@ Passed into the Constructor
  <inheritdocs cref="M:EwECore.SpatialData.cSpatialDataAdapter.Initialize"/>.
  -------------------------------------------------------------------
 </member>
-<member name="M:EwECore.SpatialData.cRelPPDataAdapter.InitRun">
+<member name="M:EwECore.SpatialData.cRelPPDataAdapter.InitRun(System.Boolean)">
  -------------------------------------------------------------------
- <inheritdocs cref="M:EwECore.SpatialData.cSpatialDataAdapter.InitRun"/>
+ <inheritdocs cref="M:EwECore.SpatialData.cSpatialDataAdapter.InitRun(System.Boolean)"/>
  <remarks>
  Overridden to clear the PP scale factor.
  </remarks>
@@ -36393,7 +36422,7 @@ Passed into the Constructor
  <returns>True if successful.</returns>
  -------------------------------------------------------------------
 </member>
-<member name="M:EwECore.SpatialData.cSpatialDataAdapter.InitRun">
+<member name="M:EwECore.SpatialData.cSpatialDataAdapter.InitRun(System.Boolean)">
  -------------------------------------------------------------------
  <summary>
  Perform pre-run initializations for all adapters such as preserving

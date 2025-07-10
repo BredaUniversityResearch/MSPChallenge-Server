@@ -382,6 +382,7 @@ function Read-InputWithDefault {
         [hashtable]$parameterMetadata = @{}
     )
     while ($true) {
+        $retry = $false
         if ($defaultValue -eq "") {
             $inputValue = Read-Prompt "${prompt}:"
         } else {

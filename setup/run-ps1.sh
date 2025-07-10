@@ -47,8 +47,9 @@ if [ ! -f "$script_path" ]; then
     echo "The specified PowerShell script does not exist: $script_path"
     exit 1
 fi
-pwsh -f "$script_path" "$(shift 1; echo "$@")"
-if ! pwsh -f "$script_path" "$(shift 1; echo "$@")"; then
+shift 1
+pwsh -f "$script_path" "$@"
+if [ $? -ne 0 ]; then
     echo "PowerShell script execution failed."
     exit 1
 fi
