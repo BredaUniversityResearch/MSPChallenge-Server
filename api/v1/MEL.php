@@ -767,7 +767,7 @@ SUBQUERY,
                 $this->exportGeometryTo($geom, $policyFilters, $result["geometry"]);
             }
         }
-        $result['logs'] = json_encode($this->getLogMessages());
+        $result['logs'] = $this->getLogMessages();
         return $result;
     }
 
@@ -806,7 +806,7 @@ SUBQUERY,
             $st->execute();
             // for debugging use https://wktmap.com/ to visualize using EPSG:3035 !
             $bufferedPolygonText = $st->fetchColumn();
-            return Geometry::exteriorRingCoordinatesFromWkt($bufferedPolygonText);
+            return Geometry::fromWkt($bufferedPolygonText);
         } catch (\Exception $e) {
             while (null !== $prev = $e->getPrevious()) {
                 $e = $prev;
@@ -903,6 +903,7 @@ SUBQUERY,
         if (!empty($bufferZonePolicyDataContainer)) {
             $includeOriginalPolygon =
                 !empty(array_filter($policiesToApply, fn($p) => $p instanceof SeasonalClosurePolicyData));
+            $this->log('include_original_polygon: '.($includeOriginalPolygon ? 'true' : 'false'));
             // apply buffer zone policy, and seasonal closure policy if it exists
             $exportResult[] = $this->applyGeometryBufferZonePolicy(
                 $geometry,
