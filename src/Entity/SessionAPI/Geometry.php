@@ -721,10 +721,12 @@ class Geometry
         $ring = $rings[0]; // exterior ring
         $points = explode(',', $ring);
         // Iterate through each point
+        $rCoordinates = array();
         foreach ($points as $point) {
             list($x, $y) = explode(' ', trim($point));
-            $coordinates[] = array((float)$x, (float)$y);
+            $rCoordinates[] = array((float)$x, (float)$y);
         }
+        $coordinates[] = $rCoordinates;
         return $coordinates;
     }
 }
