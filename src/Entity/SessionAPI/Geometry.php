@@ -706,7 +706,7 @@ class Geometry
         return '('.$originalPolygonCoordsText.')';
     }
 
-    public static function exteriorRingCoordinatesFromWkt(string $wkt): array
+    public static function fromWkt(string $wkt): array
     {
         // Strip "POLYGON(" and the trailing ")"
         $wkt = substr($wkt, strlen("POLYGON("), -1);
@@ -714,19 +714,17 @@ class Geometry
         preg_match_all('/\((.*?)\)/', $wkt, $matches);
         $rings = $matches[1];
         $coordinates = [];
-        // Only the first ring is the exterior ring
-        if (empty($rings)) {
-            return $coordinates; // No rings found
+        // Iterate through each ring
+        foreach ($rings as $ring) {
+            $points = explode(',', $ring);
+            $rCoordinates = array();
+            // Iterate through each point
+            foreach ($points as $point) {
+                list($x, $y) = explode(' ', trim($point));
+                $rCoordinates[] = array((float)$x, (float)$y);
+            }
+            $coordinates[] = $rCoordinates;
         }
-        $ring = $rings[0]; // exterior ring
-        $points = explode(',', $ring);
-        // Iterate through each point
-        $rCoordinates = array();
-        foreach ($points as $point) {
-            list($x, $y) = explode(' ', trim($point));
-            $rCoordinates[] = array((float)$x, (float)$y);
-        }
-        $coordinates[] = $rCoordinates;
         return $coordinates;
     }
 }
