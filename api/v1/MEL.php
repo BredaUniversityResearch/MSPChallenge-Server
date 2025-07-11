@@ -239,7 +239,7 @@ class MEL extends Base
             //   Don't insert any new values in the database to avoid the fishing values increasing every start of MEL.
             $this->log('Found existing fishing plan, canceling fishing values insertion');
             return [
-                'log' => $this->getLogMessages()
+                'logs' => $this->getLogMessages()
             ];
         }
 
@@ -261,7 +261,7 @@ class MEL extends Base
         if (empty($gameConfigValues['policy_settings']['fishing']['fleet_info']['fleets'])) {
             $this->error('No policy_settings->fishing->fleet_info->fleets defined in the config.');
             return [
-                'log' => $this->getLogMessages()
+                'logs' => $this->getLogMessages()
             ];
         }
 
@@ -411,7 +411,7 @@ class MEL extends Base
             }
         }
         return [
-            'log' => $this->getLogMessages()
+            'logs' => $this->getLogMessages()
         ];
     }
 
