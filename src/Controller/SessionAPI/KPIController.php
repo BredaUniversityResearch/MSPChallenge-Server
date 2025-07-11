@@ -131,10 +131,10 @@ class KPIController extends BaseController
             return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
         }
 
-        $message = 'KPI values posted successfully';
+        $logs[] = 'KPI values posted successfully';
         $notify = $request->headers->get('x-notify-monthly-simulation-finished');
         if (!($notify && filter_var($notify, FILTER_VALIDATE_BOOLEAN))) {
-            return new JsonResponse(self::wrapPayloadForResponse(true, $message));
+            return new JsonResponse(self::wrapPayloadForResponse(true, ['logs' => $logs]));
         }
 
         try {
@@ -148,10 +148,10 @@ class KPIController extends BaseController
             foreach ($watchdog->getSimulations() as $simulation) {
                 $repo->notifyMonthSimulationFinished($serverId, $simulation->getName(), $kpiValues[0]['month']);
             }
-            $message .= '. Monthly simulation finished notified';
+            $logs[] = 'Monthly simulation finished notified';
         } catch (Exception $e) {
-            $message .= '. ' . $e->getMessage();
+            $logs[] = $e->getMessage();
         }
-        return new JsonResponse(self::wrapPayloadForResponse(true, $message));
+        return new JsonResponse(self::wrapPayloadForResponse(true, ['logs' => $logs]));
     }
 }
