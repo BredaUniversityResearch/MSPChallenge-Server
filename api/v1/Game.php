@@ -359,32 +359,38 @@ class Game extends Base
     {
         // find cable layers
         $cableLayers = collect($meta)->filter(fn($l) => $l['layer_editing_type'] === 'cable')->keyBy('layer_id');
-        if ($cableLayers->isEmpty()) {
-            return;
+        // find socket layers
+        $socketLayers = collect($meta)->filter(fn($l) => $l['layer_editing_type'] === 'socket')->keyBy('layer_id');
+        if ($cableLayers->isEmpty() && $socketLayers->isEmpty()) {
+            return; // no cable or socket layers, nothing to do
         }
-        // if cable layers exists, go through all layers
-        foreach ($meta as &$layer) {
-            $layer['layer_dependencies'] = [];
 
-            // has to be a non-cable
-            if ($cableLayers->has($layer['layer_id'])) {
+        // now go through all layers
+        foreach ($meta as &$layer) {
+            if ($cableLayers->has($layer['layer_id']) || $socketLayers->has($layer['layer_id'])) {
+                // if this layer is a cable or socket layer, it does not depend on any other layer
                 continue;
             }
-            // if they have the required energy editing type: "transformer", "socket", "sourcepoint" or "sourcepolygon"
-            if (!in_array(
+            $layer['layer_dependencies'] = [];
+            if (in_array(
                 $layer['layer_editing_type'],
                 ['transformer', 'socket', 'sourcepoint', 'sourcepolygon']
-            )) {
-                continue;
+            ) &&
+                null !== $cableLayer = $cableLayers->firstWhere('layer_green', $layer['layer_green'])
+            ) {
+                // cables: if this layer is of the right other type, add associated cable layer id as a dependency
+                $layer['layer_dependencies'][] = $cableLayer['layer_id'];
             }
-
-            // find the corresponding green or grey cable layer
-            if (null === $cableLayer = $cableLayers->firstWhere('layer_green', $layer['layer_green'])) {
-                continue;
+            
+            if (in_array(
+                $layer['layer_editing_type'],
+                ['transformer', 'cable', 'sourcepoint', 'sourcepolygon']
+            ) &&
+                null !== $socketLayer = $socketLayers->firstWhere('layer_green', $layer['layer_green'])
+            ) {
+                // sockets: if this layer is of the right other type, add associated socket layer id as a dependency
+                $layer['layer_dependencies'][] = $socketLayer['layer_id'];
             }
-
-            // add the associated cable layer id to their dependency
-            $layer['layer_dependencies'][] = $cableLayer['layer_id'];
         }
         unset($layer);
     }
