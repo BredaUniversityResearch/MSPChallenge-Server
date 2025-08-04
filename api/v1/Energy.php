@@ -928,7 +928,10 @@ class Energy extends Base
                                 'plan_layer_connection.plan_layer_plan_id = plan_connection.plan_id'
                             )
                             ->where($qb->expr()->and(
-                                $qb->expr()->neq('plan_connection.plan_state', $qb->createPositionalParameter(PlanState::DELETED)),
+                                $qb->expr()->neq(
+                                    'plan_connection.plan_state',
+                                    $qb->createPositionalParameter(PlanState::DELETED)
+                                ),
                                 'geometry_start.geometry_active = 1',
                                 'geometry_end.geometry_active = 1',
                                 'geometry_connection.geometry_active = 1',
