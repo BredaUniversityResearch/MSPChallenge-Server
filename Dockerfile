@@ -36,15 +36,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         default-mysql-client \
         procps \
         nano \
-        gnupg \
-        && rm -rf /var/lib/apt/lists/*
+        npm
 
-# Add Yarn APT repository and install Yarn
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-    apt-get update && \
-    apt-get install -y yarn && \
-    rm -rf /var/lib/apt/lists/*
+# Install Yarn through corepack
+RUN npm install -g corepack
 
 # Install PHP extensions
 RUN set -eux; \
@@ -153,7 +148,7 @@ RUN set -eux; \
 
 # Install dependencies and build assets
 RUN set -eux; \
-    yarn install --frozen-lockfile; \
+    corepack yarn; \
     yarn encore production; \
     rm -rf node_modules; \
     rm -rf /tmp/*

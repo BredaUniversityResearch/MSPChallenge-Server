@@ -41,7 +41,7 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
   chown -R "$(whoami)":www-data export raster running_session_config ServerManager/configfiles ServerManager/log ServerManager/saves ServerManager/session_archive session_archive var vendor POV
   chmod -R u+rwX,g+rwX,o+rX export raster running_session_config ServerManager/configfiles ServerManager/log ServerManager/saves ServerManager/session_archive session_archive var vendor POV
 
-  yarn install
+  corepack yarn
   echo 'PHP app ready!'
 
   echo "Starting supervisor..."
