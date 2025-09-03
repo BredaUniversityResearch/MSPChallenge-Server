@@ -22,6 +22,8 @@ body:
     id: expected
     attributes:
       label: What was the expected result?
+    validations:
+      required: true
   - type: dropdown
     attributes:
       label: Version
