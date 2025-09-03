@@ -27,9 +27,10 @@ body:
   - type: dropdown
     attributes:
       label: Version
-      description: What version of the server are you running?
+      description: What version of MSP Challenge are you running?
       multiple: false
       options:
+        - "5.2"
         - "5.1"
         - "5.0"
         - "4.0.2"
