@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "date_modified": "6/18/2025",
-    "data_model_hash": "1F40DC6DE2B1ADE8FA9176F83F3DA9D4BA4CE24B32F2C375C187681000ED8E4F",
-    "errors": 2,
+    "date_modified": "9/1/2025",
+    "data_model_hash": "3A3CF3E0DA659A21290244F2AE43A4CC325CFBA8D491BED6BA506E52C9F7E242",
+    "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
   },
@@ -70,17 +70,17 @@
       ],
       "NS_Shipping_Routes_DT|NS_Separation_Zones_DT": [
         {
-          "message": "Shipping routes are not allowed inside separation zones.",
+          "message": "Your shipping route overlaps a separation zone.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_Shipping_Routes_DT",
           "starttype": "",
           "endlayer": "NS_Separation_Zones_DT",
           "endtype": "0",
-          "sort": "Inclusion"
+          "sort": "Exclusion"
         },
         {
-          "message": "Shipping routes should not be placed in areas to be avoided.",
+          "message": "Your shipping route overlaps a separation zone.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Shipping_Routes_DT",
@@ -112,11 +112,119 @@
           "sort": "Inclusion"
         }
       ],
+      "NS_Fishing_Priority_Areas|NS_Oil_Gas_Offshore_Instalations": [
+        {
+          "message": "Be aware that certain fishing fleets cannot operate in areas with oil and gas installations",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Fishing_Priority_Areas",
+          "starttype": "",
+          "endlayer": "NS_Oil_Gas_Offshore_Instalations",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Fishing_Priority_Areas|NS_Pipelines": [
+        {
+          "message": "Be aware that certain fishing fleets cannot operate in areas with pipelines",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Fishing_Priority_Areas",
+          "starttype": "",
+          "endlayer": "NS_Pipelines",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Fishing_Priority_Areas|NS_Tidal_Farms": [
+        {
+          "message": "Be aware that certain fishing fleets cannot operate in areas with tidal farms",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Fishing_Priority_Areas",
+          "starttype": "",
+          "endlayer": "NS_Tidal_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Fishing_Priority_Areas|NS_Wave_Farms": [
+        {
+          "message": "Be aware that certain fishing fleets cannot operate in areas with wave farms",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Fishing_Priority_Areas",
+          "starttype": "",
+          "endlayer": "NS_Wave_Farms",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Fishing_Priority_Areas|NS_Wind_Farms_Implemented": [
+        {
+          "message": "Be aware that certain fishing fleets cannot operate in areas with wind farms",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Fishing_Priority_Areas",
+          "starttype": "",
+          "endlayer": "NS_Wind_Farms_Implemented",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Fishing_Priority_Areas|NS_Military_Areas": [
+        {
+          "message": "Be aware that certain fishing fleets cannot operate in areas where there are dumped ammunitions (military areas)",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Fishing_Priority_Areas",
+          "starttype": "",
+          "endlayer": "NS_Military_Areas",
+          "endtype": "2",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Fishing_Priority_Areas|NS_Telecom_Cables": [
+        {
+          "message": "Be aware that certain fishing fleets cannot operate in areas where there are telecom cables",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Fishing_Priority_Areas",
+          "starttype": "",
+          "endlayer": "NS_Telecom_Cables",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Fishing_Priority_Areas|NS_Shipping_Intensity_raster": [
+        {
+          "message": "Be aware that fishing fleets cannot operate in busy shipping areas",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Fishing_Priority_Areas",
+          "starttype": "",
+          "endlayer": "NS_Shipping_Intensity_raster",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Fishing_Priority_Areas|NS_Energy_Cables_Edit": [
+        {
+          "message": "Be aware that certain fishing fleets cannot operate in areas where there are electricity cables",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Fishing_Priority_Areas",
+          "starttype": "",
+          "endlayer": "NS_Energy_Cables_Edit",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
       "NS_Fishing_Priority_Areas|NS_Fisheries_Closure_DT_types": [
         {
           "message": "This area is being considered or has been approved closed for fishing.",
           "value": 0.0,
-          "type": "WARNING",
+          "type": "ERROR",
           "startlayer": "NS_Fishing_Priority_Areas",
           "starttype": "",
           "endlayer": "NS_Fisheries_Closure_DT_types",
@@ -124,11 +232,23 @@
           "sort": "Inclusion"
         }
       ],
+      "NS_Fishing_Priority_Areas|NS_MPA_fix": [
+        {
+          "message": "Marine Protected Areas can restrict fishing activities",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Fishing_Priority_Areas",
+          "starttype": "",
+          "endlayer": "NS_MPA_fix",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
       "NS_Reserveringsgebied_zand_OR|NS_Countries": [
         {
-          "message": "This area is not included in the simulations.",
+          "message": "Your plan includes land areas",
           "value": 0.0,
-          "type": "ERROR",
+          "type": "WARNING",
           "startlayer": "NS_Reserveringsgebied_zand_OR",
           "starttype": "",
           "endlayer": "NS_Countries",
@@ -136,122 +256,142 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Sand_Licensed_OR|NS_Countries": [
+      "NS_Reserveringsgebied_zand_OR|NS_Fishing_Priority_Areas": [
         {
-          "message": "This area is not included in the simulations.",
+          "message": "Your plan overlaps fishing priority areas.",
           "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Sand_Licensed_OR",
+          "type": "WARNING",
+          "startlayer": "NS_Reserveringsgebied_zand_OR",
           "starttype": "",
-          "endlayer": "NS_Countries",
+          "endlayer": "NS_Fishing_Priority_Areas",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
-      "NS_Sand_search_OR|NS_Countries": [
+      "NS_Sand_Licensed_OR|NS_Bathymetry_Continuous_raster": [
         {
-          "message": "This area is not included in the simulations.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Sand_search_OR",
-          "starttype": "",
-          "endlayer": "NS_Countries",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_Extraction_OR|NS_Countries": [
-        {
-          "message": "This area is not included in the simulations.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Sand_Extraction_OR",
-          "starttype": "",
-          "endlayer": "NS_Countries",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_Licensed_OR|NS_Shipping_Intensity": [
-        {
-          "message": "Shipping intensity might be high in this area.",
+          "message": "Your plan includes areas with depth less than 20m",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Sand_Licensed_OR",
           "starttype": "",
-          "endlayer": "NS_Shipping_Intensity",
-          "endtype": "",
+          "endlayer": "NS_Bathymetry_Continuous_raster",
+          "endtype": "0",
           "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_search_OR|NS_Shipping_Intensity": [
+        },
         {
-          "message": "Shipping intensity might be high in this area.",
+          "message": "Your plan includes areas with depth less than 20m",
           "value": 0.0,
           "type": "WARNING",
-          "startlayer": "NS_Sand_search_OR",
+          "startlayer": "NS_Sand_Licensed_OR",
           "starttype": "",
-          "endlayer": "NS_Shipping_Intensity",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_Extraction_OR|NS_Shipping_Intensity": [
-        {
-          "message": "Shipping intensity might be high in this area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Extraction_OR",
-          "starttype": "",
-          "endlayer": "NS_Shipping_Intensity",
-          "endtype": "",
+          "endlayer": "NS_Bathymetry_Continuous_raster",
+          "endtype": "1",
           "sort": "Inclusion"
         }
       ],
       "NS_Sand_Licensed_OR|NS_Military_Areas_DT": [
         {
-          "message": "There might be ammunitions dumped in the area.",
+          "message": "Your plan conflicts with military interests",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Sand_Licensed_OR",
           "starttype": "",
           "endlayer": "NS_Military_Areas_DT",
-          "endtype": "0",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_search_OR|NS_Military_Areas_DT": [
-        {
-          "message": "There might be ammunitions dumped in the area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_search_OR",
-          "starttype": "",
-          "endlayer": "NS_Military_Areas_DT",
-          "endtype": "0",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_Extraction_OR|NS_Military_Areas_DT": [
-        {
-          "message": "There might be ammunitions dumped in the area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Extraction_OR",
-          "starttype": "",
-          "endlayer": "NS_Military_Areas_DT",
-          "endtype": "0",
+          "endtype": "",
           "sort": "Inclusion"
         }
       ],
       "NS_Sand_Licensed_OR|NS_Wind_Farms_Implemented": [
         {
-          "message": "Sand extraction is not allowed in wind farms.",
+          "message": "Sand extraction is not allowed in wind farms",
           "value": 0.0,
-          "type": "ERROR",
+          "type": "WARNING",
           "startlayer": "NS_Sand_Licensed_OR",
           "starttype": "",
           "endlayer": "NS_Wind_Farms_Implemented",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Sand_Licensed_OR|NS_Windstudie_designated_OR": [
+        {
+          "message": "Your plan overlaps with planned farms development",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_Licensed_OR",
+          "starttype": "",
+          "endlayer": "NS_Windstudie_designated_OR",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Sand_Licensed_OR|NS_after_2030_OR": [
+        {
+          "message": "Your plan overlaps areas identified as desirable for wind farm development",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_Licensed_OR",
+          "starttype": "",
+          "endlayer": "NS_after_2030_OR",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Sand_Licensed_OR|NS_Fishing_Priority_Areas": [
+        {
+          "message": "Your plan overlaps fishing priority areas.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_Licensed_OR",
+          "starttype": "",
+          "endlayer": "NS_Fishing_Priority_Areas",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Sand_Licensed_OR|NS_Shipping_Routes_DT": [
+        {
+          "message": "Your plan overlaps shipping routes.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_Licensed_OR",
+          "starttype": "",
+          "endlayer": "NS_Shipping_Routes_DT",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Sand_search_OR|NS_Bathymetry_Continuous_raster": [
+        {
+          "message": "Your plan includes areas with depth less than 20m",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_search_OR",
+          "starttype": "",
+          "endlayer": "NS_Bathymetry_Continuous_raster",
+          "endtype": "0",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan includes areas with depth less than 20m",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_search_OR",
+          "starttype": "",
+          "endlayer": "NS_Bathymetry_Continuous_raster",
+          "endtype": "1",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Sand_search_OR|NS_Military_Areas_DT": [
+        {
+          "message": "Your plan conflicts with military interests",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_search_OR",
+          "starttype": "",
+          "endlayer": "NS_Military_Areas_DT",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -268,6 +408,130 @@
           "sort": "Inclusion"
         }
       ],
+      "NS_Sand_search_OR|NS_Windstudie_designated_OR": [
+        {
+          "message": "Your plan overlaps with areas that have been licensed for wind farm development.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_search_OR",
+          "starttype": "",
+          "endlayer": "NS_Windstudie_designated_OR",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Sand_search_OR|NS_after_2030_OR": [
+        {
+          "message": "Your plan overlaps areas identified as desirable for wind farm development",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_search_OR",
+          "starttype": "",
+          "endlayer": "NS_after_2030_OR",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Sand_search_OR|NS_Fishing_Priority_Areas": [
+        {
+          "message": "Your plan overlaps fishing priority areas.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_search_OR",
+          "starttype": "",
+          "endlayer": "NS_Fishing_Priority_Areas",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Sand_search_OR|NS_Shipping_Routes_DT": [
+        {
+          "message": "Your plan overlaps with shipping routes.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_search_OR",
+          "starttype": "",
+          "endlayer": "NS_Shipping_Intensity",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Sand_Extraction_OR|NS_Countries": [
+        {
+          "message": "Your plan includes land areas",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_Extraction_OR",
+          "starttype": "",
+          "endlayer": "NS_Countries",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Sand_Extraction_OR|NS_Bathymetry_Continuous_raster": [
+        {
+          "message": "Your plan includes areas with depth less than 20m",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_Extraction_OR",
+          "starttype": "",
+          "endlayer": "NS_Bathymetry_Continuous_raster",
+          "endtype": "0",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan includes areas with depth less than 20m",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_Extraction_OR",
+          "starttype": "",
+          "endlayer": "NS_Bathymetry_Continuous_raster",
+          "endtype": "1",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Sand_Extraction_OR|NS_Military_Areas_DT": [
+        {
+          "message": "Your plan overlaps with military interests.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_Extraction_OR",
+          "starttype": "1",
+          "endlayer": "NS_Military_Areas_DT",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with military interests.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_Extraction_OR",
+          "starttype": "2",
+          "endlayer": "NS_Military_Areas_DT",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Your plan overlaps with military interests.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Sand_Extraction_OR",
+          "starttype": "3",
+          "endlayer": "NS_Military_Areas_DT",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "There might be ammunitions dumped in the area.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "NS_Sand_Extraction_OR",
+          "starttype": "",
+          "endlayer": "NS_Military_Areas_DT",
+          "endtype": "0",
+          "sort": "Inclusion"
+        }
+      ],
       "NS_Sand_Extraction_OR|NS_Wind_Farms_Implemented": [
         {
           "message": "Sand extraction is not allowed in wind farms.",
@@ -276,30 +540,6 @@
           "startlayer": "NS_Sand_Extraction_OR",
           "starttype": "",
           "endlayer": "NS_Wind_Farms_Implemented",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_Licensed_OR|NS_Windstudie_designated_OR": [
-        {
-          "message": "This area has been licensed for wind farm development.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "NS_Windstudie_designated_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_search_OR|NS_Windstudie_designated_OR": [
-        {
-          "message": "This area has been licensed for wind farm development.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_search_OR",
-          "starttype": "",
-          "endlayer": "NS_Windstudie_designated_OR",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -316,30 +556,6 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Sand_Licensed_OR|NS_after_2030_OR": [
-        {
-          "message": "This area has been identified as desirable for wind farm development.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "NS_after_2030_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_search_OR|NS_after_2030_OR": [
-        {
-          "message": "This area has been identified as desirable for wind farm development.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_search_OR",
-          "starttype": "",
-          "endlayer": "NS_after_2030_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
       "NS_Sand_Extraction_OR|NS_after_2030_OR": [
         {
           "message": "This area has been identified as desirable for wind farm development.",
@@ -348,30 +564,6 @@
           "startlayer": "NS_Sand_Extraction_OR",
           "starttype": "",
           "endlayer": "NS_after_2030_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_Licensed_OR|NS_Energy_Cables_Edit": [
-        {
-          "message": "No sand extraction allowed in areas with passing cables.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Sand_search_OR",
-          "starttype": "",
-          "endlayer": "NS_Energy_Cables_Edit",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_search_OR|NS_Energy_Cables_Edit": [
-        {
-          "message": "There are electricity cables crossing this area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_search_OR",
-          "starttype": "",
-          "endlayer": "NS_Energy_Cables_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -388,30 +580,6 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Sand_Licensed_OR|NS_Oil_Gas_Platforms_DT": [
-        {
-          "message": "Sand extraction is not allowed where there are oil and gas platforms.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "NS_Oil_Gas_Platforms_DT",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_search_OR|NS_Oil_Gas_Platforms_DT": [
-        {
-          "message": "Sand extraction is not allowed where there are oil and gas platforms.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_search_OR",
-          "starttype": "",
-          "endlayer": "NS_Oil_Gas_Platforms_DT",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
       "NS_Sand_Extraction_OR|NS_Oil_Gas_Platforms_DT": [
         {
           "message": "Sand extraction is not allowed where there are oil and gas platforms.",
@@ -424,31 +592,7 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Sand_Licensed_OR|NS_Pipelines_DT`": [
-        {
-          "message": "No sand extraction allowed in areas with passing pipelines.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "NS_Pipelines_DT",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_search_OR|NS_Pipelines_DT`": [
-        {
-          "message": "There are pipelines crossing the area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "NS_Pipelines_DT",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_Extraction_OR|NS_Pipelines_DT`": [
+      "NS_Sand_Extraction_OR|NS_Pipelines_DT": [
         {
           "message": "No sand extraction allowed in areas with passing pipelines.",
           "value": 0.0,
@@ -456,66 +600,18 @@
           "startlayer": "NS_Sand_Extraction_OR",
           "starttype": "",
           "endlayer": "NS_Pipelines_DT",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_Licensed_OR|NS_Shipping_Routes_DT": [
-        {
-          "message": "There are shipping routes in the area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "NS_Shipping_Routes_DT",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_search_OR|NS_Shipping_Routes_DT": [
-        {
-          "message": "There are shipping routes in the area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_search_OR",
-          "starttype": "",
-          "endlayer": "NS_Shipping_Routes_DT",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
       "NS_Sand_Extraction_OR|NS_Shipping_Routes_DT": [
         {
-          "message": "There are shipping routes in the area.",
+          "message": "Your plan overlaps with a shipping route.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Sand_Extraction_OR",
           "starttype": "",
           "endlayer": "NS_Shipping_Routes_DT",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_Licensed_OR|NS_Telecom_Cables_DT`": [
-        {
-          "message": "There are telecom cables in the area.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "NS_Telecom_Cables_DT",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_search_OR|NS_Telecom_Cables_DT`": [
-        {
-          "message": "There are telecom cables in the area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_search_OR",
-          "starttype": "",
-          "endlayer": "NS_Telecom_Cables_DT",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -532,174 +628,6 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Sand_Licensed_OR|dem2008_2018`": [
-        {
-          "message": "This area accounts for high fishing income.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "dem2008_2018",
-          "endtype": "4",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "This area accounts for high fishing income.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "dem2008_2018",
-          "endtype": "5",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "This area accounts for high fishing income.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "dem2008_2018",
-          "endtype": "6",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "This area accounts for high fishing income.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "dem2008_2018",
-          "endtype": "7",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "This area accounts for high fishing income.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "dem2008_2018",
-          "endtype": "8",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "This area accounts for high fishing income.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "dem2008_2018",
-          "endtype": "9",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "This area accounts for high fishing income.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "dem2008_2018",
-          "endtype": "10",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_Extraction_OR|dem2008_2018`": [
-        {
-          "message": "This area accounts for high fishing income.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Extraction_OR",
-          "starttype": "",
-          "endlayer": "dem2008_2018",
-          "endtype": "4",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "This area accounts for high fishing income.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Extraction_OR",
-          "starttype": "",
-          "endlayer": "dem2008_2018",
-          "endtype": "5",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "This area accounts for high fishing income.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Extraction_OR",
-          "starttype": "",
-          "endlayer": "dem2008_2018",
-          "endtype": "6",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "This area accounts for high fishing income.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Extraction_OR",
-          "starttype": "",
-          "endlayer": "dem2008_2018",
-          "endtype": "7",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "This area accounts for high fishing income.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Extraction_OR",
-          "starttype": "",
-          "endlayer": "dem2008_2018",
-          "endtype": "8",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "This area accounts for high fishing income.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Extraction_OR",
-          "starttype": "",
-          "endlayer": "dem2008_2018",
-          "endtype": "9",
-          "sort": "Inclusion"
-        },
-        {
-          "message": "This area accounts for high fishing income.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Extraction_OR",
-          "starttype": "",
-          "endlayer": "dem2008_2018",
-          "endtype": "10",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_Licensed_OR|NS_Anchorages_DT": [
-        {
-          "message": "There are anchorages in the area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "NS_Anchorages_DT",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_search_OR|NS_Anchorages_DT": [
-        {
-          "message": "There are anchorages in the area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_search_OR",
-          "starttype": "",
-          "endlayer": "NS_Anchorages_DT",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
       "NS_Sand_Extraction_OR|NS_Anchorages_DT": [
         {
           "message": "There are anchorages in the area.",
@@ -712,66 +640,6 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Sand_Licensed_OR|NS_Sand_abandoned_OR": [
-        {
-          "message": "Your plan overlaps an abandoned area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "NS_Sand_abandoned_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_search_OR|NS_Sand_abandoned_OR": [
-        {
-          "message": "Your plan overlaps an abandoned area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_search_OR",
-          "starttype": "",
-          "endlayer": "NS_Sand_abandoned_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_Extraction_OR|NS_Sand_abandoned_OR": [
-        {
-          "message": "Your plan overlaps an abandoned area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Extraction_OR",
-          "starttype": "",
-          "endlayer": "NS_Sand_abandoned_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_Licensed_OR|NS_Natura_2000_OR": [
-        {
-          "message": "Your plan overlaps a Natura 2000 area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "NS_Natura_2000_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_search_OR|NS_Natura_2000_OR": [
-        {
-          "message": "Your plan overlaps a Natura 2000 area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_search_OR",
-          "starttype": "",
-          "endlayer": "NS_Natura_2000_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
       "NS_Sand_Extraction_OR|NS_Natura_2000_OR": [
         {
           "message": "Your plan overlaps a Natura 2000 area.",
@@ -780,30 +648,6 @@
           "startlayer": "NS_Sand_Extraction_OR",
           "starttype": "",
           "endlayer": "NS_Natura_2000_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_Licensed_OR|NS_Fishing_Priority_Areas": [
-        {
-          "message": "Your plan overlaps a fishing priority area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_Licensed_OR",
-          "starttype": "",
-          "endlayer": "NS_Fishing_Priority_Areas",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Sand_search_OR|NS_Fishing_Priority_Areas": [
-        {
-          "message": "Your plan overlaps a fishing priority area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Sand_search_OR",
-          "starttype": "",
-          "endlayer": "NS_Fishing_Priority_Areas",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -920,7 +764,7 @@
         {
           "message": "Your plan includes an area licensed for sand extraction.",
           "value": 0.0,
-          "type": "ERROR",
+          "type": "WARNING",
           "startlayer": "NS_Wind_Farms_Implemented",
           "starttype": "",
           "endlayer": "NS_Sand_Licensed_OR",
@@ -948,18 +792,6 @@
           "startlayer": "NS_Wind_Farms_Implemented",
           "starttype": "",
           "endlayer": "NS_Sand_Extraction_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Windstudie_designated_OR|NS_Reserveringsgebied_zand_OR": [
-        {
-          "message": "Your plan includes a sand extraction reservation area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Windstudie_designated_OR",
-          "starttype": "",
-          "endlayer": "NS_Reserveringsgebied_zand_OR",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -1000,18 +832,6 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_after_2030_OR|NS_Reserveringsgebied_zand_OR": [
-        {
-          "message": "Your plan includes a sand extraction reservation area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_after_2030_OR",
-          "starttype": "",
-          "endlayer": "NS_Reserveringsgebied_zand_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
       "NS_after_2030_OR|NS_Sand_Licensed_OR": [
         {
           "message": "Your plan includes an area licensed for sand extraction.",
@@ -1026,7 +846,7 @@
       ],
       "NS_after_2030_OR|NS_Sand_search_OR": [
         {
-          "message": "Your plan includes an area licensed for sand extraction.",
+          "message": "Your plan includes an area indentified as interesting for sand extraction.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_after_2030_OR",
@@ -1042,6 +862,18 @@
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_after_2030_OR",
+          "starttype": "",
+          "endlayer": "NS_Sand_Extraction_OR",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Energy_Cables_Edit|NS_Sand_Extraction_OR": [
+        {
+          "message": "Your plan includes sand extraction sites.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "NS_Energy_Cables_Edit",
           "starttype": "",
           "endlayer": "NS_Sand_Extraction_OR",
           "endtype": "",
@@ -1072,26 +904,14 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Energy_Cables_Edit|NS_Sand_Extraction_OR": [
+      "NS_Oil_Gas_Platforms_DT|NS_Sand_Extraction_OR": [
         {
           "message": "Your plan includes sand extraction sites.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Energy_Cables_Edit",
-          "starttype": "",
-          "endlayer": "NS_Sand_Extraction_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Oil_Gas_Platforms_DT|NS_Reserveringsgebied_zand_OR": [
-        {
-          "message": "Your plan includes a sand extraction reservation area.",
-          "value": 0.0,
-          "type": "WARNING",
           "startlayer": "NS_Oil_Gas_Platforms_DT",
           "starttype": "",
-          "endlayer": "NS_Reserveringsgebied_zand_OR",
+          "endlayer": "NS_Sand_Extraction_OR",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -1116,18 +936,6 @@
           "startlayer": "NS_Oil_Gas_Platforms_DT",
           "starttype": "",
           "endlayer": "NS_Sand_search_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Oil_Gas_Platforms_DT|NS_Sand_Extraction_OR": [
-        {
-          "message": "Your plan includes sand extraction sites.",
-          "value": 0.0,
-          "type": "ERROR",
-          "startlayer": "NS_Oil_Gas_Platforms_DT",
-          "starttype": "",
-          "endlayer": "NS_Sand_Extraction_OR",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -1196,22 +1004,10 @@
         {
           "message": "Your plan includes sand extraction sites.",
           "value": 0.0,
-          "type": "WARNING",
+          "type": "ERROR",
           "startlayer": "NS_Shipping_Routes_DT",
           "starttype": "",
           "endlayer": "NS_Sand_Extraction_OR",
-          "endtype": "",
-          "sort": "Inclusion"
-        }
-      ],
-      "NS_Telecom_Cables_DT|NS_Reserveringsgebied_zand_OR": [
-        {
-          "message": "Your plan includes a sand extraction reservation area.",
-          "value": 0.0,
-          "type": "WARNING",
-          "startlayer": "NS_Telecom_Cables_DT",
-          "starttype": "",
-          "endlayer": "NS_Reserveringsgebied_zand_OR",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -1230,7 +1026,7 @@
       ],
       "NS_Telecom_Cables_DT|NS_Sand_search_OR": [
         {
-          "message": "Your plan includes an area licensed for sand extraction.",
+          "message": " Your plan includes a search area for sand extraction ",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Telecom_Cables_DT",
@@ -1256,7 +1052,7 @@
         {
           "message": "Your plan includes an area licensed for sand extraction.",
           "value": 0.0,
-          "type": "ERROR",
+          "type": "WARNING",
           "startlayer": "NS_Anchorages_DT",
           "starttype": "",
           "endlayer": "NS_Sand_Licensed_OR",
@@ -1266,7 +1062,7 @@
       ],
       "NS_Anchorages_DT|NS_Sand_search_OR": [
         {
-          "message": "Your plan includes an area licensed for sand extraction.",
+          "message": "Your plan includes a search area for sand extraction.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Anchorages_DT",
@@ -1288,26 +1084,26 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Sand_Licensed_OR|NS_Sand_Extraction_OR": [
+      "": [
         {
-          "message": "Your plan includes sand extraction sites.",
+          "message": "Your plan overlaps an existing sand extraction licensed area",
           "value": 0.0,
-          "type": "ERROR",
+          "type": "WARNING",
           "startlayer": "NS_Sand_Licensed_OR",
           "starttype": "",
-          "endlayer": "NS_Sand_Extraction_OR",
+          "endlayer": "NS_Countries",
           "endtype": "",
-          "sort": "Inclusion"
+          "sort": "Exclusion"
         }
       ],
       "NS_Sand_search_OR|NS_Sand_Extraction_OR": [
         {
-          "message": "Your plan includes sand extraction sites.",
+          "message": "Your plan includes an existing search area for sand extraction.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Sand_search_OR",
           "starttype": "",
-          "endlayer": "NS_Sand_Extraction_OR",
+          "endlayer": "NS_Sand_search_OR",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -1350,7 +1146,7 @@
       ],
       "NS_Sand_Extraction_OR|NS_Coastal_Comb_OR": [
         {
-          "message": "No sand extraction allowed east of the -20m line.",
+          "message": "No sand extraction allowed on coastal foundation",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_Sand_Extraction_OR",
@@ -23788,13 +23584,13 @@
         "policy_type": "energy",
         "enabled": true
       },
-      "sand_extraction": {
-        "policy_type": "sand_extraction",
-        "enabled": true
-      },
       "eco_gear": {
         "policy_type": "eco_gear",
         "enabled": false
+      },
+      "sand_extraction": {
+        "policy_type": "sand_extraction",
+        "enabled": true
       }
     },
     "MEL": {
@@ -25150,7 +24946,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#000000FF",
-            "pointSize": 0.8,
+            "pointSize": 0.5,
             "pointSpriteName": "Info",
             "description": "",
             "capacity": 0,
@@ -26219,6 +26015,281 @@
           "ValueMap",
           "Bathymetry",
           "Invisible"
+        ]
+      },
+      {
+        "layer_name": "NS_Bathymetry_Continuous_raster",
+        "layer_geotype": "raster",
+        "layer_entity_value_max": 1000.0,
+        "layer_short": "Bathymetry (NL)",
+        "layer_category": "management",
+        "layer_subcategory": "environmental_conditions",
+        "layer_download_from_geoserver": 1,
+        "layer_width": 1024,
+        "layer_height": 1024,
+        "layer_raster_material": "RasterMELCustomizable",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.1,
+        "layer_active": 1,
+        "layer_selectable": 1,
+        "layer_editable": 0,
+        "layer_toggleable": 1,
+        "layer_active_on_start": 1,
+        "layer_green": 0,
+        "layer_tooltip": "More detailed overview of the depth in the ducth EEZ",
+        "layer_information": "",
+        "layer_media": "wiki://Bathymetry",
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 0
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": -4,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": ">0 m",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#C8DFEEFF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#C8DFEEFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#ABFFFFFF",
+            "pointSize": 0.0,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Bathymetry"
+          },
+          "1": {
+            "displayName": "0 - -10 m",
+            "approval": "EEZ",
+            "value": 149,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#B5D5E9FF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#B5D5E9FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#A0F3F4FF",
+            "pointSize": 0.0,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Bathymetry"
+          },
+          "2": {
+            "displayName": "-10 - -20 m",
+            "approval": "EEZ",
+            "value": 299,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#A3CBE4FF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#A3CBE4FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#8ADADF80",
+            "pointSize": 0.0,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Bathymetry"
+          },
+          "3": {
+            "displayName": "-20 - 30 m",
+            "approval": "EEZ",
+            "value": 448,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#91C0DEFF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#91C0DEFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#7FCED580",
+            "pointSize": 0.0,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Bathymetry"
+          },
+          "4": {
+            "displayName": "-30 - -40 m",
+            "approval": "EEZ",
+            "value": 597,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#7EB6D9FF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#7EB6D9FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#7FCED5FF",
+            "pointSize": 0.0,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Bathymetry"
+          },
+          "5": {
+            "displayName": "-40 - -50 m",
+            "approval": "EEZ",
+            "value": 746,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#6CABD3FF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#6CABD3FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#74C2CAFF",
+            "pointSize": 0.0,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Bathymetry"
+          },
+          "6": {
+            "displayName": "-50 - -60 m",
+            "approval": "NotDependent",
+            "value": 896,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#5AA1CEFF",
+            "polygonPatternName": "1",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 1,
+            "lineColor": "#5AA1CEFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#00000000",
+            "pointSize": 0.0,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": "wiki://Bathymetry"
+          },
+          "7": {
+            "displayName": "> -60 m",
+            "approval": "NotDependent",
+            "value": 923,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#4897C9FF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 1,
+            "lineColor": "#4897C9FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#00000000",
+            "pointSize": 0.0,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": "wiki://Bathymetry"
+          }
+        },
+        "layer_info_properties": null,
+        "layer_tags": [
+          "ValueMap",
+          "Bathymetry"
         ]
       },
       {
@@ -30144,7 +30215,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#000000FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Socket",
             "description": "",
             "capacity": 1000000000,
@@ -30172,7 +30243,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#FF8000FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Socket",
             "description": "",
             "capacity": 10000000000,
@@ -30303,7 +30374,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#FFAA55FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Transformer",
             "description": "",
             "capacity": 400000000,
@@ -30331,7 +30402,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#C46200FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Transformer",
             "description": "",
             "capacity": 800000000,
@@ -37456,7 +37527,7 @@
         ],
         "layer_editing_type": "",
         "layer_special_entity_type": "Default",
-        "layer_depth": 0,
+        "layer_depth": -3,
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
@@ -38184,7 +38255,7 @@
         ],
         "layer_editing_type": "",
         "layer_special_entity_type": "Default",
-        "layer_depth": -2,
+        "layer_depth": 0,
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
@@ -38471,7 +38542,7 @@
         ]
       },
       {
-        "layer_name": "NS_Distance_to_coast_Reclassified_render_OR",
+        "layer_name": "NS_Distance_to_coast_raster_OR",
         "layer_geotype": "raster",
         "layer_entity_value_max": 255.0,
         "layer_short": "Distance to Coast",
@@ -38517,7 +38588,7 @@
           "0": {
             "displayName": "0 - 50 km",
             "approval": "EEZ",
-            "value": 42,
+            "value": 0,
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#386AFFFF",
@@ -38545,7 +38616,7 @@
           "1": {
             "displayName": "50 - 100 km",
             "approval": "EEZ",
-            "value": 85,
+            "value": 50,
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#15BBDBFF",
@@ -38573,7 +38644,7 @@
           "2": {
             "displayName": "100 - 150 km",
             "approval": "EEZ",
-            "value": 127,
+            "value": 100,
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#59FFE1FF",
@@ -38601,7 +38672,7 @@
           "3": {
             "displayName": "150 - 200 km",
             "approval": "EEZ",
-            "value": 170,
+            "value": 150,
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#EEFF38FF",
@@ -38629,7 +38700,7 @@
           "4": {
             "displayName": "200 - 250 km",
             "approval": "EEZ",
-            "value": 212,
+            "value": 200,
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#FFC800FF",
@@ -39146,7 +39217,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Includes all sand in the dunes, beaches, and foreshore down to -20 meters> Ideally, the total sand volume in the area is maintained",
         "layer_information": "",
         "layer_media": "wiki://Coastal_foundation",
         "layer_text_info": null,
@@ -39322,7 +39393,7 @@
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
-            "polygonColor": "#B7BF5FFF",
+            "polygonColor": "#B7BF5FD9",
             "polygonPatternName": "0",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
@@ -40265,7 +40336,7 @@
         "layer_name": "NS_Sand_search_OR",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
-        "layer_short": "Search Areas Sand",
+        "layer_short": "Sand Search Areas",
         "layer_category": "activities",
         "layer_subcategory": "mining_&_aggregate_extraction",
         "layer_download_from_geoserver": 1,
@@ -41429,7 +41500,7 @@
         "layer_name": "NS_Sand_search_2028_OR",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
-        "layer_short": "Future Sand Search Areas 2028-2037",
+        "layer_short": "Future Sand Search Areas (2028-2037)",
         "layer_category": "activities",
         "layer_subcategory": "mining_&_aggregate_extraction",
         "layer_download_from_geoserver": 1,
@@ -41926,7 +41997,7 @@
         "layer_name": "NS_Sand_type_50m_OR",
         "layer_geotype": "raster",
         "layer_entity_value_max": 255.0,
-        "layer_short": "Sandtype",
+        "layer_short": "Sand Type",
         "layer_category": "activities",
         "layer_subcategory": "mining_&_aggregate_extraction",
         "layer_download_from_geoserver": 1,
@@ -41963,7 +42034,7 @@
         ],
         "layer_editing_type": "",
         "layer_special_entity_type": "Default",
-        "layer_depth": -2,
+        "layer_depth": 0,
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
@@ -42086,7 +42157,7 @@
         "layer_name": "NS_NAP_20m_OR",
         "layer_geotype": "line",
         "layer_entity_value_max": null,
-        "layer_short": " -20m Line (BKL)",
+        "layer_short": " -20m Line",
         "layer_category": "management",
         "layer_subcategory": "governance",
         "layer_download_from_geoserver": 1,
@@ -42247,7 +42318,7 @@
         "layer_name": "NS_Basic_coastline_OR",
         "layer_geotype": "line",
         "layer_entity_value_max": null,
-        "layer_short": "Coast Line Reference 1990",
+        "layer_short": "Coast Line Reference - 1990",
         "layer_category": "management",
         "layer_subcategory": "governance",
         "layer_download_from_geoserver": 1,
@@ -42369,7 +42440,7 @@
         "layer_name": "NS_Normal_Baseline_OR",
         "layer_geotype": "line",
         "layer_entity_value_max": null,
-        "layer_short": "Coast Line Reference 2024",
+        "layer_short": "Coast Line Reference - 2024",
         "layer_category": "management",
         "layer_subcategory": "governance",
         "layer_download_from_geoserver": 1,
@@ -43037,7 +43108,7 @@
         "layer_name": "NS_Trend_2024_100_OR",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
-        "layer_short": "Erosion Trend (2024)",
+        "layer_short": "Erosion Trends (2024)",
         "layer_category": "management",
         "layer_subcategory": "environmental_conditions",
         "layer_download_from_geoserver": 1,
@@ -43054,7 +43125,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "",
+        "layer_tooltip": "Shows the trend of erosion in 2024 along the dutch coast",
         "layer_information": "",
         "layer_media": "wiki://Erosion_Trends",
         "layer_text_info": null,
@@ -45633,7 +45704,7 @@
         "layer_name": "NS_Stratification_Depth_OR",
         "layer_geotype": "raster",
         "layer_entity_value_max": 255.0,
-        "layer_short": "Critical Sandpit Depth for Stratification",
+        "layer_short": "Critical Sandpit Depth",
         "layer_category": "management",
         "layer_subcategory": "environmental_conditions",
         "layer_download_from_geoserver": 1,
@@ -45643,14 +45714,14 @@
         "layer_raster_filter_mode": 1,
         "layer_raster_color_interpolation": 0,
         "layer_raster_pattern": "Default",
-        "layer_raster_minimum_value_cutoff": 20.0,
+        "layer_raster_minimum_value_cutoff": 1.0,
         "layer_active": 1,
         "layer_selectable": 1,
         "layer_editable": 0,
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Critical pit depth for thermal stratification",
+        "layer_tooltip": "Pits deeper than the critical depth are more likely to become stratified and contribute to eutrophication",
         "layer_information": "",
         "layer_media": "wiki://Critical_Sandpit_Depth",
         "layer_text_info": null,
@@ -45978,7 +46049,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "General indicator of possible stratification",
+        "layer_tooltip": "Sand pits larget than the tidal excursion are more likely to become stratified and contribute to eutrophication",
         "layer_information": "",
         "layer_media": "wiki://Tidal_Excursion",
         "layer_text_info": null,
@@ -46200,281 +46271,6 @@
         },
         "layer_info_properties": null,
         "layer_tags": []
-      },
-      {
-        "layer_name": "NS_Bathymetry_Continuous_raster",
-        "layer_geotype": "raster",
-        "layer_entity_value_max": 1000.0,
-        "layer_short": "Dutch Bathymetry",
-        "layer_category": "management",
-        "layer_subcategory": "environmental_conditions",
-        "layer_download_from_geoserver": 1,
-        "layer_width": 1024,
-        "layer_height": 1024,
-        "layer_raster_material": "RasterMELCustomizable",
-        "layer_raster_filter_mode": 1,
-        "layer_raster_color_interpolation": 0,
-        "layer_raster_pattern": "Default",
-        "layer_raster_minimum_value_cutoff": 0.1,
-        "layer_active": 1,
-        "layer_selectable": 1,
-        "layer_editable": 0,
-        "layer_toggleable": 1,
-        "layer_active_on_start": 1,
-        "layer_green": 0,
-        "layer_tooltip": "Depth of the sea area",
-        "layer_information": "",
-        "layer_media": "wiki://Bathymetry",
-        "layer_text_info": null,
-        "layer_states": [
-          {
-            "state": "ASSEMBLY",
-            "time": 0
-          },
-          {
-            "state": "ACTIVE",
-            "time": 10
-          },
-          {
-            "state": "DISMANTLE",
-            "time": 2
-          }
-        ],
-        "layer_editing_type": "",
-        "layer_special_entity_type": "Default",
-        "layer_depth": -4,
-        "layer_property_as_type": null,
-        "layer_type": {
-          "0": {
-            "displayName": ">0 m",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#C8DFEEFF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#C8DFEEFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#ABFFFFFF",
-            "pointSize": 0.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Bathymetry"
-          },
-          "1": {
-            "displayName": "0 - -10 m",
-            "approval": "EEZ",
-            "value": 149,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#B5D5E9FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#B5D5E9FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#A0F3F4FF",
-            "pointSize": 0.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Bathymetry"
-          },
-          "2": {
-            "displayName": "-10 - -20 m",
-            "approval": "EEZ",
-            "value": 299,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#A3CBE4FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#A3CBE4FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#8ADADF80",
-            "pointSize": 0.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Bathymetry"
-          },
-          "3": {
-            "displayName": "-20 - 30 m",
-            "approval": "EEZ",
-            "value": 448,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#91C0DEFF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#91C0DEFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#7FCED580",
-            "pointSize": 0.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Bathymetry"
-          },
-          "4": {
-            "displayName": "-30 - -40 m",
-            "approval": "EEZ",
-            "value": 597,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#7EB6D9FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#7EB6D9FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#7FCED5FF",
-            "pointSize": 0.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Bathymetry"
-          },
-          "5": {
-            "displayName": "-40 - -50 m",
-            "approval": "EEZ",
-            "value": 746,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#6CABD3FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#6CABD3FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#74C2CAFF",
-            "pointSize": 0.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Bathymetry"
-          },
-          "6": {
-            "displayName": "-50 - -60 m",
-            "approval": "NotDependent",
-            "value": 896,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#5AA1CEFF",
-            "polygonPatternName": "1",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.0,
-            "displayLines": 1,
-            "lineColor": "#5AA1CEFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#00000000",
-            "pointSize": 0.0,
-            "pointSpriteName": "None",
-            "description": null,
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": 0,
-            "media": "wiki://Bathymetry"
-          },
-          "7": {
-            "displayName": "> -60 m",
-            "approval": "NotDependent",
-            "value": 923,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#4897C9FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.0,
-            "displayLines": 1,
-            "lineColor": "#4897C9FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#00000000",
-            "pointSize": 0.0,
-            "pointSpriteName": "None",
-            "description": null,
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": 0,
-            "media": "wiki://Bathymetry"
-          }
-        },
-        "layer_info_properties": null,
-        "layer_tags": [
-          "ValueMap",
-          "Bathymetry"
-        ]
       }
     ],
     "expertise_definitions": [

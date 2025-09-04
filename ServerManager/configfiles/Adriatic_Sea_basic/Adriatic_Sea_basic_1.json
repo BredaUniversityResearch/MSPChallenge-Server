@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "2/13/2025",
-    "data_model_hash": "9FBED07B8C18A9FF77F50BBD20222AE93DF26291F795C910F4A52EDAED00CA11",
+    "date_modified": "9/1/2025",
+    "data_model_hash": "3DEAAD6F7F2D2A644064CFBB12B67EA9C649FFB5835BBF596B653BFEDB913E69",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -1810,9 +1810,9 @@
     },
     "CEL": {
       "grey_centerpoint_color": "#3D1C04FF",
-      "grey_centerpoint_sprite": "oilbarrel",
+      "grey_centerpoint_sprite": "Oilbarrel",
       "green_centerpoint_color": "#18840AFF",
-      "green_centerpoint_sprite": "lightning"
+      "green_centerpoint_sprite": "Lightning"
     },
     "SEL": {
       "shipping_lane_layers": [
@@ -33582,6 +33582,10 @@
       "eco_gear": {
         "policy_type": "eco_gear",
         "enabled": false
+      },
+      "sand_extraction": {
+        "policy_type": "sand_extraction",
+        "enabled": false
       }
     },
     "MEL": null,
@@ -39230,7 +39234,7 @@
             "displayPoints": 0,
             "pointColor": "#000000FF",
             "pointSize": 0.35,
-            "pointSpriteName": "Pin",
+            "pointSpriteName": "None",
             "description": null,
             "capacity": 0,
             "investmentCost": 0.0,
@@ -39306,7 +39310,7 @@
             "displayPoints": 0,
             "pointColor": "#000000FF",
             "pointSize": 0.35,
-            "pointSpriteName": "Pin",
+            "pointSpriteName": "None",
             "description": null,
             "capacity": 0,
             "investmentCost": 0.0,
@@ -40316,7 +40320,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#000000FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Socket",
             "description": "",
             "capacity": 1000000000,
@@ -40344,7 +40348,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#FF8000FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Socket",
             "description": "",
             "capacity": 10000000000,
@@ -40475,7 +40479,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#FFAA55FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Transformer",
             "description": "",
             "capacity": 400000000,
@@ -40503,7 +40507,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#C46200FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Transformer",
             "description": "",
             "capacity": 800000000,
@@ -40866,9 +40870,9 @@
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
-        "layer_selectable": 0,
+        "layer_selectable": 1,
         "layer_editable": 0,
-        "layer_toggleable": 0,
+        "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "Coastal Municipalities",
@@ -41647,38 +41651,7 @@
             "media": ""
           }
         },
-        "layer_info_properties": [
-          {
-            "property_name": "SEASONAL_CLOSURE",
-            "policy_type": "seasonal_closure",
-            "enabled": 1,
-            "editable": 1,
-            "display_name": "Seasonal closure policy",
-            "sprite_name": null,
-            "update_visuals": false,
-            "update_text": false,
-            "update_calculation": false,
-            "content_type": 0,
-            "content_validation": 0,
-            "unit": null,
-            "default_value": null
-          },
-          {
-            "property_name": "POLICY_BUFFER_ZONE",
-            "policy_type": "buffer_zone",
-            "enabled": 1,
-            "editable": 1,
-            "display_name": "Buffer zone policy",
-            "sprite_name": null,
-            "update_visuals": false,
-            "update_text": false,
-            "update_calculation": false,
-            "content_type": 0,
-            "content_validation": 0,
-            "unit": null,
-            "default_value": null
-          }
-        ],
+        "layer_info_properties": [],
         "layer_tags": []
       },
       {
@@ -44244,7 +44217,7 @@
     "edition_name": "Adriatic Sea edition",
     "edition_colour": "#5C67B0FF",
     "edition_letter": "A",
-    "region": "adriatic",
+    "region": "Adriatic",
     "projection": "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs",
     "start": 2020,
     "end": 2060,
