@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "6/12/2025",
-    "data_model_hash": "2D2A40001C8C0794AAF54F3FFFE58FB052809A7D1CDFD1E215F8A310FE6FD01B",
+    "date_modified": "9/1/2025",
+    "data_model_hash": "19F63ADDDB27ADCE6AA817D754D4AF4C4F1B6D9471F258BC92BE243C7AAFE170",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -20626,6 +20626,10 @@
       "eco_gear": {
         "policy_type": "eco_gear",
         "enabled": false
+      },
+      "sand_extraction": {
+        "policy_type": "sand_extraction",
+        "enabled": false
       }
     },
     "MEL": {
@@ -30268,7 +30272,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#000000FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Socket",
             "description": "",
             "capacity": 1000000000,
@@ -30296,7 +30300,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#FF8000FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Socket",
             "description": "",
             "capacity": 10000000000,
@@ -30399,7 +30403,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#FFAA55FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Transformer",
             "description": "",
             "capacity": 400000000,
@@ -30427,7 +30431,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#C46200FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Transformer",
             "description": "",
             "capacity": 800000000,
@@ -34066,9 +34070,9 @@
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
-        "layer_selectable": 0,
-        "layer_editable": 0,
-        "layer_toggleable": 0,
+        "layer_selectable": 1,
+        "layer_editable": 1,
+        "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "Areas where fishing is prohibited",
@@ -34213,9 +34217,9 @@
         "layer_raster_pattern": "Default",
         "layer_raster_minimum_value_cutoff": 0.05,
         "layer_active": 1,
-        "layer_selectable": 0,
-        "layer_editable": 0,
-        "layer_toggleable": 0,
+        "layer_selectable": 1,
+        "layer_editable": 1,
+        "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
         "layer_tooltip": "Areas where cod fisheries are prohibited",
