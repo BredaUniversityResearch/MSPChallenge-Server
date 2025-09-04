@@ -90,7 +90,6 @@
                                     <td>{{ watchdog.getGameWatchdogServer().createUrl() }}</td>
                                     <td>
                                         {% set simulations = watchdog.getSimulations()|map(s => s.name)|join(', ') %}
-                                        {# meaning we can still connect during setup , or re-connect if the simulations were setup correctly #}
                                         {% if watchdog.getStatus().value == enum('App\\Domain\\Common\\EntityEnums\\WatchdogStatus').UNRESPONSIVE.value %}
                                         <button class="btn btn-warning btn-sm" data-session="{{ gameSession.id }}" data-watchdog="{{ watchdog.id }}" data-action="gamelist#connectToWatchdog">
                                             <i class="fa fa-handshake-o"></i> Connect
