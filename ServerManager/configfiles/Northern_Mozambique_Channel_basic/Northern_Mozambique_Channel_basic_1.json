@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "4/17/2025",
-    "data_model_hash": "EF16D7D5AD98696824D27BD70C8F7CCF328BAE8BE1D590156D304F2289B23E64",
+    "date_modified": "9/1/2025",
+    "data_model_hash": "8B47EB59DBE69EE98DE19C6977D56A17A9FEE5086E030168F3DCE820844742F9",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -15,9 +15,9 @@
     },
     "CEL": {
       "grey_centerpoint_color": "#3D1C04FF",
-      "grey_centerpoint_sprite": "oilbarrel",
+      "grey_centerpoint_sprite": "Oilbarrel",
       "green_centerpoint_color": "#18840AFF",
-      "green_centerpoint_sprite": "lightning"
+      "green_centerpoint_sprite": "Lightning"
     },
     "SEL": null,
     "policy_settings": {
@@ -49,6 +49,10 @@
       },
       "eco_gear": {
         "policy_type": "eco_gear",
+        "enabled": false
+      },
+      "sand_extraction": {
+        "policy_type": "sand_extraction",
         "enabled": false
       }
     },
@@ -1817,7 +1821,7 @@
             "displayPoints": 1,
             "pointColor": "#9A1FF8FF",
             "pointSize": 0.4,
-            "pointSpriteName": "Compass",
+            "pointSpriteName": "Dot",
             "description": null,
             "capacity": 0,
             "investmentCost": 0.0,
@@ -2798,7 +2802,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#000000FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Socket",
             "description": "",
             "capacity": 1000000000,
@@ -2826,7 +2830,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#FF8000FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Socket",
             "description": "",
             "capacity": 10000000000,
