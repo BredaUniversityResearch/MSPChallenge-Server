@@ -1,5 +1,9 @@
 # MSPChallenge-Server 
 
+If you want to just use the MSPChallenge Server, so no development, please follow the installation instructions on [community.mspchallenge.info](https://community.mspchallenge.info/wiki/Installation_Manual).
+
+Below installation instructions are more tailored towards developers. 
+
 ## Getting Started using Symfony Docker
 
 MSP Challenge's Docker configuration is based on [Symfony Docker](https://github.com/dunglas/symfony-docker).
