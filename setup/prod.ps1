@@ -3,7 +3,7 @@
     MSP Challenge Server setup script
 
 .DESCRIPTION
-    This is setup script for installing "MSP Challenge Server". It will spin up multiple Docker containers running its services.
+    This is the setup script for installing "MSP Challenge Server". It will spin up multiple Docker containers running its services.
 
 .PARAMETER Preset
     The environment preset to use (Direct, Proxy, LAN, Local).
