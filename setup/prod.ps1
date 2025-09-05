@@ -1,18 +1,67 @@
 <#
 .SYNOPSIS
-This script demonstrates parameter handling with GUI and CLI modes.
+    MSP Challenge Server setup script
+
+.DESCRIPTION
+    This is setup script for installing "MSP Challenge Server". It will spin up multiple Docker containers running its services.
+
+.PARAMETER Preset
+    The environment preset to use (Direct, Proxy, LAN, Local).
 
 .PARAMETER ServerName
-The domain name of the server.
+    The domain name of the server.
+
+.PARAMETER UrlWebServerHost
+    The host for the web server.
+
+.PARAMETER UrlWebServerScheme
+    The scheme for the web server (http or https).
+
+.PARAMETER UrlWebServerPort
+    The port for the web server.
+
+.PARAMETER UrlWsServerPort
+    The port for the WebSocket server.
+
+.PARAMETER UrlWsServerHost
+    The host for the WebSocket server.
+
+.PARAMETER UrlWsServerScheme
+    The scheme for the WebSocket server (ws or wss).
+
+.PARAMETER UrlWsServerUri
+    The URI for the WebSocket server.
 
 .PARAMETER ServerPort
-The port number for the server.
+    The port number for the server.
 
-.PARAMETER TestSwitch
-Enable a switch as a test (default: 0).
+.PARAMETER WsServerPort
+    The port number for the WebSocket server.
+
+.PARAMETER HttpsPort
+    The HTTPS port.
+
+.PARAMETER Http3Port
+    The HTTP/3 port.
+
+.PARAMETER WatchdogPort
+    The port for the watchdog service.
 
 .PARAMETER EnableGui
-Enable GUI mode for input (default: 0).
+    Enable GUI mode for input (default: 1).
+
+.PARAMETER CaddyMercureJwtSecret
+    The JWT secret for Caddy Mercure.
+
+.PARAMETER BranchName
+    The branch name to use for downloading docker-compose files.
+
+.PARAMETER AppSecret
+    The application secret.
+
+.LINK
+    MSP Challenge Server GitHub page: https://github.com/BredaUniversityResearch/MSPChallenge-Server/
+    MSP Challenge Community website: https://community.mspchallenge.info/
 #>
 
 # Define parameters
@@ -855,8 +904,11 @@ function Invoke-NonGuiMode {
         if ($linked) {
             continue
         }
+
+        $envVar = GetParamMetadataValue -param $param -metadata "EnvVar" -parameterMetadata $parameterMetadata
+
         # Prompt for input
-        $resolvedParameters[$param] = Read-InputWithDefault -prompt "Enter value for $param" -defaultValue $resolvedParameters[$param] -paramDef $parameters[$param] -parameterMetadata $parameterMetadata[$param]
+        $resolvedParameters[$param] = Read-InputWithDefault -prompt "Enter value for $envVar" -defaultValue $resolvedParameters[$param] -paramDef $parameters[$param] -parameterMetadata $parameterMetadata[$param]
     }
 }
 
