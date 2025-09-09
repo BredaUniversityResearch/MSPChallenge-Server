@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "9/1/2025",
-    "data_model_hash": "3DEAAD6F7F2D2A644064CFBB12B67EA9C649FFB5835BBF596B653BFEDB913E69",
+    "date_modified": "9/9/2025",
+    "data_model_hash": "F011246AF856B73266CF6ADCBA6AAE3C84995D8DEE909A00FD0DD09BFA16CA4E",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -44217,7 +44217,7 @@
     "edition_name": "Adriatic Sea edition",
     "edition_colour": "#5C67B0FF",
     "edition_letter": "A",
-    "region": "Adriatic",
+    "region": "adriatic",
     "projection": "+proj=laea +lat_0=52 +lon_0=10 +x_0=4321000 +y_0=3210000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs",
     "start": 2020,
     "end": 2060,
