@@ -271,7 +271,12 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
      */
     private function importLayerData(SessionSetupContext $context): void
     {
-        $geoServerCommunicator = new GeoServerCommunicator($this->client, $this->downloadsCache, $this->resultsCache);
+        $geoServerCommunicator = new GeoServerCommunicator(
+            $this->client,
+            $this->provider,
+            $this->downloadsCache,
+            $this->resultsCache
+        );
         $geoServerCommunicator
             ->setBaseURL($this->gameSession->getGameGeoServer()->getAddress())
             ->setUsername($this->gameSession->getGameGeoServer()->getUsername())
