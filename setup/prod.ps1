@@ -929,7 +929,7 @@ if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
 
 # Remove from $resolvedParameters those params that do not have an EnvVar metadata
 # Build all lines first, then write at once with Set-Content (avoids BOM issues in PowerShell Core and always writes the file)
-$envLines = @()
+$envLines = @("APP_ENV=prod")
 foreach ($param in $resolvedParameters.Keys.Clone()) {
     $envVar = GetParamMetadataValue -param $param -metadata "EnvVar" -parameterMetadata $parameterMetadata
     if (-not $envVar) {
