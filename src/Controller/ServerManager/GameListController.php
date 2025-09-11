@@ -11,6 +11,7 @@ use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Domain\Common\GameListAndSaveSerializer;
+use App\Domain\Common\MessageJsonResponse;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameList;

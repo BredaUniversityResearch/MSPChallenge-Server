@@ -30,8 +30,7 @@ class SessionController extends AbstractController
             'slashes2' => '\/*',
             'slashes3' => '\/*'
         ],
-        defaults: ['slashes' => '', 'slashes2' => '', 'slashes3' => ''],
-        methods: ['GET', 'POST']
+        defaults: ['slashes' => '', 'slashes2' => '', 'slashes3' => '']
     )]
     public function __invoke(
         HttpKernelInterface $httpKernel,

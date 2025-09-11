@@ -2,8 +2,8 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\MessageJsonResponse;
 use App\Domain\Common\ObjectMethod;
-use App\Domain\WsServer\ClientDisconnectedException;
 use Closure;
 use Exception;
 use JetBrains\PhpStorm\ArrayShape;
@@ -49,7 +49,7 @@ class Router
                                // >> OptIn means some calls will request transactions (so default is no transactions)
                                // >> OptOut means some calls will request no transactions (so default is transactions)
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function RouteApiCall(string $apiCallUrl, array $data): array
+    public static function RouteApiCall(string $apiCallUrl, array $data): MessageJsonResponse
     {
         $endpointData = self::parseEndpointString($apiCallUrl);
         try {
@@ -59,22 +59,15 @@ class Router
                 $data,
                 self::TRANSACTIONS_TOGGLE
             );
-
-            if (UnitTestSupport::ShouldLogApiCalls()) {
-                $unitTestSupport = new UnitTestSupport();
-                $unitTestSupport->RecordApiCall($endpointData["class"], $endpointData["method"], $data, $result);
-            }
+// not supported anymore
+//            if (UnitTestSupport::ShouldLogApiCalls()) {
+//                $unitTestSupport = new UnitTestSupport();
+//                $unitTestSupport->RecordApiCall($endpointData["class"], $endpointData["method"], $data, $result);
+//            }
 
             return $result;
         } catch (Exception $e) {
-            return self::formatResponse(
-                false,
-                $e->getMessage(),
-                null,
-                $endpointData["class"],
-                $endpointData["method"],
-                $data
-            );
+            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
         }
     }
 
@@ -169,12 +162,12 @@ class Router
         string $method,
         array $data,
         bool $startDatabaseTransaction = true
-    ): array {
+    ): MessageJsonResponse {
         try {
             $class = self::createObjectFrom($className, $method);
         } catch (Exception $e) {
             $message = self::ErrorString(new Exception('Invalid class.'));
-            return self::FormatResponse(false, $message, null, $className, $method, $data);
+            return new MessageJsonResponse(message: $message, status: 500);
         }
         $message = null;
         $payload = null;
@@ -209,7 +202,7 @@ class Router
                 }
 
                 $message = self::ErrorString($e);
-                return self::formatResponse($success, $message, null, $className, $method, $data);
+                return new MessageJsonResponse(message: $message, status: 500);
             }
             // execution worked, payload has been set, message can remain empty
             $success = true;
@@ -218,7 +211,7 @@ class Router
             $success = false;
             $message = self::ErrorString(new Exception("Invalid method."));
         }
-        return self::formatResponse($success, $message, $payload, $className, $method, $data);
+        return new MessageJsonResponse(status: $success ? 200 : 500, message: $message, data: $payload);
     }
 
     /**

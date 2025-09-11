@@ -5,7 +5,7 @@ namespace App\Controller\SessionAPI;
 use App\Controller\BaseController;
 use App\Domain\API\APIHelper;
 use App\Domain\API\v1\Kpi;
-use App\Domain\API\v1\Router;
+use App\Domain\Common\MessageJsonResponse;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\SessionAPI\Simulation;
 use App\Entity\SessionAPI\Watchdog;
@@ -109,18 +109,12 @@ class KPIController extends BaseController
     ): JsonResponse {
         $kpiValues = $request->request->get('kpiValues');
         if (empty($kpiValues)) {
-            return new JsonResponse(
-                Router::formatResponse(false, 'Invalid or missing data', null, __CLASS__, __FUNCTION__),
-                Response::HTTP_BAD_REQUEST
-            );
+            return new MessageJsonResponse(message: 'Invalid or missing data', status: Response::HTTP_BAD_REQUEST);
         }
 
         $kpiValues = json_decode($kpiValues, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return new JsonResponse(
-                Router::formatResponse(false, 'Invalid or missing data', null, __CLASS__, __FUNCTION__),
-                Response::HTTP_BAD_REQUEST
-            );
+            return new MessageJsonResponse(message: 'Invalid or missing data', status: Response::HTTP_BAD_REQUEST);
         }
 
         $kpi = new Kpi();
@@ -128,13 +122,13 @@ class KPIController extends BaseController
         try {
             $kpi->BatchPost($kpiValues);
         } catch (Exception $e) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
         }
 
         $logs[] = 'KPI values posted successfully';
         $notify = $request->headers->get('x-notify-monthly-simulation-finished');
         if (!($notify && filter_var($notify, FILTER_VALIDATE_BOOLEAN))) {
-            return new JsonResponse(self::wrapPayloadForResponse(true, ['logs' => $logs]));
+            return new JsonResponse(['logs' => $logs]);
         }
 
         try {
@@ -152,6 +146,6 @@ class KPIController extends BaseController
         } catch (Exception $e) {
             $logs[] = $e->getMessage();
         }
-        return new JsonResponse(self::wrapPayloadForResponse(true, ['logs' => $logs]));
+        return new JsonResponse(['logs' => $logs]);
     }
 }

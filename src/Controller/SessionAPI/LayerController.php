@@ -4,6 +4,7 @@ namespace App\Controller\SessionAPI;
 
 use App\Controller\BaseController;
 use App\Domain\API\v1\Layer;
+use App\Domain\Common\MessageJsonResponse;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
 use OpenApi\Attributes as OA;
@@ -105,9 +106,9 @@ class LayerController extends BaseController
         $layer->setGameSessionId($this->getSessionIdFromRequest($request));
         try {
             $layers = $layer->list($layerTags);
-            return new JsonResponse(self::wrapPayloadForResponse(true, $layers));
+            return new JsonResponse($layers);
         } catch (Exception $e) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
         }
     }
 
@@ -231,13 +232,12 @@ class LayerController extends BaseController
             $layer = new Layer();
             $layer->setGameSessionId($this->getSessionIdFromRequest($request));
             $layerId = $request->request->get('layer_id');
-            return new JsonResponse(self::wrapPayloadForResponse(
-                true,
-                $layer->Export($layerId),
-                'Layer export with all geometry and their attributes'
-            ));
+            return new MessageJsonResponse(
+                data: $layer->Export($layerId),
+                message: 'Layer export with all geometry and their attributes'
+            );
         } catch (Exception $e) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
         }
     }
 
@@ -371,9 +371,9 @@ class LayerController extends BaseController
             $layer = new Layer();
             $layer->setGameSessionId($this->getSessionIdFromRequest($request));
             $layerId = $request->request->get('layer_id');
-            return new JsonResponse(self::wrapPayloadForResponse(true, $layer->Get($layerId)));
+            return new JsonResponse($layer->Get($layerId));
         } catch (Exception $e) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
         }
     }
 
@@ -471,14 +471,13 @@ class LayerController extends BaseController
             $layer->setGameSessionId($this->getSessionIdFromRequest($request));
             $layerName = $request->request->get('layer_name');
             $month = $request->request->get('month', -1);
-            return new JsonResponse(self::wrapPayloadForResponse(
-                true,
-                $layer->GetRaster($layerName, $month),
-                'Returns array of displayed_bounds and image_data strings to payload, whereby image_data is '.
-                'base64 encoded file'
-            ));
+            return new MessageJsonResponse(
+                data: $layer->GetRaster($layerName, $month),
+                message:'Returns array of displayed_bounds and image_data strings to payload, whereby image_data is '.
+                    'base64 encoded file'
+            );
         } catch (Exception $e) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
         }
     }
 
@@ -532,9 +531,9 @@ class LayerController extends BaseController
             $layer = new Layer();
             $layer->setGameSessionId($this->getSessionIdFromRequest($request));
             $layerId = $request->request->get('layer_id');
-            return new JsonResponse(self::wrapPayloadForResponse(true, $layer->Meta($layerId), 'JSON object'));
+            return new MessageJsonResponse(data: $layer->Meta($layerId), message:'JSON object');
         } catch (Exception $e) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
         }
     }
 
@@ -589,9 +588,9 @@ class LayerController extends BaseController
             $layer = new Layer();
             $layer->setGameSessionId($this->getSessionIdFromRequest($request));
             $name = $request->request->get('name');
-            return new JsonResponse(self::wrapPayloadForResponse(true, $layer->MetaByName($name), 'JSON object'));
+            return new MessageJsonResponse(data: $layer->MetaByName($name), message:'JSON object');
         } catch (Exception $e) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
         }
     }
 }
