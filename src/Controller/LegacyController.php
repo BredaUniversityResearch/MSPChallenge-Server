@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Domain\Common\MessageJsonResponse;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use ServerManager\ServerManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -39,12 +40,9 @@ class LegacyController extends LegacyControllerBase
             $_SERVER['HTTP_' . strtoupper($headerName)] = $headerValue[0];
         }
 
-        ob_start();
-        require('legacy.php');
-        $json = json_decode(ob_get_contents());
-        ob_end_clean();
-
-        return new JsonResponse($json, 200);
+        /** @var MessageJsonResponse $response */
+        $response = require('legacy.php');
+        return $response;
     }
 
     #[Route(

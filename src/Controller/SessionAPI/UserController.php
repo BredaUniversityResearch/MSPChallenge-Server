@@ -4,6 +4,7 @@ namespace App\Controller\SessionAPI;
 
 use App\Controller\BaseController;
 use App\Domain\API\v1\User;
+use App\Domain\Common\MessageJsonResponse;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Security\BearerTokenValidator;
@@ -144,10 +145,7 @@ class UserController extends BaseController
         $sessionId = $this->getSessionIdFromRequest($request);
         // check if country_id get parameter is an int
         if (!ctype_digit($request->get('country_id'))) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Invalid country_id value. Must be an integer'),
-                400
-            );
+            return new MessageJsonResponse(message: 'Invalid country_id value. Must be an integer', status: 400);
         }
 
         try {
@@ -165,11 +163,11 @@ class UserController extends BaseController
             $responseData = json_decode($jsonResponse->getContent());
             $payload['api_access_token'] = $responseData->token;
             $payload['api_refresh_token'] = $responseData->api_refresh_token;
-            return new JsonResponse(self::wrapPayloadForResponse(true, $payload));
+            return new JsonResponse($payload);
         } catch (\Exception $e) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: $e->getMessage().PHP_EOL.$e->getTraceAsString()),
-                500
+            return new MessageJsonResponse(
+                message: $e->getMessage().PHP_EOL.$e->getTraceAsString(),
+                status: 500
             );
         }
     }
@@ -244,11 +242,11 @@ class UserController extends BaseController
             $responseData = json_decode($jsonResponse->getContent());
             $payload['api_access_token'] = $responseData->token;
             $payload['api_refresh_token'] = $responseData->api_refresh_token;
-            return new JsonResponse(self::wrapPayloadForResponse(true, $payload));
+            return new JsonResponse($payload);
         } catch (\Exception $e) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: $e->getMessage().PHP_EOL.$e->getTraceAsString()),
-                500
+            return new MessageJsonResponse(
+                message: $e->getMessage().PHP_EOL.$e->getTraceAsString(),
+                status: 500
             );
         }
     }
