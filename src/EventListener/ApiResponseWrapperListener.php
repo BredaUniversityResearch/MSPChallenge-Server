@@ -20,14 +20,13 @@ class ApiResponseWrapperListener
         }
 
         $inner = $event->getResponse();
-        // only process Json or JWTAuthenticationFailureResponse
+        // only process Json responses
         $hasJsonContentType = preg_match(
             '/application\/[^;+]*\+?json/',
             $inner->headers->get('Content-Type')
         ) === 1;
         if (!(
                 $hasJsonContentType ||
-                ($inner instanceof JWTAuthenticationFailureResponse) ||
                 ($inner instanceof JsonResponse)
             )) {
             return;
