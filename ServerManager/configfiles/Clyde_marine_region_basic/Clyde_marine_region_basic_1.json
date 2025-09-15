@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "date_modified": "3/26/2025",
-    "data_model_hash": "2CD71090D060CD9B3A4698E8E2A28025C6314383ACA2C15BDA06F94D3A0BD0EF",
+    "date_modified": "9/1/2025",
+    "data_model_hash": "65FA7DB45380CD8B9DD4A3459C84ABA6271FF45844B83F857AA1F594F9B94A82",
     "errors": 0,
     "editor_version": "2.0.0",
     "config_version": "2.0.0"
@@ -1646,9 +1646,9 @@
     },
     "CEL": {
       "grey_centerpoint_color": "#3D1C04FF",
-      "grey_centerpoint_sprite": "oilbarrel",
+      "grey_centerpoint_sprite": "Oilbarrel",
       "green_centerpoint_color": "#18840AFF",
-      "green_centerpoint_sprite": "lightning"
+      "green_centerpoint_sprite": "Lightning"
     },
     "SEL": {
       "shipping_lane_layers": [
@@ -5755,6 +5755,10 @@
       "eco_gear": {
         "policy_type": "eco_gear",
         "enabled": false
+      },
+      "sand_extraction": {
+        "policy_type": "sand_extraction",
+        "enabled": false
       }
     },
     "MEL": {
@@ -6309,10 +6313,6 @@
           "subcategory": "Biodiversity"
         },
         {
-          "name": "Shannon Diversity Indicator",
-          "subcategory": "Biodiversity"
-        },
-        {
           "name": "Benthic Catch",
           "subcategory": "Species Catch"
         },
@@ -6424,12 +6424,6 @@
           "categoryColor": "#5AAE61FF",
           "unit": "",
           "valueDefinitions": [
-            {
-              "valueName": "Shannon Diversity Indicator",
-              "valueColor": "#000000FF",
-              "unit": "",
-              "valueDependentCountry": -1
-            },
             {
               "valueName": "Large Fish Indicator",
               "valueColor": "#000000FF",
@@ -18004,194 +17998,6 @@
         "layer_tags": []
       },
       {
-        "layer_name": "mel_Shannon_Diversity_Indicator",
-        "layer_geotype": "raster",
-        "layer_entity_value_max": null,
-        "layer_short": "Shannon Diversity Indicator (Simulated)",
-        "layer_category": "ecology",
-        "layer_subcategory": "biodiversity_indicator",
-        "layer_download_from_geoserver": 0,
-        "layer_width": 67,
-        "layer_height": 93,
-        "layer_raster_material": "RasterMELCustomizable",
-        "layer_raster_filter_mode": 1,
-        "layer_raster_color_interpolation": 0,
-        "layer_raster_pattern": "Default",
-        "layer_raster_minimum_value_cutoff": 0.05,
-        "layer_active": 1,
-        "layer_selectable": 1,
-        "layer_editable": 0,
-        "layer_toggleable": 1,
-        "layer_active_on_start": 0,
-        "layer_green": 0,
-        "layer_tooltip": "Simulated distribution of Shannon's diversity indicator",
-        "layer_information": "",
-        "layer_media": "wiki://Shannon_Diversity_Indicator",
-        "layer_text_info": null,
-        "layer_states": [
-          {
-            "state": "ASSEMBLY",
-            "time": 2
-          },
-          {
-            "state": "ACTIVE",
-            "time": 10
-          },
-          {
-            "state": "DISMANTLE",
-            "time": 2
-          }
-        ],
-        "layer_editing_type": "",
-        "layer_special_entity_type": "Default",
-        "layer_depth": 1,
-        "layer_property_as_type": null,
-        "layer_type": {
-          "0": {
-            "displayName": "Extremely Low",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#0000FFC9",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#0000FFFF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#0000FFFF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Shannon_Diversity_Indicator"
-          },
-          "1": {
-            "displayName": "Low",
-            "approval": "EEZ",
-            "value": 250,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#00FFFFC9",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#00FF00FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#00FF00FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Shannon_Diversity_Indicator"
-          },
-          "2": {
-            "displayName": "Medium",
-            "approval": "EEZ",
-            "value": 500,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#00FF00C9",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FFFF00FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FFFF00FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Shannon_Diversity_Indicator"
-          },
-          "3": {
-            "displayName": "High",
-            "approval": "EEZ",
-            "value": 750,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#FF8000FF",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FF8000FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FF8000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Shannon_Diversity_Indicator"
-          },
-          "4": {
-            "displayName": "Extra High",
-            "approval": "EEZ",
-            "value": 1000,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#FF0000C9",
-            "polygonPatternName": "5",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 0.2,
-            "displayLines": 1,
-            "lineColor": "#FF0000FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#FF0000FF",
-            "pointSize": 1.0,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Shannon_Diversity_Indicator"
-          }
-        },
-        "layer_info_properties": null,
-        "layer_tags": []
-      },
-      {
         "layer_name": "mel_Protection_Seine",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
@@ -19398,7 +19204,7 @@
             "linePatternType": "Solid",
             "displayPoints": 1,
             "pointColor": "#000000FF",
-            "pointSize": 0.75,
+            "pointSize": 0.5,
             "pointSpriteName": "Socket",
             "description": "",
             "capacity": 1000000000,

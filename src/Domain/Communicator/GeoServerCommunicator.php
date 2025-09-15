@@ -4,6 +4,7 @@ namespace App\Domain\Communicator;
 
 use App\Domain\Common\CacheItemConfig;
 use App\Entity\SessionAPI\Layer;
+use App\VersionsProvider;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -21,6 +22,7 @@ class GeoServerCommunicator extends AbstractCommunicator
 
     public function __construct(
         HttpClientInterface $httpClient,
+        private readonly VersionsProvider $versionsProvider,
         private readonly ?CacheInterface $downloadsCache = null,
         private readonly ?CacheInterface $resultsCache = null
     ) {
@@ -70,7 +72,13 @@ class GeoServerCommunicator extends AbstractCommunicator
         if ($this->resultsCache === null || // there is no cache pool
             $cacheItemConfig === null || // no cache item config, so no cache
             $cacheLifetime === null) { // cache lifetime is null, so disabled.
-            return $this->call('GET', $endPoint, [], [], $asArray);
+            return $this->call(
+                'GET',
+                $endPoint,
+                [],
+                ['Msp-Server-Version' => $this->versionsProvider->getVersion()],
+                $asArray
+            );
         }
 
         // Try to use cache
@@ -81,7 +89,13 @@ class GeoServerCommunicator extends AbstractCommunicator
                 if ($cacheLifetime > 0) {
                     $item->expiresAfter($cacheLifetime);
                 }
-                return $this->call('GET', $endPoint, [], [], $asArray);
+                return $this->call(
+                    'GET',
+                    $endPoint,
+                    [],
+                    ['Msp-Server-Version' => $this->versionsProvider->getVersion()],
+                    $asArray
+                );
             },
             0
         );
