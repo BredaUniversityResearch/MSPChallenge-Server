@@ -147,10 +147,10 @@ class ImmersiveSessionService
                         $gameList
                     ),
                     'IMMERSIVE_SESSION_REGION_COORDS='.json_encode([
-                        'region_bottom_left_x' => $sess->getRegion()->getBottomLeftX(),
-                        'region_bottom_left_y' => $sess->getRegion()->getBottomLeftY(),
-                        'region_top_right_x' => $sess->getRegion()->getTopRightX(),
-                        'region_top_right_y' => $sess->getRegion()->getTopRightY()
+                        'region_bottom_left_x' => $sess->getBottomLeftX(),
+                        'region_bottom_left_y' => $sess->getBottomLeftY(),
+                        'region_top_right_x' => $sess->getTopRightX(),
+                        'region_top_right_y' => $sess->getTopRightY()
                     ]),
                     'IMMERSIVE_SESSION_MONTH='.$conn->getSession()->getMonth(),
                     // like require_username, require_team, gamemaster_pick
