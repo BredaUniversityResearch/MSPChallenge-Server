@@ -13,6 +13,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -72,6 +74,29 @@ class DynamicEntityFormType extends AbstractType
             }
             if (null !== ($formFieldTypeOptions['attr']['placeholder'] ?? null)) {
                 $formFieldTypeOptions['attr']['title'] = "example:\n".$formFieldTypeOptions['attr']['placeholder'];
+            }
+            // json_document type handling
+            if ((null !== $attribute = Util::getPropertyAttribute($property, ORM\Column::class)) &&
+                $attribute->type == 'json_document'
+            ) {
+                $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($property) {
+                    $data = $event->getData();
+                    $propertyValue = $property->getValue($data);
+                    if ($propertyValue === null) {
+                        return;
+                    }
+                    $property->setValue($data, json_encode($propertyValue, JSON_PRETTY_PRINT));
+                    $event->setData($data);
+                });
+                $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) use ($property) {
+                    $data = $event->getData();
+                    $propertyValue = $property->getValue($data);
+                    if ($propertyValue === null) {
+                        return;
+                    }
+                    $property->setValue($data, json_decode($propertyValue, true));
+                    $event->setData($data);
+                });
             }
             $builder->add($propertyName, $formFieldType, $formFieldTypeOptions);
         }
