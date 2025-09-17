@@ -12,9 +12,6 @@ class ApiResponseWrapperListener
 {
     public function onKernelResponse(ResponseEvent $event): void
     {
-        if ($event->getRequest()->attributes->get('_route') != 'api_session') {
-            return;
-        }
         if (!$event->isMainRequest()) {
             return;
         }

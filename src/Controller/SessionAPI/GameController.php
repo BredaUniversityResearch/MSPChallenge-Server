@@ -211,15 +211,9 @@ class GameController extends BaseController
         try {
             $zipFilepath = $configCreator->createAndZip($region);
         } catch (Exception $e) {
-            return new JsonResponse(
-                Router::formatResponse(
-                    false,
-                    'Could not create POV config, error: '.$e->getMessage(),
-                    null,
-                    __CLASS__,
-                    __FUNCTION__
-                ),
-                Response::HTTP_INTERNAL_SERVER_ERROR
+            return new MessageJsonResponse(
+                status: Response::HTTP_INTERNAL_SERVER_ERROR,
+                message: 'Could not create POV config, error: '.$e->getMessage()
             );
         }
 

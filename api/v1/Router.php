@@ -305,63 +305,6 @@ class Router
     }
 
     /**
-     * @param bool $success
-     * @param string|null $message
-     * @param mixed|null $payload
-     * @param string $className
-     * @param string $method
-     * @param array $data
-     * @return array
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function formatResponse(
-        bool $success,
-        ?string $message,
-        mixed $payload = null,
-        string $className = '',
-        string $method = '',
-        array $data = []
-    ): array {
-        $debugMessage = null;
-        // @marin debug feature: setting a debug-message through a payload field
-        if (is_array($payload) && isset($payload['debug-message'])) {
-            if (is_string($payload['debug-message'])) {
-                $debugMessage = $payload['debug-message'];
-            }
-            unset($payload['debug-message']);
-        }
-
-        if (($_ENV['APP_ENV'] ?? 'prod') !== 'dev') {
-            return [
-                // no need for header information from api, only needed for websocket server communication.
-                "header_type" => null,
-                "header_data" => null,
-                "success" => $success,
-                "message" => $message,
-                "payload" => $payload
-            ];
-        }
-
-        // everything for dev (debug) below
-        $message .= $debugMessage;
-        if (!$success) {
-            $message .= PHP_EOL .
-            "Request: " . $className . "/" . $method . PHP_EOL .
-            "Call data: " . str_replace(array("\n", "\r"), "", var_export($data, true)) . PHP_EOL .
-            "Request URI: " . $_SERVER['REQUEST_URI'];
-        }
-
-        return [
-            // no need for header information from api, only needed for websocket server communication.
-            "header_type" => null,
-            "header_data" => null,
-            "success" => $success,
-            "message" => $message,
-            "payload" => $payload
-        ];
-    }
-
-    /**
      * @param mixed $input
      * @param string $targetType
      * @return bool

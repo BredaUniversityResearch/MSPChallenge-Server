@@ -180,12 +180,6 @@ services:
         tags:
             - 'twig.extension'
 
-    App\EventListener\CheckApiSessionIdListener:
-        arguments:
-            $pathPatterns: '%app.api_path_patterns%'
-        tags:
-            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
-
     # https://symfony.com/doc/6.4/components/uid.html#generating-and-inspecting-uuids-ulids-in-the-console
     Symfony\Component\Uid\Command\GenerateUlidCommand: ~
     Symfony\Component\Uid\Command\GenerateUuidCommand: ~

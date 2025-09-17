@@ -10,7 +10,19 @@ class MessageJsonResponse extends JsonResponse
 
     public function __construct($data = null, int $status = 200, array $headers = [], ?string $message = null)
     {
+        $debugMessage = null;
+        // @marin debug feature: setting a debug-message through a payload field
+        if (is_array($data) && isset($data['debug-message'])) {
+            if (is_string($data['debug-message'])) {
+                $debugMessage = $data['debug-message'];
+            }
+            unset($data['debug-message']);
+        }
+
         $this->message = $message;
+        if ($debugMessage) {
+            $this->message = ($this->message ?? '').$debugMessage;
+        }
         parent::__construct($data, $status, $headers);
     }
 
