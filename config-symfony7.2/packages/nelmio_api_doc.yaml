@@ -1,0 +1,374 @@
+nelmio_api_doc:
+    html_config:
+        assets_mode: 'bundle'
+    documentation:
+        # define the order in which tags are shown here, User first
+        tags:
+            - name: "User"
+        servers:
+          - url: '%env(default:app.default_scheme:scheme:URL_WEB_SERVER_SCHEME)%://%env(default:app.default_host:URL_WEB_SERVER_HOST)%:%env(default:app.default_port:URL_WEB_SERVER_PORT)%/{sessionId}'
+            variables:
+                sessionId:
+                    default: '1'
+                    description: The session ID
+                    pattern: '^\d+$' # Regular expression to validate as an integer
+          - url: 'http://localhost:80/{sessionId}'
+            variables:
+                sessionId:
+                    default: '1'
+                    description: The session ID
+                    pattern: '^\d+$' # Regular expression to validate as an integer
+        info:
+            title: MSP Challenge API
+            # description: This is an awesome app!
+            version: '%env(file:VERSION_FILE)%'
+        components:
+            links: []
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+                    description: 'call /api/User/RequestSession and copy the value of api_access_token here'
+            schemas:
+                ResponseStructure:
+                    type: object
+                    properties:
+                        header_type:
+                            type: string
+                            nullable: true
+                            example: null
+                            description: 'always null for api responses. For websocket responses, this is the type of the message. E.g. Batch/ExecuteBatch'
+                        header_data:
+                            type: string
+                            nullable: true
+                            example: null
+                            description: 'always null for api responses. For websocket responses, this holds data of the message type. E.g. the batch guid'
+                        success:
+                            type: boolean
+                            description: 'false on failure, true on success'
+                        message:
+                            type: string
+                            nullable: true
+                            description: 'In case of a failure a message that describes what went wrong'
+                        payload:
+                            nullable: true
+                            description: 'The actual data that is returned on success'
+                            oneOf:
+                                - type: array
+                                  items:
+                                      oneOf:
+                                          - type: object
+                                          - type: string
+                                - type: string
+                                - type: object
+                ResponseGeometry:
+                    allOf:
+                            - $ref: '#/components/schemas/ResponseStructure'
+                            - type: object
+                              properties:
+                                payload:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: integer
+                                        example: 1586
+                                      geometry:
+                                        type: array
+                                        items:
+                                          type: array
+                                          items:
+                                            type: number
+                                            maxItems: 2
+                                            minItems: 2
+                                            example: [3674414.2806077, 3346465.4397283]
+                                      subtractive:
+                                        type: array
+                                        items:
+                                          type: integer
+                                        example: []
+                                      persistent:
+                                        type: integer
+                                        example: 1586
+                                      mspid:
+                                        type: integer
+                                        example: 14109
+                                      type:
+                                        type: integer
+                                        example: 1
+                                      country:
+                                        type: integer
+                                        example: -1
+                                      active:
+                                        type: integer
+                                        enum: [0, 1]
+                                        example: 1
+                                      data:
+                                        type: object
+                                        example:
+                                          Status: "Open"
+                                          Area_cal: "2695738"
+                                          Dist_coast: "2610.41"
+                                          Updateyea_: "2014"
+                                          Country: "England"
+                                          Depth_m_: ""
+                                          Name: "WEST STONES"
+                                          original_layer_name: "NS_Dredging_Deposit_Areas"
+            responses:
+                LayerMetaResponse:
+                    description: 'Layer meta'
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                    - $ref: '#/components/schemas/ResponseStructure'
+                                    - type: object
+                                      properties:
+                                          payload:
+                                              type: object
+                                              properties:
+                                                  layer_id:
+                                                      type: integer
+                                                      example: 22
+                                                  layer_original_id:
+                                                      type: integer
+                                                      nullable: true
+                                                      example: null
+                                                  layer_active:
+                                                      type: integer
+                                                      example: 1
+                                                  layer_selectable:
+                                                      type: integer
+                                                      example: 1
+                                                  layer_active_on_start:
+                                                      type: integer
+                                                      example: 0
+                                                  layer_toggleable:
+                                                      type: integer
+                                                      example: 1
+                                                  layer_editable:
+                                                      type: integer
+                                                      example: 1
+                                                  layer_name:
+                                                      type: string
+                                                      example: 'NS_Dredging_Deposit_Areas'
+                                                  layer_geotype:
+                                                      type: string
+                                                      example: 'polygon'
+                                                  layer_short:
+                                                      type: string
+                                                      example: 'Disposal Sites'
+                                                  layer_group:
+                                                      type: string
+                                                      example: 'northsee'
+                                                  layer_tooltip:
+                                                      type: string
+                                                      example: 'Areas designated for depositing dredged materials'
+                                                  layer_category:
+                                                      type: string
+                                                      example: 'activities'
+                                                  layer_subcategory:
+                                                      type: string
+                                                      example: 'mining_&_aggregate_extraction'
+                                                  layer_kpi_category:
+                                                      type: string
+                                                      example: 'Miscellaneous'
+                                                  layer_type:
+                                                      type: array
+                                                      items:
+                                                          type: object
+                                                          properties:
+                                                              displayName:
+                                                                  type: string
+                                                                  example: 'Closed'
+                                                              approval:
+                                                                  type: string
+                                                                  example: 'EEZ'
+                                                              value:
+                                                                  type: integer
+                                                                  example: 0
+                                                              map_type:
+                                                                  type: string
+                                                                  nullable: true
+                                                                  example: null
+                                                              displayPolygon:
+                                                                  type: integer
+                                                                  example: 1
+                                                              polygonColor:
+                                                                  type: string
+                                                                  example: '#B65F34FF'
+                                                              polygonPatternName:
+                                                                  type: string
+                                                                  example: '31'
+                                                              innerGlowEnabled:
+                                                                  type: integer
+                                                                  example: 0
+                                                              innerGlowRadius:
+                                                                  type: integer
+                                                                  example: 0
+                                                              innerGlowIterations:
+                                                                  type: integer
+                                                                  example: 0
+                                                              innerGlowMultiplier:
+                                                                  type: integer
+                                                                  example: 0
+                                                              innerGlowPixelSize:
+                                                                  type: integer
+                                                                  example: 3
+                                                              displayLines:
+                                                                  type: integer
+                                                                  example: 1
+                                                              lineColor:
+                                                                  type: string
+                                                                  example: '#B65F34FF'
+                                                              lineWidth:
+                                                                  type: integer
+                                                                  example: 1
+                                                              lineIcon:
+                                                                  type: string
+                                                                  nullable: true
+                                                                  example: null
+                                                              linePatternType:
+                                                                  type: string
+                                                                  example: 'Solid'
+                                                              displayPoints:
+                                                                  type: integer
+                                                                  example: 0
+                                                              pointColor:
+                                                                  type: string
+                                                                  example: '#000000FF'
+                                                              pointSize:
+                                                                  type: number
+                                                                  example: 0.4
+                                                              pointSpriteName:
+                                                                  type: string
+                                                                  example: 'None'
+                                                              description:
+                                                                  type: string
+                                                                  example: ''
+                                                              capacity:
+                                                                  type: integer
+                                                                  example: 0
+                                                              investmentCost:
+                                                                  type: integer
+                                                                  example: 0
+                                                              availability:
+                                                                  type: integer
+                                                                  example: -12
+                                                              media:
+                                                                  type: string
+                                                                  example: 'wiki://Dumping_areas'
+                                                  layer_depth:
+                                                      type: integer
+                                                      example: 1
+                                                  layer_info_properties:
+                                                      type: array
+                                                      items:
+                                                          type: object
+                                                          properties:
+                                                              property_name:
+                                                                  type: string
+                                                                  example: 'Status'
+                                                              enabled:
+                                                                  type: integer
+                                                                  example: 0
+                                                              editable:
+                                                                  type: integer
+                                                                  example: 0
+                                                              display_name:
+                                                                  type: string
+                                                                  example: ''
+                                                              sprite_name:
+                                                                  type: string
+                                                                  nullable: true
+                                                                  example: null
+                                                              update_visuals:
+                                                                  type: boolean
+                                                                  example: false
+                                                              update_text:
+                                                                  type: boolean
+                                                                  example: false
+                                                              update_calculation:
+                                                                  type: boolean
+                                                                  example: false
+                                                              content_type:
+                                                                  type: integer
+                                                                  example: 0
+                                                              content_validation:
+                                                                  type: integer
+                                                                  example: 0
+                                                              unit:
+                                                                  type: string
+                                                                  nullable: true
+                                                                  example: null
+                                                              default_value:
+                                                                  type: string
+                                                                  nullable: true
+                                                                  example: null
+                                                  layer_information:
+                                                      type: string
+                                                      example: 'wiki://Dumping_areas'
+                                                  layer_text_info:
+                                                      type: string
+                                                      nullable: true
+                                                      example: null
+                                                  layer_states:
+                                                      type: string
+                                                      example: '[{"state":"ASSEMBLY","time":0},{"state":"ACTIVE","time":10},{"state":"DISMANTLE","time":2}]'
+                                                  layer_raster:
+                                                      type: string
+                                                      nullable: true
+                                                      example: null
+                                                  layer_lastupdate:
+                                                      type: integer
+                                                      example: 100
+                                                  layer_melupdate:
+                                                      type: integer
+                                                      example: 0
+                                                  layer_editing_type:
+                                                      type: string
+                                                      example: ''
+                                                  layer_special_entity_type:
+                                                      type: string
+                                                      example: 'Default'
+                                                  layer_green:
+                                                      type: integer
+                                                      example: 0
+                                                  layer_melupdate_construction:
+                                                      type: integer
+                                                      example: 0
+                                                  layer_filecreationtime:
+                                                      type: integer
+                                                      example: 0
+                                                  layer_media:
+                                                      type: string
+                                                      example: 'wiki://Dumping_areas'
+                                                  layer_entity_value_max:
+                                                      type: number
+                                                      nullable: true
+                                                      example: null
+                                                  layer_tags:
+                                                      type: array
+                                                      items:
+                                                          type: string
+                                                      example: ['Polygon', 'Deposit', 'Dredging']
+
+        security:
+            - Bearer: []
+    areas: # to filter documented areas
+        path_patterns: '%app.api_path_patterns%'
+
+# note that using mitmproxy results into "TypeError: NetworkError when attempting to fetch resource." response,
+#   therefore we force dev to use "localhost" with the right port
+when@dev:
+    nelmio_api_doc:
+        documentation:
+            servers:
+              - url: 'http://localhost:%env(default:app.default_port:WEB_SERVER_PORT)%/{sessionId}'
+                variables:
+                    sessionId:
+                        default: '1'
+                        description: The session ID
+                        pattern: '^\d+$' # Regular expression to validate as an integer
