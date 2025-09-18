@@ -1,6 +1,6 @@
 services:
   php:
-    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:5.2.0
+    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest
     volumes:
       - ./running_session_config/:/app/running_session_config
       - ./raster/:/app/raster
@@ -26,7 +26,7 @@ services:
         protocol: tcp
 
   simulations:
-    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:5.2.0
+    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:latest
 
 volumes:
   configfiles_data:
