@@ -82,7 +82,10 @@ class GeometryController extends BaseController
         /** @var Geometry $geometry */
         $geometry = $geom->find($id);
         if (null == $geometry) {
-            return new MessageJsonResponse(message: 'Geometry with ID ' . $id . ' not found.', status: 404);
+            return new MessageJsonResponse(
+                status: 404,
+                message: 'Geometry with ID ' . $id . ' not found.'
+            );
         }
         return new Response($geometry->toWkt());
     }

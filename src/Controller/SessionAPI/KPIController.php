@@ -109,12 +109,15 @@ class KPIController extends BaseController
     ): JsonResponse {
         $kpiValues = $request->request->get('kpiValues');
         if (empty($kpiValues)) {
-            return new MessageJsonResponse(message: 'Invalid or missing data', status: Response::HTTP_BAD_REQUEST);
+            return new MessageJsonResponse(
+                status: Response::HTTP_BAD_REQUEST,
+                message: 'Invalid or missing data'
+            );
         }
 
         $kpiValues = json_decode($kpiValues, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return new MessageJsonResponse(message: 'Invalid or missing data', status: Response::HTTP_BAD_REQUEST);
+            return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: 'Invalid or missing data');
         }
 
         $kpi = new Kpi();
@@ -122,7 +125,7 @@ class KPIController extends BaseController
         try {
             $kpi->BatchPost($kpiValues);
         } catch (Exception $e) {
-            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
+            return new MessageJsonResponse(status: 500, message: $e->getMessage());
         }
 
         $logs[] = 'KPI values posted successfully';

@@ -145,7 +145,7 @@ class UserController extends BaseController
         $sessionId = $this->getSessionIdFromRequest($request);
         // check if country_id get parameter is an int
         if (!ctype_digit($request->get('country_id'))) {
-            return new MessageJsonResponse(message: 'Invalid country_id value. Must be an integer', status: 400);
+            return new MessageJsonResponse(status: 400, message: 'Invalid country_id value. Must be an integer');
         }
 
         try {
@@ -166,8 +166,8 @@ class UserController extends BaseController
             return new JsonResponse($payload);
         } catch (\Exception $e) {
             return new MessageJsonResponse(
-                message: $e->getMessage().PHP_EOL.$e->getTraceAsString(),
-                status: 500
+                status: 500,
+                message: $e->getMessage().PHP_EOL.$e->getTraceAsString()
             );
         }
     }
@@ -245,8 +245,8 @@ class UserController extends BaseController
             return new JsonResponse($payload);
         } catch (\Exception $e) {
             return new MessageJsonResponse(
-                message: $e->getMessage().PHP_EOL.$e->getTraceAsString(),
-                status: 500
+                status: 500,
+                message: $e->getMessage().PHP_EOL.$e->getTraceAsString()
             );
         }
     }

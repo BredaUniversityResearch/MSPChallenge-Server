@@ -6,12 +6,13 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use App\Domain\Common\EntityEnums\ImmersiveSessionTypeID;
 use App\Repository\SessionAPI\ImmersiveSessionRepository;
+use App\State\ImmersiveSessionProcessor;
 use App\Validator\ImmersiveSessionTypeJsonSchema;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ImmersiveSessionRepository::class)]
-#[ApiResource]
+#[ApiResource(processor: ImmersiveSessionProcessor::class)]
 class ImmersiveSession
 {
     #[ORM\Id]
@@ -60,9 +61,9 @@ class ImmersiveSession
     #[ImmersiveSessionTypeJsonSchema]
     #[ApiProperty(
         openapiContext: [
-            'example' => '{
-                "key": "value"
-            }'
+            'example' => [
+                'key' => 'value'
+            ]
         ]
     )]
     #[ORM\Column(type: 'json_document', nullable: true)]

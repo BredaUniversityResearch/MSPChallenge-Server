@@ -108,8 +108,7 @@
     "autoload": {
         "psr-4": {
             "App\\": [
-                "src/",
-                "src-symfony6.4/"
+                "src/"
             ],
             "App\\Domain\\API\\": "api",
             "DoctrineMigrations\\": "migrations/src/",

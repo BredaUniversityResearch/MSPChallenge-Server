@@ -3,7 +3,6 @@
 namespace App\Form;
 
 use App\Domain\Common\EntityEnums\Attribute\GetAttributesTrait;
-use App\Domain\Common\EntityEnums\ImmersiveSessionTypeID;
 use App\Domain\Helper\Util;
 use App\Entity\Mapping as AppMappings;
 use Doctrine\ORM\Mapping as ORM;

@@ -74,14 +74,20 @@ class MELController extends BaseController
     {
         $fishingValues = json_decode($request->request->get('fishing_values'), true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return new MessageJsonResponse(message: 'Invalid JSON', status: 400);
+            return new MessageJsonResponse(
+                status: 400,
+                message: 'Invalid JSON'
+            );
         }
         try {
             $mel = new MEL();
             $mel->setGameSessionId($this->getSessionIdFromRequest($request));
             return new JsonResponse($mel->InitialFishing($fishingValues));
         } catch (Exception $e) {
-            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
+            return new MessageJsonResponse(
+                status: 500,
+                message: $e->getMessage()
+            );
         }
     }
 }

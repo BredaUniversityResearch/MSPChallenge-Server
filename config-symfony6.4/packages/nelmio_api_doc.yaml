@@ -1,7 +1,9 @@
+#file: noinspection YAMLSchemaValidation
 nelmio_api_doc:
     html_config:
         assets_mode: 'bundle'
     documentation:
+        openapi: 3.1.0
         # define the order in which tags are shown here, User first
         tags:
             - name: "User"

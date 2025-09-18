@@ -170,7 +170,10 @@ class GameController extends BaseController
             !is_numeric($regionBottomLeftY) ||
             !is_numeric($regionTopRightX) ||
             !is_numeric($regionTopRightY)) {
-            return new MessageJsonResponse(message: 'Invalid region coordinates', status: Response::HTTP_BAD_REQUEST);
+            return new MessageJsonResponse(
+                status: Response::HTTP_BAD_REQUEST,
+                message: 'Invalid region coordinates'
+            );
         }
 
         $region = new Region($regionBottomLeftX, $regionBottomLeftY, $regionTopRightX, $regionTopRightY);
@@ -183,8 +186,8 @@ class GameController extends BaseController
             }
         } catch (\Exception $e) {
             return new MessageJsonResponse(
-                message: 'Could not set output image format, error: '.$e->getMessage(),
-                status: Response::HTTP_INTERNAL_SERVER_ERROR
+                status: Response::HTTP_INTERNAL_SERVER_ERROR,
+                message: 'Could not set output image format, error: '.$e->getMessage()
             );
         }
         $exclLayerByTags = null;
@@ -199,8 +202,8 @@ class GameController extends BaseController
             }
         } catch (\Exception $e) {
             return new MessageJsonResponse(
-                message: 'Invalid value for field excl_layers_by_tags, error: '.$e->getMessage(),
-                status: Response::HTTP_INTERNAL_SERVER_ERROR
+                status: Response::HTTP_INTERNAL_SERVER_ERROR,
+                message: 'Invalid value for field excl_layers_by_tags, error: '.$e->getMessage()
             );
         }
         $exclLayerByTags = is_array($exclLayerByTags) ? $exclLayerByTags : [];
@@ -313,7 +316,10 @@ class GameController extends BaseController
             $countries = $game->GetCountries();
             return new JsonResponse($countries);
         } catch (Exception $e) {
-            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
+            return new MessageJsonResponse(
+                status: 500,
+                message: $e->getMessage()
+            );
         }
     }
 
@@ -382,8 +388,8 @@ class GameController extends BaseController
         $simulatedMonth = $request->request->get('simulated_month');
         if (!is_numeric($simulatedMonth)) {
             return new MessageJsonResponse(
-                message: 'Invalid or missing simulated month',
-                status: Response::HTTP_BAD_REQUEST
+                status: Response::HTTP_BAD_REQUEST,
+                message: 'Invalid or missing simulated month'
             );
         }
         $game = new Game();
@@ -392,7 +398,10 @@ class GameController extends BaseController
             $actualDate = $game->GetActualDateForSimulatedMonth($simulatedMonth);
             return new JsonResponse($actualDate);
         } catch (Exception $e) {
-            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
+            return new MessageJsonResponse(
+                status: 500,
+                message: $e->getMessage()
+            );
         }
     }
 
@@ -453,7 +462,10 @@ class GameController extends BaseController
             $settings = $game->PolicySimSettings();
             return new JsonResponse($settings);
         } catch (Exception $e) {
-            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
+            return new MessageJsonResponse(
+                status: 500,
+                message: $e->getMessage()
+            );
         }
     }
 

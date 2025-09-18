@@ -108,7 +108,7 @@ class LayerController extends BaseController
             $layers = $layer->list($layerTags);
             return new JsonResponse($layers);
         } catch (Exception $e) {
-            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
+            return new MessageJsonResponse(status: 500, message: $e->getMessage());
         }
     }
 
@@ -237,7 +237,7 @@ class LayerController extends BaseController
                 message: 'Layer export with all geometry and their attributes'
             );
         } catch (Exception $e) {
-            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
+            return new MessageJsonResponse(status: 500, message: $e->getMessage());
         }
     }
 
@@ -373,7 +373,7 @@ class LayerController extends BaseController
             $layerId = $request->request->get('layer_id');
             return new JsonResponse($layer->Get($layerId));
         } catch (Exception $e) {
-            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
+            return new MessageJsonResponse(status: 500, message: $e->getMessage());
         }
     }
 
@@ -477,7 +477,7 @@ class LayerController extends BaseController
                     'base64 encoded file'
             );
         } catch (Exception $e) {
-            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
+            return new MessageJsonResponse(status: 500, message: $e->getMessage());
         }
     }
 
@@ -533,7 +533,7 @@ class LayerController extends BaseController
             $layerId = $request->request->get('layer_id');
             return new MessageJsonResponse(data: $layer->Meta($layerId), message:'JSON object');
         } catch (Exception $e) {
-            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
+            return new MessageJsonResponse(status: 500, message: $e->getMessage());
         }
     }
 
@@ -590,7 +590,7 @@ class LayerController extends BaseController
             $name = $request->request->get('name');
             return new MessageJsonResponse(data: $layer->MetaByName($name), message:'JSON object');
         } catch (Exception $e) {
-            return new MessageJsonResponse(message: $e->getMessage(), status: 500);
+            return new MessageJsonResponse(status: 500, message: $e->getMessage());
         }
     }
 }
