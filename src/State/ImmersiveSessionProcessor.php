@@ -51,8 +51,8 @@ class ImmersiveSessionProcessor implements ProcessorInterface
             return $this->removeProcessor->process($data, $operation, $uriVariables, $context);
         }
 
-        /** @var ImmersiveSession $result */
         $data->setStatus(ImmersiveSessionStatus::STARTING);
+        /** @var ImmersiveSession $result */
         $result = $this->persistProcessor->process($data, $operation, $uriVariables, $context);
         if ($hasConnection) {
             return $result;

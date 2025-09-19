@@ -11,7 +11,7 @@ class RemoveImmersiveSessionContainerMessage extends ImmersiveSessionContainerMe
         return $this->dockerContainerId;
     }
 
-    public function setDockerContainerId(string $dockerContainerId): self
+    public function setDockerContainerId(string $dockerContainerId): static
     {
         $this->dockerContainerId = $dockerContainerId;
         return $this;
