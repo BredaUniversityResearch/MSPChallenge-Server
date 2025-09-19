@@ -8,9 +8,6 @@ use App\Entity\Interface\WatchdogInterface;
 use App\Entity\SessionAPI\Watchdog;
 use Doctrine\DBAL\Schema\Schema;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 final class Version20250116085814 extends MSPMigration
 {
     public function getDescription(): string
@@ -25,6 +22,7 @@ final class Version20250116085814 extends MSPMigration
 
     protected function onUp(Schema $schema): void
     {
+        // phpcs:ignoreFile Generic.Files.LineLength.TooLong
         $this->addSql(<<<'SQL'
         ALTER TABLE `game_watchdog_servers`
         ADD `server_id` binary(16) NOT NULL COMMENT '(DC2Type:uuid)' AFTER `id`,
