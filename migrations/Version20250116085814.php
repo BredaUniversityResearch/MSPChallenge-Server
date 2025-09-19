@@ -30,7 +30,7 @@ final class Version20250116085814 extends MSPMigration
         ADD `server_id` binary(16) NOT NULL COMMENT '(DC2Type:uuid)' AFTER `id`,
         ADD `port` int unsigned NOT NULL DEFAULT '80' AFTER `address`,
         ADD `scheme` varchar(255) COLLATE 'utf8mb4_unicode_ci' NOT NULL DEFAULT 'http' AFTER `port`,
-        ADD `simulation_settings` longtext COLLATE 'utf8mb4_unicode_ci' NULL COMMENT '(DC2Type:json)' AFTER `scheme`,
+        ADD `simulation_settings` longtext COLLATE 'utf8mb4_unicode_ci' NULL COMMENT '(DC2Type:json_document)' AFTER `scheme`,
         DROP INDEX `UNIQ_C35754DF5E237E06`,
         DROP INDEX `UNIQ_C35754DFD4E6F81`,
         ADD UNIQUE `uq_server_id` (`server_id`),

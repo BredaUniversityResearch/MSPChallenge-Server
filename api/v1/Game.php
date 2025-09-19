@@ -537,7 +537,7 @@ class Game extends Base
             if (empty($watchdogSimSettings)) {
                 continue;
             }
-            $simulationSettings[] = json_decode($watchdogSimSettings, true);
+            $simulationSettings[] = $watchdogSimSettings;
         }
         return [
             'policy_settings' => $policySettings,

@@ -36,7 +36,7 @@ final class Version20250916081751 extends MSPMigration
         $this->addSql(<<<'SQL'
         ALTER TABLE `immersive_session_connection`
         ADD `status` enum('starting','running','unresponsive') COLLATE 'utf8mb4_unicode_ci' NOT NULL DEFAULT 'starting' AFTER `session_id`,
-        ADD `status_response` longtext COLLATE 'utf8mb4_bin' NULL COMMENT '(DC2Type:json_document)' AFTER `status`
+        ADD `status_response` JSON COLLATE 'utf8mb4_bin' NULL COMMENT '(DC2Type:json_document)' AFTER `status`
         SQL
         );
     }
