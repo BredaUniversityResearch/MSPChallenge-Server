@@ -183,7 +183,7 @@ class ImmersiveSession
 
     public function setConnection(ImmersiveSessionConnection $connection): static
     {
-        // set the owning side of the relation if necessary
+        // set the owning side of the relation if necessary - to prevent looping
         if ($connection->getSession() !== $this) {
             $connection->setSession($this);
         }

@@ -271,7 +271,7 @@ class SimulationController extends BaseController
         }
         $simRepo = $em->getRepository(Simulation::class);
         $simulations = $simRepo->findBy(['watchdog' => $watchdog]);
-        return new JsonResponse(self::wrapPayloadForResponse(true, $simulations));
+        return new JsonResponse($simulations);
     }
 
     /**
@@ -371,9 +371,9 @@ class SimulationController extends BaseController
         $em = $this->connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
         $watchdogRepo = $em->getRepository(Watchdog::class);
         if (null === $watchdog = $watchdogRepo->findOneBy(['serverId' => $serverId])) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Watchdog server not found'),
-                Response::HTTP_NOT_FOUND
+            return new MessageJsonResponse(
+                status: Response::HTTP_NOT_FOUND,
+                message: 'Watchdog server not found'
             );
         }
 
@@ -385,9 +385,7 @@ class SimulationController extends BaseController
         }
 
         $em->flush();
-        return new JsonResponse(
-            self::wrapPayloadForResponse(true, message: 'Simulations deleted')
-        );
+        return new MessageJsonResponse(message: 'Simulations deleted');
     }
 
     /**
@@ -471,9 +469,7 @@ class SimulationController extends BaseController
         }
 
         $em->flush();
-        return new JsonResponse(
-            self::wrapPayloadForResponse(true, message: 'All simulations deleted')
-        );
+        return new MessageJsonResponse(message: 'All simulations deleted');
     }
 
     /**

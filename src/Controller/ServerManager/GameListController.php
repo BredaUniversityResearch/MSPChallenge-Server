@@ -86,37 +86,31 @@ class GameListController extends BaseController
         try {
             $provider->checkCompatibleClient($request->headers->get('Msp-Client-Version'));
         } catch (IncompatibleClientException $e) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(
-                    false,
-                    [
-                        'clients_url' => $this->getParameter('app.clients_url'),
-                        'server_version' => $provider->getVersion()
-                    ],
-                    $e->getMessage()
-                ),
-                403
+            return new MessageJsonResponse(
+                data: [
+                    'clients_url' => $this->getParameter('app.clients_url'),
+                    'server_version' => $provider->getVersion()
+                ],
+                status: 403,
+                message: $e->getMessage()
             );
         } catch (InvalidVersionString $e) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 400);
+            return new MessageJsonResponse(status: 400, message: $e->getMessage());
         }
         $serverDesc = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
         if (is_null($serverDesc)) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Please log in to the Server Manager for the first time.'),
-                500
+            return new MessageJsonResponse(
+                status: 500,
+                message: 'Please log in to the Server Manager for the first time.'
             );
         }
-        return $this->json(self::wrapPayloadForResponse(
-            true,
-            [
-                'sessionslist' => $gameList,
-                'server_description' => $serverDesc->getValue(),
-                'clients_url' => $this->getParameter('app.clients_url'),
-                'server_version' => $provider->getVersion(),
-                'server_components_versions' => $provider->getComponentsVersions()
-            ]
-        ));
+        return $this->json([
+            'sessionslist' => $gameList,
+            'server_description' => $serverDesc->getValue(),
+            'clients_url' => $this->getParameter('app.clients_url'),
+            'server_version' => $provider->getVersion(),
+            'server_components_versions' => $provider->getComponentsVersions()
+        ]);
     }
 
     /**

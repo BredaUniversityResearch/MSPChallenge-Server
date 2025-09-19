@@ -37,18 +37,4 @@ class BaseController extends AbstractController
         }
         return Uuid::fromString($serverId);
     }
-
-    public static function wrapPayloadForResponse(
-        bool $success,
-        mixed $payload = null,
-        ?string $message = null
-    ): array {
-        return [
-            'header_type' => '',
-            'header_data' => '',
-            'success' => $success,
-            'message' => $message,
-            'payload' => $payload
-        ];
-    }
 }
