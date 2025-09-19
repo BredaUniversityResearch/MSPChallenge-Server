@@ -5,7 +5,7 @@ export MSYS=winsymlinks:nativestrict
 SYMFONY_VERSION_DEFAULT="6.4"
 
 setSymfonyVersion() {
-  [[ -z "${SYMFONY_VERSION}" ]] && SYMFONY_VERSION=$1
+  [[ ! -z "$1" ]] && SYMFONY_VERSION=$1
   if [[ -z $SYMFONY_VERSION || "${SYMFONY_VERSION}" == "default" ]]; then
     SYMFONY_VERSION="${SYMFONY_VERSION_DEFAULT}"
   fi

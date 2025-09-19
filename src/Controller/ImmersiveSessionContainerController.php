@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Domain\Common\EntityEnums\ImmersiveSessionStatus;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\SessionAPI\ImmersiveSession;
@@ -65,6 +66,9 @@ class ImmersiveSessionContainerController extends BaseController
                 Response::HTTP_ALREADY_REPORTED
             );
         }
+        $session->setStatus(ImmersiveSessionStatus::STARTING);
+        $em->persist($session);
+        $em->flush();
         $message = new CreateImmersiveSessionContainerMessage();
         $message
             ->setImmersiveSessionId($sessionId)
@@ -108,6 +112,7 @@ class ImmersiveSessionContainerController extends BaseController
         $message = new RemoveImmersiveSessionContainerMessage();
         $message
             ->setImmersiveSessionId($sessionId)
+            ->setDockerContainerId($session->getConnection()->getDockerContainerID())
             ->setGameSessionId($gameSessionId);
         $this->messageBus->dispatch($message);
         return new Response('Removal of container successfully requested.');

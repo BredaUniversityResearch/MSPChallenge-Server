@@ -2,6 +2,7 @@
 
 namespace App\Entity\SessionAPI;
 
+use ApiPlatform\Metadata\ApiProperty;
 use App\Repository\SessionAPI\ImmersiveSessionConnectionRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -13,6 +14,9 @@ class ImmersiveSessionConnection
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ApiProperty(
+        readable: false,
+    )]
     #[ORM\OneToOne(inversedBy: 'connection', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?ImmersiveSession $session = null;
@@ -39,7 +43,6 @@ class ImmersiveSessionConnection
     public function setSession(ImmersiveSession $session): static
     {
         $this->session = $session;
-
         return $this;
     }
 

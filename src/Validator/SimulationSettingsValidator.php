@@ -12,7 +12,7 @@ class SimulationSettingsValidator extends ConstraintValidator
 {
     private string $jsonSchema = '{
         "$schema": "http://json-schema.org/draft-04/schema#",
-        "type": "object",
+        "type": "array",
         "properties": {
             "simulation_type": {
                 "type": "string"
@@ -21,7 +21,7 @@ class SimulationSettingsValidator extends ConstraintValidator
                 "type": "array",
                 "items": [
                     {
-                        "type": "object",
+                        "type": "array",
                         "properties": {
                             "categoryName": {
                                 "type": "string"
@@ -33,7 +33,7 @@ class SimulationSettingsValidator extends ConstraintValidator
                                 "type": "array",
                                 "items": [
                                     {
-                                        "type": "object",
+                                        "type": "array",
                                         "properties": {
                                             "valueName": {
                                                 "type": "string"
@@ -66,16 +66,15 @@ class SimulationSettingsValidator extends ConstraintValidator
         if (!$constraint instanceof SimulationSettings) {
             throw new UnexpectedTypeException($constraint, SimulationSettings::class);
         }
-        if (empty(trim($value))) {
+        if (empty($value)) {
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{{ errors }}', 'Empty JSON data')
                 ->addViolation();
             return;
         }
         $validator = new Validator();
-        $data = json_decode($value);
         $schema = json_decode($this->jsonSchema);
-        $validator->validate($data, $schema, JsonSchemaConstraint::CHECK_MODE_APPLY_DEFAULTS);
+        $validator->validate($value, $schema, JsonSchemaConstraint::CHECK_MODE_APPLY_DEFAULTS);
         if (!$validator->isValid()) {
             $errors = array_map(function ($error) {
                 return sprintf("[%s] %s", $error['property'], $error['message']);

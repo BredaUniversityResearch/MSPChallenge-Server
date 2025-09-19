@@ -2,7 +2,11 @@ framework:
     notifier:
 # Enabled in Symfony 7 by default:
 #        chatter_transports:
+        #    slack: '%env(SLACK_DSN)%'
+        #    telegram: '%env(TELEGRAM_DSN)%'
 #        texter_transports:
+        #    twilio: '%env(TWILIO_DSN)%'
+        #    nexmo: '%env(NEXMO_DSN)%'
 #        channel_policy:
 #            # use chat/slack, chat/telegram, sms/twilio or sms/nexmo
 #            urgent: ['email']

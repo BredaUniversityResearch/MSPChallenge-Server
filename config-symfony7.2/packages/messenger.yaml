@@ -7,12 +7,26 @@ framework:
         failure_transport: failed
 
         transports:
+            docker:
+                dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
+                options:
+                    table_name: 'messenger_docker'
+                    queue_name: 'docker'
+                retry_strategy:
+                    max_retries: 0 # no retries
+            watchdog:
+                dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
+                options:
+                    table_name: 'messenger_watchdog'
+                    queue_name: 'watchdog'
+                retry_strategy:
+                    service: App\MessageHandler\Retry\WatchdogMessageRetryStrategy
             # https://symfony.com/doc/current/messenger.html#transport-configuration
             analytics:
                 dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
                 options:
                     table_name: 'messenger_analytics'
-                    queue_name: 'message'
+                    queue_name: 'analytics'
             async:
 # Enabled in Symfony 7 by default:
 #                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
@@ -31,11 +45,11 @@ framework:
                 dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
                 options:
                     table_name: 'messenger_async_processes'
-                    queue_name: 'message'
+                    queue_name: 'async'
             failed:
                 dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
                 options:
-                    table_name: 'messenger_analytics'
+                    table_name: 'messenger_failed'
                     queue_name: 'failed'
 
         routing:
@@ -46,8 +60,11 @@ framework:
             # Route your messages to the transports
             # 'App\Message\YourMessage': async
 
+            'App\Message\Docker\DockerCommunicationMessageBase': docker
             'App\Message\Analytics\AnalyticsMessageBase': analytics
             'App\Message\GameList\GameListCreationMessage': async            
             'App\Message\GameList\GameListArchiveMessage': async
             'App\Message\GameSave\GameSaveCreationMessage': async
             'App\Message\GameSave\GameSaveLoadMessage': async
+            'App\Message\Watchdog\Message\WatchdogMessageBase': watchdog
+

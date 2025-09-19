@@ -11,7 +11,7 @@ abstract class DockerCommunicationMessageBase
         return $this->gameSessionId;
     }
 
-    public function setGameSessionId(int $gameSessionId): self
+    public function setGameSessionId(int $gameSessionId): static
     {
         $this->gameSessionId = $gameSessionId;
         return $this;

@@ -4,6 +4,7 @@ namespace App\Controller\SessionAPI;
 
 use App\Controller\BaseController;
 use App\Domain\API\v1\MEL;
+use App\Domain\Common\MessageJsonResponse;
 use Exception;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -73,14 +74,20 @@ class MELController extends BaseController
     {
         $fishingValues = json_decode($request->request->get('fishing_values'), true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: 'Invalid JSON'), 400);
+            return new MessageJsonResponse(
+                status: 400,
+                message: 'Invalid JSON'
+            );
         }
         try {
             $mel = new MEL();
             $mel->setGameSessionId($this->getSessionIdFromRequest($request));
-            return new JsonResponse(self::wrapPayloadForResponse(true, $mel->InitialFishing($fishingValues)));
+            return new JsonResponse($mel->InitialFishing($fishingValues));
         } catch (Exception $e) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+            return new MessageJsonResponse(
+                status: 500,
+                message: $e->getMessage()
+            );
         }
     }
 }

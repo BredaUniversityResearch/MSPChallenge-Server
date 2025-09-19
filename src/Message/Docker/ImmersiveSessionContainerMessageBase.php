@@ -11,7 +11,7 @@ abstract class ImmersiveSessionContainerMessageBase extends DockerCommunicationM
         return $this->immersiveSessionId;
     }
 
-    public function setImmersiveSessionId(int $immersiveSessionId): self
+    public function setImmersiveSessionId(int $immersiveSessionId): static
     {
         $this->immersiveSessionId = $immersiveSessionId;
         return $this;

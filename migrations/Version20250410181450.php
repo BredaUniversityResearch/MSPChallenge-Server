@@ -47,7 +47,7 @@ final class Version20250410181450 extends MSPMigration
           PRIMARY KEY (`id`),
           KEY `immersive_session_region_id` (`region_id`),
           CONSTRAINT `immersive_session_region_id` FOREIGN KEY (`region_id`) REFERENCES `immersive_session_region` (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci         
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         SQL
         );
         $this->addSql(<<<'SQL'

@@ -3,15 +3,18 @@
 namespace App\Command;
 
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(
+    name: 'app:check-entity-manager',
+    description: 'Checks which entity manager is responsible for a specific entity.'
+)]
 class CheckEntityManagerCommand extends Command
 {
-    protected static $defaultName = 'app:check-entity-manager';
-
     private ManagerRegistry $doctrine;
 
     public function __construct(ManagerRegistry $doctrine)

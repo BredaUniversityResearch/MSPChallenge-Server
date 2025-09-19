@@ -8,6 +8,7 @@ use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Plan;
 use App\Domain\API\v1\Router;
 use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Common\MessageJsonResponse;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\LayerTags;
@@ -169,9 +170,9 @@ class GameController extends BaseController
             !is_numeric($regionBottomLeftY) ||
             !is_numeric($regionTopRightX) ||
             !is_numeric($regionTopRightY)) {
-            return new JsonResponse(
-                Router::formatResponse(false, 'Invalid region coordinates', null, __CLASS__, __FUNCTION__),
-                Response::HTTP_BAD_REQUEST
+            return new MessageJsonResponse(
+                status: Response::HTTP_BAD_REQUEST,
+                message: 'Invalid region coordinates'
             );
         }
 
@@ -184,15 +185,9 @@ class GameController extends BaseController
                 );
             }
         } catch (\Exception $e) {
-            return new JsonResponse(
-                Router::formatResponse(
-                    false,
-                    'Could not set output image format, error: '.$e->getMessage(),
-                    null,
-                    __CLASS__,
-                    __FUNCTION__
-                ),
-                Response::HTTP_INTERNAL_SERVER_ERROR
+            return new MessageJsonResponse(
+                status: Response::HTTP_INTERNAL_SERVER_ERROR,
+                message: 'Could not set output image format, error: '.$e->getMessage()
             );
         }
         $exclLayerByTags = null;
@@ -206,15 +201,9 @@ class GameController extends BaseController
                 );
             }
         } catch (\Exception $e) {
-            return new JsonResponse(
-                Router::formatResponse(
-                    false,
-                    'Invalid value for field excl_layers_by_tags, error: '.$e->getMessage(),
-                    null,
-                    __CLASS__,
-                    __FUNCTION__
-                ),
-                Response::HTTP_INTERNAL_SERVER_ERROR
+            return new MessageJsonResponse(
+                status: Response::HTTP_INTERNAL_SERVER_ERROR,
+                message: 'Invalid value for field excl_layers_by_tags, error: '.$e->getMessage()
             );
         }
         $exclLayerByTags = is_array($exclLayerByTags) ? $exclLayerByTags : [];
@@ -225,15 +214,9 @@ class GameController extends BaseController
         try {
             $zipFilepath = $configCreator->createAndZip($region);
         } catch (Exception $e) {
-            return new JsonResponse(
-                Router::formatResponse(
-                    false,
-                    'Could not create POV config, error: '.$e->getMessage(),
-                    null,
-                    __CLASS__,
-                    __FUNCTION__
-                ),
-                Response::HTTP_INTERNAL_SERVER_ERROR
+            return new MessageJsonResponse(
+                status: Response::HTTP_INTERNAL_SERVER_ERROR,
+                message: 'Could not create POV config, error: '.$e->getMessage()
             );
         }
 
@@ -331,9 +314,12 @@ class GameController extends BaseController
         $game->setGameSessionId($this->getSessionIdFromRequest($request));
         try {
             $countries = $game->GetCountries();
-            return new JsonResponse(self::wrapPayloadForResponse(true, $countries));
+            return new JsonResponse($countries);
         } catch (Exception $e) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+            return new MessageJsonResponse(
+                status: 500,
+                message: $e->getMessage()
+            );
         }
     }
 
@@ -401,18 +387,21 @@ class GameController extends BaseController
     ): JsonResponse {
         $simulatedMonth = $request->request->get('simulated_month');
         if (!is_numeric($simulatedMonth)) {
-            return new JsonResponse(
-                Router::formatResponse(false, 'Invalid or missing simulated month', null, __CLASS__, __FUNCTION__),
-                Response::HTTP_BAD_REQUEST
+            return new MessageJsonResponse(
+                status: Response::HTTP_BAD_REQUEST,
+                message: 'Invalid or missing simulated month'
             );
         }
         $game = new Game();
         $game->setGameSessionId($this->getSessionIdFromRequest($request));
         try {
             $actualDate = $game->GetActualDateForSimulatedMonth($simulatedMonth);
-            return new JsonResponse(self::wrapPayloadForResponse(true, $actualDate));
+            return new JsonResponse($actualDate);
         } catch (Exception $e) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+            return new MessageJsonResponse(
+                status: 500,
+                message: $e->getMessage()
+            );
         }
     }
 
@@ -471,9 +460,12 @@ class GameController extends BaseController
         $game->setGameSessionId($this->getSessionIdFromRequest($request));
         try {
             $settings = $game->PolicySimSettings();
-            return new JsonResponse(self::wrapPayloadForResponse(true, $settings));
+            return new JsonResponse($settings);
         } catch (Exception $e) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+            return new MessageJsonResponse(
+                status: 500,
+                message: $e->getMessage()
+            );
         }
     }
 
@@ -530,6 +522,6 @@ class GameController extends BaseController
     )]
     public function isOnline(): JsonResponse
     {
-        return new JsonResponse(self::wrapPayloadForResponse(true, 'online'));
+        return new JsonResponse('online');
     }
 }

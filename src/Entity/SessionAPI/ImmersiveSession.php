@@ -4,14 +4,16 @@ namespace App\Entity\SessionAPI;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
+use App\Domain\Common\EntityEnums\ImmersiveSessionStatus;
 use App\Domain\Common\EntityEnums\ImmersiveSessionTypeID;
 use App\Repository\SessionAPI\ImmersiveSessionRepository;
+use App\State\ImmersiveSessionProcessor;
 use App\Validator\ImmersiveSessionTypeJsonSchema;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ImmersiveSessionRepository::class)]
-#[ApiResource]
+#[ApiResource(processor: ImmersiveSessionProcessor::class)]
 class ImmersiveSession
 {
     #[ORM\Id]
@@ -45,27 +47,49 @@ class ImmersiveSession
     )]
     private int $month = -1;
 
+    #[ApiProperty(
+        writable: false,
+        openapiContext: [
+            'type' => 'string',
+            'enum' => ImmersiveSessionStatus::ALL,
+            'description' => 'The status of the immersive session connection',
+            'example' => ImmersiveSessionStatus::STARTING->value
+        ]
+    )]
+    #[ORM\Column(enumType: ImmersiveSessionStatus::class)]
+    private ImmersiveSessionStatus $status = ImmersiveSessionStatus::STARTING;
+
+    #[ApiProperty(
+        writable: false,
+        openapiContext: [
+            'example' => ''
+        ]
+    )]
+    #[ORM\Column(type: 'json_document', nullable: true)]
+    private mixed $statusResponse = null;
+
+    #[ORM\Column]
+    private ?float $bottomLeftX = null;
+
+    #[ORM\Column]
+    private ?float $bottomLeftY = null;
+
+    #[ORM\Column]
+    private ?float $topRightX = null;
+
+    #[ORM\Column]
+    private ?float $topRightY = null;
+
     #[ImmersiveSessionTypeJsonSchema]
     #[ApiProperty(
         openapiContext: [
-            'example' => '{
-                "key": "value"
-            }'
+            'example' => [
+                'key' => 'value'
+            ]
         ]
     )]
     #[ORM\Column(type: 'json_document', nullable: true)]
     private mixed $data = null;
-
-    #[ApiProperty(
-        openapiContext: [
-            'example' => '/api/immersive_session_regions/{regionId}',
-        ]
-    )]
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotBlank(message: "The region field should not be blank.")]
-    #[Assert\NotNull(message: "The region field is required.")]
-    private ?ImmersiveSessionRegion $region = null;
 
     #[ApiProperty(
         writable: false
@@ -114,6 +138,77 @@ class ImmersiveSession
         return $this;
     }
 
+    public function getStatus(): ImmersiveSessionStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(ImmersiveSessionStatus $status): static
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    public function getStatusResponse(): mixed
+    {
+        return $this->statusResponse;
+    }
+
+    public function setStatusResponse(mixed $statusResponse): static
+    {
+        $this->statusResponse = $statusResponse;
+
+        return $this;
+    }
+
+    public function getBottomLeftX(): ?float
+    {
+        return $this->bottomLeftX;
+    }
+
+    public function setBottomLeftX(float $bottomLeftX): static
+    {
+        $this->bottomLeftX = $bottomLeftX;
+
+        return $this;
+    }
+
+    public function getBottomLeftY(): ?float
+    {
+        return $this->bottomLeftY;
+    }
+
+    public function setBottomLeftY(float $bottomLeftY): static
+    {
+        $this->bottomLeftY = $bottomLeftY;
+
+        return $this;
+    }
+
+    public function getTopRightX(): ?float
+    {
+        return $this->topRightX;
+    }
+
+    public function setTopRightX(float $topRightX): static
+    {
+        $this->topRightX = $topRightX;
+
+        return $this;
+    }
+
+    public function getTopRightY(): ?float
+    {
+        return $this->topRightY;
+    }
+
+    public function setTopRightY(float $topRightY): static
+    {
+        $this->topRightY = $topRightY;
+
+        return $this;
+    }
+
     public function getData(): mixed
     {
         return $this->data;
@@ -126,32 +221,21 @@ class ImmersiveSession
         return $this;
     }
 
-    public function getRegion(): ?ImmersiveSessionRegion
-    {
-        return $this->region;
-    }
-
-    public function setRegion(ImmersiveSessionRegion $region): static
-    {
-        $this->region = $region;
-
-        return $this;
-    }
-
     public function getConnection(): ?ImmersiveSessionConnection
     {
         return $this->connection;
     }
 
-    public function setConnection(ImmersiveSessionConnection $connection): static
+    public function setConnection(?ImmersiveSessionConnection $connection): static
     {
+        $this->connection = $connection;
+        if (null == $connection) {
+            return $this;
+        }
         // set the owning side of the relation if necessary
         if ($connection->getSession() !== $this) {
             $connection->setSession($this);
         }
-
-        $this->connection = $connection;
-
         return $this;
     }
 }

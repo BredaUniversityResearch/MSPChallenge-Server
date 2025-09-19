@@ -2,6 +2,7 @@
 
 namespace App\Domain\Services;
 
+use App\Domain\Common\EntityEnums\ImmersiveSessionStatus;
 use App\Entity\ServerManager\DockerApi;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\ImmersiveSessionType;
@@ -147,10 +148,10 @@ class ImmersiveSessionService
                         $gameList
                     ),
                     'IMMERSIVE_SESSION_REGION_COORDS='.json_encode([
-                        'region_bottom_left_x' => $sess->getRegion()->getBottomLeftX(),
-                        'region_bottom_left_y' => $sess->getRegion()->getBottomLeftY(),
-                        'region_top_right_x' => $sess->getRegion()->getTopRightX(),
-                        'region_top_right_y' => $sess->getRegion()->getTopRightY()
+                        'region_bottom_left_x' => $sess->getBottomLeftX(),
+                        'region_bottom_left_y' => $sess->getBottomLeftY(),
+                        'region_top_right_x' => $sess->getTopRightX(),
+                        'region_top_right_y' => $sess->getTopRightY()
                     ]),
                     'IMMERSIVE_SESSION_MONTH='.$conn->getSession()->getMonth(),
                     // like require_username, require_team, gamemaster_pick
@@ -163,27 +164,39 @@ class ImmersiveSessionService
         $containerId = $responseContent['Id'];
         $this->dockerApiCall('POST', "/containers/{$containerId}/start");
         $conn->setDockerContainerID($containerId);
+        $sess
+            ->setConnection($conn)
+            ->setStatus(ImmersiveSessionStatus::RUNNING);
         $em->persist($conn);
+        $em->persist($sess);
         $em->flush();
     }
 
     /**
      * @throws Exception
      */
-    public function removeImmersiveSessionContainer(ImmersiveSession $sess, int $gameSessionId): void
+    public function removeImmersiveSessionContainer(string $dockerContainerId): void
+    {
+        $this->dockerApiCall('POST', "/containers/{$dockerContainerId}/stop");
+        $this->dockerApiCall('DELETE', "/containers/{$dockerContainerId}");
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function removeImmersiveSessionConnection(ImmersiveSession $sess, int $gameSessionId): void
     {
         $conn = $sess->getConnection();
         if ($conn === null) {
             throw new Exception('No connection found for this session.');
         }
-
-        $dockerContainerId = $conn->getDockerContainerId();
         $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
         $em->remove($conn);
+        $sess
+            ->setConnection(null)
+            ->setStatus(ImmersiveSessionStatus::STOPPED);
+        $em->persist($sess);
         $em->flush();
-
-        $this->dockerApiCall('POST', "/containers/{$dockerContainerId}/stop");
-        $this->dockerApiCall('DELETE', "/containers/{$dockerContainerId}");
     }
 
     /**
