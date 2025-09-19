@@ -4,6 +4,7 @@ namespace App\Entity\SessionAPI;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
+use App\Domain\Common\EntityEnums\ImmersiveSessionStatus;
 use App\Domain\Common\EntityEnums\ImmersiveSessionTypeID;
 use App\Repository\SessionAPI\ImmersiveSessionRepository;
 use App\State\ImmersiveSessionProcessor;
@@ -45,6 +46,27 @@ class ImmersiveSession
         min: -1
     )]
     private int $month = -1;
+
+    #[ApiProperty(
+        writable: false,
+        openapiContext: [
+            'type' => 'string',
+            'enum' => ImmersiveSessionStatus::ALL,
+            'description' => 'The status of the immersive session connection',
+            'example' => ImmersiveSessionStatus::STARTING->value
+        ]
+    )]
+    #[ORM\Column(enumType: ImmersiveSessionStatus::class)]
+    private ImmersiveSessionStatus $status = ImmersiveSessionStatus::STARTING;
+
+    #[ApiProperty(
+        writable: false,
+        openapiContext: [
+            'example' => ''
+        ]
+    )]
+    #[ORM\Column(type: 'json_document', nullable: true)]
+    private mixed $statusResponse = null;
 
     #[ORM\Column]
     private ?float $bottomLeftX = null;
@@ -116,6 +138,29 @@ class ImmersiveSession
         return $this;
     }
 
+    public function getStatus(): ImmersiveSessionStatus
+    {
+        return $this->status;
+    }
+
+    public function setStatus(ImmersiveSessionStatus $status): static
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    public function getStatusResponse(): mixed
+    {
+        return $this->statusResponse;
+    }
+
+    public function setStatusResponse(mixed $statusResponse): static
+    {
+        $this->statusResponse = $statusResponse;
+
+        return $this;
+    }
+
     public function getBottomLeftX(): ?float
     {
         return $this->bottomLeftX;
@@ -181,15 +226,16 @@ class ImmersiveSession
         return $this->connection;
     }
 
-    public function setConnection(ImmersiveSessionConnection $connection): static
+    public function setConnection(?ImmersiveSessionConnection $connection): static
     {
+        $this->connection = $connection;
+        if (null == $connection) {
+            return $this;
+        }
         // set the owning side of the relation if necessary
         if ($connection->getSession() !== $this) {
             $connection->setSession($this);
         }
-
-        $this->connection = $connection;
-
         return $this;
     }
 }

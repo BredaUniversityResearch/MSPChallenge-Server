@@ -44,22 +44,26 @@ readonly class DockerCommunicationMessageHandler
     ): void {
         $immersiveSessionId = $message->getImmersiveSessionId();
         $em = $this->connectionManager->getGameSessionEntityManager($message->getGameSessionId());
-        if (null === $immersiveSession = $em->find(ImmersiveSession::class, $immersiveSessionId)) {
-            $this->dockerLogger->warning('Immersive session not found: ' . $immersiveSessionId);
-            return;
-        }
+        $immersiveSession = $em->find(ImmersiveSession::class, $immersiveSessionId);
         switch (get_class($message)) {
             case CreateImmersiveSessionContainerMessage::class:
+                if (null === $immersiveSession) {
+                    $this->dockerLogger->warning('Immersive session not found: ' . $immersiveSessionId);
+                    return;
+                }
                 $this->immersiveSessionService->createImmersiveSessionContainer(
                     $immersiveSession,
                     $message->getGameSessionId()
                 );
                 break;
             case RemoveImmersiveSessionContainerMessage::class:
-                $this->immersiveSessionService->removeImmersiveSessionContainer(
-                    $immersiveSession,
-                    $message->getGameSessionId()
-                );
+                if (null !== $immersiveSession) {
+                    $this->immersiveSessionService->removeImmersiveSessionConnection(
+                        $immersiveSession,
+                        $message->getGameSessionId()
+                    );
+                }
+                $this->immersiveSessionService->removeImmersiveSessionContainer($message->getDockerContainerId());
                 break;
             default:
                 $this->dockerLogger->error('Unknown message type: '.get_class($message));
