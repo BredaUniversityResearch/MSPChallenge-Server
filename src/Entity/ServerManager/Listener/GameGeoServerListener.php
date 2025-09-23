@@ -18,8 +18,6 @@ class GameGeoServerListener
 
     public function preFlush(GameGeoServer $geoServer, PreFlushEventArgs $event): void
     {
-        $geoServer->setUsername(base64_encode($geoServer->getUsername()));
-        $geoServer->setPassword(base64_encode($geoServer->getPassword()));
         if (substr($geoServer->getAddress(), -1) !== '/') {
             $geoServer->setAddress($geoServer->getAddress().'/');
         }
@@ -47,9 +45,6 @@ class GameGeoServerListener
                     )
                 );
             }
-        } else {
-            $geoServer->setUsername(base64_decode($geoServer->getUsername()));
-            $geoServer->setPassword(base64_decode($geoServer->getPassword()));
         }
     }
 }

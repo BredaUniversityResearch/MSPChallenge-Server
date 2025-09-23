@@ -36,6 +36,14 @@ class GameListSaveSerializationTest extends KernelTestCase
         $gameSave = $serializer->createGameSaveFromData($gameListArray);
         self::assertInstanceOf(GameSave::class, $gameSave, 'createGameSaveFromData failed');
 
+        // @todo check with Harald
+        // BEGIN -- had to add these
+        $gameSave->setGameConfigFilesFilename($gameList->getGameConfigVersion()->getGameConfigFile()->getFilename());
+        $gameSave->setGameConfigVersionsRegion($gameList->getGameConfigVersion()->getRegion());
+        $gameSave->setGameServer($gameList->getGameServer());
+        $gameSave->setGameWatchdogServer($gameList->getGameWatchdogServer());
+        // END
+
         $emServerManager->persist($gameSave);
         $emServerManager->flush();
 
@@ -52,6 +60,14 @@ class GameListSaveSerializationTest extends KernelTestCase
         // testing related to uploading a save ZIP (1)
         $gameSaveNew = $serializer->createGameSaveFromJson($json);
         self::assertInstanceOf(GameSave::class, $gameSaveNew, 'createGameSaveFromJson failed');
+
+        // @todo check with Harald
+        // BEGIN -- had to add these
+        $gameSaveNew->setGameConfigFilesFilename($gameSave->getGameConfigVersion()->getGameConfigFile()->getFilename());
+        $gameSaveNew->setGameConfigVersionsRegion($gameSave->getGameConfigVersion()->getRegion());
+        $gameSaveNew->setGameServer($gameSave->getGameServer());
+        $gameSaveNew->setGameWatchdogServer($gameSave->getGameWatchdogServer());
+        // END
 
         $emServerManager->persist($gameSaveNew);
         $emServerManager->flush();
@@ -90,6 +106,6 @@ class GameListSaveSerializationTest extends KernelTestCase
 
     public static function setUpBeforeClass(): void
     {
-        SetupBeforeTests::completeCleanInstallDatabases();
+        \App\Tests\Utils\ResourceHelper::resetDatabases(static::bootKernel()->getProjectDir());
     }
 }

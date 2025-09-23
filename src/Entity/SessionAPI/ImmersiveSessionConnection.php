@@ -5,6 +5,7 @@ namespace App\Entity\SessionAPI;
 use ApiPlatform\Metadata\ApiProperty;
 use App\Repository\SessionAPI\ImmersiveSessionConnectionRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ImmersiveSessionConnectionRepository::class)]
 class ImmersiveSessionConnection
@@ -14,19 +15,19 @@ class ImmersiveSessionConnection
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ApiProperty(
-        readable: false,
-    )]
     #[ORM\OneToOne(inversedBy: 'connection', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?ImmersiveSession $session = null;
 
+    #[Groups(['read'])]
     #[ORM\Column]
     private ?int $dockerApiID = null;
 
+    #[Groups(['read'])]
     #[ORM\Column]
     private ?int $port = null;
 
+    #[Groups(['read'])]
     #[ORM\Column(length: 255)]
     private ?string $dockerContainerID = null;
 

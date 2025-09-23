@@ -78,24 +78,24 @@ class GameGeoServer extends EntityBase
 
     public function getUsername(): ?string
     {
-        return $this->username;
+        return base64_decode($this->username);
     }
 
     public function setUsername(?string $username): self
     {
-        $this->username = $username;
+        $this->username = base64_encode($username);
 
         return $this;
     }
 
     public function getPassword(): ?string
     {
-        return $this->password;
+        return base64_decode($this->password);
     }
 
     public function setPassword(?string $password): self
     {
-        $this->password = $password;
+        $this->password = base64_encode($password);
 
         return $this;
     }

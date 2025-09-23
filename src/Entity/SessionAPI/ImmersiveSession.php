@@ -10,22 +10,36 @@ use App\Repository\SessionAPI\ImmersiveSessionRepository;
 use App\State\ImmersiveSessionProcessor;
 use App\Validator\ImmersiveSessionTypeJsonSchema;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
+use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ImmersiveSessionRepository::class)]
-#[ApiResource(processor: ImmersiveSessionProcessor::class)]
+#[ApiResource(
+    processor: ImmersiveSessionProcessor::class,
+    normalizationContext: ['groups' => ['read']],
+    denormalizationContext: ['groups' => ['write']]
+)]
+#[Gedmo\SoftDeleteable(fieldName: 'deletedAt', timeAware: false, hardDelete: false)]
 class ImmersiveSession
 {
+    use SoftDeleteableEntity, TimestampableEntity;
+
+    #[Groups(['read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['read', 'write'])]
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "The name field should not be blank.")]
     #[Assert\NotNull(message: "The name field is required.")]
     private ?string $name = null;
 
+    #[Groups(['read', 'write'])]
     #[ApiProperty(
         openapiContext: [
             'type' => 'string',
@@ -39,6 +53,7 @@ class ImmersiveSession
     #[Assert\NotNull(message: "The type field is required.")]
     private ImmersiveSessionTypeID $type = ImmersiveSessionTypeID::MR;
 
+    #[Groups(['read', 'write'])]
     #[ORM\Column(options: ['default' => -1])]
     #[Assert\NotBlank(message: "The month field should not be blank.")]
     #[Assert\Range(
@@ -47,6 +62,7 @@ class ImmersiveSession
     )]
     private int $month = -1;
 
+    #[Groups(['read'])]
     #[ApiProperty(
         writable: false,
         openapiContext: [
@@ -59,6 +75,7 @@ class ImmersiveSession
     #[ORM\Column(enumType: ImmersiveSessionStatus::class)]
     private ImmersiveSessionStatus $status = ImmersiveSessionStatus::STARTING;
 
+    #[Groups(['read'])]
     #[ApiProperty(
         writable: false,
         openapiContext: [
@@ -68,18 +85,23 @@ class ImmersiveSession
     #[ORM\Column(type: 'json_document', nullable: true)]
     private mixed $statusResponse = null;
 
+    #[Groups(['read', 'write'])]
     #[ORM\Column]
     private ?float $bottomLeftX = null;
 
+    #[Groups(['read', 'write'])]
     #[ORM\Column]
     private ?float $bottomLeftY = null;
 
+    #[Groups(['read', 'write'])]
     #[ORM\Column]
     private ?float $topRightX = null;
 
+    #[Groups(['read', 'write'])]
     #[ORM\Column]
     private ?float $topRightY = null;
 
+    #[Groups(['read', 'write'])]
     #[ImmersiveSessionTypeJsonSchema]
     #[ApiProperty(
         openapiContext: [
@@ -91,9 +113,7 @@ class ImmersiveSession
     #[ORM\Column(type: 'json_document', nullable: true)]
     private mixed $data = null;
 
-    #[ApiProperty(
-        writable: false
-    )]
+    #[Groups(['read'])]
     #[ORM\OneToOne(mappedBy: 'session', cascade: ['persist', 'remove'])]
     private ?ImmersiveSessionConnection $connection = null;
 
