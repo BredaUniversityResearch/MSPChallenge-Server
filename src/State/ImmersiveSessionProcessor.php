@@ -48,6 +48,8 @@ class ImmersiveSessionProcessor implements ProcessorInterface
                     ->setGameSessionId($gameSessionId);
                 $this->messageBus->dispatch($message);
             }
+            $data->setStatus(ImmersiveSessionStatus::REMOVED);
+            $result = $this->persistProcessor->process($data, $operation, $uriVariables, $context);
             return $this->removeProcessor->process($data, $operation, $uriVariables, $context);
         }
 

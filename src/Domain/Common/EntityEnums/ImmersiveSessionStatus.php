@@ -15,6 +15,6 @@ enum ImmersiveSessionStatus: string
     case STARTING = 'starting';
     case RUNNING = 'running';
     case UNRESPONSIVE = 'unresponsive';
-
     case STOPPED = 'stopped';
+    case REMOVED = 'removed';
 }

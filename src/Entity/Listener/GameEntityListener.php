@@ -8,7 +8,7 @@ use Doctrine\ORM\Event\PrePersistEventArgs;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
-readonly class GameListener implements
+readonly class GameEntityListener implements
     SubEntityListenerInterface,
     PostLoadEventListenerInterface,
     PrePersistEventListenerInterface

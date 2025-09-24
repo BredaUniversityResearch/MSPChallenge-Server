@@ -4,7 +4,7 @@ namespace App\Entity\SessionAPI;
 
 use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Entity\Interface\WatchdogInterface;
-use App\Entity\Listener\WatchdogListener;
+use App\Entity\Listener\WatchdogEntityListener;
 use App\Entity\ServerManager\GameWatchdogServer;
 use App\Entity\Trait\LazyLoadersTrait;
 use App\Entity\Trait\WatchdogTrait;
@@ -129,7 +129,7 @@ class Watchdog implements WatchdogInterface
     {
         // fail-safe: Trigger post load to ensure the serialized watchdog has its lazy loaders set
         //  Eg. after serialization into a message and handled by the message handler.
-        WatchdogListener::getInstance()->triggerPostLoad($this);
+        WatchdogEntityListener::getInstance()->triggerPostLoad($this);
         if (null !== $ll = $this->getLazyLoader(self::LAZY_LOADING_PROPERTY_GAME_WATCHDOG_SERVER)) {
             return $ll();
         }

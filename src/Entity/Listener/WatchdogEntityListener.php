@@ -8,9 +8,9 @@ use App\Repository\ServerManager\GameWatchdogServerRepository;
 use App\Entity\SessionAPI\Watchdog;
 use Doctrine\ORM\Event\PostLoadEventArgs;
 
-class WatchdogListener implements SubEntityListenerInterface, PostLoadEventListenerInterface
+class WatchdogEntityListener implements SubEntityListenerInterface, PostLoadEventListenerInterface
 {
-    private static ?WatchdogListener $instance = null;
+    private static ?self $instance = null;
 
     public function __construct()
     {

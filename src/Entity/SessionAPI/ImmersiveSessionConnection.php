@@ -2,7 +2,9 @@
 
 namespace App\Entity\SessionAPI;
 
-use ApiPlatform\Metadata\ApiProperty;
+use App\Entity\Listener\ImmersiveSessionConnectionEntityListener;
+use App\Entity\ServerManager\DockerApi;
+use App\Entity\Trait\LazyLoadersTrait;
 use App\Repository\SessionAPI\ImmersiveSessionConnectionRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -10,6 +12,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: ImmersiveSessionConnectionRepository::class)]
 class ImmersiveSessionConnection
 {
+    public const LAZY_LOADING_PROPERTY_DOCKER_API = 'dockerApi'; // value does not matter
+
+    use LazyLoadersTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -19,7 +25,6 @@ class ImmersiveSessionConnection
     #[ORM\JoinColumn(nullable: false)]
     private ?ImmersiveSession $session = null;
 
-    #[Groups(['read'])]
     #[ORM\Column]
     private ?int $dockerApiID = null;
 
@@ -81,5 +86,17 @@ class ImmersiveSessionConnection
         $this->dockerContainerID = $dockerContainerID;
 
         return $this;
+    }
+
+    #[Groups(['read'])]
+    public function getDockerApi(): ?DockerApi
+    {
+        // fail-safe: Trigger post load to ensure the serialized connection has its lazy loaders set
+        //  Eg. after serialization into a message and handled by the message handler.
+        ImmersiveSessionConnectionEntityListener::getInstance()->triggerPostLoad($this);
+        if (null !== $ll = $this->getLazyLoader(self::LAZY_LOADING_PROPERTY_DOCKER_API)) {
+            return $ll();
+        }
+        return null;
     }
 }

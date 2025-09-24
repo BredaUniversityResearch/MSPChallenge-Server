@@ -142,8 +142,9 @@ services:
             - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameGeoServer', entity_manager: 'msp_server_manager' }
             - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameGeoServer', entity_manager: 'msp_server_manager' }
 
-    App\Entity\Listener\WatchdogListener:
-    App\Entity\Listener\GameListener:
+    App\Entity\Listener\WatchdogEntityListener:
+    App\Entity\Listener\ImmersiveSessionConnectionEntityListener:
+    App\Entity\Listener\GameEntityListener:
         arguments:
             $params: '@Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface'
 
@@ -151,8 +152,9 @@ services:
     App\Entity\Listener\SessionEntityListener:
         arguments:
             $listeners: [
-                '@App\Entity\Listener\WatchdogListener',
-                '@App\Entity\Listener\GameListener'
+                '@App\Entity\Listener\WatchdogEntityListener',
+                '@App\Entity\Listener\ImmersiveSessionConnectionEntityListener',
+                '@App\Entity\Listener\GameEntityListener'
             ]
         tags:
             - { name: 'doctrine.event_listener', event: 'prePersist' }
