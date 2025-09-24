@@ -79,7 +79,7 @@ class ImmersiveSessionsWsServerPlugin extends Plugin
                     $qb->createPositionalParameter(date('Y-m-d H:i:s', (int)$newUpdateTime))
                 ))
         )
-        ->then(function (Result $result) use ($connResourceId, $lastUpdateTime, $newUpdateTime) {
+        ->then(function (Result $result) use ($connResourceId, $newUpdateTime) {
             $rows = ($result->fetchAllRows() ?? []) ?: [];
             if (empty($rows)) {
                 return [];
