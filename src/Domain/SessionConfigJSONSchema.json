@@ -181,7 +181,7 @@
                                 "type": "string"
                               },
                               "Shipping_Intensity": {
-                                "type": "string"
+                                "type": ["string", "integer"]
                               },
                               "ShippingDirection": {
                                 "type": "string"
