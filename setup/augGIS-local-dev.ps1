@@ -1,0 +1,76 @@
+param([switch]$elevated, [string]$tag = "latest")
+
+function Test-Admin {
+    $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
+    $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
+}
+
+# Check for administrative privileges
+if ((Test-Admin) -eq $false)  {
+    if ($elevated) {
+        Write-Host "Failed to elevate privileges. Exiting..."
+    } else {
+        Write-Host "This script requires administrative privileges. Relaunching as admin..."
+        Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file "{0}" -elevated -tag {1}' -f ($myinvocation.MyCommand.Definition, $tag))
+    }
+    exit
+}
+
+function IfEmpty {
+    param (
+        $Value,
+        [Parameter(Mandatory=$true)]
+        $DefaultValue
+    )
+    if ($null -eq $Value -or $Value -eq "") {
+        return $DefaultValue
+    }
+    return $Value
+}
+
+# check if docker-compose.override.yml is in the current working directory, if not try to find it in the parent directory
+if (-not (Test-Path "docker-compose.override.yml")) {
+    if (Test-Path "..\docker-compose.override.yml") {
+        Set-Location ..
+    } else {
+        Write-Host "Could not find docker-compose.override.yml in the current or parent directory. Exiting..."
+        exit 1
+    }
+}
+
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
+
+if (Test-Path ".env.local") {
+    # output content of .env.local
+    Write-Host ".env.local already exists with the following content:"
+    Get-Content ".env.local"
+    # Ask user confirmation to overwrite existing .env.local
+    $confirmation = Read-Host "The .env.local file already exists. Do you want to overwrite it? (y/n)"
+    # If no, exit the script
+    if ($confirmation -ne 'y') {
+        Write-Host "Exiting without changes."
+        exit 0
+    }
+    # make a backup of the existing .env.local with a timestamp
+    $timestamp = Get-Date -Format "yyyyMMddHHmmss"
+    $backupFile = ".env.local.$timestamp.bak"
+    Copy-Item -Path ".env.local" -Destination $backupFile
+    Write-Host "Backup of .env.local created as $backupFile"
+}
+
+# Get the IP address of the Wi-Fi network interface
+$wifiAdapter = Get-NetIPAddress | Where-Object { $_.InterfaceAlias -like "*Wi-Fi*" -and $_.AddressFamily -eq "IPv4" }
+$wifiAdapter.IPAddress
+Write-Host "Gonna use $($wifiAdapter.IPAddress) for the MSP server connections"
+
+docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
+
+# Write variables to .env.local
+Set-Content -Path ".env.local" -Value @"
+URL_WEB_SERVER_HOST=$($wifiAdapter.IPAddress)
+URL_WS_SERVER_HOST=$($wifiAdapter.IPAddress)
+IMMERSIVE_TWINS_DOCKER_HUB_TAG=$tag
+"@
+
+docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d --remove-orphans
+exit 0
