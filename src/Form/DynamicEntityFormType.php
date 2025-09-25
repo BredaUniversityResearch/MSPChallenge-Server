@@ -128,7 +128,7 @@ class DynamicEntityFormType extends AbstractType
                 if (preg_match_all('/%env\(string:([A-Z0-9_]+)\)%/', $value, $matches)) {
                     $replacements = [];
                     foreach ($matches[1] as $i => $envName) {
-                        $envValue = $_ENV[$envName] ?? getenv($envName) ?? null;
+                        $envValue = $_ENV[$envName] ?? null;
                         if ($envValue !== null) {
                             $replacements[$matches[0][$i]] = $envValue;
                         }
