@@ -6,6 +6,7 @@ use App\Entity\EntityBase;
 use App\Entity\Mapping as AppMappings;
 use App\Repository\ServerManager\ImmersiveSessionDockerApiRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Form\Extension\Core\Type as SymfonyFormType;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[AppMappings\Plurals('Docker API', 'Docker APIs')]
@@ -21,15 +22,42 @@ class DockerApi extends EntityBase
     #[Groups(['read'])]
     #[AppMappings\Property\TableColumn]
     #[ORM\Column(length: 255)]
+    #[AppMappings\Property\FormFieldType(
+        type: SymfonyFormType\TextType::class,
+        options: [
+            'attr' => [
+                'class' => 'form-control',
+                'placeholder' => '%env(string:URL_WEB_SERVER_HOST)%'
+            ]
+        ]
+    )]
     private ?string $address = null;
 
     #[Groups(['read'])]
     #[AppMappings\Property\TableColumn]
     #[ORM\Column]
+    #[AppMappings\Property\FormFieldType(
+        type: SymfonyFormType\TextType::class,
+        options: [
+            'attr' => [
+                'class' => 'form-control',
+                'placeholder' => '2375'
+            ]
+        ]
+    )]
     private ?int $port = null;
 
     #[Groups(['read'])]
     #[ORM\Column(length: 255)]
+    #[AppMappings\Property\FormFieldType(
+        type: SymfonyFormType\TextType::class,
+        options: [
+            'attr' => [
+                'class' => 'form-control',
+                'placeholder' => 'http'
+            ]
+        ]
+    )]
     private ?string $scheme = null;
 
     public function getId(): ?int

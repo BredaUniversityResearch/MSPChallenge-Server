@@ -49,7 +49,7 @@ class DynamicEntityFormType extends AbstractType
                 Util::getPropertyAttribute($property, AppMappings\Property\FormFieldType::class)) {
                 /** @var AppMappings\Property\FormFieldType $attribute */
                 $formFieldType = $attribute->type;
-                $formFieldTypeOptions = $attribute->options;
+                $formFieldTypeOptions = $this->resolveEnvPlaceholders($attribute->options);
                 if ($formFieldTypeLabel) {
                     $formFieldTypeOptions['label'] ??= $formFieldTypeLabel;
                 }
@@ -114,5 +114,31 @@ class DynamicEntityFormType extends AbstractType
             'bool' => CheckboxType::class,
             default => null, // Skip unsupported types
         };
+    }
+
+    /**
+     * Recursively resolve %env(string:VAR_NAME)% placeholders in an array.
+     */
+    private function resolveEnvPlaceholders(array $options): array
+    {
+        foreach ($options as $key => $value) {
+            if (is_array($value)) {
+                $options[$key] = $this->resolveEnvPlaceholders($value);
+            } elseif (is_string($value)) {
+                if (preg_match_all('/%env\(string:([A-Z0-9_]+)\)%/', $value, $matches)) {
+                    $replacements = [];
+                    foreach ($matches[1] as $i => $envName) {
+                        $envValue = $_ENV[$envName] ?? getenv($envName) ?? null;
+                        if ($envValue !== null) {
+                            $replacements[$matches[0][$i]] = $envValue;
+                        }
+                    }
+                    if ($replacements) {
+                        $options[$key] = strtr($value, $replacements);
+                    }
+                }
+            }
+        }
+        return $options;
     }
 }
