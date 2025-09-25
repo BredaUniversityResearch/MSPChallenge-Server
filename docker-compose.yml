@@ -93,7 +93,7 @@ services:
       APP_ENV: ${APP_ENV:-dev}
       FRAMEWORK_CACHE_APP: ${FRAMEWORK_CACHE_APP:-cache.adapter.redis}
       IMMERSIVE_TWINS_DOCKER_HUB_TAG: ${IMMERSIVE_TWINS_DOCKER_HUB_TAG:-latest}
-      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-}
+      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-^https?://(localhost|127\.0\.0\.1|${URL_WEB_SERVER_HOST})(:[0-9]+)?$}
     ports:
       # Websocket server
       - "${WS_SERVER_PORT:-45001}:${WS_SERVER_PORT:-45001}"
