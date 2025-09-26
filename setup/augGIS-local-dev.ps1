@@ -59,16 +59,16 @@ if (Test-Path ".env.local") {
 }
 
 # Get the IP address of the Wi-Fi network interface
-$wifiAdapter = Get-NetIPAddress | Where-Object { $_.InterfaceAlias -like "*Wi-Fi*" -and $_.AddressFamily -eq "IPv4" }
-$wifiAdapter.IPAddress
-Write-Host "Gonna use $($wifiAdapter.IPAddress) for the MSP server connections"
+$netAdapter = Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias Wi-Fi,Ethernet -AddressState Preferred | Select-Object -First 1
+$netAdapter.IPAddress
+Write-Host "Gonna use $($netAdapter.IPAddress) for the MSP server connections"
 
 docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
 
 # Write variables to .env.local
 Set-Content -Path ".env.local" -Value @"
-URL_WEB_SERVER_HOST=$($wifiAdapter.IPAddress)
-URL_WS_SERVER_HOST=$($wifiAdapter.IPAddress)
+URL_WEB_SERVER_HOST=$($netAdapter.IPAddress)
+URL_WS_SERVER_HOST=$($netAdapter.IPAddress)
 IMMERSIVE_TWINS_DOCKER_HUB_TAG=$tag
 "@
 
