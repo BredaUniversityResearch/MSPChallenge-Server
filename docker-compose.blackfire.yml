@@ -1,0 +1,21 @@
+services:
+  blackfire:
+    image: blackfire/blackfire:2
+    ports:
+      - "${BLACKFIRE_PORT:-}:8307"
+    environment:
+        # Define Blackfire Agent log vebosity level
+        BLACKFIRE_LOG_LEVEL: 4
+
+        # Exposes BLACKFIRE_SERVER_* environment variables from the host
+        BLACKFIRE_SERVER_ID: ${BLACKFIRE_SERVER_ID:-}
+        BLACKFIRE_SERVER_TOKEN: ${BLACKFIRE_SERVER_TOKEN:-}
+
+        # Exposes BLACKFIRE_CLIENT_* environment variables
+        # allowing the client to communicate with Blackfire's API:
+        BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID:-}
+        BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
+    networks:
+      - msp_network
+    logging:
+      driver: "local"
