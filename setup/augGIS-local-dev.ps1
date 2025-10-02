@@ -69,7 +69,8 @@ docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/do
 Set-Content -Path ".env.local" -Value @"
 URL_WEB_SERVER_HOST=$($netAdapter.IPAddress)
 URL_WS_SERVER_HOST=$($netAdapter.IPAddress)
-IMMERSIVE_TWINS_DOCKER_HUB_TAG=$tag
+IMMERSIVE_SESSIONS_DOCKER_HUB_TAG=dev
+IMMERSIVE_SESSIONS_HEALTHCHECK_WRITE_MODE=1
 "@
 
 docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d --remove-orphans

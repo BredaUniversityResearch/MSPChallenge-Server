@@ -188,6 +188,9 @@ services:
     Symfony\Component\Uid\Command\InspectUlidCommand: ~
     Symfony\Component\Uid\Command\InspectUuidCommand: ~
 
+    App\MessageHandler\Retry\DockerMessageRetryStrategy:
+        tags:
+            - { name: messenger.retry_strategy }
     App\MessageHandler\Retry\WatchdogMessageRetryStrategy:
         tags:
             - { name: messenger.retry_strategy }

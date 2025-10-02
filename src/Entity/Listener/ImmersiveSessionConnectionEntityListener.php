@@ -4,7 +4,7 @@ namespace App\Entity\Listener;
 
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\DockerApi;
-use App\Entity\SessionAPI\ImmersiveSessionConnection;
+use App\Entity\SessionAPI\DockerConnection;
 use Doctrine\ORM\Event\PostLoadEventArgs;
 
 class ImmersiveSessionConnectionEntityListener implements SubEntityListenerInterface, PostLoadEventListenerInterface
@@ -25,15 +25,15 @@ class ImmersiveSessionConnectionEntityListener implements SubEntityListenerInter
     public function getSupportedEntityClasses(): array
     {
         return [
-            ImmersiveSessionConnection::class,
+            DockerConnection::class,
         ];
     }
 
-    public function triggerPostLoad(ImmersiveSessionConnection $immersiveSessionConnection): void
+    public function triggerPostLoad(DockerConnection $immersiveSessionConnection): void
     {
-        $immersiveSessionConnection->hasLazyLoader(ImmersiveSessionConnection::LAZY_LOADING_PROPERTY_DOCKER_API) or
+        $immersiveSessionConnection->hasLazyLoader(DockerConnection::LAZY_LOADING_PROPERTY_DOCKER_API) or
         $immersiveSessionConnection->setLazyLoader(
-            ImmersiveSessionConnection::LAZY_LOADING_PROPERTY_DOCKER_API,
+            DockerConnection::LAZY_LOADING_PROPERTY_DOCKER_API,
             function () use ($immersiveSessionConnection) {
                 $em = ConnectionManager::getInstance()->getServerManagerEntityManager();
                 $repo = $em->getRepository(DockerApi::class);
@@ -46,7 +46,7 @@ class ImmersiveSessionConnectionEntityListener implements SubEntityListenerInter
     public function postLoad(PostLoadEventArgs $event): void
     {
         $immersiveSessionConnection = $event->getObject();
-        if (!$immersiveSessionConnection instanceof ImmersiveSessionConnection) {
+        if (!$immersiveSessionConnection instanceof DockerConnection) {
             return;
         }
         $this->triggerPostLoad($immersiveSessionConnection);

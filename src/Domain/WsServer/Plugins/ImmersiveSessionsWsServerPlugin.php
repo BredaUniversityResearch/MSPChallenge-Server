@@ -9,7 +9,7 @@ use App\Domain\Common\ToPromiseFunction;
 use App\Domain\WsServer\ClientDisconnectedException;
 use App\Domain\WsServer\ClientHeaderKeys;
 use App\Entity\SessionAPI\ImmersiveSession;
-use App\Entity\SessionAPI\ImmersiveSessionConnection;
+use App\Entity\SessionAPI\DockerConnection;
 use App\Security\BearerTokenValidator;
 use Drift\DBAL\Result;
 use Exception;
@@ -117,7 +117,7 @@ class ImmersiveSessionsWsServerPlugin extends Plugin
     {
         $conn = null;
         if (isset($payload['port']) && isset($payload['docker_api_id'])) {
-            $conn = new ImmersiveSessionConnection();
+            $conn = new DockerConnection();
             $conn
                 ->setPort($payload['port'])
                 ->setDockerApiID($payload['docker_api_id'])

@@ -2,7 +2,7 @@
 
 namespace App\Message\Docker;
 
-class RemoveImmersiveSessionContainerMessage extends ImmersiveSessionContainerMessageBase
+class RemoveImmersiveSessionConnectionMessage extends ImmersiveSessionConnectionMessageBase
 {
     private string $dockerContainerId;
 

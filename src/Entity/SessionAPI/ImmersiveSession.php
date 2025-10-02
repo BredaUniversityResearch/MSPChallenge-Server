@@ -114,8 +114,9 @@ class ImmersiveSession
     private mixed $data = null;
 
     #[Groups(['read'])]
-    #[ORM\OneToOne(mappedBy: 'session', cascade: ['persist', 'remove'])]
-    private ?ImmersiveSessionConnection $connection = null;
+    #[ORM\OneToOne(targetEntity: DockerConnection::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\JoinColumn(name: 'docker_connection_id', referencedColumnName: 'id', nullable: true)]
+    private ?DockerConnection $connection = null;
 
     public function getId(): ?int
     {
@@ -247,21 +248,15 @@ class ImmersiveSession
         return $this;
     }
 
-    public function getConnection(): ?ImmersiveSessionConnection
+    public function getConnection(): ?DockerConnection
     {
         return $this->connection;
     }
 
-    public function setConnection(?ImmersiveSessionConnection $connection): static
+    public function setConnection(?DockerConnection $connection): static
     {
         $this->connection = $connection;
-        if (null == $connection) {
-            return $this;
-        }
-        // set the owning side of the relation if necessary
-        if ($connection->getSession() !== $this) {
-            $connection->setSession($this);
-        }
+
         return $this;
     }
 }

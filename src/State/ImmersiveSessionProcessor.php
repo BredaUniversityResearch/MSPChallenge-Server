@@ -8,20 +8,20 @@ use ApiPlatform\State\ProcessorInterface;
 use App\Domain\Common\EntityEnums\ImmersiveSessionStatus;
 use App\Domain\Helper\RequestDataExtractor;
 use App\Entity\SessionAPI\ImmersiveSession;
-use App\Message\Docker\CreateImmersiveSessionContainerMessage;
-use App\Message\Docker\RemoveImmersiveSessionContainerMessage;
+use App\Message\Docker\CreateImmersiveSessionConnectionMessage;
+use App\Message\Docker\RemoveImmersiveSessionConnectionMessage;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Messenger\MessageBusInterface;
 
-class ImmersiveSessionProcessor implements ProcessorInterface
+readonly class ImmersiveSessionProcessor implements ProcessorInterface
 {
     public function __construct(
         #[Autowire(service: 'api_platform.doctrine.orm.state.persist_processor')]
-        private readonly ProcessorInterface $persistProcessor,
+        private ProcessorInterface  $persistProcessor,
         #[Autowire(service: 'api_platform.doctrine.orm.state.remove_processor')]
-        private readonly ProcessorInterface $removeProcessor,
-        private readonly MessageBusInterface $messageBus
+        private ProcessorInterface  $removeProcessor,
+        private MessageBusInterface $messageBus
     ) {
     }
 
@@ -41,7 +41,7 @@ class ImmersiveSessionProcessor implements ProcessorInterface
         $hasConnection = $data->getConnection() !== null;
         if ($operation instanceof DeleteOperationInterface) {
             if ($hasConnection) {
-                $message = new RemoveImmersiveSessionContainerMessage();
+                $message = new RemoveImmersiveSessionConnectionMessage();
                 $message
                     ->setImmersiveSessionId($data->getId())
                     ->setDockerContainerId($data->getConnection()->getDockerContainerID())
@@ -49,18 +49,18 @@ class ImmersiveSessionProcessor implements ProcessorInterface
                 $this->messageBus->dispatch($message);
             }
             $data->setStatus(ImmersiveSessionStatus::REMOVED);
-            $result = $this->persistProcessor->process($data, $operation, $uriVariables, $context);
+            $this->persistProcessor->process($data, $operation, $uriVariables, $context);
             return $this->removeProcessor->process($data, $operation, $uriVariables, $context);
         }
 
-        $data->setStatus(ImmersiveSessionStatus::STARTING);
         /** @var ImmersiveSession $result */
         $result = $this->persistProcessor->process($data, $operation, $uriVariables, $context);
         if ($hasConnection) {
             return $result;
         }
 
-        $message = new CreateImmersiveSessionContainerMessage();
+        $data->setStatus(ImmersiveSessionStatus::STARTING);
+        $message = new CreateImmersiveSessionConnectionMessage();
         $message
             ->setImmersiveSessionId($result->getId())
             ->setGameSessionId($gameSessionId);

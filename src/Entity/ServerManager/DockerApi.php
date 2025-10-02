@@ -60,6 +60,8 @@ class DockerApi extends EntityBase
     )]
     private ?string $scheme = null;
 
+    private ?\DateTime $lastDockerEventAt = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -97,6 +99,18 @@ class DockerApi extends EntityBase
     public function setScheme(string $scheme): static
     {
         $this->scheme = $scheme;
+
+        return $this;
+    }
+
+    public function getLastDockerEventAt(): ?\DateTime
+    {
+        return $this->lastDockerEventAt;
+    }
+
+    public function setLastDockerEventAt(?\DateTime $lastDockerEventAt): static
+    {
+        $this->lastDockerEventAt = $lastDockerEventAt;
 
         return $this;
     }

@@ -78,7 +78,8 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
                 $this->startStateRegisterPlugins();
                 break;
             case self::STATE_READY:
-                $this->addOutput('Websocket server is ready');
+                $this->addOutput('*** Websocket server is ready *** ');
+                $this->addOutput('Press "n" -> [Enter] to switch views');
                 break;
         }
     }

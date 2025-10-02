@@ -5,12 +5,12 @@ namespace App\Entity\SessionAPI;
 use App\Entity\Listener\ImmersiveSessionConnectionEntityListener;
 use App\Entity\ServerManager\DockerApi;
 use App\Entity\Trait\LazyLoadersTrait;
-use App\Repository\SessionAPI\ImmersiveSessionConnectionRepository;
+use App\Repository\SessionAPI\DockerConnectionRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: ImmersiveSessionConnectionRepository::class)]
-class ImmersiveSessionConnection
+#[ORM\Entity(repositoryClass: DockerConnectionRepository::class)]
+class DockerConnection
 {
     public const LAZY_LOADING_PROPERTY_DOCKER_API = 'dockerApi'; // value does not matter
 
@@ -20,10 +20,6 @@ class ImmersiveSessionConnection
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
-    #[ORM\OneToOne(inversedBy: 'connection', cascade: ['persist'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?ImmersiveSession $session = null;
 
     #[ORM\Column]
     private ?int $dockerApiID = null;
@@ -36,20 +32,11 @@ class ImmersiveSessionConnection
     #[ORM\Column(length: 255)]
     private ?string $dockerContainerID = null;
 
+    private bool $verified = false;
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getSession(): ?ImmersiveSession
-    {
-        return $this->session;
-    }
-
-    public function setSession(ImmersiveSession $session): static
-    {
-        $this->session = $session;
-        return $this;
     }
 
     public function getDockerApiID(): ?int
@@ -84,6 +71,18 @@ class ImmersiveSessionConnection
     public function setDockerContainerID(?string $dockerContainerID): static
     {
         $this->dockerContainerID = $dockerContainerID;
+
+        return $this;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->verified;
+    }
+
+    public function setVerified(bool $verified): static
+    {
+        $this->verified = $verified;
 
         return $this;
     }

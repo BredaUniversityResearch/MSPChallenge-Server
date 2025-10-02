@@ -4,7 +4,7 @@ namespace App\Repository\SessionAPI;
 
 use Doctrine\ORM\EntityRepository;
 
-class ImmersiveSessionConnectionRepository extends EntityRepository
+class DockerConnectionRepository extends EntityRepository
 {
     //    /**
     //     * @return ImmersiveSessionConnection[] Returns an array of ImmersiveSessionConnection objects
