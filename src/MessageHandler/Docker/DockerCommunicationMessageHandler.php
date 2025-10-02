@@ -231,10 +231,12 @@ readonly class DockerCommunicationMessageHandler
                     continue;
                 }
                 $gameSessionId = $this->extractSessionIdFromEnv($inspectData['Config']['Env']);
-                $this->dockerLogger->info('Inspect immersive session container '.$container['Id'].
+                $this->dockerLogger->info(
+                    'Inspect immersive session container '.$container['Id'].
                     ' for game session #'.$gameSessionId.
                     ' status: '.$inspectData['State']['Status'].
-                    ($inspectData['State']['Status'] == 'running' ?
+                    (
+                        $inspectData['State']['Status'] == 'running' ?
                         ', health: '.($inspectData['State']['Health']['Status'] ?? 'none') : ''
                     )
                 );
