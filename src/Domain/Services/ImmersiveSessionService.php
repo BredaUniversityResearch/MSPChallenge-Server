@@ -314,7 +314,7 @@ class ImmersiveSessionService
      *  Id: string,
      *  State: array{
      *     Status: string,
-     *     Health: array{
+     *     Health?: array{
      *       Status: string,
      *       FailingStreak: int,
      *       Log: array{array{Start: string, End: string, ExitCode: int, Output: mixed}}
@@ -384,7 +384,7 @@ class ImmersiveSessionService
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, false); // Stream the response directly
         $responseContent = '';
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use (&$responseContent) {
-            //$this->dockerLogger->info($data);
+            $this->dockerLogger->info($data);
             $responseContent .= $data;
             return strlen($data);
         });

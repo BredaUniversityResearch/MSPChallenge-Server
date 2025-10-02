@@ -194,7 +194,7 @@ class MonitorDockerApiEventsCommand extends Command
 
     private function formatDockerApiId(?int $dockerApiId): string
     {
-        return '#'.str_pad($dockerApiId ?? 0, 6, '_', STR_PAD_LEFT);
+        return '#'.str_pad($dockerApiId ?? '0', 6, '_', STR_PAD_LEFT);
     }
     private function outputDockerApiMessage(int $dockerApiId, string $type, string $message): void
     {
