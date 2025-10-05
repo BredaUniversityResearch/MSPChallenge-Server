@@ -156,14 +156,17 @@ readonly class DockerCommunicationMessageHandler
     /**
      * @throws Exception
      */
-    public function setImmersiveSessionsToUnresponsive(DockerApi $dockerApi, array &$context): void
+    public function setImmersiveSessionsToUnresponsive(DockerApi $dockerApi, string $errorMsg, array &$context): void
     {
         foreach ($context as $gameSessionId => $gameSession) {
             $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
             /** @var ImmersiveSession $session  */
             foreach ($gameSession['sessions'] as $session) {
-                // only running sessions can become unresponsive
-                if ($session->getStatus() != ImmersiveSessionStatus::RUNNING) {
+                // only running sessions can become unresponsive, or already unresponsive sessions can be updated
+                if (!in_array(
+                    $session->getStatus(),
+                    [ImmersiveSessionStatus::RUNNING, ImmersiveSessionStatus::UNRESPONSIVE]
+                )) {
                     continue;
                 }
                 /** @var DockerConnection $connection */
@@ -171,8 +174,9 @@ readonly class DockerCommunicationMessageHandler
                 if ($connection->getDockerApiID() === $dockerApi->getId()) {
                     $connection->setVerified(true); // avoid removal of session
                     $session
+                        ->setUpdatedAt(new \DateTime())
                         ->setStatus(ImmersiveSessionStatus::UNRESPONSIVE)
-                        ->setStatusResponse('Docker API '.$dockerApi->getAddress().' down?');
+                        ->setStatusResponse('Docker API '.$dockerApi->getAddress().' down? Error: '.$errorMsg);
                     $em->persist($session);
                 }
             }
@@ -182,11 +186,22 @@ readonly class DockerCommunicationMessageHandler
     /**
      * @throws Exception
      */
-    public function setImmersiveSessionToUnresponsive(DockerApi $dockerApi, string $containerId, array &$context): void
-    {
+    public function setImmersiveSessionToUnresponsive(
+        DockerApi $dockerApi,
+        string $containerId,
+        string $errorMsg,
+        array &$context
+    ): void {
         foreach ($context as $gameSessionId => $gameSession) {
             $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
             foreach ($gameSession['sessions'] as $session) {
+                // only running sessions can become unresponsive, or already unresponsive sessions can be updated
+                if (!in_array(
+                    $session->getStatus(),
+                    [ImmersiveSessionStatus::RUNNING, ImmersiveSessionStatus::UNRESPONSIVE]
+                )) {
+                    continue;
+                }
                 // only running sessions can become unresponsive
                 if ($session->getStatus() != ImmersiveSessionStatus::RUNNING) {
                     continue;
@@ -196,7 +211,11 @@ readonly class DockerCommunicationMessageHandler
                 if ($connection->getDockerApiID() === $dockerApi->getId() &&
                     $connection->getDockerContainerID() === $containerId) {
                     $connection->setVerified(true); // avoid removal of session
-                    $session->setStatus(ImmersiveSessionStatus::UNRESPONSIVE);
+
+                    $session
+                        ->setUpdatedAt(new \DateTime())
+                        ->setStatus(ImmersiveSessionStatus::UNRESPONSIVE)
+                        ->setStatusResponse('Docker container '.$containerId. 'is unresponsive: '.$errorMsg);
                     $em->persist($session);
                 }
             }
@@ -217,7 +236,7 @@ readonly class DockerCommunicationMessageHandler
             } catch (Exception $e) {
                 $this->dockerLogger->error('List immersive sessions failed: '.$e->getMessage());
                 // for all sessions having connections for this docker api set its status to unresponsive
-                $this->setImmersiveSessionsToUnresponsive($dockerApi, $context);
+                $this->setImmersiveSessionsToUnresponsive($dockerApi, $e->getMessage(), $context);
                 continue;
             }
             $this->dockerLogger->info('Found '.count($containers).' immersive sessions');
@@ -230,7 +249,12 @@ readonly class DockerCommunicationMessageHandler
                 } catch (Exception $e) {
                     $this->dockerLogger->error('Inspect immersive session failed: '.$e->getMessage());
                     // for the session having this connection set its status to unresponsive
-                    $this->setImmersiveSessionToUnresponsive($dockerApi, $container['Id'], $context);
+                    $this->setImmersiveSessionToUnresponsive(
+                        $dockerApi,
+                        $container['Id'],
+                        $e->getMessage(),
+                        $context
+                    );
                     continue;
                 }
                 $gameSessionId = $this->extractSessionIdFromEnv($inspectData['Config']['Env']);

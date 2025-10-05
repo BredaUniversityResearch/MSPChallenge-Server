@@ -9,6 +9,7 @@ use App\Domain\Common\EntityEnums\ImmersiveSessionTypeID;
 use App\Repository\SessionAPI\ImmersiveSessionRepository;
 use App\State\ImmersiveSessionProcessor;
 use App\Validator\ImmersiveSessionTypeJsonSchema;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
@@ -115,6 +116,14 @@ class ImmersiveSession
     #[ORM\OneToOne(targetEntity: DockerConnection::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     #[ORM\JoinColumn(name: 'docker_connection_id', referencedColumnName: 'id', nullable: true)]
     private ?DockerConnection $connection = null;
+
+    /**
+     * @var \DateTime|null
+     */
+    #[Groups(['read'])]
+    #[Gedmo\Timestampable(on: 'update')]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    protected $updatedAt;
 
     public function getId(): ?int
     {
