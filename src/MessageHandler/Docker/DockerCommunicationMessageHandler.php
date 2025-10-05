@@ -160,6 +160,7 @@ readonly class DockerCommunicationMessageHandler
     {
         foreach ($context as $gameSessionId => $gameSession) {
             $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
+            /** @var ImmersiveSession $session  */
             foreach ($gameSession['sessions'] as $session) {
                 // only running sessions can become unresponsive
                 if ($session->getStatus() != ImmersiveSessionStatus::RUNNING) {
@@ -169,7 +170,9 @@ readonly class DockerCommunicationMessageHandler
                 $connection = $session->getConnection();
                 if ($connection->getDockerApiID() === $dockerApi->getId()) {
                     $connection->setVerified(true); // avoid removal of session
-                    $session->setStatus(ImmersiveSessionStatus::UNRESPONSIVE);
+                    $session
+                        ->setStatus(ImmersiveSessionStatus::UNRESPONSIVE)
+                        ->setStatusResponse('Docker API '.$dockerApi->getAddress().' down?');
                     $em->persist($session);
                 }
             }
