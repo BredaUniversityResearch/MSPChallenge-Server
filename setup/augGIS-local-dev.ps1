@@ -1,4 +1,4 @@
-param([switch]$elevated, [string]$tag = "latest")
+param([switch]$elevated, [string]$tag = "dev")
 
 function Test-Admin {
     $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
@@ -28,6 +28,11 @@ function IfEmpty {
     return $Value
 }
 
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
+
+# Change to the script's directory
+Set-Location -Path (Split-Path -Parent $MyInvocation.MyCommand.Definition)
+
 # check if docker-compose.override.yml is in the current working directory, if not try to find it in the parent directory
 if (-not (Test-Path "docker-compose.override.yml")) {
     if (Test-Path "..\docker-compose.override.yml") {
@@ -37,8 +42,6 @@ if (-not (Test-Path "docker-compose.override.yml")) {
         exit 1
     }
 }
-
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
 
 if (Test-Path ".env.local") {
     # output content of .env.local
@@ -69,7 +72,7 @@ docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/do
 Set-Content -Path ".env.local" -Value @"
 URL_WEB_SERVER_HOST=$($netAdapter.IPAddress)
 URL_WS_SERVER_HOST=$($netAdapter.IPAddress)
-IMMERSIVE_SESSIONS_DOCKER_HUB_TAG=dev
+IMMERSIVE_SESSIONS_DOCKER_HUB_TAG=$tag
 IMMERSIVE_SESSIONS_HEALTHCHECK_WRITE_MODE=1
 "@
 
