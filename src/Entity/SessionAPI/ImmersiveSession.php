@@ -36,7 +36,6 @@ class ImmersiveSession
     #[Groups(['read', 'write'])]
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "The name field should not be blank.")]
-    #[Assert\NotNull(message: "The name field is required.")]
     private ?string $name = null;
 
     #[Groups(['read', 'write'])]
@@ -50,7 +49,6 @@ class ImmersiveSession
     )]
     #[ORM\Column(enumType: ImmersiveSessionTypeID::class)]
     #[Assert\NotBlank(message: "The type field should not be blank.")]
-    #[Assert\NotNull(message: "The type field is required.")]
     private ImmersiveSessionTypeID $type = ImmersiveSessionTypeID::MR;
 
     #[Groups(['read', 'write'])]

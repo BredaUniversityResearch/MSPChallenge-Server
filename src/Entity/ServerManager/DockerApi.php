@@ -8,6 +8,7 @@ use App\Repository\ServerManager\ImmersiveSessionDockerApiRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Form\Extension\Core\Type as SymfonyFormType;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[AppMappings\Plurals('Docker API', 'Docker APIs')]
 #[ORM\Entity(repositoryClass: ImmersiveSessionDockerApiRepository::class)]
@@ -22,6 +23,7 @@ class DockerApi extends EntityBase
     #[Groups(['read'])]
     #[AppMappings\Property\TableColumn]
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "The address cannot be empty.")]
     #[AppMappings\Property\FormFieldType(
         type: SymfonyFormType\TextType::class,
         options: [
@@ -36,6 +38,7 @@ class DockerApi extends EntityBase
     #[Groups(['read'])]
     #[AppMappings\Property\TableColumn]
     #[ORM\Column]
+    #[Assert\NotBlank(message: "The port cannot be empty.")]
     #[AppMappings\Property\FormFieldType(
         type: SymfonyFormType\TextType::class,
         options: [
@@ -49,6 +52,8 @@ class DockerApi extends EntityBase
 
     #[Groups(['read'])]
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "The scheme cannot be empty.")]
+    #[Assert\Choice(choices: ['http', 'https'], message: 'Set a valid scheme, either: http or https.')]
     #[AppMappings\Property\FormFieldType(
         type: SymfonyFormType\TextType::class,
         options: [
