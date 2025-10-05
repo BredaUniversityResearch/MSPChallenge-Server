@@ -166,6 +166,7 @@ class ImmersiveSessionService
                     'MSP_CHALLENGE_API_BASE_URL_FOR_CLIENT='.WatchdogCommunicationMessageHandler::getSessionAPIBaseUrl(
                         $gameList
                     ),
+                    'IMMERSIVE_SESSION_ID='.$sess->getId(),
                     'IMMERSIVE_SESSION_REGION_COORDS='.json_encode([
                         'region_bottom_left_x' => $sess->getBottomLeftX(),
                         'region_bottom_left_y' => $sess->getBottomLeftY(),
