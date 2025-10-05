@@ -304,7 +304,8 @@ readonly class DockerCommunicationMessageHandler
                         );
                     }
                     $session
-                        ->setStatus(ImmersiveSessionStatus::REMOVED);
+                        ->setStatus(ImmersiveSessionStatus::REMOVED)
+                        ->setStatusResponse(['message' => 'Container is either stopped or removed, removing session']);
                     $em->persist($session);
                 }
             }
@@ -335,31 +336,25 @@ readonly class DockerCommunicationMessageHandler
     {
         foreach ($context as $gameSessionId => $gameSession) {
             foreach ($gameSession['sessions'] as $sessionId => $session) {
-                $createdAt = $session->getCreatedAt();
-                $updatedAt = $session->getUpdatedAt();
-                $bootupTime = (new \DateTime())->getTimestamp() - $updatedAt->getTimestamp();
-                if (
-                    // leave sessions in starting state - allow it to connect
-                    $session->getStatus() == ImmersiveSessionStatus::STARTING &&
-                    // but in-case it was not updated by the message handler, remove it after 30 seconds
-                    !(
-                        $createdAt instanceof \DateTimeInterface &&
-                        $updatedAt instanceof \DateTimeInterface &&
-                        $createdAt == $updatedAt &&
-                        $bootupTime > 30
-                    )
-                ) {
+                if ($session->getConnection()?->isVerified()) {
                     continue;
                 }
-                if ($session->getConnection() === null || !$session->getConnection()->isVerified()) {
-                    $this->dockerLogger->warning(
-                        'Immersive session connection lost, removing it. Session: '.$sessionId.
-                        ', verified: '.($session->getConnection()->isVerified() ? 'yes' : 'no').
-                        ', boot-up time: '.$bootupTime
-                    );
-                    $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
-                    $em->remove($session);
+                // allow unverified sessions in STARTING-state for no more than 30 sec
+                $bootupTime = (new \DateTime())->getTimestamp() - $session->getUpdatedAt()->getTimestamp();
+                if ($session->getStatus() == ImmersiveSessionStatus::STARTING && $bootupTime < 31) {
+                    continue;
                 }
+
+                $this->dockerLogger->warning(
+                    'Immersive session connection lost, removing it. Session: '.$sessionId.
+                    ', verified: '.($session->getConnection()->isVerified() ? 'yes' : 'no').
+                    ', boot-up time: '.$bootupTime
+                );
+                $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
+                $session
+                    ->setStatus(ImmersiveSessionStatus::REMOVED)
+                    ->setStatusResponse(['message' => 'Connection lost, removing session']);
+                $em->persist($session);
             }
         }
     }
