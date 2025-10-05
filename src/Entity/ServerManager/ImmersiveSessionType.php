@@ -9,6 +9,7 @@ use App\Repository\ServerManager\ImmersiveSessionTypeRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Form\Extension\Core\Type as SymfonyFormType;
 use Symfony\Component\Validator\Constraints as Assert;
+
 #[AppMappings\Plurals('Immersive session type', 'Immersive session types')]
 #[ORM\Entity(repositoryClass: ImmersiveSessionTypeRepository::class)]
 class ImmersiveSessionType extends EntityBase
