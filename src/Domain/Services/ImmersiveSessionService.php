@@ -319,7 +319,7 @@ class ImmersiveSessionService
      *     Health?: array{
      *       Status: string,
      *       FailingStreak: int,
-     *       Log?: array{Start: string, End: string, ExitCode: int, Output: string}
+     *       Log?: array{array{Start: string, End: string, ExitCode: int, Output: string}}
      *    }
      *  },
      *  Config: array{Env: array<string>

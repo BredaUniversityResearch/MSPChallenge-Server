@@ -309,7 +309,7 @@ readonly class DockerCommunicationMessageHandler
                     $session->setStatusResponse([
                         'message' => empty($inspectData['State']['Health']['Log']) ?
                             'Health check is unavailable' : 'Last health check log output: '.
-                                $inspectData['State']['Health']['Log']['Output'],
+                                $inspectData['State']['Health']['Log'][0]['Output'],
                         'payload' => $inspectData['State']['Health']['Log'] ?? null
                     ]);
                 }
