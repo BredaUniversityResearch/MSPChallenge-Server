@@ -156,6 +156,7 @@ class ImmersiveSessionService
                     ]
                 ],
                 'Env' => [
+                    'DOCKER=1',
                     'APP_ENV='.($_ENV['APP_ENV'] ?? 'prod'),
                     'HEALTHCHECK_WRITER_MODE='.($_ENV['IMMERSIVE_SESSIONS_HEALTHCHECK_WRITE_MODE'] ?? 0),
                     'MSP_CHALLENGE_SESSION_ID='.$gameSessionId,
