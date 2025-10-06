@@ -29,13 +29,15 @@ class ApiResponseWrapperListener
             return;
         }
 
+        $payload = $hasJsonContentType ?
+            json_decode($inner->getContent(), true) : $inner->getContent();
+        $payload = empty($payload) ? null : $payload; // do not allow empty arrays or empty strings
         if ($inner->getStatusCode() >= 200 && $inner->getStatusCode() < 300) {
             $event->setResponse(new JsonResponse(
                 [
                     'message' => ($inner instanceof MessageJsonResponse) ? $inner->getMessage() : null,
                     'success' => true,
-                    'payload' => $hasJsonContentType ?
-                        json_decode($inner->getContent(), true) : $inner->getContent()
+                    'payload' => $payload
                 ],
                 $inner->getStatusCode()
             ));
@@ -51,8 +53,7 @@ class ApiResponseWrapperListener
                             ($inner instanceof MessageJsonResponse)
                         ) ?
                         $inner->getMessage() : null) ?? Response::$statusTexts[$inner->getStatusCode()],
-                    'payload' => $hasJsonContentType ?
-                        json_decode($inner->getContent(), true) : $inner->getContent()
+                    'payload' => $payload
                 ],
                 $inner->getStatusCode()
             ));
