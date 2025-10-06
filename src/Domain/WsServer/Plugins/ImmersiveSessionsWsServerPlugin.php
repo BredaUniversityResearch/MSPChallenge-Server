@@ -130,10 +130,7 @@ class ImmersiveSessionsWsServerPlugin extends Plugin
             ->setType(ImmersiveSessionTypeID::from($payload['type']))
             ->setMonth($payload['month'])
             ->setStatus(ImmersiveSessionStatus::from($payload['status']))
-            ->setStatusResponse([
-                'message' => 'Last health check status log',
-                'payload' => $payload['status_response']
-            ])
+            ->setStatusResponse($payload['status_response'])
             ->setBottomLeftX($payload['bottom_left_x'])
             ->setBottomLeftY($payload['bottom_left_y'])
             ->setTopRightX($payload['top_right_x'])

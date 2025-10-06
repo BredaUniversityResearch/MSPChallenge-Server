@@ -305,10 +305,12 @@ readonly class DockerCommunicationMessageHandler
                         'healthy' => ImmersiveSessionStatus::RUNNING,
                         default => ImmersiveSessionStatus::UNRESPONSIVE // "none" "unhealthy"
                     };
-                    $session->setStatusResponse(
-                        ($inspectData['State']['Health']['Log'] ?? []) ?:
-                            ['message' => 'Health check is unavailable']
-                    );
+                    $session->setStatusResponse([
+                        'message' => empty($inspectData['State']['Health']['Log']) ?
+                            'Health check is unavailable' : 'Last health check log output: '.
+                                ($inspectData['State']['Health']['Log']['Output'] ?? '-'),
+                        'payload' => $inspectData['State']['Health']['Log'] ?? null
+                    ]);
                 }
                 $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
                 $session
