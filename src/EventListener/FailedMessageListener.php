@@ -36,9 +36,8 @@ readonly class FailedMessageListener implements EventSubscriberInterface
             $em = $this->connectionManager->getGameSessionEntityManager($message->getGameSessionId());
             $immersiveSession = $em->find(ImmersiveSession::class, $immersiveSessionId);
             $immersiveSession->setStatusResponse([
-                'message' => 'Create immersive session container failed after max retries. ' .
-                    'Removing session.',
-                'error' => $event->getThrowable()->getMessage()
+                'message' => 'Create immersive session container failed after max retries. Error: ' .
+                    $event->getThrowable()->getMessage() . '. Removing session.'
             ]);
             $em->remove($immersiveSession);
         }

@@ -96,8 +96,8 @@ readonly class DockerCommunicationMessageHandler
                     );
                 } catch (Exception $e) {
                     $immersiveSession->setStatusResponse([
-                        'message' => 'Create immersive session container failed, will retry',
-                        'error' => $e->getMessage()
+                        'message' => 'Create immersive session container failed. Error: '.$e->getMessage().
+                            '. Will retry'
                     ]);
                     $em->persist($immersiveSession);
                     $this->dockerLogger->warning(
@@ -176,7 +176,9 @@ readonly class DockerCommunicationMessageHandler
                     $session
                         ->setUpdatedAt(new \DateTime())
                         ->setStatus(ImmersiveSessionStatus::UNRESPONSIVE)
-                        ->setStatusResponse('Docker API '.$dockerApi->getAddress().' down? Error: '.$errorMsg);
+                        ->setStatusResponse([
+                            'message' => 'Docker API '.$dockerApi->getAddress().' down? Error: '.$errorMsg
+                        ]);
                     $em->persist($session);
                 }
             }
@@ -215,7 +217,9 @@ readonly class DockerCommunicationMessageHandler
                     $session
                         ->setUpdatedAt(new \DateTime())
                         ->setStatus(ImmersiveSessionStatus::UNRESPONSIVE)
-                        ->setStatusResponse('Docker container '.$containerId. 'is unresponsive: '.$errorMsg);
+                        ->setStatusResponse(
+                            ['message' => 'Docker container '.$containerId. 'is unresponsive: '.$errorMsg]
+                        );
                     $em->persist($session);
                 }
             }
