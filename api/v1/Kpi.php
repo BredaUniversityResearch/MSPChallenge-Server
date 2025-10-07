@@ -7,6 +7,8 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Kpi extends Base
 {
+    public const ALLOWED_KPI_TYPES = ['ECOLOGY', 'ENERGY', 'SHIPPING', 'EXTERNAL'];
+
     /**
      * called from MEL
      * @apiGroup KPI
@@ -64,9 +66,9 @@ class Kpi extends Base
         string $kpiUnit,
         int $kpiCountry = -1
     ): int {
-        if (!in_array(strtoupper($kpiType), array('ECOLOGY', 'ENERGY', 'SHIPPING', 'EXTERNAL'))) {
+        if (!in_array(strtoupper($kpiType), self::ALLOWED_KPI_TYPES)) {
             throw new BadRequestHttpException('Invalid KPI type: '.$kpiType.
-                '. Allowed values are ECOLOGY, ENERGY, SHIPPING.');
+                '. Allowed values are '.implode(',', self::ALLOWED_KPI_TYPES).'.');
         }
         $kpiType = strtoupper($kpiType);
         return (int)$this->getDatabase()->query(
