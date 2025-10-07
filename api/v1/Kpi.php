@@ -68,7 +68,7 @@ class Kpi extends Base
     ): int {
         if (!in_array(strtoupper($kpiType), self::ALLOWED_KPI_TYPES)) {
             throw new BadRequestHttpException('Invalid KPI type: '.$kpiType.
-                '. Allowed values are '.implode(',', self::ALLOWED_KPI_TYPES).'.');
+                '. Allowed values are: '.implode(',', self::ALLOWED_KPI_TYPES).'.');
         }
         $kpiType = strtoupper($kpiType);
         return (int)$this->getDatabase()->query(
