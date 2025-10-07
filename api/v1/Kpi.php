@@ -64,10 +64,11 @@ class Kpi extends Base
         string $kpiUnit,
         int $kpiCountry = -1
     ): int {
-        if (!in_array($kpiType, array('ECOLOGY', 'ENERGY', 'SHIPPING', 'EXTERNAL'))) {
+        if (!in_array(strtoupper($kpiType), array('ECOLOGY', 'ENERGY', 'SHIPPING', 'EXTERNAL'))) {
             throw new BadRequestHttpException('Invalid KPI type: '.$kpiType.
                 '. Allowed values are ECOLOGY, ENERGY, SHIPPING.');
         }
+        $kpiType = strtoupper($kpiType);
         return (int)$this->getDatabase()->query(
             "
             INSERT INTO kpi (kpi_name, kpi_value, kpi_month, kpi_type, kpi_lastupdate, kpi_unit, kpi_country_id) 
