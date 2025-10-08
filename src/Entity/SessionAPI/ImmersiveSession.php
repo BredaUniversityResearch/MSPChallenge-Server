@@ -4,6 +4,7 @@ namespace App\Entity\SessionAPI;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\OpenApi\Model\Operation;
 use App\Domain\Common\EntityEnums\ImmersiveSessionStatus;
 use App\Domain\Common\EntityEnums\ImmersiveSessionTypeID;
 use App\Repository\SessionAPI\ImmersiveSessionRepository;
@@ -21,6 +22,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ApiResource(
     normalizationContext: ['groups' => ['read']],
     denormalizationContext: ['groups' => ['write']],
+    openapi: new Operation(
+        tags: ['✨ Immersive Session']
+    ),
     processor: ImmersiveSessionProcessor::class
 )]
 #[Gedmo\SoftDeleteable(fieldName: 'deletedAt', timeAware: false, hardDelete: false)]

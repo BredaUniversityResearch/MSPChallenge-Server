@@ -2,16 +2,30 @@
 
 namespace App\Entity\SessionAPI;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\OpenApi\Model\Operation;
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Repository\SessionAPI\LayerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: LayerRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get()
+    ],
+    normalizationContext: ['groups' => ['read']],
+    openapi: new Operation(
+        tags: ['✨ Layer']
+    )
+)]
 class Layer
 {
+    #[Groups(['read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, length: 11)]
@@ -24,57 +38,75 @@ class Layer
     #[ORM\JoinColumn(name: 'layer_original_id', referencedColumnName: 'layer_id')]
     private ?Layer $originalLayer = null;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
     private ?int $layerActive = 1;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
     private ?int $layerSelectable = 1;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
     private ?int $layerActiveOnStart = 0;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
     private ?int $layerToggleable = 1;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
     private ?int $layerEditable = 1;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 125, options: ['default' => ''])]
     private ?string $layerName = '';
 
+    #[Groups(['read'])]
     #[ORM\Column(name: 'layer_geotype', length: 255, nullable: true, enumType: LayerGeoType::class)]
     private ?LayerGeoType $layerGeoType = null;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => ''])]
     private ?string $layerShort = '';
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => ''])]
     private ?string $layerGroup = '';
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 512, options: ['default' => ''])]
     private ?string $layerTooltip = '';
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => 'management'])]
     private ?string $layerCategory = 'management';
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => 'aquaculture'])]
     private ?string $layerSubcategory = 'aquaculture';
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => 'Miscellaneous'])]
     private ?string $layerKpiCategory = 'Miscellaneous';
 
+    #[Groups(['read'])]
     #[ORM\Column(type: 'json_document', nullable: true)]
     private mixed $layerType = null;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 3, options: ['default' => 1])]
     private ?int $layerDepth = 1;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: 'json_document', nullable: true)]
     private mixed $layerInfoProperties = null;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 1024, nullable: true)]
     private ?string $layerInformation = null;
 
+    #[Groups(['read'])]
     #[ORM\Column(
         type: 'json_document',
         length: 1024,
@@ -83,6 +115,7 @@ class Layer
     )]
     private array $layerTextInfo = [];
 
+    #[Groups(['read'])]
     #[ORM\Column(
         type: 'json_document',
         length: 255,
@@ -97,36 +130,47 @@ class Layer
         ['state' => 'DISMANTLE', 'time' => 2],
     ];
 
+    #[Groups(['read'])]
     #[ORM\Column(type: 'json_document', length: 512, nullable: true)]
     private mixed $layerRaster = null;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 100])]
     private ?float $layerLastupdate = 100;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 4, options: ['default' => 0])]
     private ?int $layerMelupdate = 0;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 512, nullable: true)]
     private ?string $layerEditingType = null;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 512, options: ['default' => 'Default'])]
     private ?string $layerSpecialEntityType = 'Default';
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
     private ?int $layerGreen = 0;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
     private ?int $layerMelupdateConstruction = 0;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 0])]
     private ?float $layerFilecreationtime = 0;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     private ?string $layerMedia = null;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
     private ?float $layerEntityValueMax = null;
 
+    #[Groups(['read'])]
     #[ORM\Column(type: 'json_document', length: 1024, nullable: true)]
     private mixed $layerTags = null;
 
@@ -219,6 +263,12 @@ class Layer
         }
 
         return $this;
+    }
+
+    #[Groups(['read'])]
+    public function getOriginalLayerId(): ?int
+    {
+        return $this->originalLayer?->getLayerId();
     }
 
     public function getOriginalLayer(): ?Layer
