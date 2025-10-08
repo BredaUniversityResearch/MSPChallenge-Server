@@ -111,9 +111,10 @@ class Layer
         type: 'json_document',
         length: 1024,
         nullable: false,
-        options: ['default' => '{}', 'json_encode_options' => JSON_FORCE_OBJECT]
+        options: ['default' => '{}']
     )]
-    private array $layerTextInfo = [];
+    // !! assign a null default value such that $reflectionClass->getDefaultProperties() returns this property...
+    private object|array|null $layerTextInfo = null;
 
     #[Groups(['read'])]
     #[ORM\Column(
@@ -227,6 +228,7 @@ class Layer
 
     public function __construct()
     {
+        $this->layerTextInfo = (object)[];
         $this->derivedLayer = new ArrayCollection();
         $this->geometry = new ArrayCollection();
         $this->restrictionStart = new ArrayCollection();
@@ -615,14 +617,14 @@ class Layer
         return $this;
     }
 
-    public function getLayerTextInfo(): array
+    public function getLayerTextInfo(): object
     {
-        return $this->layerTextInfo;
+        return (object)$this->layerTextInfo;
     }
 
-    public function setLayerTextInfo(array $layerTextInfo): static
+    public function setLayerTextInfo(object|array $layerTextInfo): static
     {
-        $this->layerTextInfo = $layerTextInfo;
+        $this->layerTextInfo = (object)$layerTextInfo;
         return $this;
     }
 

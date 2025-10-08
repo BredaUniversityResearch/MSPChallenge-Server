@@ -11,7 +11,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use ReflectionException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
@@ -138,7 +137,7 @@ class LayerRepository extends EntityRepository
             null,
             (new NormalizerContextBuilder(Layer::class))->withCallbacks([
                 'layerGeoType' => fn($value) => LayerGeoType::from($value),
-                'layerTextInfo' => fn($value) => $value ?? []
+                'layerTextInfo' => fn($value) => (object)$value
             ])->toArray()
         );
     }
@@ -151,7 +150,7 @@ class LayerRepository extends EntityRepository
         if (is_null($layer)) {
             return [];
         }
-        return $this->getSerializer()->normalize(
+        $result = $this->getSerializer()->normalize(
             $layer,
             null,
             (new NormalizerContextBuilder(Layer::class))
@@ -166,6 +165,9 @@ class LayerRepository extends EntityRepository
                     'layerGeoType' => fn(?LayerGeoType $value) => $value?->value
                 ])->toArray()
         );
+        // post fix
+        $result['layer_text_info'] = (object)$result['layer_text_info'];
+        return $result;
     }
 
     private function getNormalizer(): ObjectNormalizer

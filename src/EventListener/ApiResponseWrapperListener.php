@@ -30,7 +30,7 @@ class ApiResponseWrapperListener
         }
 
         $payload = $hasJsonContentType ?
-            json_decode($inner->getContent(), true) : $inner->getContent();
+            json_decode($inner->getContent()) : $inner->getContent();
         $payload = empty($payload) ? null : $payload; // do not allow empty arrays or empty strings
         if ($inner->getStatusCode() >= 200 && $inner->getStatusCode() < 300) {
             $event->setResponse(new JsonResponse(
