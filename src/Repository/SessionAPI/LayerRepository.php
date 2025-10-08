@@ -132,9 +132,7 @@ class LayerRepository extends EntityRepository
         // fix name inconsistencies
         $layerData['layer_geo_type'] = $layerData['layer_geotype'];
         unset($layerData['layer_geotype']);
-        $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
-        $this->serializer ??= new Serializer([$this->normalizer]);
-        return $this->serializer->denormalize(
+        return $this->getSerializer()->denormalize(
             $layerData,
             Layer::class,
             null,
@@ -153,14 +151,7 @@ class LayerRepository extends EntityRepository
         if (is_null($layer)) {
             return [];
         }
-        $normalizer ??= new ObjectNormalizer(null, new EntityPropToDbColumnNameConvertor(
-            customNameMapping: [
-                'layerGeoType' => 'layer_geotype',
-                'originalLayer' => 'layer_original_id'
-            ]
-        ));
-        $serializer ??= new Serializer([$normalizer]);
-        return $serializer->normalize(
+        return $this->getSerializer()->normalize(
             $layer,
             null,
             (new NormalizerContextBuilder(Layer::class))
@@ -175,5 +166,22 @@ class LayerRepository extends EntityRepository
                     'layerGeoType' => fn(?LayerGeoType $value) => $value?->value
                 ])->toArray()
         );
+    }
+
+    private function getNormalizer(): ObjectNormalizer
+    {
+        $this->normalizer ??= new ObjectNormalizer(null, new EntityPropToDbColumnNameConvertor(
+            customNameMapping: [
+                'layerGeoType' => 'layer_geotype',
+                'originalLayer' => 'layer_original_id'
+            ]
+        ));
+        return $this->normalizer;
+    }
+
+    private function getSerializer(): Serializer
+    {
+        $this->serializer ??= new Serializer([$this->getNormalizer()]);
+        return $this->serializer;
     }
 }
