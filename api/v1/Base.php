@@ -75,6 +75,9 @@ abstract class Base extends CommonBase
                 "type" => $d['type'],
                 "country" => ($d['country'] == null) ? -1 : $d['country']
             );
+            if (array_key_exists('implementation_time', $d)) {
+                $geom['implementation_time'] = $d['implementation_time'];
+            }
 
             if (isset($d['active'])) {
                 $geom["active"] = $d['active'];
