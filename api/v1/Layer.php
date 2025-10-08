@@ -778,11 +778,10 @@ class Layer extends Base
         return file_get_contents($filePath);
     }
 
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-
     /**
      * @throws Exception|ExceptionInterface
      */
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function GetMetaForLayerById(int $layerId): array
     {
         /** @var LayerRepository $repo */
