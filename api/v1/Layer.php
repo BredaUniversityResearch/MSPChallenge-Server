@@ -176,27 +176,28 @@ class Layer extends Base
             throw new Exception("Not a vector layer.");
         }
             
-        $data = $this->getDatabase()->query("
-                SELECT g2.* FROM (SELECT
-                    g.geometry_id as id, 
-                    IFNULL(MAX(p.plan_gametime), -1) as implementation_time,
-					g.geometry_geometry as geometry, 
-					g.geometry_country_id as country,
-					g.geometry_FID as FID,
-					g.geometry_data as data,
-					g.geometry_layer_id as layer,
-					g.geometry_subtractive as subtractive,
-					g.geometry_type as type,
-					g.geometry_persistent as persistent,
-					g.geometry_mspid as mspid,
-					g.geometry_active as active
-				FROM layer l
-				LEFT JOIN geometry g ON l.layer_id=g.geometry_layer_id
-                LEFT JOIN plan_layer pl ON pl.plan_layer_layer_id = l.layer_id
-                LEFT JOIN plan p ON p.plan_id = pl.plan_layer_plan_id
-				WHERE l.layer_id = ?
-				GROUP BY g.geometry_id) g2
-				ORDER BY g2.FID, g2.subtractive",
+        $data = $this->getDatabase()->query(
+            "
+            SELECT g2.* FROM (SELECT
+                g.geometry_id as id, 
+                IFNULL(MAX(p.plan_gametime), -1) as implementation_time,
+                g.geometry_geometry as geometry, 
+                g.geometry_country_id as country,
+                g.geometry_FID as FID,
+                g.geometry_data as data,
+                g.geometry_layer_id as layer,
+                g.geometry_subtractive as subtractive,
+                g.geometry_type as type,
+                g.geometry_persistent as persistent,
+                g.geometry_mspid as mspid,
+                g.geometry_active as active
+            FROM layer l
+            LEFT JOIN geometry g ON l.layer_id=g.geometry_layer_id
+            LEFT JOIN plan_layer pl ON pl.plan_layer_layer_id = l.layer_id
+            LEFT JOIN plan p ON p.plan_id = pl.plan_layer_plan_id
+            WHERE l.layer_id = ?
+            GROUP BY g.geometry_id) g2
+            ORDER BY g2.FID, g2.subtractive",
             array($layer_id)
         );
             

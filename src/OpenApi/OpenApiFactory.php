@@ -30,4 +30,3 @@ readonly class OpenApiFactory implements OpenApiFactoryInterface
         );
     }
 }
-// \ApiPlatform\OpenApi\Model\Components \ArrayObject
