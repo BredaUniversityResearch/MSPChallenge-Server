@@ -2,6 +2,7 @@
 
 namespace App\Domain\Common;
 
+use InvalidArgumentException;
 use ReflectionException;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
@@ -9,7 +10,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
  * This class is context array builder to be used when calling Symfony's Serializer (de)normalize methods.
  *
  * Note that from Symfony 7, the Serializer component will have a context builder that will allow you to define
- *   the context, see: https://github.com/symfony/serializer/commit/c70fee8c625be80d4829a10cd7db299a0e018c26
+ *   the context, see: https://github.com/symfony/serializer/blob/c70fee8c625be80d4829a10cd7db299a0e018c26/Context/Normalizer/AbstractNormalizerContextBuilder.php
  * So, this class uses bits and pieces of Symfony 7 Serializer code, until we can upgrade to Symfony 7.
  *
  * Additionally, given a class, it validates if the fields in the context array are valid fields in the class.
@@ -34,6 +35,36 @@ class NormalizerContextBuilder
     public function toArray(): array
     {
         return $this->context;
+    }
+
+
+    /**
+     * Configures attributes to (de)normalize.
+     *
+     * For nested structures, this list needs to reflect the object tree.
+     *
+     * Eg: ['foo', 'bar', 'object' => ['baz']]
+     *
+     * @param array<string|array>|null $attributes
+     *
+     * @throws InvalidArgumentException
+     */
+    public function withAttributes(?array $attributes): static
+    {
+        $it = new \RecursiveIteratorIterator(
+            new \RecursiveArrayIterator($attributes ?? []),
+            \RecursiveIteratorIterator::LEAVES_ONLY
+        );
+
+        foreach ($it as $attribute) {
+            if (!\is_string($attribute)) {
+                throw new InvalidArgumentException(
+                    sprintf('Each attribute must be a string, "%s" given.', get_debug_type($attribute))
+                );
+            }
+        }
+
+        return $this->with(AbstractNormalizer::ATTRIBUTES, $attributes);
     }
 
     /**

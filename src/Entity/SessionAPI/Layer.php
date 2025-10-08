@@ -63,34 +63,42 @@ class Layer
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => 'Miscellaneous'])]
     private ?string $layerKpiCategory = 'Miscellaneous';
 
-    #[ORM\Column(type: Types::STRING, nullable: true)]
-    private ?string $layerType = null;
+    #[ORM\Column(type: 'json_document', nullable: true)]
+    private mixed $layerType = null;
 
     #[ORM\Column(type: Types::SMALLINT, length: 3, options: ['default' => 1])]
     private ?int $layerDepth = 1;
 
-    #[ORM\Column(type: Types::STRING, nullable: true)]
-    private ?string $layerInfoProperties = null;
+    #[ORM\Column(type: 'json_document', nullable: true)]
+    private mixed $layerInfoProperties = null;
 
     #[ORM\Column(type: Types::STRING, length: 1024, nullable: true)]
     private ?string $layerInformation = null;
 
-    #[ORM\Column(type: Types::STRING, length: 1024, options: ['default' => '{}'])]
-    private ?string $layerTextInfo = '{}';
+    #[ORM\Column(
+        type: 'json_document',
+        length: 1024,
+        nullable: false,
+        options: ['default' => '{}', 'json_encode_options' => JSON_FORCE_OBJECT]
+    )]
+    private array $layerTextInfo = [];
 
     #[ORM\Column(
-        type: Types::STRING,
+        type: 'json_document',
         length: 255,
         nullable: true,
         options: [
             'default' => '[{"state":"ASSEMBLY","time":2},{"state":"ACTIVE","time":10},{"state":"DISMANTLE","time":2}]'
         ]
     )]
-    private ?string $layerStates =
-        '[{"state":"ASSEMBLY","time":2},{"state":"ACTIVE","time":10},{"state":"DISMANTLE","time":2}]';
+    private array $layerStates = [
+        ['state' => 'ASSEMBLY', 'time' => 2],
+        ['state' => 'ACTIVE', 'time' => 10],
+        ['state' => 'DISMANTLE', 'time' => 2],
+    ];
 
-    #[ORM\Column(type: Types::STRING, length: 512, nullable: true)]
-    private ?string $layerRaster = null;
+    #[ORM\Column(type: 'json_document', length: 512, nullable: true)]
+    private mixed $layerRaster = null;
 
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 100])]
     private ?float $layerLastupdate = 100;
@@ -119,8 +127,8 @@ class Layer
     #[ORM\Column(type: Types::FLOAT, nullable: true)]
     private ?float $layerEntityValueMax = null;
 
-    #[ORM\Column(type: Types::STRING, length: 1024, nullable: true)]
-    private ?string $layerTags = null;
+    #[ORM\Column(type: 'json_document', length: 1024, nullable: true)]
+    private mixed $layerTags = null;
 
     #[ORM\OneToMany(mappedBy: 'layer', targetEntity: Geometry::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $geometry;
@@ -191,7 +199,7 @@ class Layer
         return $this->derivedLayer;
     }
 
-    public function addDerivedLayer(Layer $derivedLayer): Layer
+    public function addDerivedLayer(Layer $derivedLayer): static
     {
         if (!$this->derivedLayer->contains($derivedLayer)) {
             $this->derivedLayer->add($derivedLayer);
@@ -201,7 +209,7 @@ class Layer
         return $this;
     }
 
-    public function removeDerivedLayer(Layer $derivedLayer): Layer
+    public function removeDerivedLayer(Layer $derivedLayer): static
     {
         if ($this->derivedLayer->removeElement($derivedLayer)) {
             // set the owning side to null (unless already changed)
@@ -218,7 +226,7 @@ class Layer
         return $this->originalLayer;
     }
 
-    public function setOriginalLayer(?Layer $originalLayer): Layer
+    public function setOriginalLayer(?Layer $originalLayer): static
     {
         $this->originalLayer = $originalLayer;
         return $this;
@@ -229,7 +237,7 @@ class Layer
         return $this->layerGeometryWithGeneratedMspids;
     }
 
-    public function isGeometryWithGeneratedMspids(): Layer
+    public function isGeometryWithGeneratedMspids(): static
     {
         $this->layerGeometryWithGeneratedMspids = true;
         return $this;
@@ -240,7 +248,7 @@ class Layer
         return $this->layerWidth;
     }
 
-    public function setLayerWidth(?int $layerWidth): Layer
+    public function setLayerWidth(?int $layerWidth): static
     {
         $this->layerWidth = $layerWidth;
         return $this;
@@ -251,7 +259,7 @@ class Layer
         return $this->layerHeight;
     }
 
-    public function setLayerHeight(?int $layerHeight): Layer
+    public function setLayerHeight(?int $layerHeight): static
     {
         $this->layerHeight = $layerHeight;
         return $this;
@@ -262,7 +270,7 @@ class Layer
         return $this->layerRasterMaterial;
     }
 
-    public function setLayerRasterMaterial(?string $layerRasterMaterial): Layer
+    public function setLayerRasterMaterial(?string $layerRasterMaterial): static
     {
         $this->layerRasterMaterial = $layerRasterMaterial;
         return $this;
@@ -273,7 +281,7 @@ class Layer
         return $this->layerRasterFilterMode;
     }
 
-    public function setLayerRasterFilterMode(?bool $layerRasterFilterMode): Layer
+    public function setLayerRasterFilterMode(?bool $layerRasterFilterMode): static
     {
         $this->layerRasterFilterMode = $layerRasterFilterMode;
         return $this;
@@ -284,7 +292,7 @@ class Layer
         return $this->layerRasterColorInterpolation;
     }
 
-    public function setLayerRasterColorInterpolation(?bool $layerRasterColorInterpolation): Layer
+    public function setLayerRasterColorInterpolation(?bool $layerRasterColorInterpolation): static
     {
         $this->layerRasterColorInterpolation = $layerRasterColorInterpolation;
         return $this;
@@ -295,7 +303,7 @@ class Layer
         return $this->layerRasterPattern;
     }
 
-    public function setLayerRasterPattern(?string $layerRasterPattern): Layer
+    public function setLayerRasterPattern(?string $layerRasterPattern): static
     {
         $this->layerRasterPattern = $layerRasterPattern;
         return $this;
@@ -306,7 +314,7 @@ class Layer
         return $this->layerRasterMinimumValueCutoff;
     }
 
-    public function setLayerRasterMinimumValueCutoff(?float $layerRasterMinimumValueCutoff): Layer
+    public function setLayerRasterMinimumValueCutoff(?float $layerRasterMinimumValueCutoff): static
     {
         $this->layerRasterMinimumValueCutoff = $layerRasterMinimumValueCutoff;
         return $this;
@@ -317,7 +325,7 @@ class Layer
         return $this->layerRasterURL;
     }
 
-    public function setLayerRasterURL(?string $layerRasterURL): Layer
+    public function setLayerRasterURL(?string $layerRasterURL): static
     {
         $this->layerRasterURL = $layerRasterURL;
         return $this;
@@ -328,7 +336,7 @@ class Layer
         return $this->layerRasterBoundingbox;
     }
 
-    public function setLayerRasterBoundingbox(?array $layerRasterBoundingbox): Layer
+    public function setLayerRasterBoundingbox(?array $layerRasterBoundingbox): static
     {
         $this->layerRasterBoundingbox = $layerRasterBoundingbox;
         return $this;
@@ -339,7 +347,7 @@ class Layer
         return $this->layerDownloadFromGeoserver;
     }
 
-    public function setLayerDownloadFromGeoserver(?bool $layerDownloadFromGeoserver): Layer
+    public function setLayerDownloadFromGeoserver(?bool $layerDownloadFromGeoserver): static
     {
         $this->layerDownloadFromGeoserver = $layerDownloadFromGeoserver;
         return $this;
@@ -350,7 +358,7 @@ class Layer
         return $this->layerPropertyAsType;
     }
 
-    public function setLayerPropertyAsType(?string $layerPropertyAsType): Layer
+    public function setLayerPropertyAsType(?string $layerPropertyAsType): static
     {
         $this->layerPropertyAsType = $layerPropertyAsType;
         return $this;
@@ -361,7 +369,7 @@ class Layer
         return $this->layerId;
     }
 
-    public function setLayerId(?int $layerId): Layer
+    public function setLayerId(?int $layerId): static
     {
         $this->layerId = $layerId;
         return $this;
@@ -372,7 +380,7 @@ class Layer
         return $this->layerActive;
     }
 
-    public function setLayerActive(?int $layerActive): Layer
+    public function setLayerActive(?int $layerActive): static
     {
         $this->layerActive = $layerActive;
         return $this;
@@ -383,7 +391,7 @@ class Layer
         return $this->layerSelectable;
     }
 
-    public function setLayerSelectable(?int $layerSelectable): Layer
+    public function setLayerSelectable(?int $layerSelectable): static
     {
         $this->layerSelectable = $layerSelectable;
         return $this;
@@ -394,7 +402,7 @@ class Layer
         return $this->layerActiveOnStart;
     }
 
-    public function setLayerActiveOnStart(?int $layerActiveOnStart): Layer
+    public function setLayerActiveOnStart(?int $layerActiveOnStart): static
     {
         $this->layerActiveOnStart = $layerActiveOnStart;
         return $this;
@@ -405,7 +413,7 @@ class Layer
         return $this->layerToggleable;
     }
 
-    public function setLayerToggleable(?int $layerToggleable): Layer
+    public function setLayerToggleable(?int $layerToggleable): static
     {
         $this->layerToggleable = $layerToggleable;
         return $this;
@@ -416,7 +424,7 @@ class Layer
         return $this->layerEditable;
     }
 
-    public function setLayerEditable(?int $layerEditable): Layer
+    public function setLayerEditable(?int $layerEditable): static
     {
         $this->layerEditable = $layerEditable;
         return $this;
@@ -427,7 +435,7 @@ class Layer
         return $this->layerName;
     }
 
-    public function setLayerName(?string $layerName): Layer
+    public function setLayerName(?string $layerName): static
     {
         $this->layerName = $layerName;
         return $this;
@@ -438,7 +446,7 @@ class Layer
         return $this->layerGeoType;
     }
 
-    public function setLayerGeoType(?LayerGeoType $layerGeoType): Layer
+    public function setLayerGeoType(?LayerGeoType $layerGeoType): static
     {
         $this->layerGeoType = $layerGeoType;
         return $this;
@@ -449,7 +457,7 @@ class Layer
         return $this->layerShort;
     }
 
-    public function setLayerShort(?string $layerShort): Layer
+    public function setLayerShort(?string $layerShort): static
     {
         $this->layerShort = $layerShort;
         return $this;
@@ -460,7 +468,7 @@ class Layer
         return $this->layerGroup;
     }
 
-    public function setLayerGroup(?string $layerGroup): Layer
+    public function setLayerGroup(?string $layerGroup): static
     {
         $this->layerGroup = $layerGroup;
         return $this;
@@ -471,7 +479,7 @@ class Layer
         return $this->layerTooltip;
     }
 
-    public function setLayerTooltip(?string $layerTooltip): Layer
+    public function setLayerTooltip(?string $layerTooltip): static
     {
         if (is_null($layerTooltip)) {
             $layerTooltip = "";
@@ -485,7 +493,7 @@ class Layer
         return $this->layerCategory;
     }
 
-    public function setLayerCategory(?string $layerCategory): Layer
+    public function setLayerCategory(?string $layerCategory): static
     {
         $this->layerCategory = $layerCategory;
         return $this;
@@ -496,7 +504,7 @@ class Layer
         return $this->layerSubcategory;
     }
 
-    public function setLayerSubcategory(?string $layerSubcategory): Layer
+    public function setLayerSubcategory(?string $layerSubcategory): static
     {
         $this->layerSubcategory = $layerSubcategory;
         return $this;
@@ -507,22 +515,19 @@ class Layer
         return $this->layerKpiCategory;
     }
 
-    public function setLayerKpiCategory(?string $layerKpiCategory): Layer
+    public function setLayerKpiCategory(?string $layerKpiCategory): static
     {
         $this->layerKpiCategory = $layerKpiCategory;
         return $this;
     }
 
-    public function getLayerType(): ?array
+    public function getLayerType(): mixed
     {
-        return json_decode($this->layerType, true);
+        return $this->layerType;
     }
 
-    public function setLayerType(string|array|null $layerType): Layer
+    public function setLayerType(mixed $layerType): static
     {
-        if (is_array($layerType)) {
-            $layerType = json_encode($layerType);
-        }
         $this->layerType = $layerType;
         return $this;
     }
@@ -532,22 +537,19 @@ class Layer
         return $this->layerDepth;
     }
 
-    public function setLayerDepth(?int $layerDepth): Layer
+    public function setLayerDepth(?int $layerDepth): static
     {
         $this->layerDepth = $layerDepth;
         return $this;
     }
 
-    public function getLayerInfoProperties(): ?string
+    public function getLayerInfoProperties(): mixed
     {
         return $this->layerInfoProperties;
     }
 
-    public function setLayerInfoProperties(string|array|null $layerInfoProperties): Layer
+    public function setLayerInfoProperties(mixed $layerInfoProperties): static
     {
-        if (is_array($layerInfoProperties)) {
-            $layerInfoProperties = json_encode($layerInfoProperties);
-        }
         $this->layerInfoProperties = $layerInfoProperties;
         return $this;
     }
@@ -557,68 +559,54 @@ class Layer
         return $this->layerInformation;
     }
 
-    public function setLayerInformation(?string $layerInformation): Layer
+    public function setLayerInformation(?string $layerInformation): static
     {
         $this->layerInformation = $layerInformation;
         return $this;
     }
 
-    public function getLayerTextInfo(): ?string
+    public function getLayerTextInfo(): array
     {
         return $this->layerTextInfo;
     }
 
-    public function setLayerTextInfo(string|array|null $layerTextInfo): Layer
+    public function setLayerTextInfo(array $layerTextInfo): static
     {
-        if (is_null($layerTextInfo)) {
-            $layerTextInfo = "";
-        }
-        if (is_array($layerTextInfo)) {
-            $layerTextInfo = json_encode($layerTextInfo, JSON_FORCE_OBJECT);
-        }
         $this->layerTextInfo = $layerTextInfo;
         return $this;
     }
 
-    public function getLayerStates(): ?array
+    public function getLayerStates(): mixed
     {
-        return json_decode($this->layerStates, true);
+        return $this->layerStates;
     }
 
-    public function setLayerStates(string|array|null $layerStates): Layer
+    public function setLayerStates(mixed $layerStates): static
     {
-        if (is_array($layerStates)) {
-            $layerStates = json_encode($layerStates);
-        }
         $this->layerStates = $layerStates;
         return $this;
     }
 
-    public function getLayerRaster(): ?array
+    public function getLayerRaster(): mixed
     {
-        $layerRaster = json_decode($this->layerRaster, true);
-        $this->setLayerRasterMaterial($layerRaster["layer_raster_material"] ?? null);
-        $this->setLayerRasterPattern($layerRaster["layer_raster_pattern"] ?? null);
-        $this->setLayerRasterMinimumValueCutoff($layerRaster["layer_raster_minimum_value_cutoff"] ?? null);
-        $this->setLayerRasterColorInterpolation($layerRaster["layer_raster_color_interpolation"] ?? null);
-        $this->setLayerRasterFilterMode($layerRaster["layer_raster_filter_mode"] ?? null);
-        $this->setLayerRasterURL($layerRaster["url"] ?? null);
-        $this->setLayerRasterBoundingbox($layerRaster["boundingbox"] ?? null);
-        return $layerRaster;
+        $this->setLayerRasterMaterial($this->layerRaster["layer_raster_material"] ?? null);
+        $this->setLayerRasterPattern($this->layerRaster["layer_raster_pattern"] ?? null);
+        $this->setLayerRasterMinimumValueCutoff($this->layerRaster["layer_raster_minimum_value_cutoff"] ?? null);
+        $this->setLayerRasterColorInterpolation($this->layerRaster["layer_raster_color_interpolation"] ?? null);
+        $this->setLayerRasterFilterMode($this->layerRaster["layer_raster_filter_mode"] ?? null);
+        $this->setLayerRasterURL($this->layerRaster["url"] ?? null);
+        $this->setLayerRasterBoundingbox($this->layerRaster["boundingbox"] ?? null);
+        return $this->layerRaster;
     }
 
     public function getLayerRasterAsJson(): ?string
     {
-        return $this->layerRaster;
+        return json_encode($this->layerRaster);
     }
 
-    public function setLayerRaster(?string $layerRaster = null): Layer
+    public function setLayerRaster(mixed $layerRaster = null): static
     {
-        if (is_string($layerRaster) && !empty($layerRaster)) {
-            $this->layerRaster = $layerRaster;
-            return $this;
-        }
-        $layerRaster = [];
+        $layerRaster ??= [];
         $layerRaster["layer_raster_material"] = $this->getLayerRasterMaterial();
         $layerRaster["layer_raster_pattern"] = $this->getLayerRasterPattern();
         $layerRaster["layer_raster_minimum_value_cutoff"] = $this->getLayerRasterMinimumValueCutoff();
@@ -626,7 +614,7 @@ class Layer
         $layerRaster["layer_raster_filter_mode"] = $this->getLayerRasterFilterMode();
         $layerRaster["url"] = $this->getLayerRasterURL();
         $layerRaster["boundingbox"] = $this->getLayerRasterBoundingbox();
-        $this->layerRaster = json_encode($layerRaster);
+        $this->layerRaster = $layerRaster;
         return $this;
     }
 
@@ -635,7 +623,7 @@ class Layer
         return $this->layerLastupdate;
     }
 
-    public function setLayerLastupdate(?float $layerLastupdate): Layer
+    public function setLayerLastupdate(?float $layerLastupdate): static
     {
         $this->layerLastupdate = $layerLastupdate;
         return $this;
@@ -646,7 +634,7 @@ class Layer
         return $this->layerMelupdate;
     }
 
-    public function setLayerMelupdate(?int $layerMelupdate): Layer
+    public function setLayerMelupdate(?int $layerMelupdate): static
     {
         $this->layerMelupdate = $layerMelupdate;
         return $this;
@@ -657,7 +645,7 @@ class Layer
         return $this->layerEditingType;
     }
 
-    public function setLayerEditingType(?string $layerEditingType): Layer
+    public function setLayerEditingType(?string $layerEditingType): static
     {
         $this->layerEditingType = $layerEditingType;
         return $this;
@@ -668,7 +656,7 @@ class Layer
         return $this->layerSpecialEntityType;
     }
 
-    public function setLayerSpecialEntityType(?string $layerSpecialEntityType): Layer
+    public function setLayerSpecialEntityType(?string $layerSpecialEntityType): static
     {
         $this->layerSpecialEntityType = $layerSpecialEntityType;
         return $this;
@@ -679,7 +667,7 @@ class Layer
         return $this->layerGreen;
     }
 
-    public function setLayerGreen(?int $layerGreen): Layer
+    public function setLayerGreen(?int $layerGreen): static
     {
         $this->layerGreen = $layerGreen;
         return $this;
@@ -690,7 +678,7 @@ class Layer
         return $this->layerMelupdateConstruction;
     }
 
-    public function setLayerMelupdateConstruction(?int $layerMelupdateConstruction): Layer
+    public function setLayerMelupdateConstruction(?int $layerMelupdateConstruction): static
     {
         $this->layerMelupdateConstruction = $layerMelupdateConstruction;
         return $this;
@@ -701,7 +689,7 @@ class Layer
         return $this->layerFilecreationtime;
     }
 
-    public function setLayerFilecreationtime(?float $layerFilecreationtime): Layer
+    public function setLayerFilecreationtime(?float $layerFilecreationtime): static
     {
         $this->layerFilecreationtime = $layerFilecreationtime;
         return $this;
@@ -712,7 +700,7 @@ class Layer
         return $this->layerMedia;
     }
 
-    public function setLayerMedia(?string $layerMedia): Layer
+    public function setLayerMedia(?string $layerMedia): static
     {
         $this->layerMedia = $layerMedia;
         return $this;
@@ -723,27 +711,20 @@ class Layer
         return $this->layerEntityValueMax;
     }
 
-    public function setLayerEntityValueMax(?float $layerEntityValueMax): Layer
+    public function setLayerEntityValueMax(?float $layerEntityValueMax): static
     {
         $this->layerEntityValueMax = $layerEntityValueMax;
         return $this;
     }
 
-    public function getLayerTags(): ?array
+    public function getLayerTags(): mixed
     {
-        if ($this->layerTags === null) {
-            return null;
-        }
-        return json_decode($this->layerTags, true);
+        return $this->layerTags;
     }
 
-    public function setLayerTags(?array $layerTags): Layer
+    public function setLayerTags(mixed $layerTags): static
     {
-        if ($layerTags == null) {
-            $this->layerTags = null;
-            return $this;
-        }
-        $this->layerTags = json_encode($layerTags);
+        $this->layerTags = $layerTags;
         return $this;
     }
 

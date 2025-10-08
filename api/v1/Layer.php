@@ -3,7 +3,9 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Services\ConnectionManager;
+use App\Repository\SessionAPI\LayerRepository;
 use Exception;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 class Layer extends Base
 {
@@ -776,18 +778,17 @@ class Layer extends Base
         return file_get_contents($filePath);
     }
 
-    /**
-     * @throws Exception
-     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+
+    /**
+     * @throws Exception|ExceptionInterface
+     */
     private function GetMetaForLayerById(int $layerId): array
     {
-        $data = $this->getDatabase()->query("SELECT * FROM layer WHERE layer_id=?", array($layerId));
-        if (empty($data)) {
-            return [];
-        }
-        Layer::FixupLayerMetaData($data[0]);
-        return $data[0];
+        /** @var LayerRepository $repo */
+        $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
+            ->getRepository(\App\Entity\SessionAPI\Layer::class);
+        return $repo->toArray($repo->find($layerId));
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps

@@ -3,10 +3,12 @@
 namespace App\Repository\SessionAPI;
 
 use App\Domain\Common\EntityEnums\LayerGeoType;
+use App\Domain\Common\EntityPropToDbColumnNameConvertor;
 use App\Domain\Common\NormalizerContextBuilder;
 use App\Entity\SessionAPI\Layer;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Exception;
 use ReflectionException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
@@ -137,8 +139,41 @@ class LayerRepository extends EntityRepository
             Layer::class,
             null,
             (new NormalizerContextBuilder(Layer::class))->withCallbacks([
-                'layerGeoType' => fn($value) => LayerGeoType::from($value)
+                'layerGeoType' => fn($value) => LayerGeoType::from($value),
+                'layerTextInfo' => fn($value) => $value ?? []
             ])->toArray()
+        );
+    }
+
+    /**
+     * @throws Exception|ExceptionInterface
+     */
+    public function toArray(?Layer $layer): array
+    {
+        if (is_null($layer)) {
+            return [];
+        }
+        $normalizer ??= new ObjectNormalizer(null, new EntityPropToDbColumnNameConvertor(
+            customNameMapping: [
+                'layerGeoType' => 'layer_geotype',
+                'originalLayer' => 'layer_original_id'
+            ]
+        ));
+        $serializer ??= new Serializer([$normalizer]);
+        return $serializer->normalize(
+            $layer,
+            null,
+            (new NormalizerContextBuilder(Layer::class))
+                ->withAttributes(array_merge(
+                    array_keys($this->getEntityManager()->getClassMetadata(Layer::class)->fieldMappings),
+                    [
+                        'originalLayer'
+                    ]
+                ))
+                ->withCallbacks([
+                    'originalLayer' => fn($value) => $value?->getLayerId(),
+                    'layerGeoType' => fn(?LayerGeoType $value) => $value?->value
+                ])->toArray()
         );
     }
 }
