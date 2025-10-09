@@ -5,7 +5,9 @@ namespace App\Domain\API\v1;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameWatchdogServer;
+use App\Entity\SessionAPI\Layer as LayerEntity;
 use App\Entity\SessionAPI\Watchdog;
+use App\Repository\SessionAPI\LayerRepository;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\PromiseInterface;
@@ -320,30 +322,21 @@ class Game extends Base
     public function Meta(int $user, bool $sort = false, bool $onlyActiveLayers = true)
     {
         $this->getDatabase()->query("UPDATE user SET user_lastupdate=? WHERE user_id=?", array(0, $user));
-
-        $activeQueryPart = "";
+        /** @var LayerRepository $repo */
+        $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
+            ->getRepository(LayerEntity::class);
+        $qb = $repo->createQueryBuilder('l');
+        $qb->where($qb->expr()->isNull('l.originalLayer'));
         if ($onlyActiveLayers) {
-            $activeQueryPart = " AND layer_active = 1 ";
+            $qb->andWhere('l.layerActive = 1');
         }
-
         if ($sort) {
-            $data = $this->getDatabase()->query(
-                "SELECT * FROM layer WHERE layer_original_id IS NULL ".$activeQueryPart." ORDER BY layer_name ASC",
-                array()
-            );
-        } else {
-            $data = $this->getDatabase()->query(
-                "SELECT * FROM layer WHERE layer_original_id IS NULL ".$activeQueryPart,
-                array()
-            );
+            $qb->orderBy('l.layerName', 'ASC');
         }
-
-        for ($i = 0; $i < sizeof($data); $i++) {
-            Layer::FixupLayerMetaData($data[$i]);
-        }
-        $this->addLayerDependenciesToMetaData($data);
-
-        return $data;
+        /** @var LayerEntity[] $layers */
+        $layers = $qb->getQuery()->getResult();
+        $this->addLayerDependencies($layers);
+        return collect($layers)->map(fn(LayerEntity $l) => $repo->toArray($l))->all();
     }
 
     /**
@@ -352,41 +345,40 @@ class Game extends Base
      * Currently, that is, all the grey energy layers depend on the grey cable layer and all the green energy layers
      *   on the green cable layer.
      *
-     * @param array $meta input meta data from Meta()
+     * @param LayerEntity[] $meta all layers
      * @return void
      */
-    private function addLayerDependenciesToMetaData(array &$meta): void
+    private function addLayerDependencies(array $meta): void
     {
         // find cable layers
-        $cableLayers = collect($meta)->filter(fn($l) => $l['layer_editing_type'] === 'cable')->keyBy('layer_id');
+        $cableLayers = collect($meta)->filter(fn(LayerEntity $l) => $l->getLayerEditingType() === 'cable')
+            ->keyBy(fn(LayerEntity $l) => $l->getLayerId());
         if ($cableLayers->isEmpty()) {
             return;
         }
         // if cable layers exists, go through all layers
-        foreach ($meta as &$layer) {
-            $layer['layer_dependencies'] = [];
-
+        foreach ($meta as $layer) {
             // has to be a non-cable
-            if ($cableLayers->has($layer['layer_id'])) {
+            if ($cableLayers->has($layer->getLayerId())) {
                 continue;
             }
             // if they have the required energy editing type: "transformer", "socket", "sourcepoint" or "sourcepolygon"
             if (!in_array(
-                $layer['layer_editing_type'],
+                $layer->getLayerEditingType(),
                 ['transformer', 'socket', 'sourcepoint', 'sourcepolygon']
             )) {
                 continue;
             }
-
             // find the corresponding green or grey cable layer
-            if (null === $cableLayer = $cableLayers->firstWhere('layer_green', $layer['layer_green'])) {
+            if (null === $cableLayer = $cableLayers->first(fn(LayerEntity $l) => $l->getLayerGreen() == $layer->getLayerGreen())) {
                 continue;
             }
 
             // add the associated cable layer id to their dependency
-            $layer['layer_dependencies'][] = $cableLayer['layer_id'];
+            $layerDependencies = $layer->getLayerDependencies();
+            $layerDependencies[] = $cableLayer->getLayerId();
+            $layer->setLayerDependencies($layerDependencies);
         }
-        unset($layer);
     }
 
     /**

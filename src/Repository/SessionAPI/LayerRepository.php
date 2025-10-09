@@ -161,7 +161,7 @@ class LayerRepository extends EntityRepository
                 ->withAttributes(array_merge(
                     array_keys($this->getEntityManager()->getClassMetadata(Layer::class)->fieldMappings),
                     [
-                        'originalLayer'
+                        'originalLayer', 'layerDependencies'
                     ]
                 ))
                 ->withCallbacks([
@@ -186,9 +186,7 @@ class LayerRepository extends EntityRepository
 
     private function getSerializer(): Serializer
     {
-        $this->serializer ??= new Serializer(normalizers: [$this->getNormalizer()], defaultContext: [
-            Serializer::EMPTY_ARRAY_AS_OBJECT => true
-        ]);
+        $this->serializer ??= new Serializer(normalizers: [$this->getNormalizer()]);
         return $this->serializer;
     }
 }

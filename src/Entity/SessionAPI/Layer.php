@@ -113,7 +113,7 @@ class Layer
         nullable: false,
         options: ['default' => '{}']
     )]
-    private object $layerTextInfo;
+    private ?object $layerTextInfo = null;
 
     #[Groups(['read'])]
     #[ORM\Column(
@@ -224,6 +224,8 @@ class Layer
     private ?string $layerRasterURL = null;
 
     private ?array $layerRasterBoundingbox = null;
+
+    private array $layerDependencies = [];
 
     public function __construct()
     {
@@ -618,6 +620,7 @@ class Layer
 
     public function getLayerTextInfo(): object
     {
+        $this->layerTextInfo ??= (object)[];
         return $this->layerTextInfo;
     }
 
@@ -1002,5 +1005,15 @@ class Layer
             }
         }
         return $arrayToEncode;
+    }
+
+    public function getLayerDependencies(): array
+    {
+        return $this->layerDependencies;
+    }
+
+    public function setLayerDependencies(array $layerDependencies): void
+    {
+        $this->layerDependencies = $layerDependencies;
     }
 }

@@ -798,14 +798,4 @@ class Layer extends Base
             ->getRepository(\App\Entity\SessionAPI\Layer::class);
         return $repo->toArray($repo->find($layerId));
     }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function FixupLayerMetaData(array &$data): void
-    {
-        $data['layer_type'] = json_decode($data['layer_type'], true);
-        $data['layer_info_properties'] = (isset($data['layer_info_properties'])) ?
-            json_decode($data['layer_info_properties']) : null;
-        $data['layer_text_info'] = (isset($data['layer_text_info'])) ? json_decode($data['layer_text_info']) : null;
-        $data['layer_tags'] =  (isset($data['layer_tags'])) ? json_decode($data['layer_tags']) : null;
-    }
 }

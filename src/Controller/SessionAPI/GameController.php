@@ -524,4 +524,69 @@ class GameController extends BaseController
     {
         return new JsonResponse('online');
     }
+
+    #[Route(
+        path: '/Meta',
+        name: 'session_api_game_meta',
+        methods: ['POST']
+    )]
+    #[OA\Post(
+        summary: 'Get all layer meta data required for a game',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/x-www-form-urlencoded',
+                schema: new OA\Schema(
+                    required: [
+                        'user'
+                    ],
+                    properties: [
+                        new OA\Property(property: 'user', type: 'integer', example: 1),
+                        new OA\Property(
+                            property: 'sort',
+                            description: 'Whether to sort the layers by their display order',
+                            type: 'boolean',
+                            default: false,
+                            nullable: true
+                        ),
+                        new OA\Property(
+                            property: 'onlyActiveLayers',
+                            description: 'Whether to return only active layers',
+                            type: 'boolean',
+                            default: true,
+                            nullable: true
+                        )
+                    ]
+                )
+            )
+        ),
+    )]
+    public function meta(
+        Request $request
+    ): JsonResponse {
+        // get user from post request
+        $user = $request->request->get('user');
+        if (!is_numeric($user)) {
+            return new MessageJsonResponse(
+                status: Response::HTTP_BAD_REQUEST,
+                message: 'Invalid or missing user'
+            );
+        }
+        $sort = $request->request->get('sort', 'false');
+        $sort = filter_var($sort, FILTER_VALIDATE_BOOLEAN);
+        $onlyActiveLayers = $request->request->get('onlyActiveLayers', 'true');
+        $onlyActiveLayers = filter_var($onlyActiveLayers, FILTER_VALIDATE_BOOLEAN);
+
+        $game = new Game();
+        $game->setGameSessionId($this->getSessionIdFromRequest($request));
+        try {
+            return new JsonResponse($game->Meta($user, $sort, $onlyActiveLayers));
+        } catch (Exception $e) {
+            return new MessageJsonResponse(
+                status: 500,
+                message: $e->getMessage()
+            );
+        }
+    }
+
 }
