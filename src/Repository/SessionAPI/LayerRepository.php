@@ -150,10 +150,11 @@ class LayerRepository extends EntityRepository
         if (is_null($layer)) {
             return [];
         }
-        $result = $this->getSerializer()->normalize(
+        return $this->getSerializer()->normalize(
             $layer,
             null,
-            (new NormalizerContextBuilder(Layer::class))
+            (new NormalizerContextBuilder())
+                ->withClassPropertyValidation(Layer::class)
                 ->withAttributes(array_merge(
                     array_keys($this->getEntityManager()->getClassMetadata(Layer::class)->fieldMappings),
                     [
@@ -163,11 +164,10 @@ class LayerRepository extends EntityRepository
                 ->withCallbacks([
                     'originalLayer' => fn($value) => $value?->getLayerId(),
                     'layerGeoType' => fn(?LayerGeoType $value) => $value?->value
-                ])->toArray()
+                ])
+                ->withPreserveEmptyObjects(true)
+                ->toArray()
         );
-        // post fix
-        $result['layer_text_info'] = (object)$result['layer_text_info'];
-        return $result;
     }
 
     private function getNormalizer(): ObjectNormalizer
@@ -183,7 +183,9 @@ class LayerRepository extends EntityRepository
 
     private function getSerializer(): Serializer
     {
-        $this->serializer ??= new Serializer([$this->getNormalizer()]);
+        $this->serializer ??= new Serializer(normalizers: [$this->getNormalizer()], defaultContext: [
+            Serializer::EMPTY_ARRAY_AS_OBJECT => true
+        ]);
         return $this->serializer;
     }
 }

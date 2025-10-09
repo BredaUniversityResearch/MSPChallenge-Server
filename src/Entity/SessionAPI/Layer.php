@@ -113,8 +113,7 @@ class Layer
         nullable: false,
         options: ['default' => '{}']
     )]
-    // !! assign a null default value such that $reflectionClass->getDefaultProperties() returns this property...
-    private object|array|null $layerTextInfo = null;
+    private object $layerTextInfo;
 
     #[Groups(['read'])]
     #[ORM\Column(
@@ -619,7 +618,7 @@ class Layer
 
     public function getLayerTextInfo(): object
     {
-        return (object)$this->layerTextInfo;
+        return $this->layerTextInfo;
     }
 
     public function setLayerTextInfo(object|array $layerTextInfo): static
