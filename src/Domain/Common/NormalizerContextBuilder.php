@@ -11,7 +11,7 @@ class NormalizerContextBuilder extends AbstractObjectNormalizerContextBuilder
 {
     public const CLASS_PROPERTY_VALIDATION = 'class_property_validation';
 
-     private static array $classPropertiesCache = [];
+    private static array $classPropertiesCache = [];
 
     /**
      * @throws ReflectionException
