@@ -69,7 +69,8 @@ class NormalizerContextBuilder extends AbstractObjectNormalizerContextBuilder
             return self::$classPropertiesCache[$className];
         }
         $reflectionClass = new \ReflectionClass($className);
-        self::$classPropertiesCache[$className] = array_keys($reflectionClass->getProperties());
+        self::$classPropertiesCache[$className] = collect($reflectionClass->getProperties())
+            ->map(fn(\ReflectionProperty $p) => $p->getName())->all();
         return self::$classPropertiesCache[$className];
     }
 }
