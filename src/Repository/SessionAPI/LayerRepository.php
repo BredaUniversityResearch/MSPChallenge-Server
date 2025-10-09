@@ -135,10 +135,13 @@ class LayerRepository extends EntityRepository
             $layerData,
             Layer::class,
             null,
-            (new NormalizerContextBuilder(Layer::class))->withCallbacks([
-                'layerGeoType' => fn($value) => LayerGeoType::from($value),
-                'layerTextInfo' => fn($value) => (object)$value
-            ])->toArray()
+            (new NormalizerContextBuilder())
+                ->withClassPropertyValidation(Layer::class)
+                ->withCallbacks([
+                    'layerGeoType' => fn($value) => LayerGeoType::from($value),
+                    'layerTextInfo' => fn($value) => (object)$value
+                ])
+                ->toArray()
         );
     }
 

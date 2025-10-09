@@ -19,8 +19,11 @@ class NormalizerContextBuilder extends AbstractObjectNormalizerContextBuilder
     public function withClassPropertyValidation(string $className): static
     {
         $instance = $this->with(self::CLASS_PROPERTY_VALIDATION, $className);
+
+        // If callbacks are already set, validate them against the new class
         $callbacks = $this->toArray()[AbstractNormalizer::CALLBACKS] ?? [];
         $this->validateCallbacks($callbacks);
+
         return $instance;
     }
 
