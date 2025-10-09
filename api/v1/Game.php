@@ -370,7 +370,9 @@ class Game extends Base
                 continue;
             }
             // find the corresponding green or grey cable layer
-            if (null === $cableLayer = $cableLayers->first(fn(LayerEntity $l) => $l->getLayerGreen() == $layer->getLayerGreen())) {
+            if (null === $cableLayer = $cableLayers->first(
+                fn(LayerEntity $l) => $l->getLayerGreen() == $layer->getLayerGreen()
+            )) {
                 continue;
             }
 

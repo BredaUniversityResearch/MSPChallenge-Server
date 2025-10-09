@@ -588,5 +588,4 @@ class GameController extends BaseController
             );
         }
     }
-
 }

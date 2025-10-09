@@ -67,7 +67,7 @@ class ImmersiveSessionsWsServerPlugin extends Plugin
         $qb = $db->createQueryBuilder();
         return $db->query(
             $qb
-                ->select( 's.*', 'c.*')
+                ->select('s.*', 'c.*')
                 ->from('immersive_session', 's')
                 ->leftJoin('s', 'docker_connection', 'c', 'c.id = s.docker_connection_id')
                 ->where($qb->expr()->gt(
