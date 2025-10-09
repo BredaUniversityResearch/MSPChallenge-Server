@@ -67,9 +67,9 @@ class ImmersiveSessionsWsServerPlugin extends Plugin
         $qb = $db->createQueryBuilder();
         return $db->query(
             $qb
-                ->select('c.*', 's.*')
+                ->select( 's.*', 'c.*')
                 ->from('immersive_session', 's')
-                ->leftJoin('s', 'immersive_session_connection', 'c', 'c.session_id = s.id')
+                ->leftJoin('s', 'docker_connection', 'c', 'c.id = s.docker_connection_id')
                 ->where($qb->expr()->gt(
                     's.updated_at',
                     $qb->createPositionalParameter(date('Y-m-d H:i:s', (int)$lastUpdateTime))
