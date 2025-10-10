@@ -30,7 +30,7 @@ class DynamicEntityFormType extends AbstractType
         $reflectionClass = new ReflectionClass($entity);
 
         $isUsingGroups = collect($reflectionClass->getProperties())->reduce(
-            function(bool $carry, \ReflectionProperty $property) {
+            function (bool $carry, \ReflectionProperty $property) {
                 return $carry || null !== Util::getPropertyAttribute($property, Groups::class);
             },
             false
