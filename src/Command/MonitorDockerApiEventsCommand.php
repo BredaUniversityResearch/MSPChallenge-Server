@@ -43,7 +43,7 @@ class MonitorDockerApiEventsCommand extends Command
     ];
 
     /** @var DockerApi[] $dockerApis */
-    private ?array $dockerApis = null;
+    private array $dockerApis = [];
 
     private OutputInterface $output;
     private LoopInterface $loop;
@@ -70,6 +70,16 @@ class MonitorDockerApiEventsCommand extends Command
         DockerApi $dockerApi
     ): \Closure {
         return function () use ($dockerApi) {
+            if ($dockerApi->getInvalidated()) {
+                $this->outputDockerApiMessage(
+                    $dockerApi->getId(),
+                    'comment',
+                    'Docker API connection invalidated. Aborting connection.'
+                );
+                unset($this->dockerApis[$dockerApi->getId()]);
+                return;
+            }
+            $this->dockerApis[$dockerApi->getId()] = $dockerApi;
             $image = $_ENV['IMMERSIVE_SESSIONS_DOCKER_HUB_IMAGE'] ??
                 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server';
             $filters = array_merge(
@@ -92,7 +102,7 @@ class MonitorDockerApiEventsCommand extends Command
                     assert($body instanceof \React\Stream\ReadableStreamInterface);
                     $buffer = '';
                     $body->on('data', $this->createStreamDataReceivedFunction($dockerApi, $buffer));
-                    $body->on('end', function () use ($dockerApi) {
+                    $body->on('close', function () use ($dockerApi) {
                         $this->outputDockerApiMessage(
                             $dockerApi->getId(),
                             'comment',
@@ -192,6 +202,35 @@ class MonitorDockerApiEventsCommand extends Command
         });
     }
 
+    /**
+     * Periodically refreshes DockerApis, invalidates outdated/removed, and starts new connections
+     */
+    private function startDockerApiRefreshLoop(): void
+    {
+        $this->loop->addPeriodicTimer(60, function () {
+            $latestDockerApis = $this->getLatestDockerApis();
+            $dockerApis = $this->dockerApis; // Copy to avoid modification during iteration
+            foreach ($dockerApis as $id => $dockerApi) {
+                // Invalidate connections for removed Docker api's
+                if (!isset($latestDockerApis[$id])) {
+                    $dockerApi->setInvalidated();
+                } else {
+                    // update the object instance in case of changes
+                    $dockerApi
+                        ->setAddress($latestDockerApis[$id]->getAddress())
+                        ->setPort($latestDockerApis[$id]->getPort())
+                        ->setScheme($latestDockerApis[$id]->getScheme());
+                }
+            }
+            // Start new connections for new Docker api's
+            foreach ($latestDockerApis as $id => $api) {
+                if (!isset($dockerApis[$id])) {
+                    $this->createConnectionFunction($api)();
+                }
+            }
+        });
+    }
+
     private function formatDockerApiId(?int $dockerApiId): string
     {
         return '#'.str_pad($dockerApiId ?? '0', 6, '_', STR_PAD_LEFT);
@@ -214,7 +253,7 @@ class MonitorDockerApiEventsCommand extends Command
                 $this->loop->stop();
             });
         }
-        $dockerApis = $this->getDockerApis();
+        $dockerApis = $this->getLatestDockerApis();
         foreach ($dockerApis as $dockerApi) {
             $this->createConnectionFunction($dockerApi)();
         }
@@ -222,18 +261,24 @@ class MonitorDockerApiEventsCommand extends Command
         $this->loop->addPeriodicTimer(60, function () {
             $this->triggerInspectDockerConnections();
         });
+        // Add periodic timer to refresh DockerApis and update connections
+        $this->startDockerApiRefreshLoop();
         $this->loop->run();
         $output->writeln('<info>MonitorDockerApiEventsCommand stopped.</info>');
         return Command::SUCCESS;
     }
 
     /**
+     * @return DockerApi[]
+     *
+     * Fetches the latest DockerApi entities from the database
      * @throws Exception
      */
-    private function getDockerApis(): array
+    private function getLatestDockerApis(): array
     {
-        $this->dockerApis ??= $this->connectionManager->getServerManagerEntityManager()->getRepository(DockerApi::class)
-            ->findAll();
-        return $this->dockerApis;
+        $em = $this->connectionManager->getServerManagerEntityManager();
+        $em->clear(); // Detach all entities
+        return collect($this->connectionManager->getServerManagerEntityManager()->getRepository(DockerApi::class)
+            ->findAll())->keyBy(fn(DockerApi $api) => $api->getId())->all();
     }
 }

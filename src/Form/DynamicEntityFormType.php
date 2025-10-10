@@ -17,6 +17,7 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 class DynamicEntityFormType extends AbstractType
 {
@@ -27,11 +28,25 @@ class DynamicEntityFormType extends AbstractType
     {
         $entity = $options['data_class'];
         $reflectionClass = new ReflectionClass($entity);
+
+        $isUsingGroups = collect($reflectionClass->getProperties())->reduce(
+            function(bool $carry, \ReflectionProperty $property) {
+                return $carry || null !== Util::getPropertyAttribute($property, Groups::class);
+            },
+            false
+        );
         foreach ($reflectionClass->getProperties() as $property) {
             $propertyName = $property->getName();
             $propertyType = $property->getType();
             $formFieldType = null;
             $formFieldTypeOptions = [];
+
+            if ($isUsingGroups) {
+                $groups = Util::getPropertyAttribute($property, Groups::class)?->getGroups() ?? [];
+                if (!in_array('write', $groups, true)) {
+                    continue; // Skip properties not in the 'write' group
+                }
+            }
             if (null !== Util::getPropertyAttribute($property, ORM\Id::class)) {
                 continue; // Skip ID properties
             }

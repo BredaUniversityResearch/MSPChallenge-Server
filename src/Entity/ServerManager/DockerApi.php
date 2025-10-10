@@ -20,7 +20,7 @@ class DockerApi extends EntityBase
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups(['read'])]
+    #[Groups(['read','write'])]
     #[AppMappings\Property\TableColumn]
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "The address cannot be empty.")]
@@ -35,7 +35,7 @@ class DockerApi extends EntityBase
     )]
     private ?string $address = null;
 
-    #[Groups(['read'])]
+    #[Groups(['read','write'])]
     #[AppMappings\Property\TableColumn]
     #[ORM\Column]
     #[Assert\NotBlank(message: "The port cannot be empty.")]
@@ -50,7 +50,7 @@ class DockerApi extends EntityBase
     )]
     private ?int $port = null;
 
-    #[Groups(['read'])]
+    #[Groups(['read','write'])]
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "The scheme cannot be empty.")]
     #[Assert\Choice(choices: ['http', 'https'], message: 'Set a valid scheme, either: http or https.')]
@@ -66,6 +66,8 @@ class DockerApi extends EntityBase
     private ?string $scheme = null;
 
     private ?\DateTime $lastDockerEventAt = null;
+
+    private bool $invalidated = false;
 
     public function getId(): ?int
     {
@@ -125,5 +127,15 @@ class DockerApi extends EntityBase
         $scheme = str_replace('://', '', $this->getScheme());
         $port = $this->getPort();
         return "{$scheme}://{$this->getAddress()}:{$port}";
+    }
+
+    public function getInvalidated(): bool
+    {
+        return $this->invalidated;
+    }
+
+    public function setInvalidated(bool $invalidate = true): void
+    {
+        $this->invalidated = $invalidate;
     }
 }
