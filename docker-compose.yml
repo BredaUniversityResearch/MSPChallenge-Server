@@ -1,9 +1,9 @@
 services:
   redis:
-    image: redis:7.2.4-alpine
+    image: redis:7.2-alpine
     restart: always
     networks:
-      - app_network
+      - msp_network
     logging:
       driver: "local"
 
@@ -31,7 +31,7 @@ services:
       '--myisam-sort-buffer-size=67108864'
     ]
     networks:
-      - app_network
+      - msp_network
     volumes:
       - ./docker/database/my2_80.sql:/root/my2_80.sql:ro
       - mariadb_data:/var/lib/mysql
@@ -53,7 +53,7 @@ services:
       - /app/var/log
       - /var/run/docker.sock:/var/run/docker.sock # to communicate with the Docker daemon
     networks:
-      - app_network
+      - msp_network
     environment:
       SERVER_NAME: ${SERVER_NAME:-localhost}, localhost:80
       DOCKER: 1
@@ -119,28 +119,7 @@ services:
     logging:
       driver: "local"
     networks:
-      - app_network
-
-  blackfire:
-    image: blackfire/blackfire:2
-    ports:
-      - "${BLACKFIRE_PORT:-}:8307"
-    environment:
-        # Define Blackfire Agent log vebosity level
-        BLACKFIRE_LOG_LEVEL: 4
-
-        # Exposes BLACKFIRE_SERVER_* environment variables from the host
-        BLACKFIRE_SERVER_ID: ${BLACKFIRE_SERVER_ID:-}
-        BLACKFIRE_SERVER_TOKEN: ${BLACKFIRE_SERVER_TOKEN:-}
-
-        # Exposes BLACKFIRE_CLIENT_* environment variables
-        # allowing the client to communicate with Blackfire's API:
-        BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID:-}
-        BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
-    networks:
-      - app_network
-    logging:
-      driver: "local"
+      - msp_network
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###
@@ -161,4 +140,4 @@ volumes:
 ###< doctrine/doctrine-bundle ###
 
 networks:
-  app_network:
+  msp_network:

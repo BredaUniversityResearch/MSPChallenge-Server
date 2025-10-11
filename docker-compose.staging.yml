@@ -1,6 +1,8 @@
 services:
   php:
-    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest
+    build:
+      context: .
+      target: frankenphp_prod
     volumes:
       - ./:/app
       - /app/var/cache
@@ -18,4 +20,10 @@ services:
         protocol: tcp
 
   simulations:
-    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:latest
+    build:
+      context: .
+      dockerfile: simulations/linux-x64/Dockerfile
+      args:
+        source_dir: simulations/linux-x64
+    volumes:
+        - ./simulations/linux-x64:/app

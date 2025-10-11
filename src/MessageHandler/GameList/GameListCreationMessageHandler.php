@@ -271,7 +271,12 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
      */
     private function importLayerData(SessionSetupContext $context): void
     {
-        $geoServerCommunicator = new GeoServerCommunicator($this->client, $this->downloadsCache, $this->resultsCache);
+        $geoServerCommunicator = new GeoServerCommunicator(
+            $this->client,
+            $this->provider,
+            $this->downloadsCache,
+            $this->resultsCache
+        );
         $geoServerCommunicator
             ->setBaseURL($this->gameSession->getGameGeoServer()->getAddress())
             ->setUsername($this->gameSession->getGameGeoServer()->getUsername())
@@ -923,15 +928,18 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             $plan->addPlanLayer($planLayer);
             foreach ($layerConfig['deleted'] as $layerGeometryDeletedConfig) {
                 $planDelete = new PlanDelete();
+                // $planDelete is cascaded by $derivedLayer, so no persist needed
+                $derivedLayer->addPlanDelete($planDelete);
+                $plan->addPlanDelete($planDelete);
                 $originalPlannedDeletedGeometry = $this->findNewPersistentGeometry(
                     $layerGeometryDeletedConfig['base_geometry_info'],
                     $context
                 );
-                // $planDelete is cascaded by $derivedLayer, so no persist needed
-                $derivedLayer->addPlanDelete($planDelete);
+                if (null === $originalPlannedDeletedGeometry) {
+                    continue;
+                }
                 // $originalPlannedDeletedGeometry is cascaded by $planDelete (and vice versa), so no persist needed
                 $originalPlannedDeletedGeometry->addPlanDelete($planDelete);
-                $plan->addPlanDelete($planDelete);
             }
         }
         $this->setupPlannedCableConnections($planCableConnectionsConfig, $context);

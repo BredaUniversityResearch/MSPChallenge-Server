@@ -36,15 +36,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         default-mysql-client \
         procps \
         nano \
-        gnupg \
-        && rm -rf /var/lib/apt/lists/*
+        npm
 
-# Add Yarn APT repository and install Yarn
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-    apt-get update && \
-    apt-get install -y yarn && \
-    rm -rf /var/lib/apt/lists/*
+# Install Yarn through corepack
+RUN npm install -g corepack
 
 # Install PHP extensions
 RUN set -eux; \
@@ -86,23 +81,6 @@ RUN mkdir -p /etc/supervisor.d/
 COPY --link docker/supervisor/supervisor.d/*.ini /etc/supervisor.d/
 
 ENTRYPOINT ["docker-entrypoint"]
-
-# Install Blackfire Probe
-RUN version=$(php -r "echo PHP_MAJOR_VERSION.PHP_MINOR_VERSION.(PHP_ZTS ? '-zts' : '');") \
-    && architecture=$(uname -m) \
-    && curl -A "Docker" -o /tmp/blackfire-probe.tar.gz -D - -L -s https://blackfire.io/api/v1/releases/probe/php/linux/$architecture/$version \
-    && mkdir -p /tmp/blackfire \
-    && tar zxpf /tmp/blackfire-probe.tar.gz -C /tmp/blackfire \
-    && mv /tmp/blackfire/blackfire-*.so $(php -r "echo ini_get ('extension_dir');")/blackfire.so \
-    && printf "extension=blackfire.so\nblackfire.agent_socket=tcp://blackfire:8307\n" > $PHP_INI_DIR/conf.d/blackfire.ini \
-    && rm -rf /tmp/blackfire /tmp/blackfire-probe.tar.gz
-
-# Install Blackfire CLI
-RUN mkdir -p /tmp/blackfire \
-    && architecture=$(uname -m) \
-    && curl -A "Docker" -L https://blackfire.io/api/v1/releases/cli/linux/$architecture | tar zxp -C /tmp/blackfire \
-    && mv /tmp/blackfire/blackfire /usr/bin/blackfire \
-    && rm -Rf /tmp/blackfire
 
 HEALTHCHECK --start-period=60s CMD curl -f http://localhost:2019/metrics || exit 1
 CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile" ]
@@ -153,7 +131,7 @@ RUN set -eux; \
 
 # Install dependencies and build assets
 RUN set -eux; \
-    yarn install --frozen-lockfile; \
+    corepack yarn; \
     yarn encore production; \
     rm -rf node_modules; \
     rm -rf /tmp/*
