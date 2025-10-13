@@ -367,10 +367,11 @@ class Game extends Base
 
         // now go through all layers
         foreach ($meta as &$layer) {
-            if ($cableLayers->has($layer['layer_id']) || $socketLayers->has($layer['layer_id'])) {
-                // if this layer is a cable or socket layer, it does not depend on any other layer
+            if ($cableLayers->has($layer['layer_id'])) {
+                // if this layer is a cable layer, it does not depend on any other layer
                 continue;
             }
+
             $layer['layer_dependencies'] = [];
             if (in_array(
                 $layer['layer_editing_type'],
@@ -378,17 +379,17 @@ class Game extends Base
             ) &&
                 null !== $cableLayer = $cableLayers->firstWhere('layer_green', $layer['layer_green'])
             ) {
-                // cables: if this layer is of the right other type, add associated cable layer id as a dependency
+                // add cables: if this layer is of the right other type, add associated cable layer id as a dependency
                 $layer['layer_dependencies'][] = $cableLayer['layer_id'];
             }
             
             if (in_array(
                 $layer['layer_editing_type'],
-                ['transformer', 'cable', 'sourcepoint', 'sourcepolygon']
+                ['sourcepoint', 'sourcepolygon']
             ) &&
                 null !== $socketLayer = $socketLayers->firstWhere('layer_green', $layer['layer_green'])
             ) {
-                // sockets: if this layer is of the right other type, add associated socket layer id as a dependency
+                // add sockets: if this layer is of the right other type, add associated socket layer id as a dependency
                 $layer['layer_dependencies'][] = $socketLayer['layer_id'];
             }
         }
