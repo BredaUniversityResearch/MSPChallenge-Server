@@ -707,7 +707,7 @@ class LayerController extends BaseController
                             property: 'name',
                             description: 'Name of the layer that we want the meta for',
                             type: 'string',
-                            example: 'NS_Dredging_Deposit_Areas'
+                            example: 'NS_Topography_raster'
                         )
                     ]
                 )
@@ -746,6 +746,101 @@ class LayerController extends BaseController
             $layer->setGameSessionId($this->getSessionIdFromRequest($request));
             $name = $request->request->get('name');
             return new MessageJsonResponse(data: $layer->MetaByName($name), message:'JSON object');
+        } catch (Exception $e) {
+            return new MessageJsonResponse(status: 500, message: $e->getMessage());
+        }
+    }
+
+    #[Route('/UpdateRaster', name: 'session_api_layer_update_raster', methods: ['POST'])]
+    #[OA\Post(
+        summary: 'UpdateRaster updates raster image',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/x-www-form-urlencoded',
+                schema: new OA\Schema(
+                    required: ['layer_name', 'image_data'],
+                    properties: [
+                        new OA\Property(
+                            property: 'layer_name',
+                            description: 'Name of the layer the raster image is for.',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'image_data',
+                            description: 'Base64 encoded string of image data.',
+                            type: 'string'
+                        ),
+                        new OA\Property(
+                            property: 'month',
+                            description: 'The month for which the raster image is for. Defaults to the current month.',
+                            type: 'integer',
+                            default: '',
+                            nullable: true
+                        ),
+                        new OA\Property(
+                            property: 'raster_bounds',
+                            description: '2x2 array of doubles specifying [[min X, min Y], [max X, max Y]]',
+                            type: 'string',
+                            format: 'json',
+                            default: '',
+                            example: '[[2921042.1165, 2835279.6931], [4800949.2847, 4499955.1151]]',
+                            nullable: true
+                        )
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'Raster data updated successfully',
+                content: new OA\JsonContent(
+                    allOf: [
+                        new OA\Schema(ref: '#/components/schemas/ResponseStructure'),
+                        new OA\Schema(
+                            properties: [
+                                new OA\Property(
+                                    property: 'logs',
+                                    type: 'array',
+                                    items: new OA\Items(type: 'string')
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+        ]
+    )]
+    // @todo: remove raster_bounds support ? REL/REL/RiskModel.cs in simulations uses it, but REL isn't used anymore?
+    public function updateRaster(Request $request): JsonResponse
+    {
+        if (empty($request->request->get('layer_name'))) {
+            return new MessageJsonResponse(status: 400, message: 'Missing required field: layer_name');
+        }
+        if (empty($request->request->get('image_data'))) {
+            return new MessageJsonResponse(status: 400, message: 'Missing required field: image_data');
+        }
+        if (null !== $rasterBounds = ($request->request->get('raster_bounds', '') ?: null)) {
+            $rasterBounds = json_decode($rasterBounds, true);
+        }
+        $month = ($request->request->get('month', ''));
+        if ($month == '') {
+            $month = null;
+        }
+        if ($month != null && !is_numeric($month)) {
+            return new MessageJsonResponse(status: 400, message: 'Invalid month: '.$month);
+        }
+        try {
+            $layer = new Layer();
+            $layer->setGameSessionId($this->getSessionIdFromRequest($request));
+            $data = $layer->UpdateRaster(
+                $request->request->get('layer_name'),
+                $request->request->get('image_data'),
+                $rasterBounds,
+                $month
+            );
+            return new MessageJsonResponse(data: $data, message:'Raster data updated successfully');
         } catch (Exception $e) {
             return new MessageJsonResponse(status: 500, message: $e->getMessage());
         }

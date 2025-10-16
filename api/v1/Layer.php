@@ -609,12 +609,17 @@ class Layer extends Base
      * @apiParam {string} layer_name Name of the layer the raster image is for.
      * @apiParam {array} raster_bounds 2x2 array of doubles specifying [[min X, min Y], [max X, max Y]]
      * @apiParam {string} image_data Base64 encoded string of image data.
-     * @apiDescription UpdateRaster updates raster image
+     * @apiDescription UpdateRaster updates raster imagecdsi
      * @noinspection PhpUnused
      */
+    // @todo: remove raster_bounds support ? REL/REL/RiskModel.cs in simulations uses it, but REL isn't used anymore?
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function UpdateRaster(string $layer_name, string $image_data, array $raster_bounds = null): array
-    {
+    public function UpdateRaster(
+        string $layer_name,
+        string $image_data,
+        array $raster_bounds = null,
+        ?int $month = null
+    ): array {
         $layerData = $this->getDatabase()->query(
             "SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?",
             array($layer_name)
@@ -622,63 +627,81 @@ class Layer extends Base
         if (count($layerData) != 1) {
             throw new Exception("Could not find layer with name " . $layer_name . " to update the raster image");
         }
-        $this->log('Updating raster for layer '.$layer_name);
-
         $rasterData = json_decode($layerData[0]['layer_raster'], true);
-        $rasterDataUpdated = false;
         if (empty($rasterData['url'])) {
             throw new Exception("Could not update raster for layer ".$layer_name.
                 " raster file name was not specified in raster metadata");
         }
 
-        if (!empty($raster_bounds)) {
-            $rasterData['boundingbox'] = $raster_bounds;
-            $rasterDataUpdated = true;
-        }
+        $game = new Game();
+        $this->asyncDataTransferTo($game);
+        $curMonth = $game->GetCurrentMonthAsId();
+        $month ??= $curMonth;
 
+        // we are processing the next month, so:
+        // - replace the current one in raster/ folder,
+        // - allow raster bounds updates
         $imageData = base64_decode($image_data);
-        Store::EnsureFolderExists(Store::GetRasterStoreFolder($this->getGameSessionId()));
-        $f = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
-        if (false ===
-            file_put_contents($f, $imageData)) {
-            $this->log('Failed to save given image_data to '.$f, self::LOG_LEVEL_ERROR);
-        } else {
-            $this->log('Stored image_data to file '.$f);
+        if ($month == $curMonth) {
+            Store::EnsureFolderExists(Store::GetRasterStoreFolder($this->getGameSessionId()));
+            $f = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
+            if (false ===
+                file_put_contents($f, $imageData)) {
+                $this->log('Failed to save given image_data to '.$f, self::LOG_LEVEL_ERROR);
+            } else {
+                $this->log('Stored image_data to '.$f);
+            }
+
+            // raster bounds update
+            $rasterDataUpdated = false;
+            if (!empty($raster_bounds)) {
+                $this->log('Updating raster for layer '.$layer_name);
+                $rasterData['boundingbox'] = $raster_bounds;
+                $rasterDataUpdated = true;
+            }
+
+            // update the layer record
+            $qb = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId())
+                ->createQueryBuilder();
+            $qb
+                ->update('layer')
+                ->set('layer_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
+                ->set('layer_melupdate', '1')
+                ->where($qb->expr()->eq('layer_id', $qb->createPositionalParameter($layerData[0]['layer_id'])));
+            if ($rasterDataUpdated) {
+                $qb
+                    ->set('layer_raster', $qb->createPositionalParameter(json_encode($rasterData)));
+            }
+            try {
+                $qb->executeQuery();
+                $this->log(sprintf(
+                    'Updated layer record%s with id %d',
+                    ($rasterDataUpdated ? ' incl. raster data' : ''),
+                    $layerData[0]['layer_id']
+                ));
+            } catch (\Doctrine\DBAL\Exception $e) {
+                $this->log(sprintf(
+                    'Failed to update layer record%s with id %d: %s',
+                    ($rasterDataUpdated ? ' incl. raster data' : ''),
+                    $layerData[0]['layer_id'],
+                    $e->getMessage()
+                ), self::LOG_LEVEL_ERROR);
+            }
         }
 
-        // Pre-archive the raster file
+        // (Pre-)archive the raster file
         Store::EnsureFolderExists(Store::GetRasterArchiveFolder($this->getGameSessionId()));
         $layerPathInfo = pathinfo($rasterData['url']);
         $layerFileName = $layerPathInfo["filename"];
         $layerFileExt = $layerPathInfo["extension"];
-        $gameData = $this->getDatabase()->query("SELECT game_currentmonth FROM game")[0];
-        $curMonth = intval($gameData['game_currentmonth']);
-        $newFileName = $layerFileName."_".$curMonth.".".$layerFileExt;
-        $archivedFile = Store::GetRasterArchiveFolder($this->getGameSessionId()).$newFileName;
+        $newFileName = $layerFileName."_".$month.".".$layerFileExt;
+        $f = Store::GetRasterArchiveFolder($this->getGameSessionId()).$newFileName;
         if (false ===
-            copy($f, $archivedFile)) {
-            $this->log(sprintf('Failed to copy %s to file %s for archiving', $f, $archivedFile), self::LOG_LEVEL_ERROR);
+            file_put_contents($f, $imageData)) {
+            $this->log('Failed to archive image_data to '.$f, self::LOG_LEVEL_ERROR);
         } else {
-            $this->log(sprintf('Copied %s to file %s for archiving', $f, $archivedFile));
+            $this->log('Archived image_data to '.$f);
         }
-
-        if ($rasterDataUpdated) {
-            $this->getDatabase()->query(
-                "UPDATE layer SET layer_lastupdate=UNIX_TIMESTAMP(NOW(6)), layer_melupdate=1, layer_raster=? ".
-                    "WHERE layer_id = ?",
-                array(json_encode($rasterData), $layerData[0]['layer_id'])
-            );
-        } else {
-            $this->getDatabase()->query(
-                "UPDATE layer SET layer_lastupdate=UNIX_TIMESTAMP(NOW(6)), layer_melupdate=1 WHERE layer_id=?",
-                array($layerData[0]['layer_id'])
-            );
-        }
-        $this->log(sprintf(
-            'Updated layer record%s with id %d',
-            ($rasterDataUpdated ? ' incl. raster data' : ''),
-            $layerData[0]['layer_id']
-        ));
 
         return ['logs' => $this->getLogMessages()];
     }
