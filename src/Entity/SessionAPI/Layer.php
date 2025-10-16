@@ -1071,10 +1071,12 @@ class Layer extends EntityBase
         if (null !== $this->ecologyKpiValue) {
             return $this->ecologyKpiValue;
         }
-        if (null == $em = $this->getOriginManager()) {
+        if (null == $conn = ConnectionManager::getInstance()->getCachedGameSessionDbConnection(
+            $this->getOriginGameListId()
+        )) {
             return null;
         }
-        $result = $em->getConnection()->executeQuery(
+        $result = $conn->executeQuery(
             <<<'SQL'
 WITH
   # group ecology kpis by name and give row number based on month, row number 1 is the latest kpi

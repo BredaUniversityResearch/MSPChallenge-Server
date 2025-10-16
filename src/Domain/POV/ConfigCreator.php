@@ -176,7 +176,7 @@ class ConfigCreator
         foreach ($raster_layers as $key => &$layer) {
             $layerObj = new Layer();
             $layerObj
-                ->setOriginManager(ConnectionManager::getInstance()->getGameSessionEntityManager($this->sessionId))
+                ->setOriginGameListId($this->sessionId)
                 ->setLayerType($layer['types'])
                 ->setLayerTags($layer['tags'])
                 ->setLayerName($layer['name']);

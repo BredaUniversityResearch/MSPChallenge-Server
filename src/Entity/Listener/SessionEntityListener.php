@@ -60,8 +60,11 @@ class SessionEntityListener implements PostLoadEventListenerInterface, PrePersis
     {
         $entity = $event->getObject();
         if (($event->getObjectManager() instanceof EntityManagerInterface) &&
-            in_array(EntityOriginTrait::class, Util::getClassUsesRecursive($entity))) {
-            $entity->setOriginManager($event->getObjectManager());
+            in_array(EntityOriginTrait::class, Util::getClassUsesRecursive($entity)) &&
+            (null !== $database = $event->getObjectManager()->getConnection()->getDatabase()) &&
+            (1 === preg_match('/'.($_ENV['DBNAME_SESSION_PREFIX'] ?? 'msp_session_').'(\d+)/', $database, $matches))
+        ) {
+            $entity->setOriginGameListId((int)$matches[1]);
         }
         foreach ($this->listeners as $entityClassName => $listeners) {
             foreach ($listeners as $listener) {
