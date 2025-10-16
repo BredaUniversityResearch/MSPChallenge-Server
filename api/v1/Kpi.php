@@ -2,12 +2,14 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Services\ConnectionManager;
 use Exception;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Kpi extends Base
 {
-    public const ALLOWED_KPI_TYPES = ['ECOLOGY', 'ENERGY', 'SHIPPING', 'EXTERNAL'];
+    public const KPI_TYPE_EXTERNAL = 'EXTERNAL';
+    public const ALLOWED_KPI_TYPES = ['ECOLOGY', 'ENERGY', 'SHIPPING', self::KPI_TYPE_EXTERNAL];
 
     /**
      * called from MEL
@@ -49,7 +51,8 @@ class Kpi extends Base
                 $value["value"],
                 $value["type"],
                 $value["unit"],
-                $value["country"]
+                $value["country"],
+                $value["type_external"] ?? null
             );
         }
     }
@@ -64,7 +67,8 @@ class Kpi extends Base
         float $kpiValue,
         string $kpiType,
         string $kpiUnit,
-        int $kpiCountry = -1
+        int $kpiCountry = -1,
+        ?string $kpiTypeExternal = null
     ): int {
         if (!in_array(strtoupper($kpiType), self::ALLOWED_KPI_TYPES)) {
             throw new BadRequestHttpException('Invalid KPI type: '.$kpiType.
@@ -73,12 +77,14 @@ class Kpi extends Base
         $kpiType = strtoupper($kpiType);
         return (int)$this->getDatabase()->query(
             "
-            INSERT INTO kpi (kpi_name, kpi_value, kpi_month, kpi_type, kpi_lastupdate, kpi_unit, kpi_country_id) 
-            VALUES (?, ?, ?, ?, UNIX_TIMESTAMP(NOW(6)), ?, ?)
+            INSERT INTO kpi (
+                 kpi_name, kpi_value, kpi_month, kpi_type, kpi_type_external, kpi_lastupdate, kpi_unit, kpi_country_id
+             ) 
+            VALUES (?, ?, ?, ?, ?, UNIX_TIMESTAMP(NOW(6)), ?, ?)
             ON DUPLICATE KEY UPDATE kpi_value=?, kpi_lastupdate=UNIX_TIMESTAMP(NOW(6))
             ",
             array(
-                $kpiName, $kpiValue, $kpiMonth, $kpiType, $kpiUnit, $kpiCountry, $kpiValue
+                $kpiName, $kpiValue, $kpiMonth, $kpiType, $kpiTypeExternal ?? 'NULL', $kpiUnit, $kpiCountry, $kpiValue
             ),
             true
         );

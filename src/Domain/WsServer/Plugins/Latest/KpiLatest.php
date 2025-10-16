@@ -52,6 +52,9 @@ class KpiLatest extends CommonBase
             )
             ->from('kpi')
             ->where($andExpr);
+        if ($kpiType == 'EXTERNAL') {
+            $qb->addSelect('kpi_type_exteral as type_external');
+        }
         return $qb;
     }
 
@@ -133,7 +136,11 @@ class KpiLatest extends CommonBase
                 $data['ecology'] = $results[0]->fetchAllRows();
                 $data['shipping'] = $results[1]->fetchAllRows();
                 $data['energy'] = $results[2]->fetchAllRows();
-                $data['external'] = $results[3]->fetchAllRows();
+                foreach (($results[3]->fetchAllRows() ?? []) as $row) {
+                    $typeExternal = $row['type_external'] ?? 'external';
+                    unset($row['type_external']);
+                    $data[$typeExternal][] = $row;
+                }
                 return $data;
             });
 

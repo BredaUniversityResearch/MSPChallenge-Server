@@ -7,11 +7,14 @@ use App\Domain\API\APIHelper;
 use App\Domain\API\v1\Kpi;
 use App\Domain\Common\MessageJsonResponse;
 use App\Domain\Services\ConnectionManager;
+use App\Entity\ServerManager\GameWatchdogServer;
 use App\Entity\SessionAPI\Simulation;
 use App\Entity\SessionAPI\Watchdog;
+use App\Repository\ServerManager\GameWatchdogServerRepository;
 use App\Repository\SessionAPI\SimulationRepository;
 use Exception;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpClient\Exception\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -38,9 +41,9 @@ class KPIController extends BaseController
                         new OA\Property(
                             property: 'kpiValues',
                             description: 'The KPI\'s to post. Format: json array of object with: name, month, value, '.
-                                'type, unit, country. type is one of ECOLOGY, ENERGY, SHIPPING. The field country is '.
-                                'the id of the country or -1 if it is global. You can retrieve the country id using '.
-                                '/api/Game/GetCountries',
+                                'type, unit, country. For the internal watchdog, type must be set to either ECOLOGY,
+                                ENERGY or SHIPPING. The field country is the id of the country or -1 if it is global.
+                                You can retrieve the country id using /api/Game/GetCountries',
                             type: 'string',
                             format: 'json',
                             default: null,
@@ -118,6 +121,27 @@ class KPIController extends BaseController
         $kpiValues = json_decode($kpiValues, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: 'Invalid or missing data');
+        }
+
+        try {
+            // It is from an external watchdog
+            $serverId = $this->getServerIdFromRequest($request);
+            if ($serverId->toRfc4122() === Watchdog::getInternalServerId()->toRfc4122()) {
+                throw new Exception('Nope, not an external watchdog');
+            }
+            $kpiValues = collect($kpiValues)->map(function ($kpiType) use ($connectionManager, $serverId) {
+                /** @var GameWatchdogServerRepository $repo */
+                $repo = $connectionManager->getServerManagerEntityManager()->getRepository(GameWatchdogServer::class);
+                $repo->validateSimulationType($serverId, $kpiType['type'])
+                    or throw new InvalidArgumentException('Invalid type: '.$kpiType['type']);
+                $kpiType['type_external'] = $kpiType['type'];
+                $kpiType['type'] = Kpi::KPI_TYPE_EXTERNAL;
+                return $kpiType;
+            })->all();
+        } catch (InvalidArgumentException $e) {
+            return new MessageJsonResponse(status: 400, message: $e->getMessage());
+        } catch (Exception) {
+            // process $kpiValues as-is
         }
 
         $kpi = new Kpi();
