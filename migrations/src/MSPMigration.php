@@ -31,13 +31,14 @@ abstract class MSPMigration extends AbstractMigration
                     !Util::hasPrefix($schema->getName(), $_ENV['DBNAME_SESSION_PREFIX'] ?? 'msp_session_'),
                     'This migrations requires a game session database. ' .
                     'Please use "--em" to set the game session entity manager. ' .
-                    PHP_EOL . 'E.g. --em=msp_session_1'
+                    PHP_EOL . 'E.g. --em='.($_ENV['DBNAME_SESSION_PREFIX'] ?? 'msp_session_').'1'
                 );
                 break;
             case MSPDatabaseType::DATABASE_TYPE_SERVER_MANAGER:
                 $this->skipIf(
                     !Util::hasPrefix($schema->getName(), $_ENV['DBNAME_SERVER_MANAGER'] ?? 'msp_server_manager'),
-                    'This migrations requires a server manager database. Please use --em=' . $schema->getName()
+                    'This migrations requires a server manager database. Please use --em='.
+                    ($_ENV['DBNAME_SERVER_MANAGER'] ?? 'msp_server_manager')
                 );
                 break;
         }

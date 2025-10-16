@@ -229,7 +229,7 @@ class Util
         }
     }
 
-    public static function getClassAttribute(\ReflectionClass $class, string $attributeClass)
+    public static function getClassAttribute(\ReflectionClass $class, string $attributeClass): ?object
     {
         if (!class_exists($attributeClass)) {
             throw new \InvalidArgumentException("Attribute class $attributeClass does not exist.");
@@ -241,7 +241,7 @@ class Util
         return $attributes[0]->newInstance();
     }
 
-    public static function getPropertyAttribute(\ReflectionProperty $property, string $attributeClass)
+    public static function getPropertyAttribute(\ReflectionProperty $property, string $attributeClass): ?object
     {
         if (!class_exists($attributeClass)) {
             throw new \InvalidArgumentException("Attribute class $attributeClass does not exist.");
@@ -251,5 +251,17 @@ class Util
             return null; // No attributes found
         }
         return $attributes[0]->newInstance();
+    }
+
+    public static function getClassUsesRecursive(string|object $class): array
+    {
+        if (is_object($class)) {
+            $class = get_class($class);
+        }
+        $results = [];
+        foreach (array_reverse(class_parents($class)) + [$class => $class] as $class) {
+            $results += class_uses($class);
+        }
+        return array_unique($results);
     }
 }

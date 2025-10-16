@@ -161,7 +161,7 @@ class LayerRepository extends EntityRepository
                 ->withAttributes(array_merge(
                     array_keys($this->getEntityManager()->getClassMetadata(Layer::class)->fieldMappings),
                     [
-                        'originalLayer', 'layerDependencies'
+                        'originalLayer', 'layerDependencies','scale'
                     ]
                 ))
                 ->withCallbacks([

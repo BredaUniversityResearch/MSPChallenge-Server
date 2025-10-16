@@ -4,10 +4,13 @@ namespace App\Entity;
 
 use App\Domain\Helper\Util;
 use App\Entity\Mapping\Plurals;
+use App\Entity\Trait\EntityOriginTrait;
 use ReflectionClass;
 
 abstract class EntityBase
 {
+    use EntityOriginTrait;
+
     public function getPlurals(): Plurals
     {
         $reflectionClass = new ReflectionClass(static::class);

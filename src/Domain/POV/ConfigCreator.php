@@ -5,6 +5,8 @@ namespace App\Domain\POV;
 use App\Domain\API\v1\Game;
 use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
+use App\Entity\SessionAPI\Layer;
+use App\Repository\SessionAPI\LayerRepository;
 use Doctrine\DBAL\Connection;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -42,7 +44,7 @@ class ConfigCreator
     {
         $formats = \Imagick::queryFormats('PNG*'); // png formats supported
         if (!in_array(strtoupper($outputImageFormat), $formats)) {
-            throw new Exception('Invalid image format: ' . $outputImageFormat);
+            throw new Exception('Invalid image format: '.$outputImageFormat);
         }
         $this->outputImageFormat = $outputImageFormat;
         return $this;
@@ -96,12 +98,12 @@ class ConfigCreator
         string $configFilename = self::DEFAULT_CONFIG_FILENAME
     ): string {
         $outputDir = $this->create($region, $dir, $configFilename);
-        $zipFilename = self::getDefaultOutputBaseDir($this->projectDir) . DIRECTORY_SEPARATOR .
+        $zipFilename = self::getDefaultOutputBaseDir($this->projectDir).DIRECTORY_SEPARATOR .
             self::getDefaultCompressedFilename($region);
-        $this->log('Creating zip file: ' . $zipFilename);
+        $this->log('Creating zip file: '.$zipFilename);
         Util::createZipFromFolder($zipFilename, $outputDir);
         Util::removeDirectory($outputDir); // clean-up
-        $this->log('Zip file created: ' . $zipFilename);
+        $this->log('Zip file created: '.$zipFilename);
         return $zipFilename;
     }
 
@@ -112,7 +114,7 @@ class ConfigCreator
 
     public static function getDefaultOutputBaseDir(string $projectDir): string
     {
-        return (php_sapi_name() == 'cli' ? getcwd() : $projectDir) . DIRECTORY_SEPARATOR . self::SUB_DIR;
+        return (php_sapi_name() == 'cli' ? getcwd() : $projectDir).DIRECTORY_SEPARATOR.self::SUB_DIR;
     }
 
     public static function getFolderNameFromRegion(Region $region): string
@@ -122,7 +124,7 @@ class ConfigCreator
 
     public static function getDefaultCompressedFilename(Region $region): string
     {
-        return self::getFolderNameFromRegion($region) . '.zip';
+        return self::getFolderNameFromRegion($region).'.zip';
     }
 
     /**
@@ -135,18 +137,18 @@ class ConfigCreator
         string $configFilename = self::DEFAULT_CONFIG_FILENAME
     ): string {
         $dir ??= self::getDefaultOutputBaseDir($this->projectDir);
-        $dir .= DIRECTORY_SEPARATOR . self::getFolderNameFromRegion($region);
+        $dir .= DIRECTORY_SEPARATOR.self::getFolderNameFromRegion($region);
         if (!extension_loaded('imagick')) {
             throw new Exception('The required imagick extension is not loaded.');
         }
-        $this->log('query json from ' . $this->getDatabaseName() . ' for region: ' . $region);
+        $this->log('query json from '.$this->getDatabaseName().' for region: '.$region);
         $jsonString = $this->queryJson($region);
         $this->log('json retrieved, decoding json');
         try {
             $json = json_decode($jsonString, true, 512, JSON_THROW_ON_ERROR);
         } catch (Exception $e) {
-            throw new Exception('Could not decode the json string retrieved from ' . $this->getDatabaseName() .
-                '. Error: ' . $e->getMessage());
+            throw new Exception('Could not decode the json string retrieved from '.$this->getDatabaseName() .
+                '. Error: '.$e->getMessage());
         }
         $this->log('json decoded, extracting region from raster layers');
         $json['datamodel']['raster_layers'] ??= [];
@@ -154,163 +156,34 @@ class ConfigCreator
         $this->excludeLayersByTags($json['datamodel']['raster_layers'], $json['datamodel']['vector_layers']);
         $this->normaliseAndExtendRasterMappings($json['datamodel']['raster_layers']);
         $this->fixMissingRasterLayerScales($json['datamodel']['raster_layers']);
+        $this->log('raster layers extracted, extracting region from vector layers');
         $this->extractRegionFromRasterLayers($region, $json['datamodel']['raster_layers'], $dir);
         $this->log('region extracted, creating json config file');
         $this->createJsonConfigFile($json, $dir, $configFilename);
-        $this->log('json config file created: ' . realpath($dir . DIRECTORY_SEPARATOR . $configFilename));
+        $this->log('json config file created: '.realpath($dir.DIRECTORY_SEPARATOR.$configFilename));
         return $dir;
     }
 
     /**
      * The game config data model (from the config file) has a ["SEL"]["heatmap_settings"]["heatmap_range"],
-     *   that is available for each SEL layer. E.g. for shipping intensity layers.
+     *   that is available for each SEL layer. E.g., for shipping intensity layers.
      * This function will try to retrieve that heatmap_range array for the specified layer
-     *   or null if it is not available, e.g. if it is not a SEL layer
+     *   or null if it is not available, e.g., if it is not a SEL layer
      * @throws Exception
      */
-    private function getSELHeatmapRange(string $layerName): ?array
+    public function fixMissingRasterLayerScales(array &$raster_layers): void
     {
-        $gameConfigDataModel = $this->getGameConfigDataModel();
-        $heatmapSettings = array_filter(
-            $gameConfigDataModel['SEL']['heatmap_settings'],
-            fn($x) => $x['layer_name'] === $layerName
-        );
-        if (empty($heatmapSettings)) {
-            return null;
-        }
-        $heatMapSetting = current($heatmapSettings);
-        if (!array_key_exists('heatmap_range', $heatMapSetting)) {
-            return null;
-        }
-        if (empty($heatMapSetting['heatmap_range'])) {
-            return null;
-        }
-        return $heatMapSetting['heatmap_range'];
-    }
-
-    /**
-     * Given a layer's SEL heatmap range from the game config file, it will try to create a scale from it
-     * The scale can be of interpolation type Lin or LinGrouped
-     *
-     * @throws Exception
-     */
-    private function getScaleFromSELHeatMapRange(?array $heatmapRange): ?array
-    {
-        if (null === $heatmapRange) {
-            return null;
-        }
-        if (empty($heatmapRange) || count($heatmapRange) < 2) {
-            return null;
-        }
-        $scale = [
-            'min_value' => current($heatmapRange)['input'],
-            'max_value' => end($heatmapRange)['input'],
-            'interpolation' => self::INTERPOLATION_TYPE_LIN
-        ];
-
-        if (count($heatmapRange) < 3) {
-            return $scale;
-        }
-
-        $scale['interpolation'] = self::INTERPOLATION_TYPE_LIN_GROUPED;
-        $scale['groups'] = array_map(fn($x) => [
-            'normalised_input_value' => $x['output'],
-            'min_output_value' => $x['input']
-        ], $heatmapRange);
-
-        return $scale;
-    }
-
-    /**
-     * Given layer mapping and type names data from the game config data model, it will try to create a scale
-     *
-     * e.g. for "NO Hywind Metcentre"'s Bathymetry layer has mapping:
-     *  [
-     *      {"max": 0,"type": 0,"min": 0},
-     *      {"max": 37,"type": 1,"min": 1},
-     *      {"max": 73,"type": 2,"min": 38},
-     *      {"max": 110,"type": 3,"min": 74},
-     *      {"max": 146,"type": 4,"min": 111},
-     *      {"max": 183,"type": 5,"min": 147},
-     *      {"max": 219,"type": 6,"min": 184},
-     *      {"max": 255,"type": 7,"min": 220}
-     *  ]
-     * and type names:
-     *   ["0 - 20 m","20 - 40 m","40 - 60 m","60 -100 m","100 - 200 m","200 - 500 m ","500 - 1000 m ","> 1000 m"]
-     *
-     * it also supports the special case "<" for the first type name, e.g. for "NO Hywind Metcentre"'s Wind Speed layer:
-     *   ["< 5.0 m\\/s","5.0 - 6.0 m\\/s","6.0 - 7.0 m\\/s","7.0 - 8.0 m\\/s","8.0 - 9.0 m\\/s","> 9.0 m\\/s"]
-     * @param string[] $layerTypeNames
-     * @throws Exception
-     */
-    private function getScaleFromTypeMapping(array $layerMapping, array $layerTypeNames): ?array
-    {
-        // using heatmap format as intermediate format
-        $heatmapRange= [];
-        foreach ($layerMapping as $mapping) {
-            $typeIndex = $mapping['type'];
-            if (!array_key_exists($typeIndex, $layerTypeNames)) {
-                return null;
-            }
-            $layerTypeName = $layerTypeNames[$typeIndex];
-            if (false === preg_match_all('/(\d+(?:\.\d+)?)|<\s/', $layerTypeName, $matches)) {
-                return null;
-            }
-            if (!isset($matches[0][0])) {
-                return null;
-            }
-            if ($matches[0][0] === '<') {
-                $matches[0][0] = 0;
-            }
-            $heatmapRangeEl['input'] = (float)$matches[0][0];
-            $heatmapRangeEl['output'] = $mapping['min'] / 255;
-            $heatmapRange[] = $heatmapRangeEl;
-        }
-
-        $num = count($heatmapRange);
-        if ($num < 3) {
-            return $this->getScaleFromSELHeatMapRange($heatmapRange);
-        }
-
-        // add additional element to fill-up to 255, use the same range as the one of the last 2 elements
-        $lastRange = $heatmapRange[$num - 1]['input'] - $heatmapRange[$num - 2]['input'];
-        $heatmapRangeEl['input'] = $heatmapRange[$num - 1]['input'] + $lastRange;
-        $heatmapRangeEl['output'] = 1;
-        $heatmapRange[] = $heatmapRangeEl;
-
-        return $this->getScaleFromSELHeatMapRange($heatmapRange);
-    }
-
-    /**
-     * Adds a scale to the raster layers that are missing it.
-     * It can add missing scales to raster layers of type ValueMap only if:
-     * - the layer has a heatmap range data in the game config data model.
-     *   The scale will be of interpolation type LinGrouped
-     * - the layer type names can be parsed to extract min and max values. The scale will be of interpolation type Lin
-     * @throws Exception
-     */
-    private function fixMissingRasterLayerScales(array &$rasterLayers): void
-    {
-        $targetRasterLayers = array_filter(
-            $rasterLayers,
-            fn($x) => !array_key_exists('scale', $x) && in_array('ValueMap', $x['tags'] ?? [])
-        );
-        foreach ($targetRasterLayers as $key => &$layer) {
-            // create a scale based on the SELs heatmap range data, if available
-            if (null !== $scale = $this->getScaleFromSELHeatMapRange(
-                $this->getSELHeatmapRange($layer['name'])
-            )) {
-                $rasterLayers[$key]['scale'] = $scale;
+        foreach ($raster_layers as $key => &$layer) {
+            $layerObj = new Layer();
+            $layerObj
+                ->setOriginManager(ConnectionManager::getInstance()->getGameSessionEntityManager($this->sessionId))
+                ->setLayerType($layer['types'])
+                ->setLayerTags($layer['tags'])
+                ->setLayerName($layer['name']);
+            if (null === $scale = $layerObj->getScale()) {
                 continue;
             }
-            // create a scale based on the layer type names, if available
-            if (null === $scale = $this->getScaleFromTypeMapping(
-                $layer['mapping'],
-                array_column($layer['types'], 'name')
-            )) {
-                continue;
-            }
-            $rasterLayers[$key]['scale'] = $scale;
+            $layer['scale'] = $scale;
         }
         unset($layer);
     }
@@ -320,16 +193,16 @@ class ConfigCreator
      */
     private function createJsonConfigFile(array &$json, string $dir, string $configFilename): void
     {
-        $outputFilepath = $dir . DIRECTORY_SEPARATOR . $configFilename;
+        $outputFilepath = $dir.DIRECTORY_SEPARATOR.$configFilename;
         try {
             if (!file_put_contents($outputFilepath, json_encode(
                 $json,
                 JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
             ))) {
-                throw new Exception('Could not write to output file: ' . $dir);
+                throw new Exception('Could not write to output file: '.$dir);
             }
         } catch (Exception $e) {
-            throw new Exception('Could not encode the json string. Error: ' . $e->getMessage());
+            throw new Exception('Could not encode the json string. Error: '.$e->getMessage());
         }
     }
 
@@ -636,11 +509,11 @@ SQL,
             $jsonString = $result->fetchOne();
         } catch (Exception $e) {
             throw new Exception(
-                'Could not query from ' . $this->getDatabaseName() . '. Error: ' . $e->getMessage()
+                'Could not query from '.$this->getDatabaseName().'. Error: '.$e->getMessage()
             );
         }
         if (!$jsonString) {
-            throw new Exception('No data found from ' . $this->getDatabaseName() . ' for the given region: ' . $region);
+            throw new Exception('No data found from '.$this->getDatabaseName().' for the given region: '.$region);
         }
         return $jsonString;
     }
@@ -655,13 +528,13 @@ SQL,
         foreach ($this->excludedLayersByTags as $exclTags) {
             foreach ($rasterLayers as $key => $layer) {
                 if ($exclTags->matches(new LayerTags($layer['tags']))) {
-                    $this->log('Excluding raster layer: ' . $layer['name']);
+                    $this->log('Excluding raster layer: '.$layer['name']);
                     unset($rasterLayers[$key]);
                 }
             }
             foreach ($vectorLayers as $key => $layer) {
                 if ($exclTags->matches(new LayerTags($layer['tags']))) {
-                    $this->log('Excluding raster layer: ' . $layer['name']);
+                    $this->log('Excluding raster layer: '.$layer['name']);
                     unset($vectorLayers[$key]);
                 }
             }
@@ -675,7 +548,7 @@ SQL,
     private function normaliseAndExtendRasterMappings(array &$rasterLayers): void
     {
         foreach ($rasterLayers as &$layer) {
-            $this->normaliseAndExtendRasterMapping($layer['mapping']);
+            Layer::normaliseAndExtendRasterMapping($layer['mapping']);
         }
         unset($layer);
     }
@@ -687,60 +560,39 @@ SQL,
      */
     private function extractRegionFromRasterLayers(Region $region, array &$rasterLayers, string $dir): void
     {
-        $targetDir = $dir . DIRECTORY_SEPARATOR . 'Rastermaps';
+        $targetDir = $dir.DIRECTORY_SEPARATOR.'Rastermaps';
         Util::removeDirectory($targetDir);
         if (!mkdir($targetDir, 0777, true)) {
-            throw new Exception('Could not create directory: ' . $targetDir);
+            throw new Exception('Could not create directory: '.$targetDir);
         }
         // cut raster according to coordinates
         foreach ($rasterLayers as &$layer) {
             $pathInfo = pathinfo($layer['data']);
             // add _Cut in the filename before the extension
-            $targetFile = $pathInfo['filename'] . '_Cut.png';
+            $targetFile = $pathInfo['filename'].'_Cut.png';
             $outputRegion = clone $region;
             try {
                 $this->extractPartFromImageByRegion(
-                    $this->projectDir . DIRECTORY_SEPARATOR . 'raster' . DIRECTORY_SEPARATOR .
-                        $this->sessionId . DIRECTORY_SEPARATOR . $layer['data'],
+                    $this->projectDir.DIRECTORY_SEPARATOR.'raster'.DIRECTORY_SEPARATOR.
+                        $this->sessionId.DIRECTORY_SEPARATOR.$layer['data'],
                     new Region(
                         $layer['coordinate0'][0],
                         $layer['coordinate0'][1],
                         $layer['coordinate1'][0],
                         $layer['coordinate1'][1]
                     ),
-                    $targetDir . DIRECTORY_SEPARATOR . $targetFile,
+                    $targetDir.DIRECTORY_SEPARATOR.$targetFile,
                     $outputRegion
                 );
             } catch (Exception $e) {
-                throw new Exception('Could not extract region from image: ' . $e->getMessage(), 0, $e);
+                throw new Exception('Could not extract region from image: '.$e->getMessage(), 0, $e);
             }
-            $layer['data'] = 'Rastermaps/' . $targetFile;
+            $layer['data'] = 'Rastermaps/'.$targetFile;
             // now set the region coordinates, clamped by input coordinates (see extractPartFromImageByRegion)
             $layer['coordinate0'] = $outputRegion->getBottomLeft();
             $layer['coordinate1'] = $outputRegion->getTopRight();
         }
         unset($layer);
-    }
-
-    /**
-     * Given the layer mapping, normalises the max values, up to 255 max, and:
-     *   sets the "min" value based on the previous mapping entry's max
-     */
-    private function normaliseAndExtendRasterMapping(array &$mapping): void
-    {
-        $m = &$mapping;
-        if (count($m) == 0) {
-            return;
-        }
-        $maxValue = $m[count($m)-1]['max'];
-        $m[0]['min'] = 0;
-        $m[0]['max'] = (int)ceil(($m[0]['max'] / $maxValue) * 255);
-        for ($n = 1; $n < count($m); ++$n) {
-            $prevMappingEntry = &$m[$n - 1];
-            $mappingEntry = &$m[$n];
-            $mappingEntry['min'] = $prevMappingEntry['max']+1;
-            $m[$n]['max'] = (int)ceil(($m[$n]['max'] / $maxValue) * 255);
-        }
     }
 
     /**
@@ -789,7 +641,7 @@ SQL,
         $regionHeight = $outputPixel1Y - $outputPixel0Y + 1;
 
         if ($regionWidth <= 0 || $regionHeight <= 0) {
-            throw new Exception('Invalid region size: ' . $regionWidth . 'x' . $regionHeight);
+            throw new Exception('Invalid region size: '.$regionWidth.'x'.$regionHeight);
         }
 
         // set the actual outputted region coordinates

@@ -12,13 +12,16 @@
 
 namespace App\Entity\Listener;
 
+use App\Domain\Helper\Util;
+use App\Entity\Trait\EntityOriginTrait;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\PostLoadEventArgs;
 use Doctrine\ORM\Event\PrePersistEventArgs;
 use Exception;
 
 class SessionEntityListener implements PostLoadEventListenerInterface, PrePersistEventListenerInterface
 {
-    /** @var (SubEntityListenerInterface|PostLoadEventListenerInterface|PrePersistEventListenerInterface)[]  */
+    /** @var (SubEntityListenerInterface|PostLoadEventListenerInterface|PrePersistEventListenerInterface)[][]  */
     private array $listeners = [];
 
     public function __construct(
@@ -30,21 +33,23 @@ class SessionEntityListener implements PostLoadEventListenerInterface, PrePersis
         foreach ($listeners as $listener) {
             $supportedEntityClasses = $listener->getSupportedEntityClasses();
             foreach ($supportedEntityClasses as $supportedEntityClass) {
-                $this->listeners[$supportedEntityClass] = $listener;
+                $this->listeners[$supportedEntityClass][] = $listener;
             }
         }
     }
 
     public function prePersist(PrePersistEventArgs $event): void
     {
-        foreach ($this->listeners as $entityClassName => $listener) {
-            if ($entityClassName != get_class($event->getObject())) {
-                continue;
+        foreach ($this->listeners as $entityClassName => $listeners) {
+            foreach ($listeners as $listener) {
+                if ($entityClassName != get_class($event->getObject())) {
+                    continue;
+                }
+                if (!($listener instanceof PrePersistEventListenerInterface)) {
+                    continue;
+                }
+                $listener->prePersist($event);
             }
-            if (!($listener instanceof PrePersistEventListenerInterface)) {
-                continue;
-            }
-            $listener->prePersist($event);
         }
     }
 
@@ -53,14 +58,21 @@ class SessionEntityListener implements PostLoadEventListenerInterface, PrePersis
      */
     public function postLoad(PostLoadEventArgs $event): void
     {
-        foreach ($this->listeners as $entityClassName => $listener) {
-            if ($entityClassName != get_class($event->getObject())) {
-                continue;
+        $entity = $event->getObject();
+        if (($event->getObjectManager() instanceof EntityManagerInterface) &&
+            in_array(EntityOriginTrait::class, Util::getClassUsesRecursive($entity))) {
+            $entity->setOriginManager($event->getObjectManager());
+        }
+        foreach ($this->listeners as $entityClassName => $listeners) {
+            foreach ($listeners as $listener) {
+                if ($entityClassName != get_class($event->getObject())) {
+                    continue;
+                }
+                if (!($listener instanceof PostLoadEventListenerInterface)) {
+                    continue;
+                }
+                $listener->postLoad($event);
             }
-            if (!($listener instanceof PostLoadEventListenerInterface)) {
-                continue;
-            }
-            $listener->postLoad($event);
         }
     }
 }

@@ -37,8 +37,7 @@ class ImmersiveSessionConnectionEntityListener implements SubEntityListenerInter
             function () use ($immersiveSessionConnection) {
                 $em = ConnectionManager::getInstance()->getServerManagerEntityManager();
                 $repo = $em->getRepository(DockerApi::class);
-                $dockerApi = $repo->find($immersiveSessionConnection->getDockerApiID());
-                return $dockerApi;
+                return $repo->find($immersiveSessionConnection->getDockerApiID());
             }
         );
     }

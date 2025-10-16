@@ -6,11 +6,16 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\OpenApi\Model\Operation;
 use App\Domain\Common\EntityEnums\LayerGeoType;
+use App\Domain\Services\ConnectionManager;
+use App\Entity\EntityBase;
+use App\Entity\ServerManager\GameConfigVersion;
+use App\Entity\ServerManager\GameList;
 use App\Repository\SessionAPI\LayerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Exception;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: LayerRepository::class)]
@@ -23,8 +28,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
         tags: ['✨ Layer']
     )
 )]
-class Layer
+class Layer extends EntityBase
 {
+    const INTERPOLATION_TYPE_LIN = 'Lin';
+    const INTERPOLATION_TYPE_LIN_GROUPED = 'LinGrouped';
+
     #[Groups(['read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -226,6 +234,12 @@ class Layer
     private ?array $layerRasterBoundingbox = null;
 
     private array $layerDependencies = [];
+
+    private ?array $scale = null;
+
+    private ?float $ecologyKpiValue = null;
+
+    private ?GameConfigVersion $gameConfigVersion = null;
 
     public function __construct()
     {
@@ -1015,5 +1029,240 @@ class Layer
     public function setLayerDependencies(array $layerDependencies): void
     {
         $this->layerDependencies = $layerDependencies;
+    }
+
+    /**
+     * Gets scale for the raster layers
+     * @throws Exception
+     */
+    #[Groups(['read'])]
+    public function getScale(): ?array
+    {
+        if (null !== $ecologyKpiValue = $this->getEcologyKpiValue()) {
+            $this->scale ??= [
+                'min_value' => 0,
+                # convert from t/km2  to kg/km2, times 2 since 0.5 is the reference value
+                'max_value' => $ecologyKpiValue * 1000 * 2,
+                'interpolation' => self::INTERPOLATION_TYPE_LIN
+            ];
+        }
+
+        // only continue for raster layers of type ValueMap
+        if (!in_array('ValueMap', $this->getLayerTags() ?? [])) {
+            return $this->scale;
+        }
+
+        /*
+         * - the layer has a heatmap range data in the game config data model.
+         *   The scale will be of interpolation type LinGrouped
+         */
+        $this->scale ??= $this->getScaleFromSELHeatMapRange($this->getSELHeatmapRange());
+
+        // the layer type names can be parsed to extract min and max values. The scale will be of interpolation type Lin
+        $this->scale ??= $this->getScaleFromTypeMapping();
+        return $this->scale;
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getEcologyKpiValue(): ?float
+    {
+        if (null !== $this->ecologyKpiValue) {
+            return $this->ecologyKpiValue;
+        }
+        if (null == $em = $this->getOriginManager()) {
+            return null;
+        }
+        $result = $em->getConnection()->executeQuery(
+            <<<'SQL'
+WITH
+  # group ecology kpis by name and give row number based on month, row number 1 is the latest kpi
+  LatestEcologyKpiStep1 AS (
+    SELECT
+      *,
+      ROW_NUMBER() OVER (PARTITION BY kpi_name ORDER BY kpi_month DESC) AS rn
+    FROM
+      kpi
+    WHERE kpi_type = 'ECOLOGY'
+  ),
+  # filter latest ecology kpis, so only with row number 1
+  LatestEcologyKpiFinal AS (
+    SELECT * FROM LatestEcologyKpiStep1 WHERE rn = 1
+  ),
+  # include kpi value if layer is an ecology layer
+  LayerEcologyKpiValue AS (
+      SELECT
+        l.name_unique_when_original_id_null as layer_name,
+        k.kpi_value
+      FROM layer l
+      LEFT JOIN LatestEcologyKpiFinal k ON (
+          CONCAT('mel_',LOWER(REPLACE(k.kpi_name,' ','_'))) = l.name_unique_when_original_id_null
+      )
+      WHERE l.name_unique_when_original_id_null IS NOT NULL
+  )
+SELECT kpi_value FROM LayerEcologyKpiValue l WHERE l.layer_name = :layer_name
+SQL,
+            ['layer_name' => $this->getLayerName()]
+        );
+        $this->ecologyKpiValue = $result->fetchOne() ?: null;
+        return $this->ecologyKpiValue;
+    }
+
+    /**
+     * The game config data model (from the config file) has a ["SEL"]["heatmap_settings"]["heatmap_range"],
+     *   that is available for each SEL layer. E.g., for shipping intensity layers.
+     * This function will try to retrieve that heatmap_range array for the specified layer
+     *   or null if it is not available, e.g., if it is not a SEL layer
+     * @throws Exception
+     */
+    private function getSELHeatmapRange(): ?array
+    {
+        if (null === $this->getLayerName()) {
+            return null;
+        }
+        if (null == $gameListId =  $this->getOriginGameListId()) {
+            return null;
+        }
+        $this->gameConfigVersion ??= ConnectionManager::getInstance()->getServerManagerEntityManager()
+            ->getRepository(GameList::class)
+            ->find($gameListId)
+            ?->getGameConfigVersion();
+        $gameConfigDataModel = $this->gameConfigVersion->getGameConfigComplete()['datamodel'];
+        $heatmapSettings = array_filter(
+            $gameConfigDataModel['SEL']['heatmap_settings'],
+            fn($x) => $x['layer_name'] === $this->getLayerName()
+        );
+        if (empty($heatmapSettings)) {
+            return null;
+        }
+        $heatMapSetting = current($heatmapSettings);
+        if (!array_key_exists('heatmap_range', $heatMapSetting)) {
+            return null;
+        }
+        if (empty($heatMapSetting['heatmap_range'])) {
+            return null;
+        }
+        return $heatMapSetting['heatmap_range'];
+    }
+
+    /**
+     * Given layer mapping and type names data from the game config data model, it will try to create a scale
+     *
+     * e.g. for "NO Hywind Metcentre"'s Bathymetry layer has mapping:
+     *  [
+     *      {"max": 0,"type": 0,"min": 0},
+     *      {"max": 37,"type": 1,"min": 1},
+     *      {"max": 73,"type": 2,"min": 38},
+     *      {"max": 110,"type": 3,"min": 74},
+     *      {"max": 146,"type": 4,"min": 111},
+     *      {"max": 183,"type": 5,"min": 147},
+     *      {"max": 219,"type": 6,"min": 184},
+     *      {"max": 255,"type": 7,"min": 220}
+     *  ]
+     * and type names:
+     *   ["0 - 20 m","20 - 40 m","40 - 60 m","60 -100 m","100 - 200 m","200 - 500 m ","500 - 1000 m ","> 1000 m"]
+     *
+     * It also supports the special case "<" for the first type name, e.g.,
+     *   for "NO Hywind Metcentre"'s Wind Speed layer:
+     *   ["< 5.0 m\\/s","5.0 - 6.0 m\\/s","6.0 - 7.0 m\\/s","7.0 - 8.0 m\\/s","8.0 - 9.0 m\\/s","> 9.0 m\\/s"]
+     * @throws Exception
+     */
+    private function getScaleFromTypeMapping(): ?array
+    {
+        $layerMapping = collect($this->getLayerType())
+            ->map(fn(array $lt, $key) => ['max' => $lt['value'], 'type' => $key])->all();
+        self::normaliseAndExtendRasterMapping($layerMapping);
+        $layerTypeNames = collect($this->getLayerType())
+            ->map(fn(array $lt) => $lt['displayName'] ?? $lt['name'])->all();
+
+        // using heatmap format as intermediate format
+        $heatmapRange= [];
+        foreach ($layerMapping as $mapping) {
+            $typeIndex = $mapping['type'];
+            if (!array_key_exists($typeIndex, $layerTypeNames)) {
+                return null;
+            }
+            $layerTypeName = $layerTypeNames[$typeIndex];
+            if (false === preg_match_all('/(\d+(?:\.\d+)?)|<\s/', $layerTypeName, $matches)) {
+                return null;
+            }
+            if (!isset($matches[0][0])) {
+                return null;
+            }
+            if ($matches[0][0] === '<') {
+                $matches[0][0] = 0;
+            }
+            $heatmapRangeEl['input'] = (float)$matches[0][0];
+            $heatmapRangeEl['output'] = $mapping['min'] / 255;
+            $heatmapRange[] = $heatmapRangeEl;
+        }
+
+        $num = count($heatmapRange);
+        if ($num < 3) {
+            return $this->getScaleFromSELHeatMapRange($heatmapRange);
+        }
+
+        // add additional element to fill-up to 255, use the same range as the one of the last 2 elements
+        $lastRange = $heatmapRange[$num - 1]['input'] - $heatmapRange[$num - 2]['input'];
+        $heatmapRangeEl['input'] = $heatmapRange[$num - 1]['input'] + $lastRange;
+        $heatmapRangeEl['output'] = 1;
+        $heatmapRange[] = $heatmapRangeEl;
+
+        return $this->getScaleFromSELHeatMapRange($heatmapRange);
+    }
+
+    /**
+     * Given the layer mapping, normalises the max values, up to 255 max, and:
+     *   sets the "min" value based on the previous mapping entry's max
+     */
+    public static function normaliseAndExtendRasterMapping(array &$mapping): void
+    {
+        $m = &$mapping;
+        if (count($m) == 0) {
+            return;
+        }
+        $maxValue = $m[count($m)-1]['max'];
+        $m[0]['min'] = 0;
+        $m[0]['max'] = (int)ceil(($m[0]['max'] / $maxValue) * 255);
+        for ($n = 1; $n < count($m); ++$n) {
+            $prevMappingEntry = &$m[$n - 1];
+            $mappingEntry = &$m[$n];
+            $mappingEntry['min'] = $prevMappingEntry['max']+1;
+            $m[$n]['max'] = (int)ceil(($m[$n]['max'] / $maxValue) * 255);
+        }
+    }
+
+    /**
+     * Given a layer's SEL heatmap range from the game config file, it will try to create a scale from it
+     * The scale can be of interpolation type Lin or LinGrouped
+     *
+     * @throws Exception
+     */
+    private function getScaleFromSELHeatMapRange(?array $heatmapRange): ?array
+    {
+        if (null === $heatmapRange) {
+            return null;
+        }
+        if (empty($heatmapRange) || count($heatmapRange) < 2) {
+            return null;
+        }
+        $scale = [
+            'min_value' => current($heatmapRange)['input'],
+            'max_value' => end($heatmapRange)['input'],
+            'interpolation' => self::INTERPOLATION_TYPE_LIN
+        ];
+
+        if (count($heatmapRange) < 3) {
+            return $scale;
+        }
+
+        $scale['interpolation'] = self::INTERPOLATION_TYPE_LIN_GROUPED;
+        $scale['groups'] = array_map(fn($x) => [
+            'normalised_input_value' => $x['output'],
+            'min_output_value' => $x['input']
+        ], $heatmapRange);
+
+        return $scale;
     }
 }
