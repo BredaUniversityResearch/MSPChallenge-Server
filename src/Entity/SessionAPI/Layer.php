@@ -132,7 +132,7 @@ class Layer extends EntityBase
             'default' => '[{"state":"ASSEMBLY","time":2},{"state":"ACTIVE","time":10},{"state":"DISMANTLE","time":2}]'
         ]
     )]
-    private array $layerStates = [
+    private ?array $layerStates = [
         ['state' => 'ASSEMBLY', 'time' => 2],
         ['state' => 'ACTIVE', 'time' => 10],
         ['state' => 'DISMANTLE', 'time' => 2],
