@@ -707,14 +707,17 @@ class SimulationController extends BaseController
             return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: $e->getMessage());
         }
         $em = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
+        $em->getFilters()->disable('softdeleteable');
         if (null === $watchdog =
             $em->getRepository(Watchdog::class)->findOneBy(['serverId' => $watchdogServerId])
         ) {
+            $em->getFilters()->enable('softdeleteable');
             return new MessageJsonResponse(
                 status: Response::HTTP_NOT_FOUND,
                 message: 'Could not find watchdog with server id: '.$watchdogServerId->toRfc4122()
             );
         }
+        $em->getFilters()->enable('softdeleteable');
         return new JsonResponse(['watchdog_token' => $watchdog->getToken()]);
     }
 }
