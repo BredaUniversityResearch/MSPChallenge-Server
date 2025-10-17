@@ -555,7 +555,7 @@ class MEL extends Base
                                     COLUMNS (
                                         months JSON PATH '$.months'
                                     )
-                                ) jt ON TRUE
+                                ) jt ON JSON_EXTRACT(g.geometry_data, '$.%s.months') IS NOT NULL
                         )
                     SELECT DISTINCT l.layer_original_id
                     FROM layer l
@@ -570,6 +570,7 @@ class MEL extends Base
                         )
                    )
 SUBQUERY,
+                    $layerProp['property_name'],
                     $layerProp['property_name']
                 )
             ))
