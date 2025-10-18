@@ -3,6 +3,7 @@
 namespace App\Domain\Common;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class MessageJsonResponse extends JsonResponse
 {
@@ -23,6 +24,12 @@ class MessageJsonResponse extends JsonResponse
         if ($debugMessage) {
             $this->message = ($this->message ?? '').$debugMessage;
         }
+
+        if ($data === null) {
+            Response::__construct($this->message, $status, $headers);
+            return;
+        }
+
         parent::__construct($data, $status, $headers);
     }
 

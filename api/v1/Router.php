@@ -202,7 +202,7 @@ class Router
                 }
 
                 $message = self::ErrorString($e);
-                return new MessageJsonResponse(message: $message, status: 500);
+                return new MessageJsonResponse(status: 500, message: $message);
             }
             // execution worked, payload has been set, message can remain empty
             $success = true;
@@ -211,7 +211,7 @@ class Router
             $success = false;
             $message = self::ErrorString(new Exception("Invalid method."));
         }
-        return new MessageJsonResponse(status: $success ? 200 : 500, message: $message, data: $payload);
+        return new MessageJsonResponse(data: $payload, status: $success ? 200 : 500, message: $message);
     }
 
     /**
