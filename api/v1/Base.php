@@ -53,14 +53,14 @@ abstract class Base extends CommonBase
     /**
      * @param array $data
      * @param bool $encode
-     * @return array|false|string
+     * @return array
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function MergeGeometry(array $data, bool $encode = false): false|string|array
+    public static function MergeGeometry(array $data, bool $encode = false): array
     {
         if (self::$more) {
             self::Debug($data);
-            return '';
+            return [];
         }
 
         $arr = array();
@@ -105,7 +105,10 @@ abstract class Base extends CommonBase
             }
         }
 
-        return ($encode) ? json_encode($arr) : $arr;
+        if ($encode) {
+            $arr = json_encode($arr) ?: [];
+        }
+        return $arr;
     }
 
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps

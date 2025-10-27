@@ -159,14 +159,14 @@ class Layer extends Base
      * @apiGroup Layer
      * @apiDescription Get all geometry in a single layer
      * @param int $layer_id
-     * @return array|null
+     * @return array
      * @throws Exception
      * @api {POST} /layer/get/ Get
      * @apiParam {int} layer_id id of the layer to return
      * @apiSuccess {string} JSON JSON object
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Get(int $layer_id): ?array
+    public function Get(int $layer_id): array
     {
         $vectorCheck = $this->getDatabase()->query(
             "SELECT layer_geotype FROM layer WHERE layer_id = ?",
@@ -202,11 +202,11 @@ class Layer extends Base
         );
             
         if (empty($data) || empty($data[0]["geometry"])) {
-            return null;
+            return [];
         }
 
         if (false === $result = self::MergeGeometry($data)) {
-            return null;
+            return [];
         }
 
         return $result;
