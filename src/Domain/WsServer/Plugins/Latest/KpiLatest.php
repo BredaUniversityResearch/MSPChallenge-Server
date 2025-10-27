@@ -53,7 +53,7 @@ class KpiLatest extends CommonBase
             ->from('kpi')
             ->where($andExpr);
         if ($kpiType == 'EXTERNAL') {
-            $qb->addSelect('kpi_type_exteral as type_external');
+            $qb->addSelect('kpi_type_external as type_external');
         }
         return $qb;
     }
