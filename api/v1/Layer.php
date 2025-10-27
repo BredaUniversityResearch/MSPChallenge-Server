@@ -205,11 +205,7 @@ class Layer extends Base
             return [];
         }
 
-        if (false === $result = self::MergeGeometry($data)) {
-            return [];
-        }
-
-        return $result;
+        return self::MergeGeometry($data);
     }
 
     /**
