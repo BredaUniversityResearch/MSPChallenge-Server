@@ -52,7 +52,7 @@ class GameLatest extends CommonBase
                     ['simulation_type' => 'CEL', 'kpi' => $results['energy']],
                     ['simulation_type' => 'MEL', 'kpi' => $results['ecology']],
                     ['simulation_type' => 'SEL', 'kpi' => $results['shipping']],
-                    ['simulation_type' => 'External', 'kpi' => $results['external']]
+                    ['simulation_type' => 'External', 'kpi' => $results['external'] ?? []]
                 ];
             });
         $latestWarning = $this->getLatestWarning($context)
