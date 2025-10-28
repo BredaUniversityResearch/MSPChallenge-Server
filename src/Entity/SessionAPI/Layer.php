@@ -121,7 +121,7 @@ class Layer extends EntityBase
         nullable: false,
         options: ['default' => '{}']
     )]
-    private ?object $layerTextInfo = null;
+    private ?LayerTextInfo $layerTextInfo = null;
 
     #[Groups(['read'])]
     #[ORM\Column(
@@ -243,7 +243,7 @@ class Layer extends EntityBase
 
     public function __construct()
     {
-        $this->layerTextInfo = (object)[];
+        $this->layerTextInfo = new LayerTextInfo();
         $this->derivedLayer = new ArrayCollection();
         $this->geometry = new ArrayCollection();
         $this->restrictionStart = new ArrayCollection();
@@ -632,15 +632,18 @@ class Layer extends EntityBase
         return $this;
     }
 
-    public function getLayerTextInfo(): object
+    public function getLayerTextInfo(): LayerTextInfo
     {
-        $this->layerTextInfo ??= (object)[];
+        $this->layerTextInfo ??= new LayerTextInfo();
         return $this->layerTextInfo;
     }
 
-    public function setLayerTextInfo(object|array $layerTextInfo): static
+    public function setLayerTextInfo(LayerTextInfo|array $layerTextInfo): static
     {
-        $this->layerTextInfo = (object)$layerTextInfo;
+        if (is_array($layerTextInfo)) {
+            $layerTextInfo = new LayerTextInfo($layerTextInfo);
+        }
+        $this->layerTextInfo = $layerTextInfo;
         return $this;
     }
 

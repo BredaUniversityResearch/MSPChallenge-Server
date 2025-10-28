@@ -6,6 +6,7 @@ use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityPropToDbColumnNameConvertor;
 use App\Domain\Common\NormalizerContextBuilder;
 use App\Entity\SessionAPI\Layer;
+use App\Entity\SessionAPI\LayerTextInfo;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
@@ -139,7 +140,7 @@ class LayerRepository extends EntityRepository
                 ->withClassPropertyValidation(Layer::class)
                 ->withCallbacks([
                     'layerGeoType' => fn($value) => LayerGeoType::from($value),
-                    'layerTextInfo' => fn($value) => (object)$value
+                    'layerTextInfo' => fn($value) => $value ?? new LayerTextInfo(),
                 ])
                 ->toArray()
         );
