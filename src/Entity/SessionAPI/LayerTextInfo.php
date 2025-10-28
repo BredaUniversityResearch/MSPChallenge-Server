@@ -2,10 +2,7 @@
 
 namespace App\Entity\SessionAPI;
 
-use Symfony\Component\Serializer\Attribute\Context;
-
 #[\AllowDynamicProperties]
-#[Context(normalizationContext: ['skip_null_values' => true])]
 class LayerTextInfo
 {
     public ?array $property_per_state = null;

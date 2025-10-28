@@ -170,6 +170,7 @@ class LayerRepository extends EntityRepository
                     'layerGeoType' => fn(?LayerGeoType $value) => $value?->value
                 ])
                 ->withPreserveEmptyObjects(true)
+                ->withSkipNullValues(true)
                 ->toArray()
         );
     }
