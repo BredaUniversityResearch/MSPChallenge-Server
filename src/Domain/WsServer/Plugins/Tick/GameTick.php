@@ -184,7 +184,7 @@ class GameTick extends TickBase
                 return;
             }
             SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch(
-                new GameListCreationMessage($this->getGameSessionId())
+                new GameListCreationMessage($this->getGameSessionId(), true)
             );
         });
     }
