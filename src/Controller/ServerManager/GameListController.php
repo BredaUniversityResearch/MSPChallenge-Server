@@ -30,7 +30,6 @@ use App\Repository\SessionAPI\WatchdogRepository;
 use App\VersionsProvider;
 use Exception;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -153,7 +152,11 @@ class GameListController extends BaseController
             $em = $connectionManager->getGameSessionEntityManager($sessionId);
             /** @var WatchdogRepository $watchdogRepo */
             $watchdogRepo = $em->getRepository(Watchdog::class);
-            if (null === $watchdog = $watchdogRepo->find($watchdogId)) {
+
+            $em->getFilters()->disable('softdeleteable');
+            $watchdog = $watchdogRepo->find($watchdogId);
+            $em->getFilters()->enable('softdeleteable');
+            if (null === $watchdog) {
                 throw new NotFoundHttpException('Watchdog not found');
             }
             $watchdog
@@ -239,8 +242,10 @@ class GameListController extends BaseController
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         try {
-            $watchdogs = $connectionManager->getGameSessionEntityManager($sessionId)->getRepository(Watchdog::class)->
-                findAll();
+            $em = $connectionManager->getGameSessionEntityManager($sessionId);
+            $em->getFilters()->disable('softdeleteable');
+            $watchdogs = $em->getRepository(Watchdog::class)->findAll();
+            $em->getFilters()->enable('softdeleteable');
         } catch (Exception $e) {
             $watchdogs = [];
         }
