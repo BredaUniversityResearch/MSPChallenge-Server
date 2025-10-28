@@ -459,7 +459,7 @@ class LayerController extends BaseController
                   # fetch all geometry including deletion, inactive, history
                   AllGeometryInclHistory AS (
                     SELECT
-                      g.*
+                      g.*, IFNULL(MAX(p.plan_gametime), -1) as implementation_time
                     FROM layer l
                     LEFT JOIN plan_layer pl ON pl.plan_layer_layer_id=l.layer_id
                     LEFT JOIN plan p ON pl.plan_layer_plan_id = p.plan_id
@@ -498,7 +498,8 @@ class LayerController extends BaseController
                       g.geometry_id as id, g.geometry_geometry as geometry, g.geometry_country_id as country,
                       g.geometry_FID as FID, g.geometry_data as data, g.geometry_layer_id as layer,
                       g.geometry_subtractive as subtractive, g.geometry_type as type,
-                      g.geometry_persistent as persistent, g.geometry_mspid as mspid, g.geometry_active as active
+                      g.geometry_persistent as persistent, g.geometry_mspid as mspid, g.geometry_active as active,
+                      g.implementation_time
                     FROM LatestGeometryStep2 g
                     WHERE
                         -- remove geometry that was deleted in one of the "delete" plans
@@ -528,7 +529,8 @@ class LayerController extends BaseController
                 'type' => $row['type'],
                 'country' => $row['country'] ?? -1,
                 'active' => $row['active'],
-                'data' => json_decode($row['data'] == '[]' ? '' : $row['data'])
+                'data' => json_decode($row['data'] == '[]' ? '' : $row['data']),
+                'implementation_time' => $row['implementation_time']
             ];
         }
         return new JsonResponse($geometry);
