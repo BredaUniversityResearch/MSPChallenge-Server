@@ -6,6 +6,7 @@ use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityPropToDbColumnNameConvertor;
 use App\Domain\Common\NormalizerContextBuilder;
 use App\Entity\SessionAPI\Layer;
+use App\Entity\SessionAPI\LayerRaster;
 use App\Entity\SessionAPI\LayerTextInfo;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
@@ -131,6 +132,21 @@ class LayerRepository extends EntityRepository
     {
         // fix name inconsistencies
         $layerData['layer_geo_type'] = $layerData['layer_geotype'];
+        $layerRasterFields = [
+            'layer_raster_material',
+            'layer_raster_pattern',
+            'layer_raster_minimum_value_cutoff',
+            'layer_raster_color_interpolation',
+            'layer_raster_filter_mode'
+        ];
+        foreach ($layerRasterFields as $field) {
+            if (!isset($layerData[$field])) {
+                continue;
+            }
+            $layerData['layer_raster'][$field] = $layerData[$field];
+            unset($layerData[$field]);
+        }
+
         unset($layerData['layer_geotype']);
         return $this->getSerializer()->denormalize(
             $layerData,
@@ -141,6 +157,7 @@ class LayerRepository extends EntityRepository
                 ->withCallbacks([
                     'layerGeoType' => fn($value) => LayerGeoType::from($value),
                     'layerTextInfo' => fn($value) => $value ?? new LayerTextInfo(),
+                    'layerRaster' => fn($value) => $value === null ? $value : new LayerRaster($value)
                 ])
                 ->toArray()
         );

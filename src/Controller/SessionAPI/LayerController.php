@@ -6,13 +6,14 @@ use App\Controller\BaseController;
 use App\Domain\API\v1\Layer;
 use App\Domain\Common\MessageJsonResponse;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\SessionAPI\Layer as LayerEntity;
 use Exception;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route('/api/Layer')]
+#[Route('/api/{layer}', requirements: ['layer' => '[lL]ayer'])]
 #[OA\Tag(name: 'Layer', description: 'Operations related to layer management')]
 class LayerController extends BaseController
 {
@@ -754,6 +755,9 @@ class LayerController extends BaseController
         }
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route('/UpdateRaster', name: 'session_api_layer_update_raster', methods: ['POST'])]
     #[OA\Post(
         summary: 'UpdateRaster updates raster image',
@@ -816,8 +820,9 @@ class LayerController extends BaseController
         ]
     )]
     // @todo: remove raster_bounds support ? REL/REL/RiskModel.cs in simulations uses it, but REL isn't used anymore?
-    public function updateRaster(Request $request): JsonResponse
-    {
+    public function updateRaster(
+        Request $request
+    ): JsonResponse {
         if (empty($request->request->get('layer_name'))) {
             return new MessageJsonResponse(status: 400, message: 'Missing required field: layer_name');
         }
@@ -834,18 +839,37 @@ class LayerController extends BaseController
         if ($month != null && !is_numeric($month)) {
             return new MessageJsonResponse(status: 400, message: 'Invalid month: '.$month);
         }
+        $em = $this->connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
+        $repo = $em->getRepository(LayerEntity::class);
+        $layerName = $request->request->get('layer_name');
+        if (null === $layerEntity = $repo->findOneBy(['layerName' => $layerName])) {
+            return new MessageJsonResponse(
+                status: 500,
+                message: "Could not find layer with name ".$layerName." to update the raster image"
+            );
+        }
+        if (false === $imageData = base64_decode($request->request->get('image_data'), true)) {
+            return new MessageJsonResponse(status: 400, message: 'Invalid image data');
+        }
         try {
             $layer = new Layer();
             $layer->setGameSessionId($this->getSessionIdFromRequest($request));
-            $data = $layer->UpdateRaster(
-                $request->request->get('layer_name'),
-                $request->request->get('image_data'),
+            $layer->UpdateRaster(
+                $layerEntity,
+                $imageData,
                 $rasterBounds,
                 $month
             );
-            return new MessageJsonResponse(data: $data, message:'Raster data updated successfully');
         } catch (Exception $e) {
             return new MessageJsonResponse(status: 500, message: $e->getMessage());
         }
+        try {
+            $em->persist($layerEntity);
+            $em->flush();
+            $logs[] = sprintf('Successfully flushed layer with id %d', $layerEntity->getLayerId());
+        } catch (Exception $e) {
+            $logs[] = sprintf('Failed to flush layer with id %d', $layerEntity->getLayerId());
+        }
+        return new MessageJsonResponse(data: ['logs' => $logs], message: 'Raster data updated successfully');
     }
 }

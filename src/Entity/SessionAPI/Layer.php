@@ -117,7 +117,6 @@ class Layer extends EntityBase
     #[Groups(['read'])]
     #[ORM\Column(
         type: 'json_document',
-        length: 1024,
         nullable: false,
         options: ['default' => '{}']
     )]
@@ -126,7 +125,6 @@ class Layer extends EntityBase
     #[Groups(['read'])]
     #[ORM\Column(
         type: 'json_document',
-        length: 255,
         nullable: true,
         options: [
             'default' => '[{"state":"ASSEMBLY","time":2},{"state":"ACTIVE","time":10},{"state":"DISMANTLE","time":2}]'
@@ -139,8 +137,8 @@ class Layer extends EntityBase
     ];
 
     #[Groups(['read'])]
-    #[ORM\Column(type: 'json_document', length: 512, nullable: true)]
-    private mixed $layerRaster = null;
+    #[ORM\Column(type: 'json_document', nullable: true)]
+    private ?LayerRaster $layerRaster = null;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 100])]
@@ -179,7 +177,7 @@ class Layer extends EntityBase
     private ?float $layerEntityValueMax = null;
 
     #[Groups(['read'])]
-    #[ORM\Column(type: 'json_document', length: 1024, nullable: true)]
+    #[ORM\Column(type: 'json_document', nullable: true)]
     private mixed $layerTags = null;
 
     #[ORM\OneToMany(mappedBy: 'layer', targetEntity: Geometry::class, cascade: ['persist'], orphanRemoval: true)]
@@ -218,20 +216,6 @@ class Layer extends EntityBase
     private ?int $layerWidth = null;
 
     private ?int $layerHeight = null;
-
-    private ?string $layerRasterMaterial = null;
-
-    private ?bool $layerRasterFilterMode = null;
-
-    private ?bool $layerRasterColorInterpolation = null;
-
-    private ?string $layerRasterPattern = null;
-
-    private ?float $layerRasterMinimumValueCutoff = null;
-
-    private ?string $layerRasterURL = null;
-
-    private ?array $layerRasterBoundingbox = null;
 
     private array $layerDependencies = [];
 
@@ -329,83 +313,6 @@ class Layer extends EntityBase
     public function setLayerHeight(?int $layerHeight): static
     {
         $this->layerHeight = $layerHeight;
-        return $this;
-    }
-
-    public function getLayerRasterMaterial(): ?string
-    {
-        return $this->layerRasterMaterial;
-    }
-
-    public function setLayerRasterMaterial(?string $layerRasterMaterial): static
-    {
-        $this->layerRasterMaterial = $layerRasterMaterial;
-        return $this;
-    }
-
-    public function getLayerRasterFilterMode(): ?bool
-    {
-        return $this->layerRasterFilterMode;
-    }
-
-    public function setLayerRasterFilterMode(?bool $layerRasterFilterMode): static
-    {
-        $this->layerRasterFilterMode = $layerRasterFilterMode;
-        return $this;
-    }
-
-    public function getLayerRasterColorInterpolation(): ?bool
-    {
-        return $this->layerRasterColorInterpolation;
-    }
-
-    public function setLayerRasterColorInterpolation(?bool $layerRasterColorInterpolation): static
-    {
-        $this->layerRasterColorInterpolation = $layerRasterColorInterpolation;
-        return $this;
-    }
-
-    public function getLayerRasterPattern(): ?string
-    {
-        return $this->layerRasterPattern;
-    }
-
-    public function setLayerRasterPattern(?string $layerRasterPattern): static
-    {
-        $this->layerRasterPattern = $layerRasterPattern;
-        return $this;
-    }
-
-    public function getLayerRasterMinimumValueCutoff(): ?float
-    {
-        return $this->layerRasterMinimumValueCutoff;
-    }
-
-    public function setLayerRasterMinimumValueCutoff(?float $layerRasterMinimumValueCutoff): static
-    {
-        $this->layerRasterMinimumValueCutoff = $layerRasterMinimumValueCutoff;
-        return $this;
-    }
-
-    public function getLayerRasterURL(): ?string
-    {
-        return $this->layerRasterURL;
-    }
-
-    public function setLayerRasterURL(?string $layerRasterURL): static
-    {
-        $this->layerRasterURL = $layerRasterURL;
-        return $this;
-    }
-
-    public function getLayerRasterBoundingbox(): ?array
-    {
-        return $this->layerRasterBoundingbox;
-    }
-
-    public function setLayerRasterBoundingbox(?array $layerRasterBoundingbox): static
-    {
-        $this->layerRasterBoundingbox = $layerRasterBoundingbox;
         return $this;
     }
 
@@ -658,15 +565,8 @@ class Layer extends EntityBase
         return $this;
     }
 
-    public function getLayerRaster(): mixed
+    public function getLayerRaster(): ?LayerRaster
     {
-        $this->setLayerRasterMaterial($this->layerRaster["layer_raster_material"] ?? null);
-        $this->setLayerRasterPattern($this->layerRaster["layer_raster_pattern"] ?? null);
-        $this->setLayerRasterMinimumValueCutoff($this->layerRaster["layer_raster_minimum_value_cutoff"] ?? null);
-        $this->setLayerRasterColorInterpolation($this->layerRaster["layer_raster_color_interpolation"] ?? null);
-        $this->setLayerRasterFilterMode($this->layerRaster["layer_raster_filter_mode"] ?? null);
-        $this->setLayerRasterURL($this->layerRaster["url"] ?? null);
-        $this->setLayerRasterBoundingbox($this->layerRaster["boundingbox"] ?? null);
         return $this->layerRaster;
     }
 
@@ -675,16 +575,8 @@ class Layer extends EntityBase
         return json_encode($this->layerRaster);
     }
 
-    public function setLayerRaster(mixed $layerRaster = null): static
+    public function setLayerRaster(?LayerRaster $layerRaster = null): static
     {
-        $layerRaster ??= [];
-        $layerRaster["layer_raster_material"] = $this->getLayerRasterMaterial();
-        $layerRaster["layer_raster_pattern"] = $this->getLayerRasterPattern();
-        $layerRaster["layer_raster_minimum_value_cutoff"] = $this->getLayerRasterMinimumValueCutoff();
-        $layerRaster["layer_raster_color_interpolation"] = $this->getLayerRasterColorInterpolation();
-        $layerRaster["layer_raster_filter_mode"] = $this->getLayerRasterFilterMode();
-        $layerRaster["url"] = $this->getLayerRasterURL();
-        $layerRaster["boundingbox"] = $this->getLayerRasterBoundingbox();
         $this->layerRaster = $layerRaster;
         return $this;
     }

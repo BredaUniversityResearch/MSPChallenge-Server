@@ -720,7 +720,7 @@ SUBQUERY,
         $layerGeoType = $layer->getLayerGeoType();
         if ($layerGeoType == LayerGeoType::RASTER) {
             $result["geotype"] = $layerGeoType?->value ?? ''; // enum to string
-            $result["raster"] = $layer->getLayerRaster()['url'] ?? '';
+            $result["raster"] = $layer->getLayerRaster()?->getUrl() ?? '';
             return $result;
         }
 

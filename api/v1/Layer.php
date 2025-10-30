@@ -5,6 +5,8 @@ namespace App\Domain\API\v1;
 use App\Domain\Services\ConnectionManager;
 use App\Repository\SessionAPI\LayerRepository;
 use Exception;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 class Layer extends Base
@@ -211,57 +213,42 @@ class Layer extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetRaster(string $layer_name, int $month = -1): array
     {
-        $layerData = $this->getDatabase()->query(
-            "SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?",
-            array($layer_name)
-        );
-        if (count($layerData) != 1) {
+        $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
+            ->getRepository(\App\Entity\SessionAPI\Layer::class);
+        if (null === $layer = $repo->findOneBy(['layerName' => $layer_name])) {
             throw new Exception("Could not find layer with name " . $layer_name . " to request the raster image for");
         }
-
-        $filePath = null;
-        if (null !== $rasterData = json_decode($layerData[0]['layer_raster'], true)) {
-            $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
+        $rasterData = $layer->getLayerRaster();
+        if (null === $url = $rasterData->getUrl()) {
+            throw new Exception("Could not find raster file for layer with name " . $layer_name);
         }
-
-        $path_parts = pathinfo($rasterData['url']);
+        $path_parts = pathinfo($url);
         $fileExt = $path_parts['extension'];
         $filename = $path_parts['filename'];
         $archivedRasterDataUrlFormat = "archive/%s_%d.%s";
-        if ($month >= 0) {
+
+        // use the archive first if it exists
+        $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).
+            sprintf($archivedRasterDataUrlFormat, $filename, $month, $fileExt);
+        // if not, traverse backwards in time until one is found
+        while (!file_exists($filePath) && $month > 0) {
+            $month--;
             $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).
                 sprintf($archivedRasterDataUrlFormat, $filename, $month, $fileExt);
-            while (!file_exists($filePath) && $month > 0) {
-                $month--;
-                $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).
-                    sprintf($archivedRasterDataUrlFormat, $filename, $month, $fileExt);
-            }
         }
-            
-        if ($filePath === null || !file_exists($filePath)) {
-            // final try.... if $month = 0 and you couldn't find the file so far, just return the very original
-            //  (which is either the original path when nothing is archived or the archived one of the setup phase)
-            if ($month == 0) {
-                $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).
-                    sprintf($archivedRasterDataUrlFormat, $filename, -1, $fileExt);
-                if (!file_exists($filePath)) {
-                    $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
-                }
-                if (!file_exists($filePath)) {
-                    throw new Exception(
-                        "Could not find raster file for layer with name " . $layer_name . " at path " . $filePath
-                    );
-                }
-            } else {
-                throw new Exception(
-                    "Could not find raster file for layer with name " . $layer_name . " at path " . $filePath
-                );
-            }
-        }
-        $imageData = file_get_contents($filePath);
 
-        $result['displayed_bounds'] = $rasterData['boundingbox'];
+        // if we still haven't found it, try the original path
+        if ($filePath == null || !file_exists($filePath)) {
+            throw new Exception(
+                "Could not find raster file for layer with name " . $layer_name . " at path " . $filePath
+            );
+        }
+        $this->log("Retrieved raster image for layer with name " . $layer_name . " from path " . $filePath);
+        ;
+        $imageData = file_get_contents($filePath);
+        $result['displayed_bounds'] = $rasterData->getBoundingbox();
         $result['image_data'] = base64_encode($imageData);
+        $result['logs'] = $this->getLogMessages();
         return $result;
     }
 
@@ -589,34 +576,19 @@ class Layer extends Base
     }
 
     /**
-     * called from MEL, SEL, REL
-     * @apiGroup Layer
      * @throws Exception
-     * @api {POST} /layer/UpdateRaster
-     * @apiParam {string} layer_name Name of the layer the raster image is for.
-     * @apiParam {array} raster_bounds 2x2 array of doubles specifying [[min X, min Y], [max X, max Y]]
-     * @apiParam {string} image_data Base64 encoded string of image data.
-     * @apiDescription UpdateRaster updates raster imagecdsi
-     * @noinspection PhpUnused
      */
     // @todo: remove raster_bounds support ? REL/REL/RiskModel.cs in simulations uses it, but REL isn't used anymore?
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function UpdateRaster(
-        string $layer_name,
-        string $image_data,
+        \App\Entity\SessionAPI\Layer $layer,
+        string $imageData,
         array $raster_bounds = null,
         ?int $month = null
-    ): array {
-        $layerData = $this->getDatabase()->query(
-            "SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?",
-            array($layer_name)
-        );
-        if (count($layerData) != 1) {
-            throw new Exception("Could not find layer with name " . $layer_name . " to update the raster image");
-        }
-        $rasterData = json_decode($layerData[0]['layer_raster'], true);
-        if (empty($rasterData['url'])) {
-            throw new Exception("Could not update raster for layer ".$layer_name.
+    ): void {
+        $rasterData = $layer->getLayerRaster();
+        if ($rasterData?->getUrl() === null) {
+            throw new Exception("Could not update raster for layer ".$layer->getLayerName().". ".
                 " raster file name was not specified in raster metadata");
         }
 
@@ -628,69 +600,58 @@ class Layer extends Base
         // we are processing the next month, so:
         // - replace the current one in raster/ folder,
         // - allow raster bounds updates
-        $imageData = base64_decode($image_data);
         if ($month == $curMonth) {
             Store::EnsureFolderExists(Store::GetRasterStoreFolder($this->getGameSessionId()));
-            $f = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
-            if (false ===
-                file_put_contents($f, $imageData)) {
-                $this->log('Failed to save given image_data to '.$f, self::LOG_LEVEL_ERROR);
-            } else {
+            $f = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData->getUrl();
+
+            try {
+                $fileSystem = new Filesystem();
+                $fileSystem->dumpFile(
+                    $f,
+                    $imageData
+                );
                 $this->log('Stored image_data to '.$f);
+            } catch (IOException $e) {
+                $this->log('Failed to save given image_data to '.$f.':'.$e->getMessage(), self::LOG_LEVEL_ERROR);
             }
 
             // raster bounds update
             $rasterDataUpdated = false;
             if (!empty($raster_bounds)) {
-                $this->log('Updating raster for layer '.$layer_name);
-                $rasterData['boundingbox'] = $raster_bounds;
+                $this->log('Set raster for layer '.$layer->getLayerName());
+                $layer->setLayerRaster($rasterData->setBoundingbox($raster_bounds));
                 $rasterDataUpdated = true;
             }
 
             // update the layer record
-            $qb = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId())
-                ->createQueryBuilder();
-            $qb
-                ->update('layer')
-                ->set('layer_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
-                ->set('layer_melupdate', '1')
-                ->where($qb->expr()->eq('layer_id', $qb->createPositionalParameter($layerData[0]['layer_id'])));
-            if ($rasterDataUpdated) {
-                $qb
-                    ->set('layer_raster', $qb->createPositionalParameter(json_encode($rasterData)));
-            }
-            try {
-                $qb->executeQuery();
-                $this->log(sprintf(
-                    'Updated layer record%s with id %d',
-                    ($rasterDataUpdated ? ' incl. raster data' : ''),
-                    $layerData[0]['layer_id']
-                ));
-            } catch (\Doctrine\DBAL\Exception $e) {
-                $this->log(sprintf(
-                    'Failed to update layer record%s with id %d: %s',
-                    ($rasterDataUpdated ? ' incl. raster data' : ''),
-                    $layerData[0]['layer_id'],
-                    $e->getMessage()
-                ), self::LOG_LEVEL_ERROR);
-            }
+            $layer
+                ->setLayerLastupdate(microtime(true))
+                ->setLayerMelupdate(1);
+            $this->log(sprintf(
+                'Updated layer %s with id %d',
+                ($rasterDataUpdated ? ' incl. raster data' : ''),
+                $layer->getLayerId()
+            ));
         }
 
         // (Pre-)archive the raster file
         Store::EnsureFolderExists(Store::GetRasterArchiveFolder($this->getGameSessionId()));
-        $layerPathInfo = pathinfo($rasterData['url']);
+        $layerPathInfo = pathinfo($rasterData->getUrl());
         $layerFileName = $layerPathInfo["filename"];
         $layerFileExt = $layerPathInfo["extension"];
         $newFileName = $layerFileName."_".$month.".".$layerFileExt;
         $f = Store::GetRasterArchiveFolder($this->getGameSessionId()).$newFileName;
-        if (false ===
-            file_put_contents($f, $imageData)) {
-            $this->log('Failed to archive image_data to '.$f, self::LOG_LEVEL_ERROR);
-        } else {
-            $this->log('Archived image_data to '.$f);
-        }
 
-        return ['logs' => $this->getLogMessages()];
+        try {
+            $fileSystem = new Filesystem();
+            $fileSystem->dumpFile(
+                $f,
+                $imageData
+            );
+            $this->log('Archived image_data to '.$f);
+        } catch (IOException $e) {
+            $this->log('Failed to archive image_data to '.$f.':'.$e->getMessage(), self::LOG_LEVEL_ERROR);
+        }
     }
 
     /**

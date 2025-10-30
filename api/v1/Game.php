@@ -221,7 +221,11 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetCurrentMonthAsId(): int
     {
-        $currentMonth = $this->getDatabase()->query("SELECT game_currentmonth, game_state FROM game")[0];
+        $result = $this->getDatabase()->query("SELECT game_currentmonth, game_state FROM game");
+        if (empty($result)) {
+            return -1; // there is no game record, so we are in setup
+        }
+        $currentMonth = $result[0];
         if ($currentMonth["game_state"] == "SETUP") {
             $currentMonth["game_currentmonth"] = -1;
         }
