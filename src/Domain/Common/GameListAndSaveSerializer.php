@@ -144,7 +144,7 @@ class GameListAndSaveSerializer
         return [
             'gameCreationTimePretty', 'gameEndMonthPretty', 'gameCurrentMonthPretty', 'gameRunningTilTimePretty',
             'gameGeoServer', 'gameServer', 'gameWatchdogServer', 'runningGame', 'countries',
-            'saveType', 'saveNotes', 'saveVisibility', 'saveTimestampPretty', 'saveTimestamp'
+            'saveType', 'saveNotes', 'saveVisibility', 'saveTimestampPretty', 'saveTimestamp', 'originGameListId'
         ];
     }
 
