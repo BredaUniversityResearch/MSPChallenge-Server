@@ -475,6 +475,7 @@ class LayerController extends BaseController
                           p.plan_state IN ('APPROVED','IMPLEMENTED') AND p.plan_gametime <= :month AND p.plan_active = 1
                         )
                       )
+                    GROUP BY g.geometry_id
                   ),
                   # group non-subtractive geometries by persistent id and give row number based on geometry_id,
                   #   row number 1 is the latest geometry
