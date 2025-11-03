@@ -231,7 +231,7 @@ class Layer extends Base
         $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).
             sprintf($archivedRasterDataUrlFormat, $filename, $month, $fileExt);
         // if not, traverse backwards in time until one is found
-        while (!file_exists($filePath) && $month > 0) {
+        while (!file_exists($filePath) && $month >= 0) {
             $month--;
             $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).
                 sprintf($archivedRasterDataUrlFormat, $filename, $month, $fileExt);

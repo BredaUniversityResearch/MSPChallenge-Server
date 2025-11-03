@@ -15,6 +15,16 @@ use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api/{layer}', requirements: ['layer' => '[lL]ayer'])]
 #[OA\Tag(name: 'Layer', description: 'Operations related to layer management')]
+#[OA\Parameter(
+    name: 'layer',
+    in: 'path',
+    required: true,
+    schema: new OA\Schema(
+        type: 'string',
+        default: 'layer',
+        enum: ['layer', 'Layer']
+    )
+)]
 class LayerController extends BaseController
 {
     /**
