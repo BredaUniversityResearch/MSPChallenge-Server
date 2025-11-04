@@ -2,26 +2,21 @@
 
 namespace App\Repository\SessionAPI;
 
+use App\Domain\Common\CustomMappingNameConvertor;
 use App\Domain\Common\EntityEnums\LayerGeoType;
-use App\Domain\Common\EntityPropToDbColumnNameConvertor;
 use App\Domain\Common\NormalizerContextBuilder;
 use App\Entity\SessionAPI\Layer;
 use App\Entity\SessionAPI\LayerRaster;
 use App\Entity\SessionAPI\LayerTextInfo;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
-use Exception;
 use ReflectionException;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
-class LayerRepository extends EntityRepository
+/**
+ * @extends SessionEntityRepository<Layer>
+ */
+class LayerRepository extends SessionEntityRepository
 {
     public const PLAY_AREA_LAYER_PREFIX = '_PLAYAREA';
-
-    private ?ObjectNormalizer $normalizer = null; // to be created upon usage
-    private ?Serializer $serializer = null; // to be created upon usage
 
     /**
      * @throws NonUniqueResultException
@@ -107,31 +102,10 @@ class LayerRepository extends EntityRepository
             ->getOneOrNullResult();
     }
 
-    public function save(Layer $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    public function remove(Layer $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    /**
-     * @throws ExceptionInterface|ReflectionException
-     */
-    public function createLayerFromData(array $layerData): Layer
+    protected function onPreDenormalize(array $data): array
     {
         // fix name inconsistencies
-        $layerData['layer_geo_type'] = $layerData['layer_geotype'];
+        $data['layer_geo_type'] = $data['layer_geotype'];
         $layerRasterFields = [
             'layer_raster_material',
             'layer_raster_pattern',
@@ -140,72 +114,55 @@ class LayerRepository extends EntityRepository
             'layer_raster_filter_mode'
         ];
         foreach ($layerRasterFields as $field) {
-            if (!isset($layerData[$field])) {
+            if (!isset($data[$field])) {
                 continue;
             }
-            $layerData['layer_raster'][$field] = $layerData[$field];
-            unset($layerData[$field]);
+            $data['layer_raster'][$field] = $data[$field];
+            unset($data[$field]);
         }
-
-        unset($layerData['layer_geotype']);
-        return $this->getSerializer()->denormalize(
-            $layerData,
-            Layer::class,
-            null,
-            (new NormalizerContextBuilder())
-                ->withClassPropertyValidation(Layer::class)
-                ->withCallbacks([
-                    'layerGeoType' => fn($value) => LayerGeoType::from($value),
-                    'layerTextInfo' => fn($value) => $value ?? new LayerTextInfo(),
-                    'layerRaster' => fn($value) => $value === null ? $value : new LayerRaster($value)
-                ])
-                ->toArray()
-        );
+        unset($data['layer_geotype']);
+        return $data;
     }
 
     /**
-     * @throws Exception|ExceptionInterface
+     * @throws ReflectionException
      */
-    public function toArray(?Layer $layer): array
-    {
-        if (is_null($layer)) {
-            return [];
-        }
-        return $this->getSerializer()->normalize(
-            $layer,
-            null,
-            (new NormalizerContextBuilder())
-                ->withClassPropertyValidation(Layer::class)
-                ->withAttributes(array_merge(
-                    array_keys($this->getEntityManager()->getClassMetadata(Layer::class)->fieldMappings),
-                    [
-                        'originalLayer', 'layerDependencies','scale'
-                    ]
-                ))
-                ->withCallbacks([
-                    'originalLayer' => fn($value) => $value?->getLayerId(),
-                    'layerGeoType' => fn(?LayerGeoType $value) => $value?->value
-                ])
-                ->withPreserveEmptyObjects(true)
-                ->withSkipNullValues(true)
-                ->toArray()
-        );
+    protected function initDenormalizerContextBuilder(
+        NormalizerContextBuilder $contextBuilder
+    ): NormalizerContextBuilder {
+        return $contextBuilder->withCallbacks([
+            'layerGeoType' => fn($value) => LayerGeoType::from($value),
+            'layerTextInfo' => fn($value) => $value ?? new LayerTextInfo(),
+            'layerRaster' => fn($value) => $value === null ? $value : new LayerRaster($value)
+        ]);
     }
 
-    private function getNormalizer(): ObjectNormalizer
-    {
-        $this->normalizer ??= new ObjectNormalizer(null, new EntityPropToDbColumnNameConvertor(
-            customNameMapping: [
-                'layerGeoType' => 'layer_geotype',
-                'originalLayer' => 'layer_original_id'
-            ]
-        ));
-        return $this->normalizer;
+    /**
+     * @throws ReflectionException
+     */
+    protected function initNormalizerContextBuilder(
+        NormalizerContextBuilder $contextBuilder
+    ): NormalizerContextBuilder {
+        return $contextBuilder
+            ->withAttributes(array_merge(
+                array_keys($this->getEntityManager()->getClassMetadata(Layer::class)->fieldMappings),
+                [
+                    'originalLayer','layerDependencies','scale'
+                ]
+            ))
+            ->withCallbacks([
+                'originalLayer' => fn($value) => $value?->getLayerId(),
+                'layerGeoType' => fn(?LayerGeoType $value) => $value?->value
+            ])
+            ->withPreserveEmptyObjects(true)
+            ->withSkipNullValues(true);
     }
 
-    private function getSerializer(): Serializer
+    protected function initNameConvertor(CustomMappingNameConvertor $convertor): CustomMappingNameConvertor
     {
-        $this->serializer ??= new Serializer(normalizers: [$this->getNormalizer()]);
-        return $this->serializer;
+        return $convertor->setCustomMapping([
+            'layerGeoType' => 'layer_geotype',
+            'originalLayer' => 'layer_original_id'
+        ]);
     }
 }

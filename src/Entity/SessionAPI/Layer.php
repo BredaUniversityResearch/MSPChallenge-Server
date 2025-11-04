@@ -4,6 +4,7 @@ namespace App\Entity\SessionAPI;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\OpenApi\Model\Operation;
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Services\ConnectionManager;
@@ -21,6 +22,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: LayerRepository::class)]
 #[ApiResource(
     operations: [
+        new GetCollection(),
         new Get()
     ],
     normalizationContext: ['groups' => ['read']],

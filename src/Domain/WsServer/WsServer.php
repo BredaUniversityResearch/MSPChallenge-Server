@@ -49,11 +49,6 @@ class WsServer extends EventDispatcher implements
     private array $clientHeaders = [];
 
     /**
-     * @var Security[]
-     */
-    private array $securityInstances = [];
-
-    /**
      * @var PluginInterface[]
      */
     private array $plugins = [];
@@ -191,7 +186,6 @@ class WsServer extends EventDispatcher implements
         unset($this->clients[$conn->resourceId]);
         unset($this->clientInfoContainer[$conn->resourceId]);
         unset($this->clientHeaders[$conn->resourceId]);
-        unset($this->securityInstances[$conn->resourceId]);
 
         $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_DISCONNECTED, $conn->resourceId));
     }

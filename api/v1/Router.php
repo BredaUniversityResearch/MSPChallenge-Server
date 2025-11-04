@@ -147,7 +147,6 @@ class Router
             "cel" => CEL::class,
             "mel" => MEL::class,
             "sel" => SEL::class,
-            "gamesession" => GameSession::class,
             default => str_replace('Router', $className, self::class),
         };
         return new $fullClassName($method);
@@ -167,7 +166,7 @@ class Router
             $class = self::createObjectFrom($className, $method);
         } catch (Exception $e) {
             $message = self::ErrorString(new Exception('Invalid class.'));
-            return new MessageJsonResponse(message: $message, status: 500);
+            return new MessageJsonResponse(status: 500, message: $message);
         }
         $message = null;
         $payload = null;

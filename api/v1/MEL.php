@@ -199,7 +199,6 @@ class MEL extends Base
 
         if (empty($data)) {
             //create new layer
-            Log::LogDebug("Note: found reference to MEL layer {$layerName}. Please check its existence under 'meta'.");
             $rasterFormat = json_encode($rasterProperties);
             $layerId = $this->getDatabase()->query(
                 "

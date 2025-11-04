@@ -103,7 +103,7 @@ class GameSessionEntitiesTest extends KernelTestCase
         $allLayers = $gameConfig->getGameConfigComplete()['datamodel']['meta'];
         /** @var LayerRepository $layerRepo */
         $layerRepo = $this->em->getRepository(Layer::class);
-        self::assertInstanceOf(Layer::class, $layerRepo->createLayerFromData($allLayers[0])); //good enough, normalizer throws exceptions anyway
+        self::assertInstanceOf(Layer::class, $layerRepo->denormalize($allLayers[0])); //good enough, normalizer throws exceptions anyway
 
         $planLayer = new Layer();
         $planLayer->setOriginalLayer($layer);

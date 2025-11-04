@@ -285,7 +285,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         /** @var LayerRepository $layerRepo */
         $layerRepo = $this->entityManager->getRepository(Layer::class);
         foreach ($this->dataModel['meta'] as $layerMetaData) {
-            $layer = $layerRepo->createLayerFromData($layerMetaData);
+            $layer = $layerRepo->denormalize($layerMetaData);
             $layer->setLayerGroup($this->dataModel['region']);
             $this->info("Starting import of layer {$layer->getLayerName()}...");
             if ($layer->getLayerGeoType() == LayerGeoType::RASTER) {

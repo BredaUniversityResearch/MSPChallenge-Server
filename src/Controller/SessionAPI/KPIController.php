@@ -40,16 +40,11 @@ class KPIController extends BaseController
                     properties: [
                         new OA\Property(
                             property: 'kpiValues',
-                            description: 'The KPI\'s to post. Format: json array of object with: name, month, value, '.
-                                'type, unit, country. For the internal watchdog, type must be set to either ECOLOGY,
-                                ENERGY or SHIPPING. The field country is the id of the country or -1 if it is global.
-                                You can retrieve the country id using /api/Game/GetCountries',
+                            // phpcs:ignore
+                            description: 'The KPI\'s to post. Format: json array of object with: name, month, value, type, unit, country. For the internal watchdog, type must be set to either ECOLOGY, ENERGY or SHIPPING. The field country is the id of the country or -1 if it is global. You can retrieve the country id using /api/Game/GetCountries<br>Example:<br><pre>[<br>    {<br>        "name": "SunHours",<br>        "month": 0,<br>        "value": 267,<br>        "type": "ECOLOGY",<br>        "unit": "hours",<br>        "country": 3<br>    },<br>    {<br>        "name": "SunHours",<br>        "month": 0,<br>        "value": 243,<br>        "type": "ECOLOGY",<br>        "unit": "hours",<br>        "country": 4<br>    }<br>]</pre>',
                             type: 'string',
                             format: 'json',
-                            default: null,
-                            example: '[{"name":"SunHours","month":0,"value":267,"type":"ECOLOGY","unit":"hours",'.
-                                '"country":3},{"name":"SunHours","month":0,"value":243,"type":"ECOLOGY",'.
-                                '"unit":"hours",'.'"country":4}]'
+                            default: null
                         )
                     ]
                 )

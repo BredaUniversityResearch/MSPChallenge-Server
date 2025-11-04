@@ -262,6 +262,17 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
                         ),
                         static::EVENT_PLUGIN_EXECUTION_FINISHED
                     );
+                })
+                ->otherwise(function ($error) {
+                    if ($error instanceof Exception) {
+                        $this->addOutput(
+                            'Plugin '.$this->getName().' failed: '.$error->getMessage()
+                        );
+                    } else {
+                        $this->addOutput(
+                            'Plugin '.$this->getName().' failed: '.$error
+                        );
+                    }
                 });
         });
     }

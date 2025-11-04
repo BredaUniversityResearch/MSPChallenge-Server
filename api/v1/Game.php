@@ -15,8 +15,6 @@ use function App\await;
 
 class Game extends Base
 {
-    const MIN_GAME_ERATIME = 12;
-
     /**
      * @apiGroup Game
      * @throws Exception
@@ -77,20 +75,6 @@ class Game extends Base
             ->setGameSessionId($this->getGameSessionId())
             ->CheckGameSessionPasswords();
         return array_merge($data, $passwordchecks);
-    }
-
-    /**
-     * @apiGroup Game
-     * @throws Exception
-     * @api {POST} /game/NextMonth NextMonth
-     * @apiDescription Updates session database to indicate start of next simulated month
-     * @noinspection PhpUnused
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function NextMonth(): void
-    {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query("UPDATE game SET game_currentmonth=game_currentmonth+1");
     }
 
     /**
@@ -232,87 +216,6 @@ class Game extends Base
         return $currentMonth["game_currentmonth"];
     }
 
-    /**
-     * @throws Exception
-     * @noinspection SpellCheckingInspection
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Setupfilename(string $configFilename): void
-    {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query("UPDATE game SET game_configfile=?", array($configFilename));
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetupCountries(array $configData): void
-    {
-        $adminColor = "#FF00FFFF";
-        if (array_key_exists("user_admin_color", $configData)) {
-            $adminColor = $configData["user_admin_color"];
-        }
-        $regionManagerColor = "#00FFFFFF";
-        if (array_key_exists("user_region_manager_color", $configData)) {
-            $regionManagerColor = $configData["user_region_manager_color"];
-        }
-
-        //Admin country.
-        $this->getDatabase()->query(
-            "INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)",
-            array(1, $adminColor, 1)
-        );
-        //Region manager country.
-        $this->getDatabase()->query(
-            "INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)",
-            array(2, $regionManagerColor, 1)
-        );
-
-        foreach ($configData['meta'] as $layerMeta) {
-            if ($layerMeta['layer_name'] == $configData['countries']) {
-                foreach ($layerMeta['layer_type'] as $country) {
-                    $countryId = $country['value'];
-                    $this->getDatabase()->query(
-                        "
-                        INSERT INTO country (country_id, country_name, country_colour, country_is_manager)
-                        VALUES (?, ?, ?, ?)
-                        ",
-                        array($countryId, $country['displayName'], $country['polygonColor'], 0 )
-                    );
-                }
-            }
-        }
-        //Setup Admin Test User so we have a default session we can use for testing.
-        $this->getDatabase()->query("INSERT INTO user (user_lastupdate, user_country_id) VALUES(0, 1)");
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetupGameTime(array $data): void
-    {
-        $this->SetStartDate($data['start']);
-
-        $this->Planning($data['era_planning_months']);
-
-        $this->Realtime($data['era_planning_realtime']);
-        $str = "";
-        $totalEras = 4;
-        $str .= str_repeat($data['era_planning_realtime'] . ",", $totalEras);
-        $str = substr($str, 0, -1);
-
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query(
-            "UPDATE game SET game_planning_era_realtime=?, game_eratime=?",
-            array(
-                $str,
-                max($data['era_total_months'], self::MIN_GAME_ERATIME)
-            )
-        );
-    }
-
     //this should probably be moved to Layer instead
     /**
      * @apiGroup Game
@@ -340,7 +243,7 @@ class Game extends Base
         /** @var LayerEntity[] $layers */
         $layers = $qb->getQuery()->getResult();
         $this->addLayerDependencies($layers);
-        return collect($layers)->map(fn(LayerEntity $l) => $repo->toArray($l))->all();
+        return collect($layers)->map(fn(LayerEntity $l) => $repo->normalise($l))->all();
     }
 
     /**
@@ -413,16 +316,6 @@ class Game extends Base
     {
         /** @noinspection SqlWithoutWhere */
         $this->getDatabase()->query("UPDATE game SET game_planning_realtime=?", array($realtime));
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function SetStartDate(int $a_startYear): void
-    {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query("UPDATE game SET game_start=?", array($a_startYear));
     }
 
     /**
@@ -579,8 +472,7 @@ class Game extends Base
      * @throws Exception
      * @return array|PromiseInterface
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetGameDetails(): array|PromiseInterface
+    public function getGameDetails(): array|PromiseInterface
     {
         $promise = $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()
@@ -638,10 +530,8 @@ class Game extends Base
 
     /**
      * @throws Exception
-     * @noinspection PhpUnused
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetCountries(): array
+    public function getCountries(): array
     {
         return $this->getDatabase()->query("SELECT * FROM country WHERE country_name IS NOT NULL");
     }

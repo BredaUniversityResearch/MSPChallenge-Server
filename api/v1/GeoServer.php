@@ -84,8 +84,6 @@ class GeoServer extends Base
 
     public function ows(string $url): ?string
     {
-        Log::LogInfo("Calling geoserver: ".$this->baseurl.$url);
-
         return $this->CallBack(
             $this->baseurl . $url,
             array(),                // no content to send

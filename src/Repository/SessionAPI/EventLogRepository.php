@@ -2,9 +2,11 @@
 
 namespace App\Repository\SessionAPI;
 
-use Doctrine\ORM\EntityRepository;
+use App\Entity\SessionAPI\EventLog;
 
-class EventLogRepository extends EntityRepository
+/**
+ * @extends SessionEntityRepository<EventLog>
+ */
+class EventLogRepository extends SessionEntityRepository
 {
-
 }

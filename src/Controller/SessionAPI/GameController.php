@@ -313,7 +313,7 @@ class GameController extends BaseController
         $game = new Game();
         $game->setGameSessionId($this->getSessionIdFromRequest($request));
         try {
-            $countries = $game->GetCountries();
+            $countries = $game->getCountries();
             return new JsonResponse($countries);
         } catch (Exception $e) {
             return new MessageJsonResponse(
@@ -581,6 +581,25 @@ class GameController extends BaseController
         $game->setGameSessionId($this->getSessionIdFromRequest($request));
         try {
             return new JsonResponse($game->Meta($user, $sort, $onlyActiveLayers));
+        } catch (Exception $e) {
+            return new MessageJsonResponse(
+                status: 500,
+                message: $e->getMessage()
+            );
+        }
+    }
+
+    #[Route(
+        path: '/GetCurrentMonth',
+        name: 'session_api_game_get_current_month',
+        methods: ['GET', 'POST']
+    )]
+    public function getCurrentMonth(Request $request): JsonResponse
+    {
+        $game = new Game();
+        $game->setGameSessionId($this->getSessionIdFromRequest($request));
+        try {
+            return new JsonResponse($game->GetCurrentMonth());
         } catch (Exception $e) {
             return new MessageJsonResponse(
                 status: 500,
