@@ -660,13 +660,14 @@ SUBQUERY,
      * - optionally, the layer type, which is used to filter on the geometry type
      * - optionally, flag to only get ones being constructed
      * - optionally, policy filters to apply
-     * @throws Exception
      * @api {POST} /mel/GeometryExportName Geometry Export Name
      * @apiParam {string} layer name to return the geometry data for
      * @apiParam {int} layer_type type within the layer to return. -1 for all types.
      * @apiParam {bool} construction_only whether to return data only if it's being constructed.
      * @apiParam {string} policy_filters JSON object with the policy filters to apply
      * @apiSuccess {string} JSON Object
+     *
+     * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GeometryExportName(
@@ -694,6 +695,7 @@ SUBQUERY,
      *
      * @return array|null
      * @throws NonUniqueResultException
+     * @throws Exception
      */
     private function exportAllGeometryFromLayer(
         string $name,

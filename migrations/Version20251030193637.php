@@ -10,7 +10,7 @@ final class Version20251030193637 extends MSPMigration
 {
     public function getDescription(): string
     {
-        return 'Changed layer table json_document fields to type TEXT and added default value (DC2Type:json)';
+        return 'Changed layer table json_document fields to type TEXT and added default value (DC2Type:json). Changed default value for layer_text_info.';
     }
 
     protected function getDatabaseType(): ?MSPDatabaseType
@@ -24,7 +24,7 @@ final class Version20251030193637 extends MSPMigration
         ALTER TABLE `layer`
         CHANGE `layer_type` `layer_type` text NULL COMMENT '(DC2Type:json)' AFTER `layer_kpi_category`,
         CHANGE `layer_info_properties` `layer_info_properties` text NULL COMMENT '(DC2Type:json)' AFTER `layer_depth`,
-        CHANGE `layer_text_info` `layer_text_info` text NOT NULL DEFAULT '{}' COMMENT '(DC2Type:json)' AFTER `layer_information`,
+        CHANGE `layer_text_info` `layer_text_info` text NOT NULL DEFAULT '{\"#type\":\"App\\\\Entity\\\\SessionAPI\\\\LayerTextInfo\"}dc' COMMENT '(DC2Type:json)' AFTER `layer_information`,
         CHANGE `layer_states` `layer_states` text NULL DEFAULT '[{\"state\":\"ASSEMBLY\",\"time\":2},{\"state\":\"ACTIVE\",\"time\":10},{\"state\":\"DISMANTLE\",\"time\":2}]' COMMENT '(DC2Type:json)' AFTER `layer_text_info`,
         CHANGE `layer_raster` `layer_raster` text NULL COMMENT '(DC2Type:json)' AFTER `layer_states`,
         CHANGE `layer_tags` `layer_tags` text NULL COMMENT '(DC2Type:json)' AFTER `layer_entity_value_max`
