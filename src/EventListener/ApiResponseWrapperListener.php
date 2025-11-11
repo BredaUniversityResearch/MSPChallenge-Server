@@ -20,7 +20,7 @@ class ApiResponseWrapperListener
         // only process Json responses
         $hasJsonContentType = preg_match(
             '/application\/[^;+]*\+?json/',
-            $inner->headers->get('Content-Type')
+            $inner->headers->get('Content-Type') ?? ''
         ) === 1;
         if (!(
                 $hasJsonContentType ||
