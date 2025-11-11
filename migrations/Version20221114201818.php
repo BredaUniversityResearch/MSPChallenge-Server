@@ -89,10 +89,9 @@ SQL
         );
 
         $this->addSql(<<<'SQL'
-  INSERT INTO `game_geoservers` (`id`, `name`, `address`, `username`, `password`) VALUES ('1', 'Default: the public MSP Challenge GeoServer', 'https://geo.mspchallenge.info/geoserver/', 'YXV0b21hdGljYWxseW9idGFpbmVk', 'YXV0b21hdGljYWxseW9idGFpbmVk');
+  INSERT INTO `game_geoservers` (`id`, `name`, `address`, `username`, `password`) VALUES ('1', 'Default: the public MSP Challenge GeoServer', 'https://geo.mspchallenge.info/geoserver/', 'MSPCHALLENGE_GEOSERVER_USERNAME', 'MSPCHALLENGE_GEOSERVER_PASSWORD');
 SQL
         );
-
         $this->addSql(<<<'SQL'
   INSERT INTO `settings` (`name`, `value`) VALUES 
   ('migration_20200618.php', 'Never'),
