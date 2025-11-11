@@ -1123,6 +1123,9 @@ SQL,
         }
         $maxValue = $m[count($m)-1]['max'];
         $m[0]['min'] = 0;
+        if ($maxValue < PHP_FLOAT_EPSILON) {
+            return;
+        }
         $m[0]['max'] = (int)ceil(($m[0]['max'] / $maxValue) * 255);
         for ($n = 1; $n < count($m); ++$n) {
             $prevMappingEntry = &$m[$n - 1];
