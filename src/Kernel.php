@@ -32,9 +32,8 @@ class Kernel extends BaseKernel
         if (!empty($invalidEnvVars)) {
             throw new \RuntimeException(
                 sprintf(
-                    'Found unsecure environment variables: %s, they cannot be equal to the default value in %s!',
-                    implode(', ', $invalidEnvVars),
-                    $_ENV['APP_ENV']
+                    'Found insecure environment variables: %s, they cannot be equal to the default value!',
+                    implode(', ', $invalidEnvVars)
                 )
             );
         }
