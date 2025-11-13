@@ -11,18 +11,6 @@ use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 class Layer extends Base
 {
-    private GeoServer $geoServer;
-
-    public function __construct()
-    {
-        $this->geoServer = new GeoServer();
-    }
-
-    public function getGeoServer(): GeoServer
-    {
-        return $this->geoServer;
-    }
-
     /**
      * @apiGroup Layer
      * @apiDescription Set a layer as inactive, without actually deleting it completely from the session database
