@@ -1,0 +1,28 @@
+<html>
+<body>
+<script>
+    var conn = new WebSocket('ws://localhost:45101');
+    conn.onopen = function(e) {
+        console.log("Connection established!");
+    };
+
+    conn.onmessage = function(e) {
+        document.getElementById('received').value += "<---" + e.data + "\n";
+    };
+
+    addEventListener("keypress", (e) => {
+        if (e.code !== 'Enter') return;
+        document.getElementById("send").click();
+    });
+
+    function send(msg) {
+        conn.send(msg);
+        document.getElementById('received').value += "--->" + msg + "\n";
+    }
+</script>
+<input id="msg" type="text" style="width: 300px">
+<input id="send" type="button" value="send" onclick="send(document.getElementById('msg').value)">
+<br />
+<textarea id="received" style="height:90%; width:90%"></textarea>
+</body>
+</html>
