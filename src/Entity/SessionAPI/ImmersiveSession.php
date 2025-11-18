@@ -86,7 +86,7 @@ class ImmersiveSession
         ]
     )]
     #[ORM\Column(type: 'json_document', nullable: true)]
-    private mixed $statusResponse = null;
+    private ?ImmersiveSessionStatusResponse $statusResponse = null;
 
     #[Groups(['read', 'write'])]
     #[ORM\Column]
@@ -187,12 +187,12 @@ class ImmersiveSession
         return $this;
     }
 
-    public function getStatusResponse(): mixed
+    public function getStatusResponse(): ?ImmersiveSessionStatusResponse
     {
         return $this->statusResponse;
     }
 
-    public function setStatusResponse(mixed $statusResponse): static
+    public function setStatusResponse(?ImmersiveSessionStatusResponse $statusResponse): static
     {
         $this->statusResponse = $statusResponse;
 

@@ -10,6 +10,7 @@ use App\Domain\WsServer\ClientDisconnectedException;
 use App\Domain\WsServer\ClientHeaderKeys;
 use App\Entity\SessionAPI\ImmersiveSession;
 use App\Entity\SessionAPI\DockerConnection;
+use App\Entity\SessionAPI\ImmersiveSessionStatusResponse;
 use App\Security\BearerTokenValidator;
 use Drift\DBAL\Result;
 use Exception;
@@ -113,29 +114,29 @@ class ImmersiveSessionsWsServerPlugin extends Plugin
         });
     }
 
-    private function createEntityFromAssociative(array $payload): ImmersiveSession
+    private function createEntityFromAssociative(array $data): ImmersiveSession
     {
         $conn = null;
-        if (isset($payload['port']) && isset($payload['docker_api_id'])) {
+        if (isset($data['port']) && isset($data['docker_api_id'])) {
             $conn = new DockerConnection();
             $conn
-                ->setPort($payload['port'])
-                ->setDockerApiID($payload['docker_api_id'])
-                ->setDockerContainerID($payload['docker_container_id'] ?? null);
+                ->setPort($data['port'])
+                ->setDockerApiID($data['docker_api_id'])
+                ->setDockerContainerID($data['docker_container_id'] ?? null);
         }
         $is = new ImmersiveSession();
         $is
-            ->setId($payload['id'])
-            ->setName($payload['name'])
-            ->setType(ImmersiveSessionTypeID::from($payload['type']))
-            ->setMonth($payload['month'])
-            ->setStatus(ImmersiveSessionStatus::from($payload['status']))
-            ->setStatusResponse($payload['status_response'])
-            ->setBottomLeftX($payload['bottom_left_x'])
-            ->setBottomLeftY($payload['bottom_left_y'])
-            ->setTopRightX($payload['top_right_x'])
-            ->setTopRightY($payload['top_right_y'])
-            ->setData(json_decode($payload['data'], true))
+            ->setId($data['id'])
+            ->setName($data['name'])
+            ->setType(ImmersiveSessionTypeID::from($data['type']))
+            ->setMonth($data['month'])
+            ->setStatus(ImmersiveSessionStatus::from($data['status']))
+            ->setStatusResponse(new ImmersiveSessionStatusResponse($data['status_response']))
+            ->setBottomLeftX($data['bottom_left_x'])
+            ->setBottomLeftY($data['bottom_left_y'])
+            ->setTopRightX($data['top_right_x'])
+            ->setTopRightY($data['top_right_y'])
+            ->setData(json_decode($data['data'], true))
             ->setConnection($conn);
         return $is;
     }

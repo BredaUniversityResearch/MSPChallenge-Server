@@ -8,6 +8,7 @@ use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\ImmersiveSessionType;
 use App\Entity\SessionAPI\ImmersiveSession;
 use App\Entity\SessionAPI\DockerConnection;
+use App\Entity\SessionAPI\ImmersiveSessionStatusResponse;
 use App\MessageHandler\Watchdog\WatchdogCommunicationMessageHandler;
 use Doctrine\ORM\EntityManager;
 use Exception;
@@ -98,9 +99,9 @@ class ImmersiveSessionService
         }
 
         $sess
-            ->setStatusResponse([
+            ->setStatusResponse(new ImmersiveSessionStatusResponse([
                 'message' => 'Starting container...'
-            ]);
+            ]));
         $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
         $em->persist($sess);
         $em->flush();
@@ -188,9 +189,9 @@ class ImmersiveSessionService
         $sess
             ->setConnection($conn)
             ->setStatus(ImmersiveSessionStatus::RUNNING)
-            ->setStatusResponse([
+            ->setStatusResponse(new ImmersiveSessionStatusResponse([
                 'message' => 'Container started.',
-            ]);
+            ]));
         $em->persist($conn);
         $em->persist($sess);
         $em->flush();

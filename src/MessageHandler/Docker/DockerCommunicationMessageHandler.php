@@ -9,6 +9,7 @@ use App\Entity\ServerManager\DockerApi;
 use App\Entity\ServerManager\GameList;
 use App\Entity\SessionAPI\DockerConnection;
 use App\Entity\SessionAPI\ImmersiveSession;
+use App\Entity\SessionAPI\ImmersiveSessionStatusResponse;
 use App\Message\Docker\CreateImmersiveSessionConnectionMessage;
 use App\Message\Docker\DockerCommunicationMessageBase;
 use App\Message\Docker\ImmersiveSessionConnectionMessageBase;
@@ -95,10 +96,10 @@ readonly class DockerCommunicationMessageHandler
                         $message->getGameSessionId()
                     );
                 } catch (Exception $e) {
-                    $immersiveSession->setStatusResponse([
+                    $immersiveSession->setStatusResponse(new ImmersiveSessionStatusResponse([
                         'message' => 'Create immersive session container failed. Error: '.$e->getMessage().
                             '. Will retry'
-                    ]);
+                    ]));
                     $em->persist($immersiveSession);
                     $this->dockerLogger->warning(
                         'Create immersive session container failed, will retry: '.$e->getMessage()
@@ -176,9 +177,9 @@ readonly class DockerCommunicationMessageHandler
                     $session
                         ->setUpdatedAt(new \DateTime())
                         ->setStatus(ImmersiveSessionStatus::UNRESPONSIVE)
-                        ->setStatusResponse([
+                        ->setStatusResponse(new ImmersiveSessionStatusResponse([
                             'message' => 'Docker API '.$dockerApi->getAddress().' down? Error: '.$errorMsg
-                        ]);
+                        ]));
                     $em->persist($session);
                 }
             }
@@ -306,12 +307,12 @@ readonly class DockerCommunicationMessageHandler
                         default => ImmersiveSessionStatus::UNRESPONSIVE // "none" "unhealthy"
                     };
 
-                    $session->setStatusResponse([
+                    $session->setStatusResponse(new ImmersiveSessionStatusResponse([
                         'message' => empty($inspectData['State']['Health']['Log']) ?
                             'Health check is unavailable' : 'Last health check log output: '.
                                 $inspectData['State']['Health']['Log'][0]['Output'],
                         'payload' => $inspectData['State']['Health']['Log'] ?? null
-                    ]);
+                    ]));
                 }
                 $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
                 $session
@@ -339,7 +340,9 @@ readonly class DockerCommunicationMessageHandler
                     }
                     $session
                         ->setStatus(ImmersiveSessionStatus::REMOVED)
-                        ->setStatusResponse(['message' => 'Container is either stopped or removed, removing session']);
+                        ->setStatusResponse(new ImmersiveSessionStatusResponse(
+                            ['message' => 'Container is either stopped or removed, removing session']
+                        ));
                     $em->persist($session);
                 }
             }
