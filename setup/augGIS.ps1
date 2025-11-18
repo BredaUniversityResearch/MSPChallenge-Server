@@ -1,4 +1,4 @@
-param([switch]$elevated, [string]$tag = "latest")
+param([switch]$elevated, [string]$tag = "latest", [string]$branch_name = "dev")
 
 function Test-Admin {
     $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
@@ -11,8 +11,7 @@ if ((Test-Admin) -eq $false)  {
         Write-Host "Failed to elevate privileges. Exiting..."
     } else {
         Write-Host "This script requires administrative privileges. Relaunching as admin..."
-        $allArgs = @('-noprofile', '-noexit', '-file', $myinvocation.MyCommand.Definition, '-elevated', '-tag', $tag) + $args
-        Start-Process powershell.exe -Verb RunAs -ArgumentList $allArgs
+        Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file "{0}" -elevated -tag {1} -branch_name {2}' -f ($myinvocation.MyCommand.Definition, $tag, $branch_name))
     }
     exit
 }
@@ -34,10 +33,10 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
 # Change to the script's directory
 Set-Location -Path (Split-Path -Parent $MyInvocation.MyCommand.Definition)
 
-$branch_name = "dev"
-if ($args.Count -gt 0) {
-    $branch_name = $args[0]
-}
+Write-Host "Starting augGIS setup script with arguments:"
+Write-Host "  elevated: $elevated"
+Write-Host "  tag: $tag"
+Write-Host "  branch_name: $branch_name"
 
 Read-Host "Please switch and connect to the Wi-Fi network to be used for your 'augGIS' session and then press enter to continue"
 # Get the IP address of the Wi-Fi network interface
