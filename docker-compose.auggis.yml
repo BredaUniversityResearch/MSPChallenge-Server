@@ -1,0 +1,32 @@
+services:
+  php:
+    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:auggis
+    volumes:
+      - ./running_session_config/:/app/running_session_config
+      - ./raster/:/app/raster
+      - ./session_archive/:/app/session_archive
+      - ./var/log/:/app/var/log
+      - configfiles_data:/app/ServerManager/configfiles
+      - ./ServerManager/session_archive/:/app/ServerManager/session_archive
+      - ./ServerManager/saves/:/app/ServerManager/saves
+      - ./ServerManager/log/:/app/ServerManager/log
+      - ./public/downloads/:/app/public/downloads
+      - /app/var/cache
+    environment:
+      APP_SECRET: ${APP_SECRET}
+      APP_ENV: prod
+      MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
+      URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-localhost}
+      URL_WS_SERVER_HOST: ${URL_WS_SERVER_HOST:-localhost}
+    ports:
+      # HTTP
+      - target: 80
+        published: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
+        protocol: tcp
+
+  simulations:
+    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:latest
+
+volumes:
+  configfiles_data:

@@ -47,7 +47,7 @@ Read-Host "If needed, switch to a network that has an internet connection and th
 
 docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.yml" -OutFile "docker-compose.yml"
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.auggis.yml" -OutFile "docker-compose.auggis.yml"
 
 if (-not $env:CADDY_MERCURE_JWT_SECRET) {
     $caddyMercureJwtSecret = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 32 | ForEach-Object {[char]$_})
@@ -79,5 +79,5 @@ GEO_SERVER_RESULTS_CACHE_LIFETIME=$geoServerResultsCacheLifetime
 IMMERSIVE_SESSIONS_DOCKER_HUB_TAG=$tag
 "@
 
-docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.prod.yml" up -d
+docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.auggis.yml" up -d
 exit 0
