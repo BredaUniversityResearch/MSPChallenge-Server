@@ -134,17 +134,19 @@ class ImmersiveSessionsWsServerPlugin extends Plugin
             ->setType(ImmersiveSessionTypeID::from($data['type']))
             ->setMonth($data['month'])
             ->setStatus(ImmersiveSessionStatus::from($data['status']))
-            ->setStatusResponse($this->getSerializer()->deserialize(
-                $data['status_response'],
-                ImmersiveSessionStatusResponse::class,
-                'json'
-            ))
             ->setBottomLeftX($data['bottom_left_x'])
             ->setBottomLeftY($data['bottom_left_y'])
             ->setTopRightX($data['top_right_x'])
             ->setTopRightY($data['top_right_y'])
             ->setData(json_decode($data['data'], true))
             ->setConnection($conn);
+        if (isset($data['status_response'])) {
+            $is->setStatusResponse($this->getSerializer()->deserialize(
+                    $data['status_response'],
+                    ImmersiveSessionStatusResponse::class,
+                    'json'
+                ));
+        }
         return $is;
     }
 
