@@ -77,6 +77,7 @@ CADDY_MERCURE_JWT_SECRET=$env:CADDY_MERCURE_JWT_SECRET
 GEO_SERVER_DOWNLOADS_CACHE_LIFETIME=$geoServerDownloadsCacheLifetime
 GEO_SERVER_RESULTS_CACHE_LIFETIME=$geoServerResultsCacheLifetime
 IMMERSIVE_SESSIONS_DOCKER_HUB_TAG=$tag
+CORS_ALLOW_ORIGIN='^https?://(localhost|127\.0\.0\.1|$($wifiAdapter.IPAddress))(:[0-9]+)?$'
 "@
 
 docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.auggis.yml" up -d
