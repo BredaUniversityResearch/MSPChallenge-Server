@@ -142,10 +142,10 @@ class ImmersiveSessionsWsServerPlugin extends Plugin
             ->setConnection($conn);
         if (isset($data['status_response'])) {
             $is->setStatusResponse($this->getSerializer()->deserialize(
-                    $data['status_response'],
-                    ImmersiveSessionStatusResponse::class,
-                    'json'
-                ));
+                $data['status_response'],
+                ImmersiveSessionStatusResponse::class,
+                'json'
+            ));
         }
         return $is;
     }
