@@ -11,7 +11,8 @@ if ((Test-Admin) -eq $false)  {
         Write-Host "Failed to elevate privileges. Exiting..."
     } else {
         Write-Host "This script requires administrative privileges. Relaunching as admin..."
-        Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file "{0}" -elevated -tag {1}' -f ($myinvocation.MyCommand.Definition, $tag))
+        $allArgs = @('-noprofile', '-noexit', '-file', $myinvocation.MyCommand.Definition, '-elevated', '-tag', $tag) + $args
+        Start-Process powershell.exe -Verb RunAs -ArgumentList $allArgs
     }
     exit
 }
