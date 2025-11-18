@@ -384,7 +384,7 @@ readonly class DockerCommunicationMessageHandler
 
                 $this->dockerLogger->warning(
                     'Immersive session connection lost, removing it. Session: '.$sessionId.
-                    ', verified: '.($session->getConnection()->isVerified() ? 'yes' : 'no').
+                    ', verified: '.($session->getConnection()?->isVerified() ? 'yes' : 'no').
                     ', boot-up time: '.$bootupTime
                 );
                 $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);

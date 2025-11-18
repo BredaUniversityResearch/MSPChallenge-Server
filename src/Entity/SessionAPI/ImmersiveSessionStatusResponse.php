@@ -13,8 +13,9 @@ class ImmersiveSessionStatusResponse
     #[Groups(['read'])]
     public mixed $payload = null;
 
-    public function __construct(array $data = [])
+    public function __construct(?array $data = [])
     {
+        $data ??= [];
         foreach ($data as $key => $value) {
             $this->$key = $value;
         }
