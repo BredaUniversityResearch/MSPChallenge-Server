@@ -4,11 +4,12 @@ namespace App\Entity\ServerManager;
 
 use App\Entity\EntityBase;
 use App\Entity\Mapping as AppMappings;
+use App\Entity\Mapping\Property\SecretsChoiceType;
 use App\Repository\ServerManager\GameGeoServerRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Bundle\FrameworkBundle\Secrets\AbstractVault;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[AppMappings\Plurals('GeoServer', 'GeoServers')]
@@ -34,18 +35,21 @@ class GameGeoServer extends EntityBase
     #[ORM\Column(length: 255, unique: true)]
     private ?string $address = null;
 
+    #[AppMappings\Property\FormFieldType(type: SecretsChoiceType::class)]
     #[Assert\NotBlank]
-    #[ORM\Column(length: 255, unique: true)]
-    private ?string $username = null;
+    #[ORM\Column(name: 'username', length: 255)]
+    private ?string $usernameSecret = null;
 
-    #[AppMappings\Property\FormFieldType(type: PasswordType::class)]
+    #[AppMappings\Property\FormFieldType(type: SecretsChoiceType::class)]
     #[Assert\NotBlank]
-    #[ORM\Column(length: 255)]
-    private ?string $password = null;
+    #[ORM\Column(name: 'password', length: 255)]
+    private ?string $passwordSecret = null;
 
     #[AppMappings\Property\TableColumn(action: true, toggleable: true, availability: true)]
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => 1])]
     private ?bool $available = true;
+
+    private ?AbstractVault $vault;
 
     public function getId(): ?int
     {
@@ -78,24 +82,40 @@ class GameGeoServer extends EntityBase
 
     public function getUsername(): ?string
     {
-        return $this->username;
+        if ($this->vault === null) {
+            return null;
+        }
+        return $this->vault->reveal($this->usernameSecret);
     }
 
-    public function setUsername(?string $username): self
+    public function getUsernameSecret(): ?string
     {
-        $this->username = $username;
+        return $this->usernameSecret;
+    }
+
+    public function setUsernameSecret(?string $usernameSecret): self
+    {
+        $this->usernameSecret = $usernameSecret;
 
         return $this;
     }
 
     public function getPassword(): ?string
     {
-        return $this->password;
+        if ($this->vault === null) {
+            return null;
+        }
+        return $this->vault->reveal($this->passwordSecret);
     }
 
-    public function setPassword(?string $password): self
+    public function getPasswordSecret(): ?string
     {
-        $this->password = $password;
+        return $this->passwordSecret;
+    }
+
+    public function setPasswordSecret(?string $passwordSecret): self
+    {
+        $this->passwordSecret = $passwordSecret;
 
         return $this;
     }
@@ -110,5 +130,15 @@ class GameGeoServer extends EntityBase
         $this->available = $available;
 
         return $this;
+    }
+
+    public function getVault(): ?AbstractVault
+    {
+        return $this->vault;
+    }
+
+    public function setVault(?AbstractVault $vault): void
+    {
+        $this->vault = $vault;
     }
 }
