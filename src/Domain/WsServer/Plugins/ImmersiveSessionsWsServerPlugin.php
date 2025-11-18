@@ -114,6 +114,9 @@ class ImmersiveSessionsWsServerPlugin extends Plugin
         });
     }
 
+    /**
+     * @throws Exception
+     */
     private function createEntityFromAssociative(array $data): ImmersiveSession
     {
         $conn = null;
@@ -131,7 +134,11 @@ class ImmersiveSessionsWsServerPlugin extends Plugin
             ->setType(ImmersiveSessionTypeID::from($data['type']))
             ->setMonth($data['month'])
             ->setStatus(ImmersiveSessionStatus::from($data['status']))
-            ->setStatusResponse(new ImmersiveSessionStatusResponse($data['status_response']))
+            ->setStatusResponse($this->getSerializer()->deserialize(
+                $data['status_response'],
+                ImmersiveSessionStatusResponse::class,
+                'json'
+            ))
             ->setBottomLeftX($data['bottom_left_x'])
             ->setBottomLeftY($data['bottom_left_y'])
             ->setTopRightX($data['top_right_x'])
