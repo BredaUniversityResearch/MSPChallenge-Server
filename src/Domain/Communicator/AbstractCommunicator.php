@@ -73,8 +73,9 @@ abstract class AbstractCommunicator
 
     /**
      * @param string|null $baseURL
+     * @return static(AbstractCommunicator)
      */
-    public function setBaseURL(?string $baseURL): self
+    public function setBaseURL(?string $baseURL): static
     {
         $this->baseURL = $baseURL;
 
@@ -82,7 +83,7 @@ abstract class AbstractCommunicator
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getUsername(): ?string
     {
@@ -91,8 +92,9 @@ abstract class AbstractCommunicator
 
     /**
      * @param string $username
+     * @return static(AbstractCommunicator)
      */
-    public function setUsername(string $username): self
+    public function setUsername(string $username): static
     {
         $this->username = $username;
 
@@ -100,7 +102,7 @@ abstract class AbstractCommunicator
     }
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getPassword(): ?string
     {
@@ -109,8 +111,9 @@ abstract class AbstractCommunicator
 
     /**
      * @param string $password
+     * @return static(AbstractCommunicator)
      */
-    public function setPassword(string $password): self
+    public function setPassword(string $password): static
     {
         $this->password = $password;
 
@@ -122,7 +125,7 @@ abstract class AbstractCommunicator
         return $this->token;
     }
 
-    public function setToken(string $token): self
+    public function setToken(string $token): static
     {
         $this->token = $token;
 

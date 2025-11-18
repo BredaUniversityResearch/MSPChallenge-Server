@@ -33,7 +33,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
 # Change to the script's directory
 Set-Location -Path (Split-Path -Parent $MyInvocation.MyCommand.Definition)
 
-$branch_name = "msp-ar"
+$branch_name = "dev"
 if ($args.Count -gt 0) {
     $branch_name = $args[0]
 }

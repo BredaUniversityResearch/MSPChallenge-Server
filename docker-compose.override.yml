@@ -75,8 +75,8 @@ services:
   simulations:
     build:
       context: .
-      dockerfile: simulations/debian.11-x64/Dockerfile
+      dockerfile: simulations/linux-x64/Dockerfile
       args:
-        source_dir: simulations/debian.11-x64
+        source_dir: simulations/linux-x64
     volumes:
-        - ./simulations/debian.11-x64:/app
+        - ./simulations/linux-x64:/app

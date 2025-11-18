@@ -1,6 +1,6 @@
 services:
   redis:
-    image: redis:7.2.4-alpine
+    image: redis:7.2-alpine
     restart: always
     networks:
       - msp_network
@@ -120,27 +120,6 @@ services:
       driver: "local"
     networks:
       - msp_network
-
-  blackfire:
-    image: blackfire/blackfire:2
-    ports:
-      - "${BLACKFIRE_PORT:-}:8307"
-    environment:
-        # Define Blackfire Agent log vebosity level
-        BLACKFIRE_LOG_LEVEL: 4
-
-        # Exposes BLACKFIRE_SERVER_* environment variables from the host
-        BLACKFIRE_SERVER_ID: ${BLACKFIRE_SERVER_ID:-}
-        BLACKFIRE_SERVER_TOKEN: ${BLACKFIRE_SERVER_TOKEN:-}
-
-        # Exposes BLACKFIRE_CLIENT_* environment variables
-        # allowing the client to communicate with Blackfire's API:
-        BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID:-}
-        BLACKFIRE_CLIENT_TOKEN: ${BLACKFIRE_CLIENT_TOKEN:-}
-    networks:
-      - msp_network
-    logging:
-      driver: "local"
 
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###

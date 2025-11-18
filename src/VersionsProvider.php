@@ -23,11 +23,11 @@ class VersionsProvider implements ProviderInterface
         // all components must have the same sub-array structure
         // and must have a version.txt file with a SemVer 2.0.0 compliant version in it
         $this->components = [
-            'MSW' => 'simulations/debian.11-x64/MSWdata/',
-            'MEL' => 'simulations/debian.11-x64/MELdata/',
-            'SEL' => 'simulations/debian.11-x64/SELdata/',
-            'CEL' => 'simulations/debian.11-x64/CELdata/',
-            'REL' => 'simulations/debian.11-x64/RELdata/',
+            'MSW' => 'simulations/linux-x64/MSWdata/',
+            'MEL' => 'simulations/linux-x64/MELdata/',
+            'SEL' => 'simulations/linux-x64/SELdata/',
+            'CEL' => 'simulations/linux-x64/CELdata/',
+            'REL' => 'simulations/linux-x64/RELdata/',
         ];
         $this->setComponentsVersions();
         $this->configVersion = Version::fromString('2.0.0');
