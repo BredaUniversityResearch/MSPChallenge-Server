@@ -41,6 +41,7 @@ Write-Host "  branch_name: $branch_name"
 Read-Host "Please switch and connect to the Wi-Fi network to be used for your 'augGIS' session and then press enter to continue"
 # Get the IP address of the Wi-Fi network interface
 $wifiAdapter = Get-NetIPAddress | Where-Object { $_.InterfaceAlias -like "*Wi-Fi*" -and $_.AddressFamily -eq "IPv4" }
+$wifiIpEscaped = $wifiAdapter.IPAddress -replace '\.', '\\.'
 $wifiAdapter.IPAddress
 Write-Host "Gonna use $($wifiAdapter.IPAddress) for the MSP server connections"
 Read-Host "If needed, switch to a network that has an internet connection and then press enter to continue"
@@ -77,7 +78,7 @@ CADDY_MERCURE_JWT_SECRET=$env:CADDY_MERCURE_JWT_SECRET
 GEO_SERVER_DOWNLOADS_CACHE_LIFETIME=$geoServerDownloadsCacheLifetime
 GEO_SERVER_RESULTS_CACHE_LIFETIME=$geoServerResultsCacheLifetime
 IMMERSIVE_SESSIONS_DOCKER_HUB_TAG=$tag
-CORS_ALLOW_ORIGIN='^https?://(localhost|127\.0\.0\.1|$($wifiAdapter.IPAddress))(:[0-9]+)?$'
+CORS_ALLOW_ORIGIN='^https?://(localhost|127\\.0\\.0\\.1|$wifiIpEscaped)(:[0-9]+)?$'
 "@
 
 docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.auggis.yml" up -d
