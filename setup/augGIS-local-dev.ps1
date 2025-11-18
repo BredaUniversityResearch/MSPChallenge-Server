@@ -64,6 +64,7 @@ if (Test-Path ".env.local") {
 # Get the IP address of the Wi-Fi network interface
 $netAdapter = Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias Wi-Fi,Ethernet -AddressState Preferred | Select-Object -First 1
 $netAdapter.IPAddress
+$wifiIpEscaped = $netAdapter.IPAddress -replace '\.', '\.'
 Write-Host "Gonna use $($netAdapter.IPAddress) for the MSP server connections"
 
 docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
@@ -74,6 +75,7 @@ URL_WEB_SERVER_HOST=$($netAdapter.IPAddress)
 URL_WS_SERVER_HOST=$($netAdapter.IPAddress)
 IMMERSIVE_SESSIONS_DOCKER_HUB_TAG=$tag
 IMMERSIVE_SESSIONS_HEALTHCHECK_WRITE_MODE=1
+CORS_ALLOW_ORIGIN='^https?://(localhost|127\.0\.0\.1|$wifiIpEscaped)(:[0-9]+)?$'
 "@
 
 docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d --remove-orphans
