@@ -1,6 +1,8 @@
 import os
 import json
 
+os.chdir(os.path.join(os.path.dirname(__file__), '../../'))
+
 # Step 1: List all directories in ServerManager/configfiles/
 base_path = 'ServerManager/configfiles/'
 directories = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
