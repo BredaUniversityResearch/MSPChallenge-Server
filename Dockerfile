@@ -36,8 +36,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         default-mysql-client \
         procps \
         nano \
-        npm \
-    ;
+        npm
 
 # Install Yarn through corepack
 RUN npm install -g corepack
@@ -46,16 +45,6 @@ RUN npm install -g corepack
 RUN set -eux; \
     install-php-extensions @composer apcu intl opcache zip pcntl imagick gd; \
     rm -rf /tmp/*
-
-# Build and install custom PHP extension from source
-RUN git clone https://github.com/BredaUniversityResearch/php-apm.git /tmp/php-apm && \
-    cd /tmp/php-apm && \
-    phpize && \
-    ./configure --with-php-config=$(which php-config) --without-sqlite3 --without-mysql && \
-    make && \
-    make install && \
-    echo "extension=apm.so" > $PHP_INI_DIR/conf.d/apm.ini && \
-    rm -rf /tmp/php-apm
 
 # if you want to debug on prod, enable below lines:
 ##   Also check ./frankenphp/conf.d/app.prod.ini

@@ -132,6 +132,3 @@ composer.phar
 
 # local xdebug files
 xdebug.log
-
-# secrets
-.secrets/

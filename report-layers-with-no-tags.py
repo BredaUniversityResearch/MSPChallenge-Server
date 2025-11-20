@@ -1,9 +1,6 @@
 import os
 import json
 
-# set working directory to root of project
-os.chdir(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-
 # Step 1: List all directories in ServerManager/configfiles/
 base_path = 'ServerManager/configfiles/'
 directories = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
