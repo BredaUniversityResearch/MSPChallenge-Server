@@ -5,14 +5,10 @@ function Test-Admin {
     $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
 }
 
-# Check for administrative privileges
-if ((Test-Admin) -eq $false)  {
-    if ($elevated) {
-        Write-Host "Failed to elevate privileges. Exiting..."
-    } else {
-        Write-Host "This script requires administrative privileges. Relaunching as admin..."
-        Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file "{0}" -elevated -tag {1}' -f ($myinvocation.MyCommand.Definition, $tag))
-    }
+# always run another instance as admin, also to loose env vars from parent process
+if (-not $elevated) {
+    Write-Host "This script requires administrative privileges. Relaunching as admin..."
+    Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file "{0}" -elevated -tag {1}' -f ($myinvocation.MyCommand.Definition, $tag))
     exit
 }
 
@@ -68,7 +64,7 @@ $wifiIpEscaped = $netAdapter.IPAddress -replace '\.', '\.'
 Write-Host "Gonna use $($netAdapter.IPAddress) for the MSP server connections"
 
 # pre-cache the auggis server image
-docker pull docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:latest
+docker pull docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:$tag
 docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
 
 # Write variables to .env.local
