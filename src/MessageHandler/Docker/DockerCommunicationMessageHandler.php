@@ -390,7 +390,9 @@ readonly class DockerCommunicationMessageHandler
                 $em = $this->connectionManager->getGameSessionEntityManager($gameSessionId);
                 $session
                     ->setStatus(ImmersiveSessionStatus::REMOVED)
-                    ->setStatusResponse(['message' => 'Connection lost, removing session']);
+                    ->setStatusResponse(new ImmersiveSessionStatusResponse(
+                        ['message' => 'Connection lost, removing session'])
+                    );
                 $em->persist($session);
             }
         }
