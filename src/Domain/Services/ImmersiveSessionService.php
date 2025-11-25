@@ -137,15 +137,19 @@ class ImmersiveSessionService
         $image = $_ENV['IMMERSIVE_SESSIONS_DOCKER_HUB_IMAGE'] ??
             'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server';
         $tag = $_ENV['IMMERSIVE_SESSIONS_DOCKER_HUB_TAG'] ?? ($_ENV['APP_ENV'] == 'dev' ? 'dev' : 'latest');
-        // true if "1", "true", "on", "yes" // false if "0", "false", "off", "no"
-        if (filter_var($_ENV['IMMERSIVE_SESSIONS_DOCKER_FORCE_PULL'] ?? 0, FILTER_VALIDATE_BOOLEAN)) {
-            $this->dockerApiCall($dockerApi, 'POST', '/images/create', [
-                'query' => [
-                    'fromImage' => $image,
-                    'tag' => $tag
-                ],
-            ]);
-        }
+        $this->dockerApiCall($dockerApi, 'POST', '/images/create', [
+            'query' => [
+                'fromImage' => $image,
+                'tag' => $tag,
+                 // When used in combination with the fromImage option, the daemon checks if the given image is present
+                 //   in the local image cache with the given "platform", and otherwise pulls the image "by force"
+                'platform' =>
+                    // true if "1", "true", "on", "yes" // false if "0", "false", "off", "no"
+                    (filter_var(
+                        $_ENV['IMMERSIVE_SESSIONS_DOCKER_FORCE_PULL'] ?? 0, FILTER_VALIDATE_BOOLEAN)
+                    ) ? '' :  'linux/amd64'
+            ],
+        ]);
         $responseContent = $this->dockerApiCall($dockerApi, 'POST', '/containers/create', [
             'json' => [
                'Image' => $image.':'.$tag,
