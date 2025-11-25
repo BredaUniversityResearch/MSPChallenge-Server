@@ -137,12 +137,15 @@ class ImmersiveSessionService
         $image = $_ENV['IMMERSIVE_SESSIONS_DOCKER_HUB_IMAGE'] ??
             'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server';
         $tag = $_ENV['IMMERSIVE_SESSIONS_DOCKER_HUB_TAG'] ?? ($_ENV['APP_ENV'] == 'dev' ? 'dev' : 'latest');
-        $this->dockerApiCall($dockerApi, 'POST', '/images/create', [
-            'query' => [
-                'fromImage' => $image,
-                'tag' => $tag
-            ],
-        ]);
+        // true if "1", "true", "on", "yes" // false if "0", "false", "off", "no"
+        if (filter_var($_ENV['IMMERSIVE_SESSIONS_DOCKER_FORCE_PULL'] ?? 0, FILTER_VALIDATE_BOOLEAN)) {
+            $this->dockerApiCall($dockerApi, 'POST', '/images/create', [
+                'query' => [
+                    'fromImage' => $image,
+                    'tag' => $tag
+                ],
+            ]);
+        }
         $responseContent = $this->dockerApiCall($dockerApi, 'POST', '/containers/create', [
             'json' => [
                'Image' => $image.':'.$tag,
