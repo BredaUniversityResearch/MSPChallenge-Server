@@ -46,6 +46,8 @@ $wifiAdapter.IPAddress
 Write-Host "Gonna use $($wifiAdapter.IPAddress) for the MSP server connections"
 Read-Host "If needed, switch to a network that has an internet connection and then press enter to continue"
 
+# pre-cache the auggis server image
+docker pull docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:latest
 docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.yml" -OutFile "docker-compose.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.auggis.yml" -OutFile "docker-compose.auggis.yml"
