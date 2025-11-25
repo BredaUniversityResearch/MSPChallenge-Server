@@ -146,7 +146,9 @@ class ImmersiveSessionService
                 'platform' =>
                     // true if "1", "true", "on", "yes" // false if "0", "false", "off", "no"
                     (filter_var(
-                        $_ENV['IMMERSIVE_SESSIONS_DOCKER_FORCE_PULL'] ?? 0, FILTER_VALIDATE_BOOLEAN)
+                        $_ENV['IMMERSIVE_SESSIONS_DOCKER_FORCE_PULL'] ?? 0,
+                        FILTER_VALIDATE_BOOLEAN
+                    )
                     ) ? '' :  'linux/amd64'
             ],
         ]);

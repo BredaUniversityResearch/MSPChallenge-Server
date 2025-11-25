@@ -391,8 +391,8 @@ readonly class DockerCommunicationMessageHandler
                 $session
                     ->setStatus(ImmersiveSessionStatus::REMOVED)
                     ->setStatusResponse(new ImmersiveSessionStatusResponse(
-                        ['message' => 'Connection lost, removing session'])
-                    );
+                        ['message' => 'Connection lost, removing session']
+                    ));
                 $em->persist($session);
             }
         }
