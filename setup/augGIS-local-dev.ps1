@@ -67,6 +67,8 @@ $netAdapter.IPAddress
 $wifiIpEscaped = $netAdapter.IPAddress -replace '\.', '\.'
 Write-Host "Gonna use $($netAdapter.IPAddress) for the MSP server connections"
 
+# pre-cache the auggis server image
+docker pull docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:latest
 docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
 
 # Write variables to .env.local
