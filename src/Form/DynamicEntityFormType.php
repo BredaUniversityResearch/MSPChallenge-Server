@@ -8,9 +8,9 @@ use App\Entity\Mapping as AppMappings;
 use Doctrine\ORM\Mapping as ORM;
 use ReflectionClass;
 use ReflectionException;
+use Symfony\Bundle\FrameworkBundle\Secrets\AbstractVault;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type as SymfonyFormType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -21,6 +21,11 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 class DynamicEntityFormType extends AbstractType
 {
+    public function __construct(private readonly AbstractVault $vault)
+    {
+    }
+
+
     /**
      * @throws ReflectionException
      */
@@ -68,17 +73,22 @@ class DynamicEntityFormType extends AbstractType
                 if ($formFieldTypeLabel) {
                     $formFieldTypeOptions['label'] ??= $formFieldTypeLabel;
                 }
-                if ($formFieldType == ChoiceType::class &&
-                    (null !== $attribute = Util::getPropertyAttribute($property, ORM\Column::class)) &&
-                    /** @var ORM\Column $attribute */
-                    null !== $attribute->enumType) {
-                    // setup choice form type to use enum values - if the property is an enum
-                    $formFieldTypeOptions['choices'] ??= $attribute->enumType::cases();
-                    $formFieldTypeOptions['choice_label'] ??=
-                        fn($enum) => in_array(GetAttributesTrait::class, class_uses($enum)) ?
-                            $enum::getDescription($enum) :$enum->name; // Display the name
-                    $formFieldTypeOptions['choice_value'] ??=
-                        fn($enum) => $enum?->value; // Use the value
+                if (is_a($formFieldType, SymfonyFormType\ChoiceType::class, true)) {
+                    // Setup choice form type to use enum values - if the property is an enum
+                    if ((null !== $attribute = Util::getPropertyAttribute($property, ORM\Column::class)) &&
+                        /** @var ORM\Column $attribute */
+                        null !== $attribute->enumType) {
+                        $formFieldTypeOptions['choices'] ??= $attribute->enumType::cases();
+                        $formFieldTypeOptions['choice_label'] ??=
+                            fn($enum) => in_array(GetAttributesTrait::class, class_uses($enum)) ?
+                                $enum::getDescription($enum) : $enum->name; // Display the name
+                        $formFieldTypeOptions['choice_value'] ??= fn($enum) => $enum?->value; // Use the value
+                    // Setup choice form type to refer to secrets
+                    } elseif (is_a($formFieldType, AppMappings\Property\SecretsChoiceType::class, true)) {
+                        $formFieldTypeOptions['label'] ??= 'Secret to use for '.$propertyName;
+                        $formFieldTypeOptions['choices'] ??= array_keys($this->vault->list());
+                        $formFieldTypeOptions['choice_label'] ??= fn($value) => $value; // Use the value
+                    }
                 }
             }
             /** @var ?\ReflectionNamedType $propertyType */
@@ -124,9 +134,9 @@ class DynamicEntityFormType extends AbstractType
     private function defaultTypeToFormFieldTypeMapping(?string $type): ?string
     {
         return match ($type) {
-            'string' => TextType::class,
-            'int' => IntegerType::class,
-            'bool' => CheckboxType::class,
+            'string' => SymfonyFormType\TextType::class,
+            'int' => SymfonyFormType\IntegerType::class,
+            'bool' => SymfonyFormType\CheckboxType::class,
             default => null, // Skip unsupported types
         };
     }

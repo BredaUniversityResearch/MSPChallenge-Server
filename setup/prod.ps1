@@ -59,6 +59,15 @@
 .PARAMETER AppSecret
     The application secret.
 
+.PARAMETER DatabasePassword
+    The database password.
+
+.PARAMETER My2UserPassword
+    The database user "my2" password for the optional Grafana container. See: https://github.com/meob/my2Collector
+
+.PARAMETER JwtPassphrase
+    The jwt passphrase used by jwt token creation.
+
 .LINK
     MSP Challenge Server GitHub page: https://github.com/BredaUniversityResearch/MSPChallenge-Server/
     MSP Challenge Community website: https://community.mspchallenge.info/
@@ -87,7 +96,10 @@ param(
     [int]$EnableGui = 1,
     [string]$CaddyMercureJwtSecret = ([guid]::NewGuid().ToString("N")),
     [string]$BranchName = "dev",
-    [string]$AppSecret = ([guid]::NewGuid().ToString("N"))
+    [string]$AppSecret = ([guid]::NewGuid().ToString("N")),
+    [string]$DatabasePassword = ([guid]::NewGuid().ToString("N")),
+    [string]$My2UserPassword = ([guid]::NewGuid().ToString("N")),
+    [string]$JwtPassphrase = ([guid]::NewGuid().ToString("N"))
 )
 
 $presetsConfiguration = @{
@@ -376,6 +388,27 @@ $parameterMetadata = @{
         Tab = "Basic setup"
         Validate = @(
             @{ "APP_SECRET must be 32 characters." = { param($v) $v.Length -eq 32 } }
+        )
+    }
+    DatabasePassword = @{
+        EnvVar = "DATABASE_PASSWORD"
+        Tab = "Basic setup"
+        Validate = @(
+            @{ "DATABASE_PASSWORD must be 32 characters." = { param($v) $v.Length -eq 32 } }
+        )
+    }
+    My2UserPassword = @{
+        EnvVar = "MY2_PASSWORD"
+        Tab = "Basic setup"
+        Validate = @(
+            @{ "MY2_PASSWORD must be 32 characters." = { param($v) $v.Length -eq 32 } }
+        )
+    }
+    JwtPassphrase = @{
+        EnvVar = "JWT_PASSPHRASE"
+        Tab = "Basic setup"
+        Validate = @(
+            @{ "JWT_PASSPHRASE must be 32 characters." = { param($v) $v.Length -eq 32 } }
         )
     }
 }

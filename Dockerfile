@@ -1,7 +1,7 @@
 #syntax=docker/dockerfile:1
 
 # build a local image using the following command:
-#   docker build -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:5.2.0 -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
+#   docker build -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:5.2.1 -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
 # how to run it:
 #  (replace [branch_name] with the branch you want to run, e.g. `main` or `dev`)
 #  * from Linux:
@@ -144,5 +144,5 @@ RUN set -eux; \
     mkdir -p var/cache var/log; \
     composer dump-autoload --classmap-authoritative --no-dev; \
     composer dump-env prod; \
-    composer run-script --no-dev post-install-cmd; \
+    IS_BUILD=true composer run-script --no-dev post-install-cmd; \
     chmod +x bin/console; sync;
