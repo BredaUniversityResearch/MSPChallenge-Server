@@ -96,7 +96,7 @@ param(
     [int]$EnableGui = 1,
     [string]$CaddyMercureJwtSecret = ([guid]::NewGuid().ToString("N")),
     [string]$BranchName = "dev",
-    [string]$AppSecret = ([guid]::NewGuid().ToString("N"))
+    [string]$AppSecret = ([guid]::NewGuid().ToString("N")),
     [string]$DatabasePassword = ([guid]::NewGuid().ToString("N")),
     [string]$My2UserPassword = ([guid]::NewGuid().ToString("N")),
     [string]$JwtPassphrase = ([guid]::NewGuid().ToString("N"))
