@@ -140,7 +140,7 @@ RUN set -eux; \
 RUN set -eux; \
     composer dump-autoload --classmap-authoritative --no-dev; \
     composer dump-env prod; \
-    composer run-script --no-dev post-install-cmd; \
+    IS_BUILD=true composer run-script --no-dev post-install-cmd; \
     chmod +x bin/console; sync;
 
 # Clean up unnecessary files

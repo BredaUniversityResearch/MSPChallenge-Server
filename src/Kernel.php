@@ -14,7 +14,12 @@ class Kernel extends BaseKernel
     {
         parent::boot();
 
-        // Only check in production
+        // Not during a build
+        if (isset($_ENV['IS_BUILD'])) {
+            return;
+        }
+
+        // Only in production
         if ($_ENV['APP_ENV'] !== 'prod') {
             return;
         }
