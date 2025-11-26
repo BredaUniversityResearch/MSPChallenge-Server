@@ -35,7 +35,7 @@ vendor/
 #   Note that docker-aliases.sh's alias "ede" exposes all dotenv vars to docker to set real environment variable
 #     using the export on app:export-dotenv-vars with docker/php/dotenv-vars.sh
 #.env.local
-.env.local.php
+.env.local.*
 .env.test
 node_modules/
 
@@ -45,6 +45,7 @@ composer.json
 composer.lock
 symfony.lock
 
+public/adminer/
 public/build/
 public/downloads/
 raster/*
@@ -54,3 +55,10 @@ ServerManager/saves/*
 ServerManager/session_archive/*
 session_archive/*
 exports/*
+
+.cache/
+secrets/jwt/
+.secrets/
+setup/
+POV/**/
+export/
