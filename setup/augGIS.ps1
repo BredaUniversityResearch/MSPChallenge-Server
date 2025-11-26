@@ -81,6 +81,12 @@ GEO_SERVER_DOWNLOADS_CACHE_LIFETIME=$geoServerDownloadsCacheLifetime
 GEO_SERVER_RESULTS_CACHE_LIFETIME=$geoServerResultsCacheLifetime
 IMMERSIVE_SESSIONS_DOCKER_HUB_TAG=$tag
 CORS_ALLOW_ORIGIN='^https?://(localhost|127\.0\.0\.1|$wifiIpEscaped)(:[0-9]+)?$'
+CADDY_MERCURE_JWT_SECRET=$([guid]::NewGuid().ToString("N"))
+APP_SECRET=$([guid]::NewGuid().ToString("N"))
+DATABASE_PASSWORD=$([guid]::NewGuid().ToString("N"))
+MY2_PASSWORD=$([guid]::NewGuid().ToString("N"))
+JWT_PASSPHRASE=$([guid]::NewGuid().ToString("N"))
+DATABASE_CREATOR_PASSWORD=$([guid]::NewGuid().ToString("N"))
 "@
 
 docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.auggis.yml" up -d

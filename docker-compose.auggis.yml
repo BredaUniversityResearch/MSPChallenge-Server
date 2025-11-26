@@ -12,13 +12,19 @@ services:
       - ./ServerManager/log/:/app/ServerManager/log
       - ./public/downloads/:/app/public/downloads
       - /app/var/cache
+      - ./.secrets:/app/.secrets
     environment:
-      APP_SECRET: ${APP_SECRET}
       APP_ENV: prod
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-localhost}
       URL_WS_SERVER_HOST: ${URL_WS_SERVER_HOST:-localhost}
+      # secrets
+      APP_SECRET: ${APP_SECRET}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      MY2_PASSWORD: ${MY2_PASSWORD}
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE}
+      DATABASE_CREATOR_PASSWORD: ${DATABASE_CREATOR_PASSWORD:-${DATABASE_PASSWORD}}
     ports:
       # HTTP
       - target: 80
