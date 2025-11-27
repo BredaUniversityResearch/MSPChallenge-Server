@@ -88,11 +88,11 @@ class MonitorDockerApiEventsCommand extends Command
                     'image' => [$image]
                 ]
             );
+            $queryParams = ['filters' => json_encode($filters)];
             if ($dockerApi->getLastDockerEventAt() !== null) {
-                $filters['since'] = $dockerApi->getLastDockerEventAt()->getTimestamp();
+                $queryParams['since'] = $dockerApi->getLastDockerEventAt()->getTimestamp();
             }
-            $filtersParam = http_build_query(['filters' => json_encode($filters)]);
-            $eventsUrl = $dockerApi->createUrl().'/events?' . $filtersParam;
+            $eventsUrl = $dockerApi->createUrl().'/events?'.http_build_query($queryParams);
             $browser = new ReactBrowser($this->loop);
             $this->output->writeln('<info>Connecting to Docker events stream at '.$eventsUrl.'...</info>');
             $browser->requestStreaming('GET', $eventsUrl)->then(
