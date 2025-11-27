@@ -2,9 +2,16 @@
 
 namespace App\Message\GameList;
 
-class GameListCreationMessage
+readonly class GameListCreationMessage
 {
-    public function __construct(public readonly int $id)
+    public function __construct(
+        public int   $id,
+        private bool $isDemoSession = false
+    ) {
+    }
+
+    public function isDemoSession(): bool
     {
+        return $this->isDemoSession;
     }
 }

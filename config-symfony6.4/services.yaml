@@ -112,6 +112,8 @@ services:
     App\Logger\GameSessionLogger:
 
     App\Entity\ServerManager\Listener\GameListListener:
+        calls:
+            - setConnectionManager: ['@App\Domain\Services\ConnectionManager']
         tags:
             - { name: 'doctrine.orm.entity_listener', event: 'prePersist', entity: 'App\Entity\ServerManager\GameList', entity_manager: 'msp_server_manager' }
             - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameList', entity_manager: 'msp_server_manager' }

@@ -182,6 +182,7 @@ class Simulation extends Base
                     ->setMonth($currentMonth);
                 SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch($message);
             }
+            return $newWatchdogGameState;
         });
     }
 
