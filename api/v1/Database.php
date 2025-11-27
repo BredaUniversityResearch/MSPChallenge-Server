@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\CommonBase;
 use App\Domain\Common\DatabaseDefaults;
 use Exception;
 use PDO;
@@ -37,12 +38,12 @@ class Database
     /**
      * @throws Exception
      */
-    public function __construct(int $overrideSessionId = GameSession::INVALID_SESSION_ID)
+    public function __construct(int $overrideSessionId = CommonBase::INVALID_SESSION_ID)
     {
         // note that it is possible that sessionId is equal to INVALID_SESSION_ID (=-1), in which case the Database
         //   instance is created, but will not do any queries since there will be no valid configuration/connection
-        $this->sessionId = ($overrideSessionId == GameSession::INVALID_SESSION_ID) ?
-            GameSession::GetGameSessionIdForCurrentRequest() : $overrideSessionId;
+        $this->sessionId = ($overrideSessionId == CommonBase::INVALID_SESSION_ID) ?
+            CommonBase::GetGameSessionIdForCurrentRequest() : $overrideSessionId;
 
         if (isset(self::$instances[$this->sessionId])) {
             throw new Exception("Creation of multiple database instances for session: " . $this->sessionId);
@@ -63,13 +64,16 @@ class Database
         self::$instances[$this->sessionId] = null;
     }
 
+    /**
+     * @throws Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function GetInstance(int $overrideSessionId = GameSession::INVALID_SESSION_ID): Database
+    public static function GetInstance(int $overrideSessionId = CommonBase::INVALID_SESSION_ID): Database
     {
         // note that it is possible that sessionId is equal to INVALID_SESSION_ID (=-1), in which case the Database
         //   instance is created, but will not do any queries since there will be no valid configuration/connection
-        $sessionId = ($overrideSessionId == GameSession::INVALID_SESSION_ID) ?
-            GameSession::GetGameSessionIdForCurrentRequest() : $overrideSessionId;
+        $sessionId = ($overrideSessionId == CommonBase::INVALID_SESSION_ID) ?
+            CommonBase::GetGameSessionIdForCurrentRequest() : $overrideSessionId;
         if (!isset(self::$instances[$sessionId])) {
             self::$instances[$sessionId] = new Database($sessionId);
         }
@@ -89,7 +93,7 @@ class Database
         $this->db_user = $dbConfig["user"];
         $this->db_pass = $dbConfig["password"];
 
-        if ($this->sessionId != GameSession::INVALID_SESSION_ID) {
+        if ($this->sessionId != CommonBase::INVALID_SESSION_ID) {
             $this->db_name = $dbConfig["multisession_database_prefix"].$this->sessionId;
             $this->configurationApplied = true;
         } else {

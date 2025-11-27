@@ -3,6 +3,9 @@
 namespace App\EventListener;
 
 use App\Domain\Services\ConnectionManager;
+use App\Entity\SessionAPI\ImmersiveSession;
+use App\Entity\SessionAPI\ImmersiveSessionStatusResponse;
+use App\Message\Docker\CreateImmersiveSessionConnectionMessage;
 use App\Message\Watchdog\Message\WatchdogMessageBase;
 use App\Entity\SessionAPI\Watchdog;
 use App\Repository\SessionAPI\WatchdogRepository;
@@ -28,6 +31,18 @@ readonly class FailedMessageListener implements EventSubscriberInterface
         }
         $envelope = $event->getEnvelope();
         $message = $envelope->getMessage();
+
+        if ($message instanceof CreateImmersiveSessionConnectionMessage) {
+            $immersiveSessionId = $message->getImmersiveSessionId();
+            $em = $this->connectionManager->getGameSessionEntityManager($message->getGameSessionId());
+            $immersiveSession = $em->find(ImmersiveSession::class, $immersiveSessionId);
+            $immersiveSession->setStatusResponse(new ImmersiveSessionStatusResponse([
+                'message' => 'Create immersive session container failed after max retries. Error: ' .
+                    $event->getThrowable()->getMessage() . '. Removing session.'
+            ]));
+            $em->remove($immersiveSession);
+        }
+
         if (!($message instanceof WatchdogMessageBase)) {
             return;
         }

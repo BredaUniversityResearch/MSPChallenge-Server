@@ -4,6 +4,7 @@ namespace App\Tests\ServerManager;
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Common\EntityEnums\GameSaveVisibilityValue;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
+use App\Domain\Common\GameListAndSaveSerializer;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
@@ -36,10 +37,12 @@ class GameListCreationSaveArchiveTest extends KernelTestCase
 
         /** @var GameListRepository $gameListRepo */
         $gameListRepo = $emServerManager->getRepository(GameList::class);
+        /** @var GameList $gameList */
         $gameList = $gameListRepo->find(1);
-        /** @var GameSaveRepository $gameSaveRepo */
-        $gameSaveRepo = $emServerManager->getRepository(GameSave::class);
-        $gameSave = $gameSaveRepo->createGameSaveFromData($gameListRepo->createDataFromGameList($gameList));
+        $serializer = new GameListAndSaveSerializer($emServerManager);
+        $gameListArray = $serializer->createDataFromGameList($gameList);
+
+        $gameSave = $serializer->createGameSaveFromData($gameListArray);
         $gameSave->setGameConfigFilesFilename($gameSave->getGameConfigVersion()->getGameConfigFile()?->getFilename());
         $gameSave->setGameConfigVersionsRegion($gameSave->getGameConfigVersion()?->getRegion());
         $gameSave->setSaveType(new GameSaveTypeValue('full'));
@@ -89,11 +92,11 @@ class GameListCreationSaveArchiveTest extends KernelTestCase
 
         /** @var GameSaveRepository $gameSaveRepo */
         $gameSaveRepo = $emServerManager->getRepository(GameSave::class);
+        /** @var GameSave $gameSave */
         $gameSave = $gameSaveRepo->find(1);
-        $normalizedGameSave = $gameSaveRepo->createDataFromGameSave($gameSave);
-        /** @var GameListRepository $gameListRepo */
-        $gameListRepo = $emServerManager->getRepository(GameList::class);
-        $newGameSessionFromLoad = $gameListRepo->createGameListFromData($normalizedGameSave);
+        $serializer = new GameListAndSaveSerializer($emServerManager);
+        $normalizedGameSave = $serializer->createDataFromGameSave($gameSave);
+        $newGameSessionFromLoad = $serializer->createGameListFromData($normalizedGameSave);
         $newGameSessionFromLoad->setName('testReloadIntoSession');
         $newGameSessionFromLoad->setGameSave($gameSave);
         $newGameSessionFromLoad->setPasswordAdmin('test');
@@ -142,6 +145,6 @@ class GameListCreationSaveArchiveTest extends KernelTestCase
 
     public static function setUpBeforeClass(): void
     {
-        GameListCreationTest::setUpBeforeClass();
+        \App\Tests\Utils\ResourceHelper::resetDatabases(static::bootKernel()->getProjectDir());
     }
 }

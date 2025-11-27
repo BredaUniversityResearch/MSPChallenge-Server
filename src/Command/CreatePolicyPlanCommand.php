@@ -766,7 +766,6 @@ class CreatePolicyPlanCommand extends Command
                 ->setLayerType(null)
                 ->setLayerDepth(1)
                 ->setLayerInfoProperties(null)
-                ->setLayerTextInfo('{}')
                 ->setLayerStates($layer->getLayerStates())
                 ->setLayerLastupdate(100)
                 ->setLayerEditingType(null)

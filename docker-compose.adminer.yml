@@ -6,7 +6,7 @@ services:
       ADMINER_DEFAULT_DRIVER: MySQL
       ADMINER_DEFAULT_SERVER: database
       ADMINER_PLUGINS: sql-log
-      ADMINER_DEFAULT_USER: ${DATABASE_USER:-}
+      ADMINER_DEFAULT_USER: ${DATABASE_USER:-root}
       ADMINER_DEFAULT_PASSWORD: ${DATABASE_PASSWORD:-}
     ports:
       # run Adminer on port 8082 since 8080 will be used by mitmproxy

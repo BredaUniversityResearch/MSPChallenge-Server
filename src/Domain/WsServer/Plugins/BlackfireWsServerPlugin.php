@@ -199,7 +199,7 @@ class BlackfireWsServerPlugin extends Plugin implements EventSubscriberInterface
         ];
     }
 
-    public function addOutput(string $output, ?int $verbosity = null): self
+    public function addOutput(string $output, ?int $verbosity = null): static
     {
         parent::addOutput(self::OUTPUT_PREFIX.$output, $verbosity);
         return $this;

@@ -11,6 +11,7 @@ use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Domain\Common\GameListAndSaveSerializer;
+use App\Domain\Common\MessageJsonResponse;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameList;
@@ -29,7 +30,6 @@ use App\Repository\SessionAPI\WatchdogRepository;
 use App\VersionsProvider;
 use Exception;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -85,37 +85,31 @@ class GameListController extends BaseController
         try {
             $provider->checkCompatibleClient($request->headers->get('Msp-Client-Version'));
         } catch (IncompatibleClientException $e) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(
-                    false,
-                    [
-                        'clients_url' => $this->getParameter('app.clients_url'),
-                        'server_version' => $provider->getVersion()
-                    ],
-                    $e->getMessage()
-                ),
-                403
+            return new MessageJsonResponse(
+                data: [
+                    'clients_url' => $this->getParameter('app.clients_url'),
+                    'server_version' => $provider->getVersion()
+                ],
+                status: 403,
+                message: $e->getMessage()
             );
         } catch (InvalidVersionString $e) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 400);
+            return new MessageJsonResponse(status: 400, message: $e->getMessage());
         }
         $serverDesc = $entityManager->getRepository(Setting::class)->findOneBy(['name' => 'server_description']);
         if (is_null($serverDesc)) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Please log in to the Server Manager for the first time.'),
-                500
+            return new MessageJsonResponse(
+                status: 500,
+                message: 'Please log in to the Server Manager for the first time.'
             );
         }
-        return $this->json(self::wrapPayloadForResponse(
-            true,
-            [
-                'sessionslist' => $gameList,
-                'server_description' => $serverDesc->getValue(),
-                'clients_url' => $this->getParameter('app.clients_url'),
-                'server_version' => $provider->getVersion(),
-                'server_components_versions' => $provider->getComponentsVersions()
-            ]
-        ));
+        return $this->json([
+            'sessionslist' => $gameList,
+            'server_description' => $serverDesc->getValue(),
+            'clients_url' => $this->getParameter('app.clients_url'),
+            'server_version' => $provider->getVersion(),
+            'server_components_versions' => $provider->getComponentsVersions()
+        ]);
     }
 
     /**
@@ -158,7 +152,11 @@ class GameListController extends BaseController
             $em = $connectionManager->getGameSessionEntityManager($sessionId);
             /** @var WatchdogRepository $watchdogRepo */
             $watchdogRepo = $em->getRepository(Watchdog::class);
-            if (null === $watchdog = $watchdogRepo->find($watchdogId)) {
+
+            $em->getFilters()->disable('softdeleteable');
+            $watchdog = $watchdogRepo->find($watchdogId);
+            $em->getFilters()->enable('softdeleteable');
+            if (null === $watchdog) {
                 throw new NotFoundHttpException('Watchdog not found');
             }
             $watchdog
@@ -244,8 +242,10 @@ class GameListController extends BaseController
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         try {
-            $watchdogs = $connectionManager->getGameSessionEntityManager($sessionId)->getRepository(Watchdog::class)->
-                findAll();
+            $em = $connectionManager->getGameSessionEntityManager($sessionId);
+            $em->getFilters()->disable('softdeleteable');
+            $watchdogs = $em->getRepository(Watchdog::class)->findAll();
+            $em->getFilters()->enable('softdeleteable');
         } catch (Exception $e) {
             $watchdogs = [];
         }

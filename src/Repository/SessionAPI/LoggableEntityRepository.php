@@ -3,9 +3,12 @@
 namespace App\Repository\SessionAPI;
 
 use App\Entity\SessionAPI\EventLog;
-use Doctrine\ORM\EntityRepository;
 
-class LoggableEntityRepository extends EntityRepository
+/**
+ * @template T of object
+ * @extends SessionEntityRepository<T>
+ */
+class LoggableEntityRepository extends SessionEntityRepository
 {
     public function findLogs(int $id)
     {
