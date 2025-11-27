@@ -133,25 +133,29 @@ class ImmersiveSessionService
             $immersiveSessionType->getDataDefault() ?? [],
             $sess->getData() ?? []
         );
-        // Pull the image before creating the container
+        // Check if image exists locally
         $image = $_ENV['IMMERSIVE_SESSIONS_DOCKER_HUB_IMAGE'] ??
             'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server';
         $tag = $_ENV['IMMERSIVE_SESSIONS_DOCKER_HUB_TAG'] ?? ($_ENV['APP_ENV'] == 'dev' ? 'dev' : 'latest');
-        $this->dockerApiCall($dockerApi, 'POST', '/images/create', [
+        $localImages = $this->dockerApiCall($dockerApi, 'GET', '/images/json', [
             'query' => [
-                'fromImage' => $image,
-                'tag' => $tag,
-                 // When used in combination with the fromImage option, the daemon checks if the given image is present
-                 //   in the local image cache with the given "platform", and otherwise pulls the image "by force"
-                'platform' =>
-                    // true if "1", "true", "on", "yes" // false if "0", "false", "off", "no"
-                    (filter_var(
-                        $_ENV['IMMERSIVE_SESSIONS_DOCKER_FORCE_PULL'] ?? 0,
-                        FILTER_VALIDATE_BOOLEAN
-                    )
-                    ) ? '' :  'linux/amd64'
-            ],
+                'filters' => json_encode(['reference' => [$image.':'.$tag]])
+            ]
         ]);
+        // If the image is not found locally or force pull is enabled, pull the image
+        if (empty($localImages) ||
+            filter_var(
+                $_ENV['IMMERSIVE_SESSIONS_DOCKER_FORCE_PULL'] ?? 0,
+                FILTER_VALIDATE_BOOLEAN
+            )
+        ) {
+            $this->dockerApiCall($dockerApi, 'POST', '/images/create', [
+                'query' => [
+                    'fromImage' => $image,
+                    'tag' => $tag
+                ],
+            ]);
+        }
         $responseContent = $this->dockerApiCall($dockerApi, 'POST', '/containers/create', [
             'json' => [
                'Image' => $image.':'.$tag,
