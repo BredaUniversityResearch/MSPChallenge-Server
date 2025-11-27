@@ -325,7 +325,6 @@ class ConnectionManager extends DatabaseDefaults
             $cacheRefresh
         );
     }
-
     /**
      * @throws \Doctrine\DBAL\Exception
      */

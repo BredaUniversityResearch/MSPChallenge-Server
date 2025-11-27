@@ -271,6 +271,14 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
      */
     private function importLayerData(SessionSetupContext $context): void
     {
+        $username = $this->gameSession->getGameGeoServer()->getUsername();
+        $password = $this->gameSession->getGameGeoServer()->getPassword();
+        if (empty($username) || empty($password)) {
+            throw new \Exception(
+                "No GeoServer credentials provided, so no GeoServer data will be imported."
+            );
+        }
+
         $geoServerCommunicator = new GeoServerCommunicator(
             $this->client,
             $this->provider,
@@ -279,8 +287,8 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         );
         $geoServerCommunicator
             ->setBaseURL($this->gameSession->getGameGeoServer()->getAddress())
-            ->setUsername($this->gameSession->getGameGeoServer()->getUsername())
-            ->setPassword($this->gameSession->getGameGeoServer()->getPassword());
+            ->setUsername($username)
+            ->setPassword($password);
 
         /** @var LayerRepository $layerRepo */
         $layerRepo = $this->entityManager->getRepository(Layer::class);

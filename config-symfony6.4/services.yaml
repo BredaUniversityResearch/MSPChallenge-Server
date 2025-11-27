@@ -131,7 +131,7 @@ services:
 
     App\Entity\ServerManager\Listener\GameGeoServerListener:
         arguments:
-            $client: '@Symfony\Contracts\HttpClient\HttpClientInterface'
+            $vault: '@secrets.vault'
         tags:
             - { name: 'doctrine.orm.entity_listener', event: 'postLoad', entity: 'App\Entity\ServerManager\GameGeoServer', entity_manager: 'msp_server_manager' }
             - { name: 'doctrine.orm.entity_listener', event: 'preFlush', entity: 'App\Entity\ServerManager\GameGeoServer', entity_manager: 'msp_server_manager' }
@@ -204,6 +204,15 @@ services:
             $parameters: 'tcp://redis:6379'
 
     App\Validator\ImmersiveSessionTypeJsonSchemaValidator:
+
+    App\Domain\Services\ImmersiveSessionService:
+        arguments:
+            $dockerLogger: '@monolog.logger.docker'
+
+    App\Form\DynamicEntityFormType:
+        arguments:
+          $vault: '@secrets.vault'
+
 when@dev:
     parameters:
         app.guraas_game_id: '3318cf30-f78d-4284-b530-a329005c248a'
