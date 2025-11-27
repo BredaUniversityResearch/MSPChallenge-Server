@@ -18,7 +18,7 @@ class ErrorsController extends BaseController
      * @throws Exception
      */
     #[Route(name: 'manager_errors')]
-    public function index(Request $request, DockerApiService $dockerApiService): Response
+    public function index(): Response
     {
         return $this->render('manager/errors_page.html.twig');
     }
@@ -47,7 +47,7 @@ class ErrorsController extends BaseController
         $response->headers->set('Content-Type', 'text/event-stream');
         $response->headers->set('Cache-Control', 'no-cache');
         $response->headers->set('Connection', 'keep-alive');
-        $response->setCallback(function () use ($dockerApiService, $localDockerApi, $fluentBitContainerId) {
+        $response->setCallback(function () use ($fluentBitContainerId) {
             $ch = curl_init();
             $url = "http://localhost/containers/{$fluentBitContainerId}/logs?follow=1&stdout=1&stderr=1&tail=100";
             curl_setopt($ch, CURLOPT_URL, $url);
