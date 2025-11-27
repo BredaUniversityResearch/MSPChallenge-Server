@@ -203,11 +203,6 @@ services:
             $parameters: 'tcp://redis:6379'
 
     App\Validator\ImmersiveSessionTypeJsonSchemaValidator:
-
-    App\Domain\Services\ImmersiveSessionService:
-        arguments:
-            $dockerLogger: '@monolog.logger.docker'
-
     App\EventListener\ApiResponseWrapperListener:
         tags:
             - { name: 'kernel.event_listener', event: 'kernel.response' }

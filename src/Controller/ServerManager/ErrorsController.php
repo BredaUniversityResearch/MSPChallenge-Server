@@ -58,8 +58,6 @@ class ErrorsController extends BaseController
                     if (preg_match('/\{.*\}/s', $line, $matches)) {
                         $jsonStr = $matches[0];
                         $decoded = json_decode($jsonStr, true);
-                        $decoded['message'] ??= $decoded['log'];
-                        unset($decoded['log']);
                         if (json_last_error() === JSON_ERROR_NONE) {
                             echo "event: log\ndata: " . json_encode($decoded) . "\n\n";
                             ob_flush();

@@ -4,84 +4,134 @@ parsers:
     format: regex
     # test on https://regex101.com/
     regex: |
-      ^\[(?<time>[^\]]+)\] (?<channel>\w+)\.(?<severity>\w+): (?<message>.*?)( (?<stack_trace>\{.*\}))?\s*\[\]$
+      ^\[(?<time>[^\]]+)\] (?<channel>\w+)\.(?<severity>\w+): (?<log>.*?)( (?<stack_trace>\{.*\}))?\s*\[\]$
     time_key: time
     time_format: "%Y-%m-%dT%H:%M:%S.%L%z"
 
 pipeline:
   # https://docs.fluentbit.io/manual/data-pipeline/inputs
   inputs:
-    - name: tail
-      path: /var/log/symfony/*.log
-      parser: symfony
-      tag: symfony
-      db: /fluent-bit/output/symfony.db
-      mem_buf_limit: 10MB
-      skip_long_lines: on
-      skip_empty_lines: on
-    - name: tail
-      path: __SIMULATIONS_LOG_PATH__
-      multiline.parser: docker
-      tag: simulations
-      db: /fluent-bit/output/simulations.db
-      mem_buf_limit: 10MB
-      skip_long_lines: on
-      skip_empty_lines: on
-    - name: tail
-      path: /var/log/supervisor/app-ws-server.log
-      tag: app-ws-server
-      db: /fluent-bit/output/app-ws-server.db
-      mem_buf_limit: 5MB
-      skip_long_lines: on
-      skip_empty_lines: on
-    - name: tail
-      path: /var/log/supervisor/messenger-*.log
-      tag: messenger
-      db: /fluent-bit/output/messenger.db
-      mem_buf_limit: 5MB
-      skip_long_lines: on
-      skip_empty_lines: on
     # test logs
     - name: tail
       path: /fluent-bit/etc/test-logs/symfony.log
       parser: symfony
       tag: symfony.test
+      skip_long_lines: on
       read_from_head: on
+      processors:
+        logs:
+          - name: content_modifier
+            action: insert
+            key: "source"
+            value: symfony.test
     - name: tail
       path: /fluent-bit/etc/test-logs/simulations.log
       multiline.parser: docker
       tag: simulations.test
+      skip_long_lines: on
       read_from_head: on
+      processors:
+        logs:
+          - name: content_modifier
+            action: insert
+            key: "source"
+            value: simulations.test
+    # production logs
+    - name: tail
+      path: /var/log/symfony/*.log
+      parser: symfony
+      tag: symfony
+      mem_buf_limit: 10MB
+      skip_long_lines: on
+      read_from_head: on
+      processors:
+        logs:
+          - name: content_modifier
+            action: insert
+            key: "source"
+            value: symfony
+    - name: tail
+      path: __SIMULATIONS_LOG_PATH__
+      multiline.parser: docker
+      tag: simulations
+      mem_buf_limit: 10MB
+      skip_long_lines: on
+      read_from_head: on
+      processors:
+        logs:
+          - name: content_modifier
+            action: insert
+            key: "source"
+            value: simulations
+    - name: tail
+      path: /var/log/supervisor/app-ws-server.log
+      tag: app-ws-server
+      mem_buf_limit: 5MB
+      skip_long_lines: on
+      read_from_head: on
+      processors:
+        logs:
+          - name: content_modifier
+            action: insert
+            key: "source"
+            value: app-ws-server
+    - name: tail
+      path: /var/log/supervisor/messenger-watchdog-*.log
+      tag: messenger-watchdog
+      mem_buf_limit: 5MB
+      skip_long_lines: on
+      read_from_head: on
+      processors:
+        logs:
+          - name: content_modifier
+            action: insert
+            key: "source"
+            value: messenger-watchdog
+    - name: tail
+      path: /var/log/supervisor/messenger-consume.log
+      tag: messenger-consume
+      mem_buf_limit: 5MB
+      skip_long_lines: on
+      read_from_head: on
+      processors:
+        logs:
+          - name: content_modifier
+            action: insert
+            key: "source"
+            value: messenger-consume
+    - name: tail
+      path: /var/log/supervisor/messenger-docker.log
+      tag: messenger-docker
+      mem_buf_limit: 5MB
+      skip_long_lines: on
+      read_from_head: on
+      processors:
+        logs:
+          - name: content_modifier
+            action: insert
+            key: "source"
+            value: messenger-docker
+    - name: tail
+      path: /var/log/supervisor/monitor-docker-api-events.log
+      tag: monitor-docker-api-events
+      mem_buf_limit: 5MB
+      skip_long_lines: on
+      read_from_head: on
+      processors:
+        logs:
+          - name: content_modifier
+            action: insert
+            key: "source"
+            value: monitor-docker-api-events
   filters:
     - name: grep
       match: symfony*
       regex:
         - severity ^CRITICAL$
     - name: grep
-      match: simulations*
+      match: "dummy-no-match"
+      match_regex: (monitor-docker-api-events|messenger-.*|app-ws-server)
       regex: log (?i).*exception.*
-    - name: grep
-      match: messenger-*
-      regex: log (?i).*exception.*
-    - name: grep
-      match: app-ws-server
-      regex: log (?i).*exception.*
-    - name: modify
-      match: symfony*
-      Add:
-        - tag symfony
-    - name: modify
-      match: simulations*
-      Add:
-        - tag simulations
-    - name: modify
-      match: app-ws-server
-      Add:
-        - tag app-ws-server
-    - name: modify
-      match: messenger
-      Add:
-        - tag messenger
   # https://docs.fluentbit.io/manual/data-pipeline/outputs
   outputs:
     - name: stdout

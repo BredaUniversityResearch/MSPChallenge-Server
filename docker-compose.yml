@@ -1,10 +1,8 @@
 services:
   fluent-bit:
+    image: docker-hub.mspchallenge.info/cradlewebmaster/fluent-bit:4.2.0
     depends_on:
       - simulations
-    build:
-        context: .
-        target: fluent_bit_base
     volumes:
       - ./docker/fluent-bit/fluent-bit.tpl.yaml:/fluent-bit/etc/fluent-bit.tpl.yaml
       - ./docker/fluent-bit/test-logs:/fluent-bit/etc/test-logs:ro
