@@ -2,9 +2,12 @@
 
 namespace App\Repository\SessionAPI;
 
-use Doctrine\ORM\EntityRepository;
+use App\Entity\SessionAPI\PlanPolicy;
 
-class PlanPolicyRepository extends EntityRepository
+/**
+ * @extends SessionEntityRepository<PlanPolicy>
+ */
+class PlanPolicyRepository extends SessionEntityRepository
 {
 
 }

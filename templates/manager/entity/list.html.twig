@@ -4,6 +4,7 @@
         <table class="table table-hover table-striped">
             <thead>
                 <tr>
+                    <th>{{ idPropertyName }}</th>
                     {% for propertyName, header in headers|filter(h => not h.action) %}
                     <th>{{ header.label ?: propertyName }}</th>
                     {% endfor %}
@@ -13,6 +14,7 @@
             <tbody>
                 {% for entity in entityList %}
                 <tr>
+                    <td>{{ attribute(entity, idPropertyName) }}</td>
                     {% for propertyName, header in headers|filter(h => not h.action) %}
                     <td>{{ attribute(entity, propertyName) }}</td>
                     {% endfor %}

@@ -3,6 +3,7 @@
 namespace App\Controller\SessionAPI;
 
 use App\Controller\BaseController;
+use App\Domain\Common\MessageJsonResponse;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SimulationHelper;
 use App\Entity\SessionAPI\Simulation;
@@ -139,17 +140,17 @@ class SimulationController extends BaseController
         try {
             $serverId = $this->getServerIdFromRequest($request);
         } catch (BadRequestHttpException $e) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: $e->getMessage()),
-                Response::HTTP_BAD_REQUEST
+            return new MessageJsonResponse(
+                status: Response::HTTP_BAD_REQUEST,
+                message: $e->getMessage()
             );
         }
         $em = $this->connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
         $watchdogRepo = $em->getRepository(Watchdog::class);
         if (null === $watchdog = $watchdogRepo->findOneBy(['serverId' => $serverId->toBinary()])) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Watchdog server not found'),
-                Response::HTTP_NOT_FOUND
+            return new MessageJsonResponse(
+                status: Response::HTTP_NOT_FOUND,
+                message: 'Watchdog server not found'
             );
         }
 
@@ -177,12 +178,9 @@ class SimulationController extends BaseController
         }
         $em->flush();
 
-        return new JsonResponse(
-            self::wrapPayloadForResponse(
-                true,
-                message: $isUpdate ? 'Simulations updated' : 'Simulations created'
-            ),
-            $isUpdate ? Response::HTTP_OK : Response::HTTP_CREATED
+        return new MessageJsonResponse(
+            status: $isUpdate ? Response::HTTP_OK : Response::HTTP_CREATED,
+            message: $isUpdate ? 'Simulations updated' : 'Simulations created'
         );
     }
 
@@ -264,22 +262,16 @@ class SimulationController extends BaseController
         try {
             $serverId = $this->getServerIdFromRequest($request);
         } catch (BadRequestHttpException $e) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: $e->getMessage()),
-                Response::HTTP_BAD_REQUEST
-            );
+            return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: $e->getMessage());
         }
         $em = $this->connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
         $watchdogRepo = $em->getRepository(Watchdog::class);
         if (null === $watchdog = $watchdogRepo->findOneBy(['serverId' => $serverId])) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Watchdog server not found'),
-                Response::HTTP_NOT_FOUND
-            );
+            return new MessageJsonResponse(status: Response::HTTP_NOT_FOUND, message: 'Watchdog server not found');
         }
         $simRepo = $em->getRepository(Simulation::class);
         $simulations = $simRepo->findBy(['watchdog' => $watchdog]);
-        return new JsonResponse(self::wrapPayloadForResponse(true, $simulations));
+        return new JsonResponse($simulations);
     }
 
     /**
@@ -368,26 +360,20 @@ class SimulationController extends BaseController
         try {
             $serverId = $this->getServerIdFromRequest($request);
         } catch (BadRequestHttpException $e) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: $e->getMessage()),
-                Response::HTTP_BAD_REQUEST
-            );
+            return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: $e->getMessage());
         }
 
         $names = array_filter($request->request->all());
         if (empty($names)) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Names are required'),
-                Response::HTTP_BAD_REQUEST
-            );
+            return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: 'Names are required');
         }
 
         $em = $this->connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
         $watchdogRepo = $em->getRepository(Watchdog::class);
         if (null === $watchdog = $watchdogRepo->findOneBy(['serverId' => $serverId])) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Watchdog server not found'),
-                Response::HTTP_NOT_FOUND
+            return new MessageJsonResponse(
+                status: Response::HTTP_NOT_FOUND,
+                message: 'Watchdog server not found'
             );
         }
 
@@ -399,9 +385,7 @@ class SimulationController extends BaseController
         }
 
         $em->flush();
-        return new JsonResponse(
-            self::wrapPayloadForResponse(true, message: 'Simulations deleted')
-        );
+        return new MessageJsonResponse(message: 'Simulations deleted');
     }
 
     /**
@@ -469,19 +453,13 @@ class SimulationController extends BaseController
         try {
             $serverId = $this->getServerIdFromRequest($request);
         } catch (BadRequestHttpException $e) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: $e->getMessage()),
-                Response::HTTP_BAD_REQUEST
-            );
+            return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: $e->getMessage());
         }
 
         $em = $this->connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
         $watchdogRepo = $em->getRepository(Watchdog::class);
         if (null === $watchdog = $watchdogRepo->findOneBy(['serverId' => $serverId])) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Watchdog server not found'),
-                Response::HTTP_NOT_FOUND
-            );
+            return new MessageJsonResponse(status: Response::HTTP_NOT_FOUND, message: 'Watchdog server not found');
         }
 
         $simRepo = $em->getRepository(Simulation::class);
@@ -491,9 +469,7 @@ class SimulationController extends BaseController
         }
 
         $em->flush();
-        return new JsonResponse(
-            self::wrapPayloadForResponse(true, message: 'All simulations deleted')
-        );
+        return new MessageJsonResponse(message: 'All simulations deleted');
     }
 
     /**
@@ -544,7 +520,7 @@ class SimulationController extends BaseController
                 description: 'Month simulation finish has been noted',
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: 'status', type: 'boolean', example: true),
+                        new OA\Property(property: 'success', type: 'boolean', example: true),
                         new OA\Property(
                             property: 'message',
                             type: 'string',
@@ -558,7 +534,7 @@ class SimulationController extends BaseController
                 description: 'Bad request',
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: 'status', type: 'boolean', example: false),
+                        new OA\Property(property: 'success', type: 'boolean', example: false),
                         new OA\Property(property: 'message', type: 'string', example: 'Simulation name is required')
                     ]
                 )
@@ -568,7 +544,7 @@ class SimulationController extends BaseController
                 description: 'Not Found',
                 content: new OA\JsonContent(
                     properties: [
-                        new OA\Property(property: 'status', type: 'boolean', example: false),
+                        new OA\Property(property: 'success', type: 'boolean', example: false),
                         new OA\Property(property: 'message', type: 'string', example: 'Entity not found')
                     ]
                 )
@@ -580,45 +556,28 @@ class SimulationController extends BaseController
         try {
             $watchdogServerId = $this->getServerIdFromRequest($request);
         } catch (BadRequestHttpException $e) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: $e->getMessage()),
-                Response::HTTP_BAD_REQUEST
-            );
+            return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: $e->getMessage());
         }
         $em = $this->connectionManager->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
         $repo = $em->getRepository(Simulation::class);
         if (null === $simName = $request->request->get('simulation_name')) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Simulation name is required'),
-                Response::HTTP_BAD_REQUEST
-            );
+            return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: 'Simulation name is required');
         }
         if (null === $month = $request->request->get('month')) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Month is required'),
-                Response::HTTP_BAD_REQUEST
-            );
+            return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: 'Month is required');
         }
         // check month is integer
         if (!is_numeric($month)) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: 'Month must be an integer'),
-                Response::HTTP_BAD_REQUEST
-            );
+            return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: 'Month must be an integer');
         }
         $month = (int)$month;
         try {
             /** @var SimulationRepository $repo */
             $repo->notifyMonthSimulationFinished($watchdogServerId, $simName, $month);
         } catch (EntityNotFoundException $e) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: $e->getMessage()),
-                Response::HTTP_NOT_FOUND
-            );
+            return new MessageJsonResponse(status: Response::HTTP_NOT_FOUND, message: $e->getMessage());
         }
-        return new JsonResponse(
-            self::wrapPayloadForResponse(true, message: 'Month simulation finished notified')
-        );
+        return new MessageJsonResponse(message: 'Month simulation finished notified');
     }
 
     /**
@@ -684,12 +643,9 @@ class SimulationController extends BaseController
                 $this->getSessionIdFromRequest($request)
             );
         } catch (Exception $e) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: $e->getMessage()),
-                Response::HTTP_NOT_FOUND
-            );
+            return new MessageJsonResponse(status: Response::HTTP_NOT_FOUND, message: $e->getMessage());
         }
-        return new JsonResponse(self::wrapPayloadForResponse(true, $requiredSimulationTypes));
+        return new JsonResponse($requiredSimulationTypes);
     }
 
     /**
@@ -748,25 +704,20 @@ class SimulationController extends BaseController
         try {
             $watchdogServerId = $this->getServerIdFromRequest($request);
         } catch (BadRequestHttpException $e) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(false, message: $e->getMessage()),
-                Response::HTTP_BAD_REQUEST
-            );
+            return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: $e->getMessage());
         }
         $em = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
+        $em->getFilters()->disable('softdeleteable');
         if (null === $watchdog =
             $em->getRepository(Watchdog::class)->findOneBy(['serverId' => $watchdogServerId])
         ) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(
-                    false,
-                    message: 'Could not find watchdog with server id: ' . $watchdogServerId->toRfc4122()
-                ),
-                Response::HTTP_NOT_FOUND
+            $em->getFilters()->enable('softdeleteable');
+            return new MessageJsonResponse(
+                status: Response::HTTP_NOT_FOUND,
+                message: 'Could not find watchdog with server id: '.$watchdogServerId->toRfc4122()
             );
         }
-        return new JsonResponse(
-            self::wrapPayloadForResponse(true, ['watchdog_token' => $watchdog->getToken()])
-        );
+        $em->getFilters()->enable('softdeleteable');
+        return new JsonResponse(['watchdog_token' => $watchdog->getToken()]);
     }
 }

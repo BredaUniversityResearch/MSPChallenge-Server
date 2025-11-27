@@ -36,15 +36,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         default-mysql-client \
         procps \
         nano \
-        npm
+        npm \
+        && rm -rf /var/lib/apt/lists/*
 
 # Install Yarn through corepack
 RUN npm install -g corepack
 
 # Install PHP extensions
 RUN set -eux; \
-    install-php-extensions @composer apcu intl opcache zip pcntl imagick gd; \
-    rm -rf /tmp/*
+    install-php-extensions @composer apcu intl opcache zip pcntl imagick gd;
 
 # if you want to debug on prod, enable below lines:
 ##   Also check ./frankenphp/conf.d/app.prod.ini
@@ -88,7 +88,8 @@ CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile" ]
 # Dev FrankenPHP image
 FROM frankenphp_base AS frankenphp_dev
 
-ENV APP_ENV=dev XDEBUG_MODE=off
+ENV APP_ENV=dev
+ENV XDEBUG_MODE=off
 
 # dev-only supervisor config
 COPY --link docker/supervisor/supervisor.d/dev/*.ini /etc/supervisor.d/
@@ -123,11 +124,13 @@ COPY --link composer-symfony6.4.json composer.json
 COPY --link composer-symfony6.4.lock composer.lock
 COPY --link symfony6.4.lock symfony.lock
 COPY --link package.json package.json
-COPY --link . ./
 
-# Install dependencies
 RUN set -eux; \
   composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress
+
+# copy sources
+COPY --link . ./
+RUN rm -Rf frankenphp/
 
 # Install dependencies and build assets
 RUN set -eux; \
@@ -138,10 +141,8 @@ RUN set -eux; \
 
 # Install PHP dependencies
 RUN set -eux; \
+    mkdir -p var/cache var/log; \
     composer dump-autoload --classmap-authoritative --no-dev; \
     composer dump-env prod; \
     IS_BUILD=true composer run-script --no-dev post-install-cmd; \
     chmod +x bin/console; sync;
-
-# Clean up unnecessary files
-RUN rm -rf frankenphp/

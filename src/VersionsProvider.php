@@ -59,6 +59,11 @@ class VersionsProvider implements ProviderInterface
         return $this->lowestClientVersion;
     }
 
+    public function setLowestClientVersion(Version $lowestClientVersion): void
+    {
+        $this->lowestClientVersion = $lowestClientVersion;
+    }
+
     public function getComponentsVersions(): array
     {
         return $this->componentsVersions;

@@ -18,13 +18,6 @@ class Log extends Base
     const ERROR = "Error";
     const FATAL = "Fatal";
 
-    public const LOG_ERROR = (1 << 0);
-    public const LOG_WARNING = (1 << 1);
-    public const LOG_INFO = (1 << 2);
-    public const LOG_DEBUG = (1 << 3);
-
-    private static int $logFilter = ~0;
-
     /**
      * called from SEL
      * @apiGroup Log
@@ -97,100 +90,5 @@ class Log extends Base
         $e = new Exception();
         $eventLog->setStackTrace($e->getTraceAsString());
         $this->postEvent($eventLog);
-    }
-
-    /**
-     * @throws Exception
-     */
-    public static function getRecreateLogPath(): string
-    {
-        $rootPath = SymfonyToLegacyHelper::getInstance()->getProjectDir();
-        $logPrefix = 'log_session_';
-        $sessionId = $_REQUEST['session'];
-
-        $log_dir = $rootPath.'/ServerManager/log';
-        if (!file_exists($log_dir)) {
-            mkdir($log_dir, 0777, true);
-        }
-
-        return $log_dir.'/'. $logPrefix . $sessionId . '.log';
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function SetupFileLogger(string $logPath): void
-    {
-        file_put_contents($logPath, "");
-        ob_start(
-            /**
-             * @throws Exception
-             */
-            function (string $message, int $phase) {
-                return self::recreateLoggingHandler($message, $phase);
-            },
-            16
-        );
-        ob_implicit_flush(true);
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function ClearFileLogger(): void
-    {
-        ob_end_flush();
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function LogError(string $message): void
-    {
-        self::FormatAndPrintToLog($message, self::LOG_ERROR);
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function LogWarning(string $message): void
-    {
-        self::FormatAndPrintToLog($message, self::LOG_WARNING);
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function LogInfo(string $message): void
-    {
-        self::FormatAndPrintToLog($message, self::LOG_INFO);
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function LogDebug(string $message): void
-    {
-        self::FormatAndPrintToLog($message, self::LOG_DEBUG);
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private static function FormatAndPrintToLog(string $message, int $logLevel): void
-    {
-        if ((self::$logFilter & $logLevel) == 0) {
-            return;
-        }
-
-        $dateNow = '[' . date("Y-m-d H:i:s") . ']';
-        if (($logLevel & self::LOG_ERROR) == self::LOG_ERROR) {
-            $logCategory = "ERROR";
-        } elseif (($logLevel & self::LOG_WARNING) == self::LOG_WARNING) {
-            $logCategory = "WARN";
-        } elseif (($logLevel & self::LOG_INFO) == self::LOG_INFO) {
-            $logCategory = "INFO";
-        } elseif (($logLevel & self::LOG_DEBUG) == self::LOG_DEBUG) {
-            $logCategory = "DEBUG";
-        } else {
-            $logCategory = "UNKNOWN";
-        }
-
-        print($dateNow . " [ ". $logCategory . ' ] - ' . $message);
-    }
-
-    /**
-     * @throws Exception
-     */
-    private static function recreateLoggingHandler(string $message, int $phase): string
-    {
-        file_put_contents(self::getRecreateLogPath(), $message . PHP_EOL, FILE_APPEND);
-        return ""; //Swallow all logging after this has been written to the log file.
     }
 }

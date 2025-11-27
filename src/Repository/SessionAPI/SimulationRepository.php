@@ -3,13 +3,16 @@
 namespace App\Repository\SessionAPI;
 
 use App\Domain\Common\InternalSimulationName;
+use App\Entity\SessionAPI\Simulation;
 use App\Entity\SessionAPI\Watchdog;
 use Doctrine\ORM\EntityNotFoundException;
-use Doctrine\ORM\EntityRepository;
 use Exception;
 use Symfony\Component\Uid\Uuid;
 
-class SimulationRepository extends EntityRepository
+/**
+ * @extends SessionEntityRepository<Simulation>
+ */
+class SimulationRepository extends SessionEntityRepository
 {
     /**
      * @throws Exception

@@ -5,7 +5,6 @@ namespace App\MessageHandler\Watchdog;
 use App\Domain\API\v1\Simulation;
 use App\Domain\API\v1\User;
 use App\Domain\Common\EntityEnums\EventLogSeverity;
-use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameList;
@@ -143,7 +142,7 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
             'game_session_api' => self::getSessionAPIBaseUrl(
                 $gameList,
                 $watchdog->getServerId() == Watchdog::getInternalServerId() ?
-                    ($_ENV['MITMPROXY_PORT'] ? 'mitmproxy' : 'php') : null,
+                    (isset($_ENV['MITMPROXY_PORT']) ? 'mitmproxy' : 'php') : null,
                 $watchdog->getServerId() == Watchdog::getInternalServerId() ? ($_ENV['MITMPROXY_PORT'] ?? 80) : null,
                 $watchdog->getServerId() == Watchdog::getInternalServerId() ? 'http' : null
             ),
