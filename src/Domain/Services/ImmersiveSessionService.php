@@ -10,7 +10,6 @@ use App\Entity\SessionAPI\ImmersiveSessionConnection;
 use App\MessageHandler\Watchdog\WatchdogCommunicationMessageHandler;
 use Doctrine\ORM\EntityManager;
 use Exception;
-use Psr\Log\LoggerInterface;
 
 class ImmersiveSessionService
 {
@@ -19,7 +18,7 @@ class ImmersiveSessionService
     public function __construct(
         private readonly ConnectionManager $connectionManager,
         private readonly \Predis\Client $redisClient,
-        private readonly LoggerInterface $dockerLogger
+        private readonly DockerApiService $dockerApiService
     ) {
         $this->currentDockerApi = null;
     }
@@ -118,50 +117,62 @@ class ImmersiveSessionService
         );
         // Pull the image before creating the container
         $tag = $_ENV['IMMERSIVE_TWINS_DOCKER_HUB_TAG'] ?? 'latest';
-        $this->dockerApiCall('POST', '/images/create', [
+        $this->dockerApiService->dockerApiCall($this->getDockerApi(), 'POST', '/images/create', [
             'query' => [
                 'fromImage' => 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server',
                 'tag' => $tag
             ],
         ]);
-        $responseContent = $this->dockerApiCall('POST', '/containers/create', [
-            'json' => [
-               'Image' => 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:'.$tag,
-               'ExposedPorts' => [
-                    '50123/udp' => new \stdClass() // Explicitly expose the port
-                ],
-                'HostConfig' => [
-                   'PortBindings' => [
-                        '50123/udp' => [
-                            ['HostPort' => (string)$conn->getPort()]
+        $responseContent = $this->dockerApiService->dockerApiCall(
+            $this->getDockerApi(),
+            'POST',
+            '/containers/create',
+            [
+                'json' => [
+                   'Image' => 'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:'.$tag,
+                   'ExposedPorts' => [
+                        '50123/udp' => new \stdClass() // Explicitly expose the port
+                    ],
+                    'HostConfig' => [
+                       'PortBindings' => [
+                            '50123/udp' => [
+                                ['HostPort' => (string)$conn->getPort()]
+                            ]
                         ]
-                    ]
+                    ],
+                    'Env' => [
+                        'MSP_CHALLENGE_SESSION_ID='.$gameSessionId,
+                        'MSP_CHALLENGE_API_BASE_URL_FOR_SERVER='.
+                        WatchdogCommunicationMessageHandler::getSessionAPIBaseUrl(
+                            $gameList,
+                            $this->getDockerApi()->getAddress() == 'host.docker.internal' ?
+                                'host.docker.internal' : null
+                        ),
+                        'MSP_CHALLENGE_API_BASE_URL_FOR_CLIENT='.
+                        WatchdogCommunicationMessageHandler::getSessionAPIBaseUrl(
+                            $gameList
+                        ),
+                        'IMMERSIVE_SESSION_REGION_COORDS='.json_encode([
+                            'region_bottom_left_x' => $sess->getRegion()->getBottomLeftX(),
+                            'region_bottom_left_y' => $sess->getRegion()->getBottomLeftY(),
+                            'region_top_right_x' => $sess->getRegion()->getTopRightX(),
+                            'region_top_right_y' => $sess->getRegion()->getTopRightY()
+                        ]),
+                        'IMMERSIVE_SESSION_MONTH='.$conn->getSession()->getMonth(),
+                        // like require_username, require_team, gamemaster_pick
+                        'IMMERSIVE_SESSION_DATA='.json_encode($data)
+                    ],
                 ],
-                'Env' => [
-                    'MSP_CHALLENGE_SESSION_ID='.$gameSessionId,
-                    'MSP_CHALLENGE_API_BASE_URL_FOR_SERVER='.WatchdogCommunicationMessageHandler::getSessionAPIBaseUrl(
-                        $gameList,
-                        $this->getDockerApi()->getAddress() == 'host.docker.internal' ? 'host.docker.internal' : null
-                    ),
-                    'MSP_CHALLENGE_API_BASE_URL_FOR_CLIENT='.WatchdogCommunicationMessageHandler::getSessionAPIBaseUrl(
-                        $gameList
-                    ),
-                    'IMMERSIVE_SESSION_REGION_COORDS='.json_encode([
-                        'region_bottom_left_x' => $sess->getRegion()->getBottomLeftX(),
-                        'region_bottom_left_y' => $sess->getRegion()->getBottomLeftY(),
-                        'region_top_right_x' => $sess->getRegion()->getTopRightX(),
-                        'region_top_right_y' => $sess->getRegion()->getTopRightY()
-                    ]),
-                    'IMMERSIVE_SESSION_MONTH='.$conn->getSession()->getMonth(),
-                    // like require_username, require_team, gamemaster_pick
-                    'IMMERSIVE_SESSION_DATA='.json_encode($data)
-                ],
-            ],
-        ]);
+            ]
+        );
 
         // Start the container
         $containerId = $responseContent['Id'];
-        $this->dockerApiCall('POST', "/containers/{$containerId}/start");
+        $this->dockerApiService->dockerApiCall(
+            $this->getDockerApi(),
+            'POST',
+            "/containers/{$containerId}/start"
+        );
         $conn->setDockerContainerID($containerId);
         $em->persist($conn);
         $em->flush();
@@ -182,60 +193,15 @@ class ImmersiveSessionService
         $em->remove($conn);
         $em->flush();
 
-        $this->dockerApiCall('POST', "/containers/{$dockerContainerId}/stop");
-        $this->dockerApiCall('DELETE', "/containers/{$dockerContainerId}");
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function dockerApiCall(string $method, string $path, array $options = []): ?array
-    {
-        // Build the query string
-        $queryString = http_build_query($options['query'] ?? []);
-        $fullUrl = $this->getDockerApi()->createUrl() . $path . ($queryString ? '?' . $queryString : '');
-
-        // Initialize cURL
-        $ch = curl_init();
-
-        // Set cURL options
-        curl_setopt($ch, CURLOPT_URL, $fullUrl);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false); // Stream the response directly
-        $responseContent = '';
-        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use (&$responseContent) {
-            $this->dockerLogger->info($data);
-            $responseContent .= $data;
-            return strlen($data);
-        });
-
-        // Set the POST fields if there is json data
-        if (!empty($options['json'] ?? [])) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($options['json']));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        }
-
-        // Execute the request
-        curl_exec($ch);
-
-        // Check for errors
-        if (curl_errno($ch)) {
-            $error = curl_error($ch);
-            curl_close($ch);
-            throw new \RuntimeException('curl error: ' . $error);
-        }
-
-        // Get the HTTP status code
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        // Close the cURL handle
-        curl_close($ch);
-
-        // Check for HTTP errors
-        if ($httpCode >= 400) {
-            throw new \RuntimeException('Docker API error: ' . $httpCode . ': ' . $responseContent);
-        }
-
-        return json_decode($responseContent, true);
+        $this->dockerApiService->dockerApiCall(
+            $this->getDockerApi(),
+            'POST',
+            "/containers/{$dockerContainerId}/stop"
+        );
+        $this->dockerApiService->dockerApiCall(
+            $this->getDockerApi(),
+            'DELETE',
+            "/containers/{$dockerContainerId}"
+        );
     }
 }

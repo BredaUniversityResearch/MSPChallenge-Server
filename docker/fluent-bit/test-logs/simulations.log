@@ -1,0 +1,12 @@
+{"log":"MEL001: CLog.CreateNew() Exception: Not a directory : '/app/MEL/MEL_log.xml'\n","stream":"stdout","time":"2025-11-24T10:22:43.139373453Z"}
+{"log":"Successfully updated refresh token for server http://mitmproxy:8080/1/\n","stream":"stdout","time":"2025-11-24T10:37:43.520953737Z"}
+{"log":"MEL001: MSWPipe | Received new API token eyJ0eXAiOi...SEL001: MSWPipe | Received new API token eyJ0eXAiOi...\n","stream":"stdout","time":"2025-11-24T10:37:43.520960501Z"}
+{"log":"\n","stream":"stdout","time":"2025-11-24T10:37:43.520964532Z"}
+{"log":"CEL001: MSWPipe | Received new API token eyJ0eXAiOi...\n","stream":"stdout","time":"2025-11-24T10:37:43.521335954Z"}
+{"log":"Requesting new access token from server http://mitmproxy:8080/1/\n","stream":"stdout","time":"2025-11-24T10:52:42.636478332Z"}
+{"log":"Successfully updated access token for server http://mitmproxy:8080/1/\n","stream":"stdout","time":"2025-11-24T10:52:43.262428986Z"}
+{"log":"Successfully updated refresh token for server http://mitmproxy:8080/1/\n","stream":"stdout","time":"2025-11-24T10:52:43.26246899Z"}
+{"log":"CEL001: MSWPipe | Received new API token eyJ0eXAiOi...SEL001: MSWPipe | Received new API token eyJ0eXAiOi...\n","stream":"stdout","time":"2025-11-24T10:52:43.262474259Z"}
+{"log":"\n","stream":"stdout","time":"2025-11-24T10:52:43.262485596Z"}
+{"log":"MEL001: MSWPipe | Received new API token eyJ0eXAiOi...\n","stream":"stdout","time":"2025-11-24T10:52:43.26248909Z"}
+{"log":"MEL001: ApiRequest::Perform for http://mitmproxy:8080/1//api/layer/UpdateRaster failed with exception: An error occurred while sending the request.\n","stream":"stdout","time":"2025-11-24T10:22:55.203083149Z"}

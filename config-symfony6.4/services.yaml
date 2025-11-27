@@ -48,6 +48,7 @@ services:
                             # The best practice is to be explicit about your dependencies anyway.
         bind:
             string $projectDir: '%kernel.project_dir%'
+            $dockerLogger: '@monolog.logger.docker'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -159,8 +160,6 @@ services:
     App\Security\MSPAuth2Authenticator:
     App\MessageHandler\Watchdog\WatchdogCommunicationMessageHandler:
     App\MessageHandler\Docker\DockerCommunicationMessageHandler:
-        arguments:
-            $dockerLogger: '@monolog.logger.docker'
 
     App\Domain\Services\SimulationHelper:
         public: true
@@ -205,11 +204,6 @@ services:
             $parameters: 'tcp://redis:6379'
 
     App\Validator\ImmersiveSessionTypeJsonSchemaValidator:
-
-    App\Domain\Services\ImmersiveSessionService:
-        arguments:
-            $dockerLogger: '@monolog.logger.docker'
-
 when@dev:
     parameters:
         app.guraas_game_id: '3318cf30-f78d-4284-b530-a329005c248a'

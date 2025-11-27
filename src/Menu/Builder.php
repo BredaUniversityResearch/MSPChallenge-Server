@@ -7,9 +7,7 @@ use Knp\Menu\ItemInterface;
 
 class Builder
 {
-    private $factory;
-
-    public function __construct(FactoryInterface $factory)
+    public function __construct(private FactoryInterface $factory)
     {
         $this->factory = $factory;
     }
@@ -48,6 +46,7 @@ class Builder
         $menu->addChild('Saves', ['route' => 'manager_gamesave']);
         $menu->addChild('Configurations', ['route' => 'manager_gameconfig']);
         $menu->addChild('Settings', ['route' => 'manager_setting']);
+        $menu->addChild('Errors', ['route' => 'manager_errors']);
 
         return $menu;
     }

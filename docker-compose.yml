@@ -1,4 +1,21 @@
 services:
+  fluent-bit:
+    depends_on:
+      - simulations
+    build:
+        context: .
+        target: fluent_bit_base
+    volumes:
+      - ./docker/fluent-bit/fluent-bit.tpl.yaml:/fluent-bit/etc/fluent-bit.tpl.yaml
+      - ./docker/fluent-bit/test-logs:/fluent-bit/etc/test-logs:ro
+      - symfony_log:/var/log/symfony:ro
+      - fluent_bit_output:/fluent-bit/output:rw
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - supervisor_log:/var/log/supervisor:ro
+    logging:
+      driver: "local"
+
   redis:
     image: redis:7.2-alpine
     restart: always
@@ -50,8 +67,10 @@ services:
       - vendor_data:/app/vendor:rw
       - node_modules_data:/app/node_modules:rw
       - public_build_data:/app/public/build:rw
-      - /app/var/log
+      - symfony_log:/app/var/log:rw
       - /var/run/docker.sock:/var/run/docker.sock # to communicate with the Docker daemon
+      - supervisor_log:/var/log/supervisor:rw
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
     networks:
       - msp_network
     environment:
@@ -117,7 +136,10 @@ services:
       WATCHDOG_PORT: ${WATCHDOG_PORT:-45000}
       MSP_MEL_EWE_DUMP_ENABLED: "${MSP_MEL_EWE_DUMP_ENABLED:-0}"
     logging:
-      driver: "local"
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - msp_network
 
@@ -132,12 +154,14 @@ volumes:
   mariadb_data:
   caddy_data:
   caddy_config:
-###> symfony/mercure-bundle ###
-###< symfony/mercure-bundle ###
-
+  symfony_log:
+  fluent_bit_output:
+  supervisor_log:
 ###> doctrine/doctrine-bundle ###
   db-data:
 ###< doctrine/doctrine-bundle ###
+###> symfony/mercure-bundle ###
+###< symfony/mercure-bundle ###
 
 networks:
   msp_network:
