@@ -21,7 +21,6 @@ function Select-WifiAdapter {
     $wifiAdapter = $null
     while ($null -eq $wifiAdapter) {
         $wifiAdapters = @(Get-NetIPAddress | Where-Object { $_.InterfaceAlias -like "*Wi-Fi*" -and $_.AddressFamily -eq "IPv4" })
-        $wifiAdapters += $wifiAdapters[0]
         if ($wifiAdapters.Count -eq 1) {
             $wifiAdapter = $wifiAdapters[0]
         } elseif ($wifiAdapters.Count -gt 1) {
