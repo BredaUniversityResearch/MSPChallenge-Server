@@ -4,7 +4,7 @@ parsers:
     format: regex
     # test on https://regex101.com/
     regex: |
-      ^\[(?<time>[^\]]+)\] (?<channel>\w+)\.(?<severity>\w+): (?<log>.*?)( (?<stack_trace>\{.*\}))?\s*\[\]$
+      ^\[(?<time>[^\]]+)\] (?<source>\w+)\.(?<severity>\w+): (?<log>.*?)( (?<stack_trace>\{.*\}))?\s*\[\]$
     time_key: time
     time_format: "%Y-%m-%dT%H:%M:%S.%L%z"
 
@@ -18,12 +18,6 @@ pipeline:
       tag: symfony.test
       skip_long_lines: on
       read_from_head: on
-      processors:
-        logs:
-          - name: content_modifier
-            action: insert
-            key: "source"
-            value: symfony.test
     - name: tail
       path: /fluent-bit/etc/test-logs/simulations.log
       multiline.parser: docker
@@ -44,12 +38,6 @@ pipeline:
       mem_buf_limit: 10MB
       skip_long_lines: on
       read_from_head: on
-      processors:
-        logs:
-          - name: content_modifier
-            action: insert
-            key: "source"
-            value: symfony
     - name: tail
       path: __SIMULATIONS_LOG_PATH__
       multiline.parser: docker
@@ -130,7 +118,7 @@ pipeline:
         - severity ^CRITICAL$
     - name: grep
       match: "dummy-no-match"
-      match_regex: (monitor-docker-api-events|messenger-.*|app-ws-server)
+      match_regex: (simulations.*|monitor-docker-api-events|messenger-.*|app-ws-server)
       regex: log (?i).*exception.*
   # https://docs.fluentbit.io/manual/data-pipeline/outputs
   outputs:

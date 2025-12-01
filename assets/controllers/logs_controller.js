@@ -32,6 +32,11 @@ export default class extends Controller {
         const row = document.createElement('tr');
         if (stackTrace) {
             const uniqueId = this.generateUUID();
+            try {
+                stackTrace = this.formatJsonAsTable(JSON.parse(stackTrace));
+            } catch (e) {
+                // do nothing if not valid json
+            }
             stackTrace = `
                 <p class="d-inline-flex gap-1">
                   <a data-bs-toggle="collapse" href="#collapse-${uniqueId}" role="button" aria-expanded="false" aria-controls="collapse-${uniqueId}">
@@ -46,7 +51,7 @@ export default class extends Controller {
             `;
         }
         row.innerHTML = `
-            <td>${this.timeAgo(time)}</td>
+            <td data-time="${time}">${this.timeAgo(time)}</td>
             <td>${source}</td>
             <td data-bs-content="test"
                 data-bs-toggle="popover"
@@ -56,6 +61,7 @@ export default class extends Controller {
             </td>
         `;
         this.logsTarget.prepend(row);
+        this.sortLogRowsByTimeDesc();
     }
 
     handleError()
@@ -90,5 +96,24 @@ export default class extends Controller {
             .replace(/[018]/g, c =>
                 (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
             );
+    }
+
+    formatJsonAsTable(jsonObj) {
+        let table = '<table class="table table-borderless"><tbody>';
+        for (const [key, value] of Object.entries(jsonObj)) {
+            table += `<tr><td>${key}:</td><td>${value}</td></tr>`;
+        }
+        table += '</tbody></table>';
+        return table;
+    }
+
+    sortLogRowsByTimeDesc() {
+        const rows = Array.from(this.logsTarget.querySelectorAll('table#if-logs-table tr'));
+        rows.sort((a, b) => {
+            const timeA = new Date(a.cells[0]?.getAttribute('data-time'));
+            const timeB = new Date(b.cells[0]?.getAttribute('data-time'));
+            return timeB - timeA;
+        });
+        rows.forEach(row => this.logsTarget.appendChild(row));
     }
 }
