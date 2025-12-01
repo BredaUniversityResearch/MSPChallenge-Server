@@ -1,4 +1,4 @@
-# Server ignores, ignores all in the configfiles folder, but includes the basic files 
+# Server ignores, ignores all in the configfiles folder, but includes the basic files
 [Ss]erverManager/[Cc]onfigfiles/**
 ![Ss]erverManager/[Cc]onfigfiles/[Bb]altic_Sea_basic**
 ![Ss]erverManager/[Cc]onfigfiles/[Bb]altic_Sea_basic/Baltic_Sea_basic_1.json**
@@ -135,3 +135,5 @@ xdebug.log
 
 # secrets
 .secrets/
+
+bolt.db
