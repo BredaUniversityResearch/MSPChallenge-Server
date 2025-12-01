@@ -12,6 +12,7 @@ services:
       - ./ServerManager/log/:/app/ServerManager/log
       - ./public/downloads/:/app/public/downloads
       - /app/var/cache
+      - ./.secrets:/app/.secrets
     environment:
       SERVER_NAME: ${SERVER_NAME:-:80}
       APP_SECRET: ${APP_SECRET}
