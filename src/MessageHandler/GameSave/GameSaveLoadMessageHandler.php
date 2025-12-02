@@ -213,6 +213,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
             '--port='.$_ENV['DATABASE_PORT'],
             '--user='.$_ENV['DATABASE_USER'],
             '--password='.$_ENV['DATABASE_PASSWORD'],
+            '--skip-ssl',
             ($_ENV['APP_ENV'] == 'test') ? $this->database.'_test' : $this->database
         ], $this->kernel->getProjectDir(), null, "source {$tempDumpFile}", 300);
         $process->mustRun(fn($type, $buffer) => $this->info($buffer));

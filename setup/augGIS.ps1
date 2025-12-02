@@ -5,17 +5,6 @@ function Test-Admin {
     $currentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)
 }
 
-# Check for administrative privileges
-if ((Test-Admin) -eq $false)  {
-    if ($elevated) {
-        Write-Host "Failed to elevate privileges. Exiting..."
-    } else {
-        Write-Host "This script requires administrative privileges. Relaunching as admin..."
-        Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file "{0}" -elevated -tag {1} -branch_name {2}' -f ($myinvocation.MyCommand.Definition, $tag, $branch_name))
-    }
-    exit
-}
-
 function IfEmpty {
     param (
         $Value,
@@ -26,6 +15,42 @@ function IfEmpty {
         return $DefaultValue
     }
     return $Value
+}
+
+function Select-WifiAdapter {
+    $wifiAdapter = $null
+    while ($null -eq $wifiAdapter) {
+        $wifiAdapters = @(Get-NetIPAddress | Where-Object { $_.InterfaceAlias -like "*Wi-Fi*" -and $_.AddressFamily -eq "IPv4" })
+        if ($wifiAdapters.Count -eq 1) {
+            $wifiAdapter = $wifiAdapters[0]
+        } elseif ($wifiAdapters.Count -gt 1) {
+            Write-Host "Multiple Wi-Fi networks detected. Please select one:"
+            for ($i = 0; $i -lt $wifiAdapters.Count; $i++) {
+                Write-Host "$($i+1): $($wifiAdapters[$i].InterfaceAlias) - $($wifiAdapters[$i].IPAddress)"
+            }
+            $selection = Read-Host "Enter the number of the Wi-Fi network to use"
+            if ($selection -match '^\d+$' -and $selection -ge 1 -and $selection -le $wifiAdapters.Count) {
+                $wifiAdapter = $wifiAdapters[$selection - 1]
+            } else {
+                Write-Host "Invalid selection. Please try again."
+            }
+        } else {
+            Write-Host "No Wi-Fi network detected. Please connect to a Wi-Fi network and press enter to continue."
+            Read-Host
+        }
+    }
+    return $wifiAdapter
+}
+
+# Check for administrative privileges
+if ((Test-Admin) -eq $false)  {
+    if ($elevated) {
+        Write-Host "Failed to elevate privileges. Exiting..."
+    } else {
+        Write-Host "This script requires administrative privileges. Relaunching as admin..."
+        Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file "{0}" -elevated -tag {1} -branch_name {2}' -f ($myinvocation.MyCommand.Definition, $tag, $branch_name))
+    }
+    exit
 }
 
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process -Force
@@ -39,8 +64,7 @@ Write-Host "  tag: $tag"
 Write-Host "  branch_name: $branch_name"
 
 Read-Host "Please switch and connect to the Wi-Fi network to be used for your 'augGIS' session and then press enter to continue"
-# Get the IP address of the Wi-Fi network interface
-$wifiAdapter = Get-NetIPAddress | Where-Object { $_.InterfaceAlias -like "*Wi-Fi*" -and $_.AddressFamily -eq "IPv4" }
+$wifiAdapter = Select-WifiAdapter
 $wifiIpEscaped = $wifiAdapter.IPAddress -replace '\.', '\.'
 $wifiAdapter.IPAddress
 Write-Host "Gonna use $($wifiAdapter.IPAddress) for the MSP server connections"

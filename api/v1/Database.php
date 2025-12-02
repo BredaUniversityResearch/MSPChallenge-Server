@@ -16,7 +16,7 @@ class Database
     private ?string $db_user = null;
     private ?string $db_pass = null;
     public ?string $db_name = null;
-    
+
     private ?PDO $conn = null;
     private bool $isTransactionRunning = false;
 
@@ -171,7 +171,7 @@ class Database
             return [];
         }
         $result = array();
-        
+
         try {
             $query = $this->executeQuery($statement, $vars);
         } catch (Exception $e) {
@@ -187,12 +187,12 @@ class Database
         if ($getId == true) {
             return $this->conn->lastInsertID();
         }
-        
+
         // Just making sure we aren't calling fetchAll on an empty result set (update/insert queries)
         //   which will result in a SQLSTATE[HY000] exception.
         if ($query != null && $query->columnCount() > 0) {
             $result = $query->fetchAll(PDO::FETCH_ASSOC) ?: [];
-            
+
             foreach ($result as $key1 => $arr) {
                 foreach ($arr as $key => $var) {
                     $result[$key1][$key] = $var;
@@ -228,7 +228,7 @@ class Database
         if (!$this->connectToDatabase()) {
             return false;
         }
-        
+
         if (false === $query = $this->prepareQuery($statement)) {
             return false;
         }
@@ -333,7 +333,7 @@ class Database
                 $dbConfig["multisession_create_user"],
                 $dbConfig["multisession_create_password"]
             );
-            
+
             $temporaryConnection->query("DROP DATABASE IF EXISTS ".$databaseName);
         }
     }
@@ -347,7 +347,7 @@ class Database
             if ($this->isTransactionRunning) {
                 throw new Exception("Running multiple transactions");
             }
-            
+
             $this->conn->beginTransaction();
             $this->isTransactionRunning = true;
         }
@@ -445,7 +445,7 @@ class Database
         string $databaseName
     ): void {
         $dumpCommand = sprintf(
-            '"%s" --user="%s" --password="%s" --host="%s" --port="%d" "%s" > "%s"',
+            '"%s" --user="%s" --password="%s" --host="%s" --skip-ssl --port="%d" "%s" > "%s"',
             $this->GetMysqlExecutableDirectory().'/bin/mysqldump',
             $databaseUser,
             $dbPassword,
