@@ -311,8 +311,8 @@ WITH
   ),
   # filter out active layers that are not in a plan or in an implemented and active plan
   LayerStep1 AS (
-      SELECT l.layer_id, lorg.layer_raster, lorg.layer_type, lorg.layer_short, lorg.layer_name, lorg.layer_geotype,
-             lorg.layer_tags, lorg.layer_category, lorg.layer_subcategory
+      SELECT l.layer_id, l.layer_original_id, lorg.layer_raster, lorg.layer_type, lorg.layer_short, lorg.layer_name,
+             lorg.layer_geotype, lorg.layer_tags, lorg.layer_category, lorg.layer_subcategory
       FROM layer l
       LEFT JOIN plan_layer pl ON l.layer_id=pl.plan_layer_layer_id
       LEFT JOIN plan p ON p.plan_id=pl.plan_layer_plan_id
@@ -427,7 +427,7 @@ WITH
       # left join since raster layers do not ever have geometry data
       LEFT JOIN LatestGeometryInRegion as g ON g.geometry_layer_id=l.layer_id
       WHERE l.layer_geotype IN ('raster') OR g.geometry_layer_id IS NOT NULL
-      GROUP BY l.layer_id
+      GROUP BY IFNULL(l.layer_original_id, l.layer_id)
   )
 SELECT
   JSON_OBJECT(
