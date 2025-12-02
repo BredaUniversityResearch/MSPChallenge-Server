@@ -145,14 +145,16 @@ class ConfigCreator
         $jsonString = $this->queryJson($region);
         $this->log('json retrieved, decoding json');
         try {
+            $jsonObj = json_decode($jsonString, false, 512, JSON_THROW_ON_ERROR);
             $json = json_decode($jsonString, true, 512, JSON_THROW_ON_ERROR);
+            $json['datamodel']['raster_layers'] ??= [];
+            // this is necessary to not lose the "metadata" field being an object {}
+            $json['datamodel']['vector_layers'] = $jsonObj->datamodel->vector_layers ?? [];
         } catch (Exception $e) {
             throw new Exception('Could not decode the json string retrieved from '.$this->getDatabaseName() .
                 '. Error: '.$e->getMessage());
         }
         $this->log('json decoded, extracting region from raster layers');
-        $json['datamodel']['raster_layers'] ??= [];
-        $json['datamodel']['vector_layers'] ??= [];
         $this->excludeLayersByTags($json['datamodel']['raster_layers'], $json['datamodel']['vector_layers']);
         $this->normaliseAndExtendRasterMappings($json['datamodel']['raster_layers']);
         $this->fixMissingRasterLayerScales($json['datamodel']['raster_layers']);
@@ -419,7 +421,7 @@ WITH
             'gaps', IF(g.geometry_gaps=JSON_ARRAY(null),JSON_ARRAY(), g.geometry_gaps),
             # just add some aliases to the metadata
             'metadata', JSON_EXTRACT(g.geometry_data, '$')
-          )        
+          )
         ) AS layer_data
       FROM LayerStep2 l
       # left join since raster layers do not ever have geometry data
@@ -533,8 +535,8 @@ SQL,
                 }
             }
             foreach ($vectorLayers as $key => $layer) {
-                if ($exclTags->matches(new LayerTags($layer['tags']))) {
-                    $this->log('Excluding raster layer: '.$layer['name']);
+                if ($exclTags->matches(new LayerTags($layer->tags))) {
+                    $this->log('Excluding raster layer: '.$layer->name);
                     unset($vectorLayers[$key]);
                 }
             }
