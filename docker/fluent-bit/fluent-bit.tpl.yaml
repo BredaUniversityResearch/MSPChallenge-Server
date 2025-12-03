@@ -32,6 +32,10 @@ pipeline:
             action: rename
             key: time
             value: datetime
+          - name: content_modifier
+            action: insert
+            key: channel
+            value: simulations
     - name: tail
       path: /fluent-bit/etc/test-logs/session.log
       parser: symfony
@@ -71,6 +75,10 @@ pipeline:
             action: rename
             key: time
             value: datetime
+          - name: content_modifier
+            action: insert
+            key: channel
+            value: simulations
   # filters
   filters:
     - name: grep

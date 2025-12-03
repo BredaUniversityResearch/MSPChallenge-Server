@@ -13,16 +13,16 @@ export default class extends Controller {
         fetch(`/manager/error/logs?offset=${this.offset}`)
             .then(response => response.json())
             .then(data => {
-                data.payload.lines.forEach(line => {
-                    // Pass each log object as an event-like object to handleLog
-                    this.handleLog(line);
-                });
+                data.payload.lines.reduce(
+                    (p, line) => p.then(() => this.handleLog(line)),
+                    Promise.resolve()
+                );
                 this.offset = data.payload.lastLine;
                 setTimeout(() => this.poll(), 20000);
             });
     }
 
-    handleLog(logObj)
+    async handleLog(logObj)
     {
         let channel = logObj.channel || '';
         let time = logObj.datetime || '';
@@ -31,7 +31,27 @@ export default class extends Controller {
         if ((Array.isArray(extra) && extra.length === 0) || (typeof extra === 'object' && Object.keys(extra).length === 0)) {
             extra = '';
         }
+        const messageHash = await this.sha256(message);
+
+        // Try to find an existing row with the same message hash
+        const existingRow = this.logsTarget.querySelector(`tr[data-message-hash="${messageHash}"]`);
+        if (existingRow) {
+            // Increment count
+            const countCell = existingRow.querySelector('td[data-count]');
+            let count = parseInt(countCell.textContent, 10) || 1;
+            countCell.textContent = count + 1;
+            // Update time
+            const timeCell = existingRow.querySelector('td[data-time]');
+            if (new Date(timeCell.getAttribute('data-time')) < new Date(time)) {
+                timeCell.textContent = this.timeAgo(time);
+                timeCell.setAttribute('data-time', time);
+            }
+            this.sortLogRowsByTimeDesc();
+            return;
+        }
+
         const row = document.createElement('tr');
+        row.setAttribute('data-message-hash', messageHash);
         if (extra) {
             const uniqueId = this.generateUUID();
             try {
@@ -47,20 +67,18 @@ export default class extends Controller {
                 </p>
                 <div class="collapse" id="collapse-${uniqueId}">
                     <div class="card card-body">
-                    ${extra}
+                        <div style="display:block;width:0;min-width:100%;overflow-x:auto;">
+                            ${extra}
+                        </div>
                     </div>
                 </div>
             `;
         }
         row.innerHTML = `
-            <td data-time="${time}">${this.timeAgo(time)}</td>
-            <td>${channel}</td>
-            <td data-bs-content="test"
-                data-bs-toggle="popover"
-                data-bs-trigger="hover focus"
-                data-bs-placement="top">
-                ${message}${extra}
-            </td>
+            <td data-count class="w-auto text-nowrap">1</td>
+            <td data-time="${time}" class="w-auto text-nowrap">${this.timeAgo(time)}</td>
+            <td class="w-auto text-nowrap">${channel}</td>
+            <td>${message}${extra}</td>
         `;
         this.logsTarget.prepend(row);
         this.sortLogRowsByTimeDesc();
@@ -109,12 +127,19 @@ export default class extends Controller {
     }
 
     sortLogRowsByTimeDesc() {
-        const rows = Array.from(this.logsTarget.querySelectorAll('table#if-logs-table tr'));
+        const rows = Array.from(this.logsTarget.querySelectorAll(':scope > tr'));
         rows.sort((a, b) => {
-            const timeA = new Date(a.cells[0]?.getAttribute('data-time'));
-            const timeB = new Date(b.cells[0]?.getAttribute('data-time'));
+            const timeA = new Date(a.cells[1]?.getAttribute('data-time'));
+            const timeB = new Date(b.cells[1]?.getAttribute('data-time'));
             return timeB - timeA;
         });
         rows.forEach(row => this.logsTarget.appendChild(row));
+    }
+
+    async sha256(str) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(str);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 }

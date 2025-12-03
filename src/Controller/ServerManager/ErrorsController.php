@@ -71,7 +71,7 @@ class ErrorsController extends BaseController
                 array_key_exists('datetime', $log) &&
                 array_key_exists('channel', $log)
             ) {
-                $log['extra'] = array_merge($log['extra'], $log['context']);
+                $log['extra'] = array_merge($log['extra'] ?? [], $log['context'] ?? []);
                 unset($log['context']);
                 if (empty($log['extra'])) {
                     unset($log['extra']);
