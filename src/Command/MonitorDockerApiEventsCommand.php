@@ -8,6 +8,7 @@ use App\Message\Docker\InspectDockerConnectionsMessage;
 use DateTime;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Log\LoggerInterface;
 use React\EventLoop\Loop;
 use React\EventLoop\LoopInterface;
 use React\EventLoop\TimerInterface;
@@ -44,8 +45,6 @@ class MonitorDockerApiEventsCommand extends Command
 
     /** @var DockerApi[] $dockerApis */
     private array $dockerApis = [];
-
-    private OutputInterface $output;
     private LoopInterface $loop;
 
     /**
@@ -61,7 +60,8 @@ class MonitorDockerApiEventsCommand extends Command
 
     public function __construct(
         private readonly ConnectionManager $connectionManager,
-        private readonly MessageBusInterface $messageBus
+        private readonly MessageBusInterface $messageBus,
+        private readonly LoggerInterface $dockerMonitorLogger
     ) {
         parent::__construct();
     }
@@ -94,7 +94,7 @@ class MonitorDockerApiEventsCommand extends Command
             }
             $eventsUrl = $dockerApi->createUrl().'/events?'.http_build_query($queryParams);
             $browser = new ReactBrowser($this->loop);
-            $this->output->writeln('<info>Connecting to Docker events stream at '.$eventsUrl.'...</info>');
+            $this->dockerMonitorLogger->info('Connecting to Docker events stream at '.$eventsUrl);
             $browser->requestStreaming('GET', $eventsUrl)->then(
                 function (ResponseInterface $response) use ($dockerApi) {
                     $body = $response->getBody();
@@ -237,7 +237,11 @@ class MonitorDockerApiEventsCommand extends Command
     }
     private function outputDockerApiMessage(int $dockerApiId, string $type, string $message): void
     {
-        $this->output->writeln("<$type>[".$this->formatDockerApiId($dockerApiId)."]$message</$type>");
+        $this->dockerMonitorLogger->log(
+            $type,
+            "[".$this->formatDockerApiId($dockerApiId)."] $message",
+            ['dockerApiId' => $dockerApiId]
+        );
     }
 
     /**
@@ -245,9 +249,8 @@ class MonitorDockerApiEventsCommand extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->output = $output;
         $this->loop = Loop::get();
-        $output->writeln('<info>Connecting to Docker events streams...</info>');
+        $this->dockerMonitorLogger->info('Connecting to Docker events streams...');
         if (function_exists('pcntl_signal')) {
             \pcntl_signal(SIGTERM, function () {
                 $this->loop->stop();
@@ -264,7 +267,7 @@ class MonitorDockerApiEventsCommand extends Command
         // Add periodic timer to refresh DockerApis and update connections
         $this->startDockerApiRefreshLoop();
         $this->loop->run();
-        $output->writeln('<info>MonitorDockerApiEventsCommand stopped.</info>');
+        $this->dockerMonitorLogger->info('MonitorDockerApiEventsCommand stopped.');
         return Command::SUCCESS;
     }
 

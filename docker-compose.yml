@@ -10,9 +10,13 @@ services:
       - fluent_bit_output:/fluent-bit/output:rw
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
-      - supervisor_log:/var/log/supervisor:ro
+      - supervisor_log:/var/log/supervisor:ro\
+      - session_log:/var/log/session:ro
     logging:
-      driver: "local"
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   redis:
     image: redis:7.2-alpine
@@ -57,6 +61,7 @@ services:
     depends_on:
       - database
       - redis
+      - fluent-bit
     restart: unless-stopped
     volumes:
       - caddy_data:/data
@@ -69,6 +74,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock # to communicate with the Docker daemon
       - supervisor_log:/var/log/supervisor:rw
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - session_log:/app/ServerManager/log:rw
     networks:
       - msp_network
     environment:
@@ -161,6 +167,7 @@ volumes:
   symfony_log:
   fluent_bit_output:
   supervisor_log:
+  session_log:
 ###> doctrine/doctrine-bundle ###
   db-data:
 ###< doctrine/doctrine-bundle ###

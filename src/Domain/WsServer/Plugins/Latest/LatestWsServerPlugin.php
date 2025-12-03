@@ -55,6 +55,11 @@ class LatestWsServerPlugin extends Plugin
                     $this->addOutput(json_encode($payloadContainer));
                 })
                 ->otherwise(function ($reason) {
+                    $context = [];
+                    if ($reason instanceof \Throwable) {
+                        $context['exception'] = $reason;
+                    }
+                    $this->getLogger()?->error($reason, $context);
                     if ($reason instanceof ClientDisconnectedException) {
                         return null;
                     }

@@ -10,3 +10,4 @@
 {"log":"\n","stream":"stdout","time":"2025-11-24T10:52:43.262485596Z"}
 {"log":"MEL001: MSWPipe | Received new API token eyJ0eXAiOi...\n","stream":"stdout","time":"2025-11-24T10:52:43.26248909Z"}
 {"log":"MEL001: ApiRequest::Perform for http://mitmproxy:8080/1//api/layer/UpdateRaster failed with exception: An error occurred while sending the request.\n","stream":"stdout","time":"2025-11-24T10:22:55.203083149Z"}
+{"log":"TEST TEST TEST Some error","stream":"stderr","time":"2025-11-24T10:52:42.636478332Z"}

@@ -57,6 +57,8 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Throwable;
+use function App\tc;
 
 #[AsMessageHandler]
 class GameListCreationMessageHandler extends CommonSessionHandlerBase
@@ -104,10 +106,10 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             $this->finaliseSession();
             $this->notice("Session {$this->gameSession->getName()} created and ready for use.");
             $state = 'healthy';
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->error(
                 "Session {$this->gameSession->getName()} failed to create. {problem}",
-                ['problem' => $e->getMessage().' '.$e->getTraceAsString()]
+                ['problem' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
             );
             $state = 'failed';
         }
@@ -142,7 +144,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         $this->notice('Creating a new session database, as this is a brand new session.');
         $this->createSessionDatabase();
     }
-    
+
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
@@ -268,15 +270,16 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      * @throws ReflectionException
+     * @throws Throwable
      */
     private function importLayerData(SessionSetupContext $context): void
     {
         $username = $this->gameSession->getGameGeoServer()->getUsername();
         $password = $this->gameSession->getGameGeoServer()->getPassword();
         if (empty($username) || empty($password)) {
-            throw new \Exception(
+            tc(fn() => throw new \Exception(
                 "No GeoServer credentials provided, so no GeoServer data will be imported."
-            );
+            ), $this->gameSessionLogger, ['gameSession' => $this->gameSession->getId()]);
         }
 
         $geoServerCommunicator = new GeoServerCommunicator(

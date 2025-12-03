@@ -25,7 +25,6 @@ use Exception;
 use JsonException;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -37,17 +36,15 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 #[AsMessageHandler]
 class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
 {
-    private ConsoleOutput $output;
-
     public function __construct(
         private readonly ConnectionManager $connectionManager,
         private readonly HttpClientInterface $client,
         private readonly AuthenticationSuccessHandler $authenticationSuccessHandler,
         private readonly VersionsProvider $provider,
+        private readonly LoggerInterface $watchdogLogger,
         LoggerInterface $gameSessionLogger
     ) {
         parent::__construct($gameSessionLogger);
-        $this->output = new ConsoleOutput();
     }
 
     /**
@@ -193,11 +190,11 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         if (($decodedResponse["success"] ?? 0) == 1) {
             $this->info(
                 sprintf(
-                    'Watchdog %s: responded with success on requesting %s: %s.',
+                    'Watchdog %s: responded with success on requesting %s.',
                     $watchdog->getServerId()->toRfc4122(),
-                    $uri,
-                    json_encode($context)
-                )
+                    $uri
+                ),
+                $context
             );
             return; // success!
         }
@@ -254,14 +251,13 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         string $uri,
         array $postValues
     ): void {
-        // output to console
-        $this->output->writeln(
+        $this->watchdogLogger->info(
             sprintf(
-                'Requesting %s on Watchdog %s with values %s',
+                'Requesting %s on Watchdog %s',
                 $uri,
-                $watchdog->getServerId()->toRfc4122(),
-                json_encode($postValues)
-            )
+                $watchdog->getServerId()->toRfc4122()
+            ),
+            $postValues
         );
         try {
             $options = [

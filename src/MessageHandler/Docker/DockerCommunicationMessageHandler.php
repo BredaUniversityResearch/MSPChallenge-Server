@@ -25,7 +25,7 @@ readonly class DockerCommunicationMessageHandler
     public function __construct(
         private ConnectionManager $connectionManager,
         private ImmersiveSessionService $immersiveSessionService,
-        private LoggerInterface $dockerLogger
+        private LoggerInterface $dockerMessengerLogger
     ) {
     }
 
@@ -42,7 +42,7 @@ readonly class DockerCommunicationMessageHandler
             $this->inspectDockerConnections();
             return;
         }
-        $this->dockerLogger->error('Unknown message type: '.get_class($message));
+        $this->dockerMessengerLogger->error('Unknown message type: '.get_class($message));
     }
 
      /**
@@ -86,7 +86,7 @@ readonly class DockerCommunicationMessageHandler
         switch (get_class($message)) {
             case CreateImmersiveSessionConnectionMessage::class: // starting
                 if (null === $immersiveSession) {
-                    $this->dockerLogger->warning('Immersive session not found: ' . $immersiveSessionId);
+                    $this->dockerMessengerLogger->warning('Immersive session not found: ' . $immersiveSessionId);
                     return;
                 }
                 try {
@@ -101,7 +101,7 @@ readonly class DockerCommunicationMessageHandler
                             '. Will retry'
                     ]));
                     $em->persist($immersiveSession);
-                    $this->dockerLogger->warning(
+                    $this->dockerMessengerLogger->warning(
                         'Create immersive session container failed, will retry: '.$e->getMessage()
                     );
                     $em->flush();
@@ -122,7 +122,7 @@ readonly class DockerCommunicationMessageHandler
                 break;
 
             default:
-                $this->dockerLogger->error('Unknown message type: '.get_class($message));
+                $this->dockerMessengerLogger->error('Unknown message type: '.get_class($message));
                 break;
         }
     }
@@ -239,12 +239,12 @@ readonly class DockerCommunicationMessageHandler
             try {
                 $containers = $this->immersiveSessionService->listImmersiveSessionContainers($dockerApi);
             } catch (Exception $e) {
-                $this->dockerLogger->error('List immersive sessions failed: '.$e->getMessage());
+                $this->dockerMessengerLogger->error('List immersive sessions failed: '.$e->getMessage());
                 // for all sessions having connections for this docker api set its status to unresponsive
                 $this->setImmersiveSessionsToUnresponsive($dockerApi, $e->getMessage(), $context);
                 continue;
             }
-            $this->dockerLogger->info('Found '.count($containers).' immersive sessions');
+            $this->dockerMessengerLogger->info('Found '.count($containers).' immersive sessions');
             foreach ($containers as $container) {
                 try {
                     $inspectData = $this->immersiveSessionService->inspectImmersiveSessionContainer(
@@ -252,7 +252,7 @@ readonly class DockerCommunicationMessageHandler
                         $container['Id']
                     );
                 } catch (Exception $e) {
-                    $this->dockerLogger->error('Inspect immersive session failed: '.$e->getMessage());
+                    $this->dockerMessengerLogger->error('Inspect immersive session failed: '.$e->getMessage());
                     // for the session having this connection set its status to unresponsive
                     $this->setImmersiveSessionToUnresponsive(
                         $dockerApi,
@@ -263,7 +263,7 @@ readonly class DockerCommunicationMessageHandler
                     continue;
                 }
                 $gameSessionId = $this->extractSessionIdFromEnv($inspectData['Config']['Env']);
-                $this->dockerLogger->info(
+                $this->dockerMessengerLogger->info(
                     'Inspect immersive session container '.$container['Id'].
                     ' for game session #'.$gameSessionId.
                     ' status: '.$inspectData['State']['Status'].
@@ -277,7 +277,9 @@ readonly class DockerCommunicationMessageHandler
                     $container['Id'],
                     $context
                 )) {
-                    $this->dockerLogger->warning('Orphaned container found: '.$container['Id'].', removing it');
+                    $this->dockerMessengerLogger->warning(
+                        'Orphaned container found: '.$container['Id'].', removing it'
+                    );
                     try {
                         // orphaned container, remove it
                         $this->immersiveSessionService->removeImmersiveSessionContainer(
@@ -285,13 +287,13 @@ readonly class DockerCommunicationMessageHandler
                             $container['Id']
                         );
                     } catch (Exception $e) {
-                        $this->dockerLogger->error(
+                        $this->dockerMessengerLogger->error(
                             'Failed to remove orphaned container: '.$container['Id'].': '.$e->getMessage()
                         );
                     }
                     continue;
                 }
-                $this->dockerLogger->info('Found immersive session #'.$session->getId());
+                $this->dockerMessengerLogger->info('Found immersive session #'.$session->getId());
                 $session->getConnection()->setVerified(true);
 
                 $status = match ($inspectData['State']['Status']) {
@@ -326,7 +328,9 @@ readonly class DockerCommunicationMessageHandler
                 if ($status == ImmersiveSessionStatus::REMOVED ||
                     // for now, we also remove session of which the container is stopped
                     $status == ImmersiveSessionStatus::STOPPED) {
-                    $this->dockerLogger->warning('Immersive session connection lost, removing it: '.$session->getId());
+                    $this->dockerMessengerLogger->warning(
+                        'Immersive session connection lost, removing it: '.$session->getId()
+                    );
                     try {
                         // discontinued container, remove it
                         $this->immersiveSessionService->removeImmersiveSessionContainer(
@@ -334,7 +338,7 @@ readonly class DockerCommunicationMessageHandler
                             $container['Id']
                         );
                     } catch (Exception $e) {
-                        $this->dockerLogger->error(
+                        $this->dockerMessengerLogger->error(
                             'Failed to remove discontinued container: '.$container['Id'].': '.$e->getMessage()
                         );
                     }
@@ -382,7 +386,7 @@ readonly class DockerCommunicationMessageHandler
                     continue;
                 }
 
-                $this->dockerLogger->warning(
+                $this->dockerMessengerLogger->warning(
                     'Immersive session connection lost, removing it. Session: '.$sessionId.
                     ', verified: '.($session->getConnection()?->isVerified() ? 'yes' : 'no').
                     ', boot-up time: '.$bootupTime

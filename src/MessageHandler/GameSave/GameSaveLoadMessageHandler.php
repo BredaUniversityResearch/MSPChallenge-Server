@@ -79,7 +79,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
         } catch (\Throwable $e) {
             $this->error(
                 "Session {$this->gameSession->getName()} failed to create. {problem}",
-                ['problem' => $e->getMessage().' '.$e->getTraceAsString()]
+                ['problem' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
             );
             $state = 'failed';
         }

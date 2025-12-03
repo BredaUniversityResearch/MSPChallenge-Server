@@ -6,9 +6,9 @@ use App\Controller\BaseController;
 use App\Domain\Services\DockerApiService;
 use App\Entity\ServerManager\DockerApi;
 use Exception;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/{manager}/error', requirements: ['manager' => 'manager|ServerManager'], defaults: ['manager' => 'manager'])]
@@ -26,8 +26,8 @@ class ErrorsController extends BaseController
     /**
      * @throws Exception
      */
-    #[Route('/logs/stream', name: 'manager_error_logs_stream')]
-    public function streamLogs(Request $request, DockerApiService $dockerApiService): Response
+    #[Route('/logs', name: 'manager_error_logs')]
+    public function getLogs(Request $request, DockerApiService $dockerApiService): JsonResponse
     {
         $localDockerApi = new DockerApi();
         $localDockerApi
@@ -40,36 +40,50 @@ class ErrorsController extends BaseController
             ],
         ])['0']['Id'] ?? null;
         if ($fluentBitContainerId === null) {
-            return new Response('No fluent-bit container found.', 404);
+            return $this->json([
+                'lines' => [],
+                'lastLine' => 0
+            ]);
         }
+        $fluentBitLogPath = $dockerApiService->dockerApiCall(
+            $localDockerApi,
+            'GET',
+            "/containers/$fluentBitContainerId/json"
+        )['LogPath'] ?? null;
+        if ($fluentBitLogPath === null) {
+            return $this->json([
+                'lines' => [],
+                'lastLine' => 0
+            ]);
+        }
+        $offset = (int) $request->query->get('offset', '0');
+        $file = new \SplFileObject($fluentBitLogPath);
+        $file->seek($offset); // $offset is the last line number returned
 
-        $response = new StreamedResponse();
-        $response->headers->set('Content-Type', 'text/event-stream');
-        $response->headers->set('Cache-Control', 'no-cache');
-        $response->headers->set('Connection', 'keep-alive');
-        $response->setCallback(function () use ($fluentBitContainerId) {
-            $ch = curl_init();
-            $url = "http://localhost/containers/{$fluentBitContainerId}/logs?follow=1&stdout=1&stderr=1&tail=100";
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_UNIX_SOCKET_PATH, '/var/run/docker.sock');
-            curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) {
-                foreach (explode("\n", $data) as $line) {
-                    // Capture the first JSON object in the line
-                    if (preg_match('/\{.*\}/s', $line, $matches)) {
-                        $jsonStr = $matches[0];
-                        $decoded = json_decode($jsonStr, true);
-                        if (json_last_error() === JSON_ERROR_NONE) {
-                            echo "event: log\ndata: " . json_encode($decoded) . "\n\n";
-                            ob_flush();
-                            flush();
-                        }
-                    }
+        $lines = [];
+        $lineCount = $offset;
+        while (!$file->eof()) {
+            $line = $file->current();
+            if ((trim($line) !== '') &&
+                ($line = json_decode($line, true)) &&
+                ($log = json_decode($line['log'], true)) &&
+                array_key_exists('message', $log) &&
+                array_key_exists('datetime', $log) &&
+                array_key_exists('channel', $log)
+            ) {
+                $log['extra'] = array_merge($log['extra'], $log['context']);
+                unset($log['context']);
+                if (empty($log['extra'])) {
+                    unset($log['extra']);
                 }
-                return strlen($data);
-            });
-            curl_exec($ch);
-            curl_close($ch);
-        });
-        return $response;
+                $lines[] = $log;
+            }
+            $file->next();
+            $lineCount++;
+        }
+        return $this->json([
+            'lines' => $lines,
+            'lastLine' => $lineCount,
+        ]);
     }
 }

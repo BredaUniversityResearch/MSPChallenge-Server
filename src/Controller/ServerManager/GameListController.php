@@ -275,15 +275,11 @@ class GameListController extends BaseController
             return new Response(null, 422);
         }
         $rawLogContents = file_get_contents($logPath);
-        $rawLogContents = preg_replace(
-            ['/\[[0-9\-\s:+.T]+\]/', '/game\_session\./', '/\{["\w:,]+\} \[\]/', '/\[\]/'],
-            [ '', '', '', ''],
-            $rawLogContents
-        );
         $logArray = explode('<br />', nl2br(trim($rawLogContents)));
         if ($type == 'excerpt') {
             $logArray = array_slice($logArray, -5);
         }
+        $logArray = array_map(fn($line) => json_decode($line, true), $logArray);
         return $this->render('manager/GameList/gamelist_log.html.twig', [
             'type' => $type,
             'logToastBody' => $logArray

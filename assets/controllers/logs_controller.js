@@ -2,42 +2,44 @@ import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
     static targets = ["logs"];
+    offset = 0;
 
     connect()
     {
-        this.eventSource = new EventSource('/manager/error/logs/stream');
-        this.eventSource.addEventListener('log', this.handleLog.bind(this));
-        this.eventSource.onerror = this.handleError.bind(this);
+        this.poll();
     }
 
-    disconnect()
-    {
-        if (this.eventSource) {
-            this.eventSource.close();
-        }
+    poll() {
+        fetch(`/manager/error/logs?offset=${this.offset}`)
+            .then(response => response.json())
+            .then(data => {
+                data.payload.lines.forEach(line => {
+                    // Pass each log object as an event-like object to handleLog
+                    this.handleLog(line);
+                });
+                this.offset = data.payload.lastLine;
+                setTimeout(() => this.poll(), 20000);
+            });
     }
 
-    handleLog(event)
+    handleLog(logObj)
     {
-        let source = '', time = '', message = '', stackTrace = '';
-        try {
-            const logObj = JSON.parse(event.data);
-            source = logObj.source || '';
-            time = logObj.time || '';
-            message = logObj.log || '';
-            stackTrace = logObj.stack_trace || '';
-        } catch (e) {
-            message = event.data;
+        let channel = logObj.channel || '';
+        let time = logObj.datetime || '';
+        let message = logObj.message || '';
+        let extra = logObj.extra || '';
+        if ((Array.isArray(extra) && extra.length === 0) || (typeof extra === 'object' && Object.keys(extra).length === 0)) {
+            extra = '';
         }
         const row = document.createElement('tr');
-        if (stackTrace) {
+        if (extra) {
             const uniqueId = this.generateUUID();
             try {
-                stackTrace = this.formatJsonAsTable(JSON.parse(stackTrace));
+                extra = this.formatAsTable(extra);
             } catch (e) {
                 // do nothing if not valid json
             }
-            stackTrace = `
+            extra = `
                 <p class="d-inline-flex gap-1">
                   <a data-bs-toggle="collapse" href="#collapse-${uniqueId}" role="button" aria-expanded="false" aria-controls="collapse-${uniqueId}">
                      <h6><span class="badge text-bg-secondary">More info</span></h6>
@@ -45,30 +47,23 @@ export default class extends Controller {
                 </p>
                 <div class="collapse" id="collapse-${uniqueId}">
                     <div class="card card-body">
-                    ${stackTrace}
+                    ${extra}
                     </div>
                 </div>
             `;
         }
         row.innerHTML = `
             <td data-time="${time}">${this.timeAgo(time)}</td>
-            <td>${source}</td>
+            <td>${channel}</td>
             <td data-bs-content="test"
                 data-bs-toggle="popover"
                 data-bs-trigger="hover focus"
                 data-bs-placement="top">
-                ${message}${stackTrace}
+                ${message}${extra}
             </td>
         `;
         this.logsTarget.prepend(row);
         this.sortLogRowsByTimeDesc();
-    }
-
-    handleError()
-    {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td colspan="6" style="color:red;">[Connection lost to log stream]</td>`;
-        this.logsTarget.prepend(row);
     }
 
     timeAgo(dateString) {
@@ -98,10 +93,16 @@ export default class extends Controller {
             );
     }
 
-    formatJsonAsTable(jsonObj) {
+    formatAsTable(obj) {
         let table = '<table class="table table-borderless"><tbody>';
-        for (const [key, value] of Object.entries(jsonObj)) {
-            table += `<tr><td>${key}:</td><td>${value}</td></tr>`;
+        for (const [key, value] of Object.entries(obj)) {
+            let displayValue;
+            if (value && typeof value === 'object' && !Array.isArray(value)) {
+                displayValue = this.formatAsTable(value);
+            } else {
+                displayValue = Array.isArray(value) ? JSON.stringify(value) : value;
+            }
+            table += `<tr><td class="pt-0">${key}:</td><td class="pt-0">${displayValue}</td></tr>`;
         }
         table += '</tbody></table>';
         return table;

@@ -69,6 +69,11 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                     if ($reason instanceof ClientDisconnectedException) {
                         return null;
                     }
+                    $context = [];
+                    if ($reason instanceof \Throwable) {
+                        $context['exception'] = $reason;
+                    }
+                    $this->getLogger()?->error($reason, $context);
                     return reject($reason);
                 });
         });
