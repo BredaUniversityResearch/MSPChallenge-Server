@@ -6,6 +6,7 @@ use App\Controller\BaseController;
 use App\Domain\Services\DockerApiService;
 use App\Entity\ServerManager\DockerApi;
 use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,8 +28,11 @@ class ErrorsController extends BaseController
      * @throws Exception
      */
     #[Route('/logs', name: 'manager_error_logs')]
-    public function getLogs(Request $request, DockerApiService $dockerApiService): JsonResponse
-    {
+    public function getLogs(
+        Request $request,
+        DockerApiService $dockerApiService,
+        LoggerInterface $logger
+    ): JsonResponse {
         $localDockerApi = new DockerApi();
         $localDockerApi
             ->setPort(2375)
@@ -66,11 +70,19 @@ class ErrorsController extends BaseController
             $line = $file->current();
             if ((trim($line) !== '') &&
                 ($line = json_decode($line, true)) &&
-                ($log = json_decode($line['log'], true)) &&
-                array_key_exists('message', $log) &&
-                array_key_exists('datetime', $log) &&
-                array_key_exists('channel', $log)
+                ($log = json_decode($line['log'], true))
             ) {
+                $diff = array_diff(['message', 'level_name', 'datetime', 'channel'], array_keys($log));
+                if (!empty($diff)) {
+                    $lines[] = [
+                        'message' => 'Malformed log line, missing fields: ' . implode(', ', $diff),
+                        'level_name' => 'WARNING',
+                        'datetime' => $line['datetime'] ?? date('c'),
+                        'channel' => 'fluent-bit',
+                        'context' => ['log' => $log],
+                    ];
+                    continue;
+                }
                 $log['extra'] = array_merge($log['extra'] ?? [], $log['context'] ?? []);
                 unset($log['context']);
                 if (empty($log['extra'])) {
