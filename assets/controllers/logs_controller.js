@@ -38,7 +38,7 @@ export default class extends Controller {
         if ((Array.isArray(extra) && extra.length === 0) || (typeof extra === 'object' && Object.keys(extra).length === 0)) {
             extra = '';
         }
-        const messageHash = await this.sha256(message);
+        const messageHash = await this.sha256(levelName+message);
 
         // Try to find an existing row with the same message hash
         const existingRow = this.logsTarget.querySelector(`tr[data-message-hash="${messageHash}"]`);

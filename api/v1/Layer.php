@@ -192,6 +192,7 @@ class Layer extends Base
 
     /**
      * @apiGroup Layer
+     * @throws NotFoundHttpException
      * @throws Exception
      * @api {POST} /layer/GetRaster GetRaster
      * @apiParam layer_name Name of the layer corresponding to the image data.
