@@ -59,6 +59,9 @@ export default class extends Controller {
 
         const row = document.createElement('tr');
         row.classList.add(levelName === 'ERROR' ? 'table-danger': 'table-warning');
+        if ((levelName === 'ERROR' && this.errorsHidden) || (levelName !== 'ERROR' && this.warningsHidden)) {
+            row.style.display = "none";
+        }
         row.setAttribute('data-message-hash', messageHash);
         if (extra) {
             const uniqueId = this.generateUUID();
@@ -89,6 +92,7 @@ export default class extends Controller {
             <td>${message}${extra}</td>
         `;
         this.logsTarget.prepend(row);
+        this.updateNoLogsMessage();
         this.sortLogRowsByTimeDesc();
     }
 
@@ -197,6 +201,21 @@ export default class extends Controller {
         } else {
             btn.classList.remove("text-bg-secondary");
             btn.classList.add("text-bg-warning");
+        }
+    }
+
+    updateNoLogsMessage()
+    {
+        const logsBody = this.logsTarget;
+        const noLogsRow = logsBody.querySelector("#no-logs-message");
+        // Count only rows that are not the no-logs-message row
+        const logRows = Array.from(logsBody.querySelectorAll("tr")).filter(
+            row => row.id !== "no-logs-message"
+        );
+        if (logRows.length === 0) {
+            noLogsRow.style.display = "";
+        } else {
+            noLogsRow.style.display = "none";
         }
     }
 }

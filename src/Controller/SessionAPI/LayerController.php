@@ -733,8 +733,8 @@ class LayerController extends BaseController
                 response: 200
             ),
             new OA\Response(
-                response: 500,
-                description: 'Internal server error',
+                response: 404,
+                description: 'Not found',
                 content: new OA\JsonContent(
                     examples: [
                         new OA\Examples(

@@ -7,6 +7,7 @@ use App\Repository\SessionAPI\LayerRepository;
 use Exception;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 class Layer extends Base
@@ -70,7 +71,7 @@ class Layer extends Base
         );
 
         $all = array();
-            
+
         // this part actually subtracts the latter geometry from the former geometry
         foreach ($geometry as $shape) {
             $g = array();
@@ -165,7 +166,7 @@ class Layer extends Base
         if (empty($vectorCheck[0]["layer_geotype"]) || $vectorCheck[0]["layer_geotype"] == "raster") {
             throw new Exception("Not a vector layer.");
         }
-            
+
         $data = $this->getDatabase()->query("SELECT 
 					geometry_id as id, 
 					geometry_geometry as geometry, 
@@ -181,7 +182,7 @@ class Layer extends Base
 				FROM layer 
 				LEFT JOIN geometry ON layer.layer_id=geometry.geometry_layer_id
 				WHERE layer.layer_id = ? ORDER BY geometry_FID, geometry_subtractive", array($layer_id));
-            
+
         if (empty($data) || empty($data[0]["geometry"])) {
             return [];
         }
@@ -204,11 +205,13 @@ class Layer extends Base
         $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
             ->getRepository(\App\Entity\SessionAPI\Layer::class);
         if (null === $layer = $repo->findOneBy(['layerName' => $layer_name])) {
-            throw new Exception("Could not find layer with name " . $layer_name . " to request the raster image for");
+            throw new NotFoundHttpException(
+                "Could not find layer with name " . $layer_name . " to request the raster image for"
+            );
         }
         $rasterData = $layer->getLayerRaster();
         if (null === $url = $rasterData->getUrl()) {
-            throw new Exception("Could not find raster file for layer with name " . $layer_name);
+            throw new NotFoundHttpException("Could not find raster file for layer with name " . $layer_name);
         }
         $path_parts = pathinfo($url);
         $fileExt = $path_parts['extension'];
@@ -227,7 +230,7 @@ class Layer extends Base
 
         // if we still haven't found it, try the original path
         if ($filePath == null || !file_exists($filePath)) {
-            throw new Exception(
+            throw new NotFoundHttpException(
                 "Could not find raster file for layer with name " . $layer_name . " at path " . $filePath
             );
         }

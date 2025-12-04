@@ -12,35 +12,35 @@ pipeline:
   # https://docs.fluentbit.io/manual/data-pipeline/inputs
   inputs:
     # test logs
-    - name: tail
-      path: /fluent-bit/etc/test-logs/symfony.log
-      parser: symfony
-      tag: symfony.test
-      skip_long_lines: on
-      read_from_head: on
-    - name: tail
-      path: /fluent-bit/etc/test-logs/simulations.log
-      multiline.parser: docker
-      tag: simulations.test
-      skip_long_lines: on
-      read_from_head: on
-      processors:
-        logs:
-          - name: content_modifier
-            action: rename
-            key: time
-            value: datetime
-          - name: content_modifier
-            action: insert
-            key: channel
-            value: simulations
-    - name: tail
-      path: /fluent-bit/etc/test-logs/session.log
-      parser: symfony
-      tag: symfony.session.test
-      mem_buf_limit: 10MB
-      skip_long_lines: on
-      read_from_head: on
+#    - name: tail
+#      path: /fluent-bit/etc/test-logs/symfony.log
+#      parser: symfony
+#      tag: symfony.test
+#      skip_long_lines: on
+#      read_from_head: on
+#    - name: tail
+#      path: /fluent-bit/etc/test-logs/simulations.log
+#      multiline.parser: docker
+#      tag: simulations.test
+#      skip_long_lines: on
+#      read_from_head: on
+#      processors:
+#        logs:
+#          - name: content_modifier
+#            action: rename
+#            key: time
+#            value: datetime
+#          - name: content_modifier
+#            action: insert
+#            key: channel
+#            value: simulations
+#    - name: tail
+#      path: /fluent-bit/etc/test-logs/session.log
+#      parser: symfony
+#      tag: symfony.session.test
+#      mem_buf_limit: 10MB
+#      skip_long_lines: on
+#      read_from_head: on
   # app logs
     - name: tail
       path: /var/log/symfony/*.log
