@@ -5,6 +5,8 @@ parsers:
     time_key: datetime
     time_format: "%Y-%m-%dT%H:%M:%S.%L%z"
     decode_field_as: escaped message
+  - name: simulations
+    format: json
 
 pipeline:
   # https://docs.fluentbit.io/manual/data-pipeline/inputs
@@ -24,10 +26,6 @@ pipeline:
       read_from_head: on
       processors:
         logs:
-          - name: content_modifier
-            action: rename
-            key: log
-            value: message
           - name: content_modifier
             action: rename
             key: time
@@ -69,10 +67,6 @@ pipeline:
         logs:
           - name: content_modifier
             action: rename
-            key: log
-            value: message
-          - name: content_modifier
-            action: rename
             key: time
             value: datetime
           - name: content_modifier
@@ -89,6 +83,11 @@ pipeline:
       match: simulations*
       regex:
         - stream ^stderr$
+    - name: parser
+      match: simulations*
+      key_name: log
+      parser: simulations
+      reserve_data: true
   # https://docs.fluentbit.io/manual/data-pipeline/outputs
   outputs:
     - name: stdout
