@@ -38,7 +38,7 @@ class WarningController extends BaseController
                 removed: $removed
             ));
         } catch (Exception $e) {
-            return new MessageJsonResponse(status: 500, message: $e->getMessage());
+            return new MessageJsonResponse(status: $e->getCode() ?: 500, message: $e->getMessage());
         }
     }
 }

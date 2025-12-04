@@ -85,7 +85,7 @@ class MELController extends BaseController
             return new JsonResponse($mel->InitialFishing($fishingValues));
         } catch (Exception $e) {
             return new MessageJsonResponse(
-                status: 500,
+                status: $e->getCode() ?: 500,
                 message: $e->getMessage()
             );
         }

@@ -317,7 +317,7 @@ class GameController extends BaseController
             return new JsonResponse($countries);
         } catch (Exception $e) {
             return new MessageJsonResponse(
-                status: 500,
+                status: $e->getCode() ?: 500,
                 message: $e->getMessage()
             );
         }
@@ -399,7 +399,7 @@ class GameController extends BaseController
             return new JsonResponse($actualDate);
         } catch (Exception $e) {
             return new MessageJsonResponse(
-                status: 500,
+                status: $e->getCode() ?: 500,
                 message: $e->getMessage()
             );
         }
@@ -463,7 +463,7 @@ class GameController extends BaseController
             return new JsonResponse($settings);
         } catch (Exception $e) {
             return new MessageJsonResponse(
-                status: 500,
+                status: $e->getCode() ?: 500,
                 message: $e->getMessage()
             );
         }
@@ -583,7 +583,7 @@ class GameController extends BaseController
             return new JsonResponse($game->Meta($user, $sort, $onlyActiveLayers));
         } catch (Exception $e) {
             return new MessageJsonResponse(
-                status: 500,
+                status: $e->getCode() ?: 500,
                 message: $e->getMessage()
             );
         }
@@ -602,7 +602,7 @@ class GameController extends BaseController
             return new JsonResponse($game->GetCurrentMonth());
         } catch (Exception $e) {
             return new MessageJsonResponse(
-                status: 500,
+                status: $e->getCode() ?: 500,
                 message: $e->getMessage()
             );
         }
