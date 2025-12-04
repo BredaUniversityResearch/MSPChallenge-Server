@@ -648,7 +648,7 @@ class LayerController extends BaseController
                     'base64 encoded file'
             );
         } catch (Exception $e) {
-            return new MessageJsonResponse(status: 500, message: $e->getMessage());
+            return new MessageJsonResponse(status: $e->getCode(), message: $e->getMessage());
         }
     }
 
