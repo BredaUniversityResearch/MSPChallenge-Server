@@ -2,6 +2,7 @@
 
 namespace App\MessageHandler\GameList;
 
+use App\Controller\SessionAPI\GameController;
 use App\Controller\SessionAPI\SELController;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
@@ -72,6 +73,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         WatchdogCommunicator $watchdogCommunicator,
         VersionsProvider $provider,
         SimulationHelper $simulationHelper,
+        private readonly GameController $gameController,
         private readonly MessageBusInterface $messageBus,
         private readonly HttpClientInterface $client,
         // e.g. used by GeoServerCommunicator
@@ -101,7 +103,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             $this->migrateSessionDatabase();
             $this->resetSessionRasterStore();
             $this->entityManager->wrapInTransaction(fn() => $this->setupAllEntities());
-            $this->finaliseSession();
+            $this->finaliseSession($gameList->isDemoSession());
             $this->notice("Session {$this->gameSession->getName()} created and ready for use.");
             $state = 'healthy';
         } catch (\Throwable $e) {
@@ -142,7 +144,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         $this->notice('Creating a new session database, as this is a brand new session.');
         $this->createSessionDatabase();
     }
-    
+
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
@@ -195,11 +197,11 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
      * @throws ClientExceptionInterface
      * @throws Exception
      */
-    private function finaliseSession(): void
+    private function finaliseSession(bool $isDemoSession): void
     {
         // some final custom queries
         $this->completeGeometryRecords();
-        $this->setupGameWatchdogAndAccess();
+        $this->setupGameWatchdogAndAccess($isDemoSession);
     }
 
     /**
@@ -1156,7 +1158,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
      * @throws ClientExceptionInterface
      * @throws Exception
      */
-    private function setupGameWatchdogAndAccess(): void
+    private function setupGameWatchdogAndAccess(bool $isDemoSession): void
     {
         // not turning game_session into a Doctrine Entity as the whole table will be deprecated
         // as soon as the session API has been ported to Symfony, so this is just for backward compatibility
@@ -1174,6 +1176,18 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             ->executeStatement();
 
         $this->registerSimulations();
+
+        if ($isDemoSession) {
+            $this->entityManager->clear();
+            $this->gameController->state(
+                $this->gameSession->getId(),
+                GameStateValue::PLAY,
+                $this->watchdogCommunicator
+            );
+            $this->logContainer($this->watchdogCommunicator);
+            return;
+        }
+
         $this->watchdogCommunicator->changeState(
             $this->gameSession->getId(),
             new GameStateValue('setup'),
