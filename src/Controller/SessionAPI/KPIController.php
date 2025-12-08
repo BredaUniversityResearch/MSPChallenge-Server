@@ -5,13 +5,16 @@ namespace App\Controller\SessionAPI;
 use App\Controller\BaseController;
 use App\Domain\API\APIHelper;
 use App\Domain\API\v1\Kpi;
-use App\Domain\API\v1\Router;
+use App\Domain\Common\MessageJsonResponse;
 use App\Domain\Services\ConnectionManager;
+use App\Entity\ServerManager\GameWatchdogServer;
 use App\Entity\SessionAPI\Simulation;
 use App\Entity\SessionAPI\Watchdog;
+use App\Repository\ServerManager\GameWatchdogServerRepository;
 use App\Repository\SessionAPI\SimulationRepository;
 use Exception;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpClient\Exception\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,16 +40,11 @@ class KPIController extends BaseController
                     properties: [
                         new OA\Property(
                             property: 'kpiValues',
-                            description: 'The KPI\'s to post. Format: json array of object with: name, month, value, '.
-                                'type, unit, country. type is one of ECOLOGY, ENERGY, SHIPPING. The field country is '.
-                                'the id of the country or -1 if it is global. You can retrieve the country id using '.
-                                '/api/Game/GetCountries',
+                            // phpcs:ignore
+                            description: 'The KPI\'s to post. Format: json array of object with: name, month, value, type, unit, country. For the internal watchdog, type must be set to either ECOLOGY, ENERGY or SHIPPING. The field country is the id of the country or -1 if it is global. You can retrieve the country id using /api/Game/GetCountries<br>Example:<br><pre>[<br>    {<br>        "name": "SunHours",<br>        "month": 0,<br>        "value": 267,<br>        "type": "ECOLOGY",<br>        "unit": "hours",<br>        "country": 3<br>    },<br>    {<br>        "name": "SunHours",<br>        "month": 0,<br>        "value": 243,<br>        "type": "ECOLOGY",<br>        "unit": "hours",<br>        "country": 4<br>    }<br>]</pre>',
                             type: 'string',
                             format: 'json',
-                            default: null,
-                            example: '[{"name":"SunHours","month":0,"value":267,"type":"ECOLOGY","unit":"hours",'.
-                                '"country":3},{"name":"SunHours","month":0,"value":243,"type":"ECOLOGY",'.
-                                '"unit":"hours",'.'"country":4}]'
+                            default: null
                         )
                     ]
                 )
@@ -109,18 +107,36 @@ class KPIController extends BaseController
     ): JsonResponse {
         $kpiValues = $request->request->get('kpiValues');
         if (empty($kpiValues)) {
-            return new JsonResponse(
-                Router::formatResponse(false, 'Invalid or missing data', null, __CLASS__, __FUNCTION__),
-                Response::HTTP_BAD_REQUEST
+            return new MessageJsonResponse(
+                status: Response::HTTP_BAD_REQUEST,
+                message: 'Invalid or missing data'
             );
         }
 
         $kpiValues = json_decode($kpiValues, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return new JsonResponse(
-                Router::formatResponse(false, 'Invalid or missing data', null, __CLASS__, __FUNCTION__),
-                Response::HTTP_BAD_REQUEST
-            );
+            return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: 'Invalid or missing data');
+        }
+
+        try {
+            // It is from an external watchdog
+            $serverId = $this->getServerIdFromRequest($request);
+            if ($serverId->toRfc4122() === Watchdog::getInternalServerId()->toRfc4122()) {
+                throw new Exception('Nope, not an external watchdog');
+            }
+            $kpiValues = collect($kpiValues)->map(function ($kpiType) use ($connectionManager, $serverId) {
+                /** @var GameWatchdogServerRepository $repo */
+                $repo = $connectionManager->getServerManagerEntityManager()->getRepository(GameWatchdogServer::class);
+                $repo->validateSimulationType($serverId, $kpiType['type'])
+                    or throw new InvalidArgumentException('Invalid type: '.$kpiType['type']);
+                $kpiType['type_external'] = $kpiType['type'];
+                $kpiType['type'] = Kpi::KPI_TYPE_EXTERNAL;
+                return $kpiType;
+            })->all();
+        } catch (InvalidArgumentException $e) {
+            return new MessageJsonResponse(status: 400, message: $e->getMessage());
+        } catch (Exception) {
+            // process $kpiValues as-is
         }
 
         $kpi = new Kpi();
@@ -128,13 +144,13 @@ class KPIController extends BaseController
         try {
             $kpi->BatchPost($kpiValues);
         } catch (Exception $e) {
-            return new JsonResponse(self::wrapPayloadForResponse(false, message: $e->getMessage()), 500);
+            return new MessageJsonResponse(status: 500, message: $e->getMessage());
         }
 
         $logs[] = 'KPI values posted successfully';
         $notify = $request->headers->get('x-notify-monthly-simulation-finished');
         if (!($notify && filter_var($notify, FILTER_VALIDATE_BOOLEAN))) {
-            return new JsonResponse(self::wrapPayloadForResponse(true, ['logs' => $logs]));
+            return new JsonResponse(['logs' => $logs]);
         }
 
         try {
@@ -152,6 +168,6 @@ class KPIController extends BaseController
         } catch (Exception $e) {
             $logs[] = $e->getMessage();
         }
-        return new JsonResponse(self::wrapPayloadForResponse(true, ['logs' => $logs]));
+        return new JsonResponse(['logs' => $logs]);
     }
 }

@@ -20,6 +20,7 @@ use React\EventLoop\LoopInterface;
 use React\Promise\PromiseInterface;
 use React\Stream\ReadableResourceStream;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class WsServer extends EventDispatcher implements
     WsServerEventDispatcherInterface,
@@ -48,11 +49,6 @@ class WsServer extends EventDispatcher implements
     private array $clientHeaders = [];
 
     /**
-     * @var Security[]
-     */
-    private array $securityInstances = [];
-
-    /**
      * @var PluginInterface[]
      */
     private array $plugins = [];
@@ -62,7 +58,6 @@ class WsServer extends EventDispatcher implements
      */
     private array $pluginsToRegister = [];
 
-    private DoctrineMigrationsDependencyFactoryHelper $doctrineMigrationsDependencyFactoryHelper;
     private ?Stopwatch $stopwatch = null;
 
     public function getDoctrineMigrationsDependencyFactoryHelper(): DoctrineMigrationsDependencyFactoryHelper
@@ -71,7 +66,8 @@ class WsServer extends EventDispatcher implements
     }
 
     public function __construct(
-        DoctrineMigrationsDependencyFactoryHelper $doctrineMigrationsDependencyFactoryHelper,
+        private DoctrineMigrationsDependencyFactoryHelper $doctrineMigrationsDependencyFactoryHelper,
+        private SerializerInterface $serializer,
         // below is required by legacy to be auto-wired
         \App\Domain\API\APIHelper $apiHelper
     ) {
@@ -190,7 +186,6 @@ class WsServer extends EventDispatcher implements
         unset($this->clients[$conn->resourceId]);
         unset($this->clientInfoContainer[$conn->resourceId]);
         unset($this->clientHeaders[$conn->resourceId]);
-        unset($this->securityInstances[$conn->resourceId]);
 
         $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_DISCONNECTED, $conn->resourceId));
     }
@@ -219,6 +214,7 @@ class WsServer extends EventDispatcher implements
             ->setStopwatch($this->stopwatch)
             ->setClientConnectionResourceManager($this)
             ->setServerManager($this)
+            ->setSerializer($this->serializer)
             ->setWsServer($this);
 
         // wait for loop to be registered

@@ -36,41 +36,59 @@ class Warning extends Base
     private function postHandleAddition(int $planId, int $planLayerId, array $addedIssue): PromiseInterface
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
-        return $this->getAsyncDatabase()->query(
-            $qb
-                ->select('warning_id')
-                ->from('warning')
-                ->where('warning_active = 1')
-                ->andWhere('warning_layer_id = ?')
-                ->andWhere('warning_issue_type = ?')
-                ->andWhere('abs(warning_x - ?) <= 1e-6')
-                ->andWhere('abs(warning_y - ?) <= 1e-6')
-                ->andWhere('warning_source_plan_id = ?')
-                ->andWhere('warning_restriction_id = ?')
-                ->setParameters([
-                    $planLayerId, $addedIssue['type'], $addedIssue['x'], $addedIssue['y'],
-                    $planId, $addedIssue['restriction_id']
-                ])
-        )
-        ->then(function (Result $result) use ($planId, $planLayerId, $addedIssue) {
+        $qb
+            ->select('warning_id')
+            ->from('warning')
+            ->where('warning_active = 1')
+            ->andWhere('warning_layer_id = ?')
+            ->andWhere('warning_issue_type = ?')
+            ->andWhere('abs(warning_x - ?) <= 1e-6')
+            ->andWhere('abs(warning_y - ?) <= 1e-6')
+            ->andWhere('warning_source_plan_id = ?');
+        $parameters = [
+            $planLayerId, $addedIssue['type'], $addedIssue['x'], $addedIssue['y'],
+            $planId
+        ];
+        if (isset($addedIssue['restriction_id'])) {
+            $qb->andWhere('warning_restriction_id = ?');
+            $parameters[] = $addedIssue['restriction_id'];
+        }
+        if (isset($addedIssue['custom_restriction_id'])) {
+            $qb->andWhere('custom_restriction_id = ?');
+            $parameters[] = $addedIssue['custom_restriction_id'];
+        }
+        $qb->setParameters($parameters);
+        return $this->getAsyncDatabase()->query($qb)->then(function (Result $result) use (
+            $planId,
+            $planLayerId,
+            $addedIssue
+        ) {
             $existingIssues = $result->fetchAllRows();
             if (empty($existingIssues)) {
                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
+                $inserts = [
+                    'warning_last_update' => 'UNIX_TIMESTAMP(NOW(6))',
+                    'warning_active' => 1,
+                    'warning_layer_id' => $qb->createPositionalParameter($planLayerId),
+                    'warning_issue_type' => $qb->createPositionalParameter($addedIssue['type']),
+                    'warning_x' => $qb->createPositionalParameter($addedIssue['x']),
+                    'warning_y' => $qb->createPositionalParameter($addedIssue['y']),
+                    'warning_source_plan_id' => $qb->createPositionalParameter($planId)
+                ];
+                if (isset($addedIssue['restriction_id'])) {
+                    $inserts['warning_restriction_id'] = $qb->createPositionalParameter($addedIssue['restriction_id']);
+                }
+                if (isset($addedIssue['custom_restriction_id'])) {
+                    $inserts['custom_restriction_id'] = $qb->createPositionalParameter(
+                        $addedIssue['custom_restriction_id']
+                    );
+                }
                 return $this->getAsyncDatabase()->query(
                     $qb
                         ->insert('warning')
-                        ->values([
-                            'warning_last_update' => 'UNIX_TIMESTAMP(NOW(6))',
-                            'warning_active' => 1,
-                            'warning_layer_id' => $qb->createPositionalParameter($planLayerId),
-                            'warning_issue_type' => $qb->createPositionalParameter($addedIssue['type']),
-                            'warning_x' => $qb->createPositionalParameter($addedIssue['x']),
-                            'warning_y' => $qb->createPositionalParameter($addedIssue['y']),
-                            'warning_source_plan_id' => $qb->createPositionalParameter($planId),
-                            'warning_restriction_id' => $addedIssue['restriction_id']
-                        ])
+                        ->values($inserts)
                 )
-                ->then(function (Result $result) use ($addedIssue) {
+                ->then(function (/*Result  $result */) use ($addedIssue) {
                     return $addedIssue;
                 });
             }
@@ -144,7 +162,8 @@ class Warning extends Base
      * @noinspection SpellCheckingInspection
      * @return array{
      *   array{
-     *     issue_database_id: int, type: string, active: boolean, x: float, y: float, restriction_id: int
+     *     issue_database_id: int, type: string, active: boolean, x: float, y: float, restriction_id?: int,
+     *     custom_restriction_id?: int
      *   }
      * }|PromiseInterface
      */
@@ -171,6 +190,7 @@ class Warning extends Base
                                 'warning_issue_type as type',
                                 'warning_active as active',
                                 'warning_restriction_id as restriction_id',
+                                'custom_restriction_id',
                                 'warning_x as x',
                                 'warning_y as y'
                             )

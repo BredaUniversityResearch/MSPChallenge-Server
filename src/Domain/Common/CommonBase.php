@@ -18,6 +18,8 @@ use function App\resolveOnFutureTick;
 
 abstract class CommonBase implements LogContainerInterface
 {
+    const INVALID_SESSION_ID = -1;
+
     use LogContainerTrait;
 
     private ?Connection $asyncDatabase = null;
@@ -39,7 +41,7 @@ abstract class CommonBase implements LogContainerInterface
     {
         if (null === $this->asyncDatabase) {
             // fail-safe: try to create an async database from current request information if there is no instance set.
-            if (GameSession::INVALID_SESSION_ID === $gameSessionId = $this->getGameSessionId()) {
+            if (self::INVALID_SESSION_ID === $gameSessionId = $this->getGameSessionId()) {
                 throw new Exception('Missing required game session id for creating an async database connection');
             }
             $this->asyncDatabase = ConnectionManager::getInstance()->getCachedAsyncGameSessionDbConnection(
@@ -69,7 +71,17 @@ abstract class CommonBase implements LogContainerInterface
             return $this->gameSessionId;
         }
         // Otherwise, try to retrieve the game session id from the request
-        return GameSession::GetGameSessionIdForCurrentRequest();
+        return self::GetGameSessionIdForCurrentRequest();
+    }
+
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public static function GetGameSessionIdForCurrentRequest(): int
+    {
+        $sessionId = $_POST['game_id'] ?? $_GET['session'] ?? self::INVALID_SESSION_ID;
+        if (1 === preg_match('/^\/(?:\/)*(\d+)\/(?:\/)*api\/(?:\/)*(.*)/', $_SERVER["REQUEST_URI"], $matches)) {
+            $sessionId = (int)$matches[1];
+        }
+        return intval($sessionId) < 1 ? self::INVALID_SESSION_ID : (int)$sessionId;
     }
 
     public function setGameSessionId(?int $gameSessionId): static

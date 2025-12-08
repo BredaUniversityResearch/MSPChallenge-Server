@@ -1,7 +1,7 @@
 #syntax=docker/dockerfile:1
 
 # build a local image using the following command:
-#   docker build -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:5.2.0 -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
+#   git clean -d -x -f; docker build -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:5.2.1 -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
 # how to run it:
 #  (replace [branch_name] with the branch you want to run, e.g. `main` or `dev`)
 #  * from Linux:
@@ -36,15 +36,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         default-mysql-client \
         procps \
         nano \
-        npm
+        npm \
+        && rm -rf /var/lib/apt/lists/*
 
 # Install Yarn through corepack
 RUN npm install -g corepack
 
 # Install PHP extensions
 RUN set -eux; \
-    install-php-extensions @composer apcu intl opcache zip pcntl imagick gd; \
-    rm -rf /tmp/*
+    install-php-extensions @composer apcu intl opcache zip pcntl imagick gd;
 
 # if you want to debug on prod, enable below lines:
 ##   Also check ./frankenphp/conf.d/app.prod.ini
@@ -82,30 +82,14 @@ COPY --link docker/supervisor/supervisor.d/*.ini /etc/supervisor.d/
 
 ENTRYPOINT ["docker-entrypoint"]
 
-# Install Blackfire Probe
-RUN version=$(php -r "echo PHP_MAJOR_VERSION.PHP_MINOR_VERSION.(PHP_ZTS ? '-zts' : '');") \
-    && architecture=$(uname -m) \
-    && curl -A "Docker" -o /tmp/blackfire-probe.tar.gz -D - -L -s https://blackfire.io/api/v1/releases/probe/php/linux/$architecture/$version \
-    && mkdir -p /tmp/blackfire \
-    && tar zxpf /tmp/blackfire-probe.tar.gz -C /tmp/blackfire \
-    && mv /tmp/blackfire/blackfire-*.so $(php -r "echo ini_get ('extension_dir');")/blackfire.so \
-    && printf "extension=blackfire.so\nblackfire.agent_socket=tcp://blackfire:8307\n" > $PHP_INI_DIR/conf.d/blackfire.ini \
-    && rm -rf /tmp/blackfire /tmp/blackfire-probe.tar.gz
-
-# Install Blackfire CLI
-RUN mkdir -p /tmp/blackfire \
-    && architecture=$(uname -m) \
-    && curl -A "Docker" -L https://blackfire.io/api/v1/releases/cli/linux/$architecture | tar zxp -C /tmp/blackfire \
-    && mv /tmp/blackfire/blackfire /usr/bin/blackfire \
-    && rm -Rf /tmp/blackfire
-
 HEALTHCHECK --start-period=60s CMD curl -f http://localhost:2019/metrics || exit 1
 CMD [ "frankenphp", "run", "--config", "/etc/caddy/Caddyfile" ]
 
 # Dev FrankenPHP image
 FROM frankenphp_base AS frankenphp_dev
 
-ENV APP_ENV=dev XDEBUG_MODE=off
+ENV APP_ENV=dev
+ENV XDEBUG_MODE=off
 
 # dev-only supervisor config
 COPY --link docker/supervisor/supervisor.d/dev/*.ini /etc/supervisor.d/
@@ -140,11 +124,13 @@ COPY --link composer-symfony6.4.json composer.json
 COPY --link composer-symfony6.4.lock composer.lock
 COPY --link symfony6.4.lock symfony.lock
 COPY --link package.json package.json
-COPY --link . ./
 
-# Install dependencies
 RUN set -eux; \
   composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress
+
+# copy sources
+COPY --link . ./
+RUN rm -Rf frankenphp/
 
 # Install dependencies and build assets
 RUN set -eux; \
@@ -155,10 +141,8 @@ RUN set -eux; \
 
 # Install PHP dependencies
 RUN set -eux; \
+    mkdir -p var/cache var/log; \
     composer dump-autoload --classmap-authoritative --no-dev; \
     composer dump-env prod; \
-    composer run-script --no-dev post-install-cmd; \
+    IS_BUILD=true composer run-script --no-dev post-install-cmd; \
     chmod +x bin/console; sync;
-
-# Clean up unnecessary files
-RUN rm -rf frankenphp/

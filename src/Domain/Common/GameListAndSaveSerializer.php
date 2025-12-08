@@ -37,7 +37,8 @@ class GameListAndSaveSerializer
         return $this->serializer->serialize(
             $gameSave,
             'json',
-            (new NormalizerContextBuilder(GameSave::class))
+            (new NormalizerContextBuilder())
+                ->withClassPropertyValidation(GameSave::class)
                 ->withIgnoredAttributes($this->getGenericIgnoredAttributes())
                 ->withCallbacks($this->getGenericNormalizeCallbacks())
                 ->toArray()
@@ -53,7 +54,8 @@ class GameListAndSaveSerializer
         return $this->serializer->normalize(
             $gameList,
             null,
-            (new NormalizerContextBuilder(GameList::class))
+            (new NormalizerContextBuilder())
+                ->withClassPropertyValidation(GameList::class)
                 ->withIgnoredAttributes($this->getGenericIgnoredAttributes())
                 ->withCallbacks($this->getGameListNormalizeCallbacks())
                 ->toArray()
@@ -69,7 +71,8 @@ class GameListAndSaveSerializer
         return $this->serializer->normalize(
             $gameSave,
             null,
-            (new NormalizerContextBuilder(GameSave::class))
+            (new NormalizerContextBuilder())
+                ->withClassPropertyValidation(GameSave::class)
                 ->withIgnoredAttributes($this->getGenericIgnoredAttributes())
                 ->withCallbacks($this->getGenericNormalizeCallbacks())
                 ->toArray()
@@ -86,7 +89,8 @@ class GameListAndSaveSerializer
             $json,
             GameSave::class,
             'json',
-            (new NormalizerContextBuilder(GameSave::class))
+            (new NormalizerContextBuilder())
+                ->withClassPropertyValidation(GameSave::class)
                 ->withIgnoredAttributes($this->getGenericIgnoredAttributes())
                 ->withCallbacks($this->getGameListJsonDenormalizeCallbacks())
                 ->toArray()
@@ -106,7 +110,8 @@ class GameListAndSaveSerializer
             $data,
             GameList::class,
             null,
-            (new NormalizerContextBuilder(GameList::class))
+            (new NormalizerContextBuilder())
+                ->withClassPropertyValidation(GameList::class)
                 ->withIgnoredAttributes($this->getGenericIgnoredAttributes())
                 ->withCallbacks($this->getGameListDenormalizeCallbacks())
                 ->toArray()
@@ -126,7 +131,8 @@ class GameListAndSaveSerializer
             $data,
             GameSave::class,
             null,
-            (new NormalizerContextBuilder(GameSave::class))
+            (new NormalizerContextBuilder())
+                ->withClassPropertyValidation(GameSave::class)
                 ->withIgnoredAttributes($this->getGenericIgnoredAttributes())
                 ->withCallbacks($this->getGenericDenormalizeCallbacks())
                 ->toArray()
@@ -138,7 +144,7 @@ class GameListAndSaveSerializer
         return [
             'gameCreationTimePretty', 'gameEndMonthPretty', 'gameCurrentMonthPretty', 'gameRunningTilTimePretty',
             'gameGeoServer', 'gameServer', 'gameWatchdogServer', 'runningGame', 'countries',
-            'saveType', 'saveNotes', 'saveVisibility', 'saveTimestampPretty', 'saveTimestamp'
+            'saveType', 'saveNotes', 'saveVisibility', 'saveTimestampPretty', 'saveTimestamp', 'originGameListId'
         ];
     }
 

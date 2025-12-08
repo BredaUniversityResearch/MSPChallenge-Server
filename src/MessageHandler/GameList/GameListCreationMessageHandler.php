@@ -15,6 +15,7 @@ use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SimulationHelper;
+use App\Entity\SessionAPI\LayerRaster;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListCreationMessage;
 use App\Message\GameSave\GameSaveLoadMessage;
@@ -45,7 +46,6 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -273,6 +273,14 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
      */
     private function importLayerData(SessionSetupContext $context): void
     {
+        $username = $this->gameSession->getGameGeoServer()->getUsername();
+        $password = $this->gameSession->getGameGeoServer()->getPassword();
+        if (empty($username) || empty($password)) {
+            throw new \Exception(
+                "No GeoServer credentials provided, so no GeoServer data will be imported."
+            );
+        }
+
         $geoServerCommunicator = new GeoServerCommunicator(
             $this->client,
             $this->provider,
@@ -281,13 +289,13 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         );
         $geoServerCommunicator
             ->setBaseURL($this->gameSession->getGameGeoServer()->getAddress())
-            ->setUsername($this->gameSession->getGameGeoServer()->getUsername())
-            ->setPassword($this->gameSession->getGameGeoServer()->getPassword());
+            ->setUsername($username)
+            ->setPassword($password);
 
         /** @var LayerRepository $layerRepo */
         $layerRepo = $this->entityManager->getRepository(Layer::class);
         foreach ($this->dataModel['meta'] as $layerMetaData) {
-            $layer = $layerRepo->createLayerFromData($layerMetaData);
+            $layer = $layerRepo->denormalize($layerMetaData);
             $layer->setLayerGroup($this->dataModel['region']);
             $this->info("Starting import of layer {$layer->getLayerName()}...");
             if ($layer->getLayerGeoType() == LayerGeoType::RASTER) {
@@ -360,13 +368,12 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
+     * @throws \Exception
      */
     private function importLayerRasterData(
         Layer $layer,
         GeoServerCommunicator $geoServerCommunicator
     ): void {
-        $rasterPath = $this->params->get('app.session_raster_dir').
-            "{$this->gameSession->getId()}/{$layer->getLayerName()}.png";
         if ($layer->getLayerDownloadFromGeoserver()) {
             $this->debug('Calling GeoServer to obtain raster metadata.');
             $rasterMetaData = $geoServerCommunicator->getRasterMetaData(
@@ -375,23 +382,26 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             );
             $this->debug("Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}");
             $this->debug('Calling GeoServer to obtain actual raster data.');
-            $layer->setLayerRasterURL($rasterMetaData['url']);
-            $layer->setLayerRasterBoundingbox($rasterMetaData['boundingbox']);
+            $layer->setLayerRaster(
+                ($layer->getLayerRaster() ?? new LayerRaster())
+                    ->setUrl($rasterMetaData['url'])
+                    ->setBoundingbox($rasterMetaData['boundingbox'])
+            );
             $rasterData = $geoServerCommunicator->getRasterDataByMetaData(
                 $this->dataModel['region'],
                 $layer,
                 $rasterMetaData
             );
             $this->debug("Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}");
-            $fileSystem = new Filesystem();
-            $fileSystem->dumpFile(
-                $rasterPath,
-                $rasterData
-            );
-            $this->debug("Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}");
-            $message = "Successfully retrieved {$layer->getLayerName()} and stored the raster file at {$rasterPath}.";
+
+            $layerApi = new \App\Domain\API\v1\Layer();
+            $layerApi->setGameSessionId($this->gameSession->getId());
+            $layerApi->UpdateRaster($layer, $rasterData);
+            foreach ($layerApi->getLogMessages() as $log) {
+                $this->debug($log);
+            }
+            $message = "Successfully retrieved {$layer->getLayerName()} and stored the raster file.";
         }
-        $layer->setLayerRaster();
         $this->info(
             $message ?? "Successfully retrieved {$layer->getLayerName()} without storing a raster file, as requested."
         );
@@ -714,19 +724,20 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
                 "Pressure layer {$layerName} not found. Make sure it has been defined under 'meta'."
             );
         }
-        $layer->getLayerRaster(); //sets all other raster metadata properties
-        $layer->setLayerRasterURL("{$layerName}.tif");
-        $layer->setLayerRasterBoundingbox([
-            [
-                $this->dataModel['MEL']['x_min'],
-                $this->dataModel['MEL']["y_min"]
-            ],
-            [
-                $this->dataModel['MEL']["x_max"],
-                $this->dataModel['MEL']["y_max"]
-            ]
-        ]);
-        $layer->setLayerRaster();
+        $layer->setLayerRaster(
+            ($layer->getLayerRaster() ?? new LayerRaster())
+            ->setUrl("{$layerName}.tif")
+            ->setBoundingbox([
+                [
+                    $this->dataModel['MEL']['x_min'],
+                    $this->dataModel['MEL']["y_min"]
+                ],
+                [
+                    $this->dataModel['MEL']["x_max"],
+                    $this->dataModel['MEL']["y_max"]
+                ]
+            ])
+        );
         return $layer;
     }
 
@@ -765,8 +776,10 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
                     actual layer in the configuration file?'
                 );
             }
-            $selOutputLayer->getLayerRaster(); //sets all other raster metadata properties
-            $selOutputLayer->setLayerRasterURL("{$selOutputLayer->getLayerName()}.png");
+            $layerRaster = ($selOutputLayer->getLayerRaster() ?? new LayerRaster());
+            $selOutputLayer->setLayerRaster(
+                $layerRaster->setUrl("{$selOutputLayer->getLayerName()}.png")
+            );
             if (isset($heatmap["output_for_mel"]) && $heatmap["output_for_mel"] === true) {
                 if (empty($this->dataModel["MEL"])) {
                     throw new \Exception("SEL has a layer {$heatmap["layer_name"]} that is marked ".
@@ -780,17 +793,16 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
                     throw new \Exception("SEL has layer {$heatmap["layer_name"]} that is marked ".
                         "for use by MEL. However the bounding box configuration in the MEL section is incomplete.");
                 }
-                $selOutputLayer->setLayerRasterBoundingbox([
+                $layerRaster->setBoundingbox([
                     [$this->dataModel["MEL"]['x_min'], $this->dataModel["MEL"]['y_min']],
                     [$this->dataModel["MEL"]['x_max'], $this->dataModel["MEL"]['y_max']]
                 ]);
             } else {
-                $selOutputLayer->setLayerRasterBoundingbox([
+                $layerRaster->setBoundingbox([
                     [$boundsConfig['x_min'], $boundsConfig['y_min']],
                     [$boundsConfig['x_max'], $boundsConfig['y_max']]
                 ]);
             }
-            $selOutputLayer->setLayerRaster();
             $this->entityManager->persist($selOutputLayer);
         }
         $this->info('Finished setting up simulation SEL.');

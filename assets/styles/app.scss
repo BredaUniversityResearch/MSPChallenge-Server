@@ -336,3 +336,13 @@ textarea.form-control {
 #footer-extra img {
     width: 40px;
 }
+
+// Make placeholder text lighter for Bootstrap form controls
+.form-control::placeholder {
+  color: #8b949e !important;
+  opacity: 1;
+}
+.form-control::-webkit-input-placeholder { color: #8b949e !important; }
+.form-control:-moz-placeholder { color: #8b949e !important; }
+.form-control::-moz-placeholder { color: #8b949e !important; }
+.form-control:-ms-input-placeholder { color: #8b949e !important; }

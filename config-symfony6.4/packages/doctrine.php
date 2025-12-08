@@ -26,11 +26,7 @@ return static function (DoctrineConfig $doctrineConfig, StofDoctrineExtensionsCo
         #   Otherwise the GameConfigVersion::getGameConfigCompleteRaw() will return null.
         'enable_lazy_ghost_objects' => false
     ]);
-    $dqlConfig = [
-        'string_functions' => [
-            'UUID_SHORT' => 'App\Doctrine\Functions\UuidShortFunction'
-        ]
-    ];
+
     $ormConfig
         ->defaultEntityManager('default')
         # https://stackoverflow.com/questions/79131843/how-to-set-auto-generate-proxy-classes-to-autogenerate-eval-when-using-doctrine
@@ -42,17 +38,19 @@ return static function (DoctrineConfig $doctrineConfig, StofDoctrineExtensionsCo
     );
     foreach ($dbNames as $dbName) {
         $dbalConfig->connection($dbName, $connectionManager->getConnectionConfig($dbName));
-        $ormConfig->entityManager($dbName, $connectionManager->getEntityManagerConfig($dbName))->dql($dqlConfig);
+        $ormConfig->entityManager($dbName, $connectionManager->getEntityManagerConfig($dbName));
     }
     $doctrineConfig->dbal($dbalConfig);
     $doctrineConfig->orm($ormConfig);
 
+    $mapping = [
+        'timestampable' => true,
+        'softdeleteable' => true
+    ];
     $stofDoctrineExtensionsConfig->defaultLocale('en_us');
+    $stofDoctrineExtensionsConfig->orm('default', $mapping);
     foreach ($dbNames as $dbName) {
-        $stofDoctrineExtensionsConfig->orm($dbName, [
-            'timestampable' => true,
-            'softdeleteable' => true
-        ]);
+        $stofDoctrineExtensionsConfig->orm($dbName, $mapping);
     }
 
     if (($_ENV['APP_ENV'] ?? null) !== 'prod') {
@@ -62,9 +60,3 @@ return static function (DoctrineConfig $doctrineConfig, StofDoctrineExtensionsCo
         ->autoGenerateProxyClasses(false)
         ->proxyDir('%kernel.build_dir%/doctrine/orm/Proxies');
 };
-
-//custom_mapping:
-//                    type: annotation
-//                    prefix: Client\IntranetBundle\LDAP\
-//                    dir: "%kernel.root_dir%/src/Client/IntranetBundle/LDAP/"
-//                    is_bundle: false

@@ -21,7 +21,7 @@ readonly class ExceptionListener
         $e = $event->getThrowable();
         if ($e instanceof MSPAuth2RedirectException) {
             $url = str_replace('://', '', $_ENV['AUTH_SERVER_SCHEME'] ?? 'https').'://'.
-                $_ENV['AUTH_SERVER_HOST'].
+                $_ENV['AUTH_SERVER_HOST'].':'.($_ENV['AUTH_SERVER_PORT'] ?? 443).
                 '/sso?redirect='.urlencode($event->getRequest()->getUri());
             $event->setResponse(new RedirectResponse($url));
             return;
