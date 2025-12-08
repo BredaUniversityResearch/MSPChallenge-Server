@@ -144,7 +144,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         $this->notice('Creating a new session database, as this is a brand new session.');
         $this->createSessionDatabase();
     }
-    
+
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
@@ -1178,9 +1178,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         $this->registerSimulations();
 
         if ($isDemoSession) {
-            $this->gameSession->setDemoSession(1);
-            $this->entityManager->persist($this->gameSession);
-            $this->entityManager->flush();
+            $this->entityManager->clear();
             $this->gameController->state(
                 $this->gameSession->getId(),
                 GameStateValue::PLAY,
