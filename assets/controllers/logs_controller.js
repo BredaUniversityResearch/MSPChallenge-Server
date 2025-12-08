@@ -32,8 +32,8 @@ export default class extends Controller {
         let message = logObj.message || '';
         let extra = logObj.extra || '';
         let levelName = logObj.level_name || '';
-        if (levelName === 'CRITICAL') {
-            levelName = 'ERROR';
+        if (levelName !== 'WARNING') {
+            levelName = 'ERROR'; // Treat all non-warning levels as ERROR: CRITICAL, ALERT, EMERGENCY, ERROR
         }
         if ((Array.isArray(extra) && extra.length === 0) || (typeof extra === 'object' && Object.keys(extra).length === 0)) {
             extra = '';

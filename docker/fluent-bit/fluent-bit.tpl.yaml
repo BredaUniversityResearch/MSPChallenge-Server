@@ -78,7 +78,7 @@ pipeline:
     - name: grep
       match: symfony*
       regex:
-        - level_name ^(CRITICAL|ERROR)$
+        - level_name ^(EMERGENCY|ALERT|CRITICAL|ERROR)$
     - name: grep
       match: simulations*
       regex:

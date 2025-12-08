@@ -7,6 +7,7 @@ parameters:
     - '!docker_monitor'
     - '!app_ws_server'
     - '!watchdog'
+    - '!client'
     - '!deprecation' # also exclude deprecation logs from main log file
   white_list_app_channels:
     - analytics
@@ -15,6 +16,7 @@ parameters:
     - docker_messenger
     - docker_monitor
     - app_ws_server
+    - client
     - watchdog
 
 monolog:
@@ -26,6 +28,7 @@ monolog:
         - docker_messenger
         - docker_monitor
         - app_ws_server
+        - client
         - watchdog
     handlers:
         # uncomment to get logging in your browser
@@ -82,7 +85,12 @@ monolog:
             level: warning
             formatter: monolog.formatter.json
             channels: ['watchdog']
-
+        client:
+            type: stream
+            path: '%kernel.logs_dir%/client.log'
+            level: warning
+            formatter: monolog.formatter.json
+            channels: ['client']
 when@prod:
     monolog:
         handlers:

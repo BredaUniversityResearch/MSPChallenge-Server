@@ -226,12 +226,18 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         $eventLog = Simulation::createEventLogForWatchdog($message, $severity, $w, $stackTrace)
             ->setSource($source);
         $message = sprintf('Watchdog %s: %s', $w->getServerId()->toRfc4122(), $message);
+        $contextVars = [
+            'watchdogId' => $w->getId(),
+            'watchdogServerId' => $w->getServerId()->toRfc4122(),
+            'source' => $source,
+            'stackTrace' => $stackTrace
+        ];
         switch ($severity) {
             case EventLogSeverity::WARNING:
-                $this->warning($message);
+                $this->warning($message, $contextVars);
                 break;
             default: // EventLogSeverity::ERROR, EventLogSeverity::FATAL
-                $this->error($message);
+                $this->error($message, $contextVars);
                 break;
         }
         return $eventLog;
