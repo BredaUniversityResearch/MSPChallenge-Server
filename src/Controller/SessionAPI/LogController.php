@@ -6,6 +6,7 @@ use App\Controller\BaseController;
 use App\Domain\API\v1\Log;
 use App\Domain\Common\EntityEnums\EventLogSeverity;
 use App\Domain\Common\MessageJsonResponse;
+use App\MessageHandler\GameList\SessionLogHandler;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -68,9 +69,7 @@ class LogController extends BaseController
     )]
     public function logEvent(
         Request $request,
-        LoggerInterface $appLogger,
-        LoggerInterface $watchdogLogger,
-        LoggerInterface $clientLogger
+        LoggerInterface $gameSessionLogger
     ): JsonResponse {
         if ((null === $message = $request->request->get('message')) || '' === trim($message)) {
             return new MessageJsonResponse(
@@ -94,17 +93,14 @@ class LogController extends BaseController
         $context = ['source' => $source];
         if (!empty($stackTrace)) {
             $context = [
-                'stack_trace' => $stackTrace
+                'stack_trace' => $stackTrace,
+                'headers' => array_intersect(['x-server-id','msp-client-version'], $request->headers->all())
             ];
         }
 
-        // external log call, so log to monolog loggers as well
-        $logger = $appLogger;
-        if ($request->headers->has('Msp-Client-Version')) {
-            $logger = $clientLogger;
-        } elseif ($request->headers->has('x-server-id')) {
-            $logger = $watchdogLogger;
-        }
+        // external log call, so log to monolog as well
+        $logger = new SessionLogHandler($gameSessionLogger);
+        $logger->setGameSessionId($this->getSessionIdFromRequest($request));
         $logger->log($this->getLogLevel($severity), $message, $context);
 
         // log to database

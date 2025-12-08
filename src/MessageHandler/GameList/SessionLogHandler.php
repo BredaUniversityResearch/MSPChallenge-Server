@@ -4,7 +4,7 @@ namespace App\MessageHandler\GameList;
 
 use Psr\Log\LoggerInterface;
 
-abstract class SessionLogHandlerBase
+class SessionLogHandler
 {
     private ?int $gameSessionId = null;
 
@@ -13,12 +13,12 @@ abstract class SessionLogHandlerBase
     ) {
     }
 
-    protected function setGameSessionId(int $gameSessionId): void
+    public function setGameSessionId(int $gameSessionId): void
     {
         $this->gameSessionId = $gameSessionId;
     }
 
-    private function log(string $level, string $message, array $contextVars = []): void
+    public function log(string $level, string $message, array $contextVars = []): void
     {
         if (null === $this->gameSessionId) {
             throw new \LogicException('Game session id not set');
@@ -27,27 +27,27 @@ abstract class SessionLogHandlerBase
         $this->gameSessionLogger->$level($message, $contextVars);
     }
 
-    protected function info(string $message, array $contextVars = []): void
+    public function info(string $message, array $contextVars = []): void
     {
         $this->log('info', $message, $contextVars);
     }
 
-    protected function debug(string $message, array $contextVars = []): void
+    public function debug(string $message, array $contextVars = []): void
     {
         $this->log('debug', $message, $contextVars);
     }
 
-    protected function notice(string $message, array $contextVars = []): void
+    public function notice(string $message, array $contextVars = []): void
     {
         $this->log('notice', $message, $contextVars);
     }
 
-    protected function warning(string $message, array $contextVars = []): void
+    public function warning(string $message, array $contextVars = []): void
     {
         $this->log('warning', $message, $contextVars);
     }
 
-    protected function error(string $message, array $contextVars = []): void
+    public function error(string $message, array $contextVars = []): void
     {
         $this->log('error', $message, $contextVars);
     }
