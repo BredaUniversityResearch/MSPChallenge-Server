@@ -3,6 +3,7 @@
 namespace App\Controller\ServerManager;
 
 use App\Controller\BaseController;
+use App\Domain\Helper\Util;
 use App\Domain\Services\DockerApiService;
 use App\Entity\ServerManager\DockerApi;
 use Exception;
@@ -92,6 +93,10 @@ class ErrorsController extends BaseController
             }
             $file->next();
             $lineCount++;
+            // Let's prevent getting out of memory
+            if (memory_get_usage(true) / Util::getMemoryLimit() > 0.8) {
+                break;
+            }
         }
         return $this->json([
             'lines' => $lines,
