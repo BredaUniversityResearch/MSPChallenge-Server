@@ -641,7 +641,7 @@ class LayerController extends BaseController
             $layer = new Layer();
             $layer->setGameSessionId($this->getSessionIdFromRequest($request));
             $layerName = $request->request->get('layer_name');
-            $month = $request->request->get('month', -1);
+            $month = $request->request->get('month');
             return new MessageJsonResponse(
                 data: $layer->GetRaster($layerName, $month),
                 message:'Returns array of displayed_bounds and image_data strings to payload, whereby image_data is '.

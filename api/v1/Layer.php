@@ -70,7 +70,7 @@ class Layer extends Base
         );
 
         $all = array();
-            
+
         // this part actually subtracts the latter geometry from the former geometry
         foreach ($geometry as $shape) {
             $g = array();
@@ -165,7 +165,7 @@ class Layer extends Base
         if (empty($vectorCheck[0]["layer_geotype"]) || $vectorCheck[0]["layer_geotype"] == "raster") {
             throw new Exception("Not a vector layer.");
         }
-            
+
         $data = $this->getDatabase()->query("SELECT 
 					geometry_id as id, 
 					geometry_geometry as geometry, 
@@ -181,7 +181,7 @@ class Layer extends Base
 				FROM layer 
 				LEFT JOIN geometry ON layer.layer_id=geometry.geometry_layer_id
 				WHERE layer.layer_id = ? ORDER BY geometry_FID, geometry_subtractive", array($layer_id));
-            
+
         if (empty($data) || empty($data[0]["geometry"])) {
             return [];
         }
@@ -199,7 +199,7 @@ class Layer extends Base
      *   encoded file
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetRaster(string $layer_name, int $month = -1): array
+    public function GetRaster(string $layer_name, ?int $month = null): array
     {
         $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
             ->getRepository(\App\Entity\SessionAPI\Layer::class);
@@ -214,6 +214,11 @@ class Layer extends Base
         $fileExt = $path_parts['extension'];
         $filename = $path_parts['filename'];
         $archivedRasterDataUrlFormat = "archive/%s_%d.%s";
+
+        $game = new Game();
+        $this->asyncDataTransferTo($game);
+        $curMonth = $game->GetCurrentMonthAsId();
+        $month ??= $curMonth;
 
         // use the archive first if it exists
         $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).
@@ -232,7 +237,6 @@ class Layer extends Base
             );
         }
         $this->log("Retrieved raster image for layer with name " . $layer_name . " from path " . $filePath);
-        ;
         $imageData = file_get_contents($filePath);
         $result['displayed_bounds'] = $rasterData->getBoundingbox();
         $result['image_data'] = base64_encode($imageData);
