@@ -264,4 +264,26 @@ class Util
         }
         return array_unique($results);
     }
+
+    public static function getMemoryLimit(): int
+    {
+        $limit = ini_get('memory_limit');
+        if ($limit == -1) {
+            return PHP_INT_MAX;
+        }
+        $unit = strtolower(substr($limit, -1));
+        $bytes = (int)$limit;
+        switch ($unit) {
+            case 'g':
+                $bytes *= 1024;
+                // fallthrough
+            case 'm':
+                $bytes *= 1024;
+                // fallthrough
+            case 'k':
+                $bytes *= 1024;
+                break;
+        }
+        return $bytes;
+    }
 }
