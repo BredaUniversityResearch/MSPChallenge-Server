@@ -274,9 +274,15 @@ class Util
         $unit = strtolower(substr($limit, -1));
         $bytes = (int)$limit;
         switch ($unit) {
-            case 'g': $bytes *= 1024;
-            case 'm': $bytes *= 1024;
-            case 'k': $bytes *= 1024;
+            case 'g':
+                $bytes *= 1024;
+                // fallthrough
+            case 'm':
+                $bytes *= 1024;
+                // fallthrough
+            case 'k':
+                $bytes *= 1024;
+                break;
         }
         return $bytes;
     }
