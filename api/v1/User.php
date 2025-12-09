@@ -28,6 +28,9 @@ class User extends Base implements JWTUserInterface
     {
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function CheckGameSessionPasswords(): array
     {

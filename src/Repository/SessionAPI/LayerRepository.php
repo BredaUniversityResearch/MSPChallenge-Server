@@ -2,23 +2,21 @@
 
 namespace App\Repository\SessionAPI;
 
+use App\Domain\Common\CustomMappingNameConvertor;
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\NormalizerContextBuilder;
 use App\Entity\SessionAPI\Layer;
-use Doctrine\ORM\EntityRepository;
+use App\Entity\SessionAPI\LayerRaster;
+use App\Entity\SessionAPI\LayerTextInfo;
 use Doctrine\ORM\NonUniqueResultException;
 use ReflectionException;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
-class LayerRepository extends EntityRepository
+/**
+ * @extends SessionEntityRepository<Layer>
+ */
+class LayerRepository extends SessionEntityRepository
 {
     public const PLAY_AREA_LAYER_PREFIX = '_PLAYAREA';
-
-    private ?ObjectNormalizer $normalizer = null; // to be created upon usage
-    private ?Serializer $serializer = null; // to be created upon usage
 
     /**
      * @throws NonUniqueResultException
@@ -104,41 +102,67 @@ class LayerRepository extends EntityRepository
             ->getOneOrNullResult();
     }
 
-    public function save(Layer $entity, bool $flush = false): void
+    protected function onPreDenormalize(array $data): array
     {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
+        // fix name inconsistencies
+        $data['layer_geo_type'] = $data['layer_geotype'];
+        $layerRasterFields = [
+            'layer_raster_material',
+            'layer_raster_pattern',
+            'layer_raster_minimum_value_cutoff',
+            'layer_raster_color_interpolation',
+            'layer_raster_filter_mode'
+        ];
+        foreach ($layerRasterFields as $field) {
+            if (!isset($data[$field])) {
+                continue;
+            }
+            $data['layer_raster'][$field] = $data[$field];
+            unset($data[$field]);
         }
-    }
-
-    public function remove(Layer $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
+        unset($data['layer_geotype']);
+        return $data;
     }
 
     /**
-     * @throws ExceptionInterface|ReflectionException
+     * @throws ReflectionException
      */
-    public function createLayerFromData(array $layerData): Layer
+    protected function initDenormalizerContextBuilder(
+        NormalizerContextBuilder $contextBuilder
+    ): NormalizerContextBuilder {
+        return $contextBuilder->withCallbacks([
+            'layerGeoType' => fn($value) => LayerGeoType::from($value),
+            'layerTextInfo' => fn($value) => $value ?? new LayerTextInfo(),
+            'layerRaster' => fn($value) => $value === null ? $value : new LayerRaster($value)
+        ]);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    protected function initNormalizerContextBuilder(
+        NormalizerContextBuilder $contextBuilder
+    ): NormalizerContextBuilder {
+        return $contextBuilder
+            ->withAttributes(array_merge(
+                array_keys($this->getEntityManager()->getClassMetadata(Layer::class)->fieldMappings),
+                [
+                    'originalLayer','layerDependencies','scale'
+                ]
+            ))
+            ->withCallbacks([
+                'originalLayer' => fn($value) => $value?->getLayerId(),
+                'layerGeoType' => fn(?LayerGeoType $value) => $value?->value
+            ])
+            ->withPreserveEmptyObjects(true)
+            ->withSkipNullValues(true);
+    }
+
+    protected function initNameConvertor(CustomMappingNameConvertor $convertor): CustomMappingNameConvertor
     {
-        // fix name inconsistencies
-        $layerData['layer_geo_type'] = $layerData['layer_geotype'];
-        unset($layerData['layer_geotype']);
-        $this->normalizer ??= new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
-        $this->serializer ??= new Serializer([$this->normalizer]);
-        return $this->serializer->denormalize(
-            $layerData,
-            Layer::class,
-            null,
-            (new NormalizerContextBuilder(Layer::class))->withCallbacks([
-                'layerGeoType' => fn($value) => LayerGeoType::from($value)
-            ])->toArray()
-        );
+        return $convertor->setCustomMapping([
+            'layerGeoType' => 'layer_geotype',
+            'originalLayer' => 'layer_original_id'
+        ]);
     }
 }

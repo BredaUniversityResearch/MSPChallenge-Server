@@ -21,6 +21,9 @@ framework:
     php_errors:
         log: true
 
+    secrets:
+      vault_directory: '%kernel.project_dir%/.secrets'
+
 when@test:
     framework:
         test: true

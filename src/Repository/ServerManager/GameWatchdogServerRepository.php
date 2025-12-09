@@ -4,6 +4,7 @@ namespace App\Repository\ServerManager;
 
 use App\Entity\ServerManager\GameWatchdogServer;
 use Doctrine\ORM\EntityRepository;
+use Symfony\Component\Uid\Uuid;
 
 class GameWatchdogServerRepository extends EntityRepository
 {
@@ -23,5 +24,15 @@ class GameWatchdogServerRepository extends EntityRepository
         if ($flush) {
             $this->getEntityManager()->flush();
         }
+    }
+
+    public function validateSimulationType(Uuid $serverId, string $type): bool
+    {
+        /** @var GameWatchdogServer $watchdogServer */
+        $watchdogServer = $this->findOneBy(['serverId' => $serverId]);
+        if (null === $simulationType = ($watchdogServer->getSimulationSettings()['simulation_type'] ?? null)) {
+            return false;
+        }
+        return $simulationType === $type;
     }
 }

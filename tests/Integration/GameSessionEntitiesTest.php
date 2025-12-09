@@ -23,14 +23,11 @@ use App\Entity\SessionAPI\PlanMessage;
 use App\Entity\SessionAPI\PlanRestrictionArea;
 use App\Entity\SessionAPI\Restriction;
 use App\Repository\SessionAPI\LayerRepository;
-use App\Tests\ServerManager\GameListCreationTest;
+use App\Tests\Utils\ResourceHelper;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
@@ -106,7 +103,7 @@ class GameSessionEntitiesTest extends KernelTestCase
         $allLayers = $gameConfig->getGameConfigComplete()['datamodel']['meta'];
         /** @var LayerRepository $layerRepo */
         $layerRepo = $this->em->getRepository(Layer::class);
-        self::assertInstanceOf(Layer::class, $layerRepo->createLayerFromData($allLayers[0])); //good enough, normalizer throws exceptions anyway
+        self::assertInstanceOf(Layer::class, $layerRepo->denormalize($allLayers[0])); //good enough, normalizer throws exceptions anyway
 
         $planLayer = new Layer();
         $planLayer->setOriginalLayer($layer);
@@ -136,25 +133,30 @@ class GameSessionEntitiesTest extends KernelTestCase
         $this->em->persist($layer);
         $this->em->flush();
 
-        $geometry2 = $this->em->getRepository(Geometry::class)->findAll()[0];
-        //dump($layer);
-        self::assertSame($geometry, $geometry2);
-        $geometry3 = $layer->getGeometry()[0];
-        self::assertSame($geometry, $geometry3);
-        $geometry2 = clone $geometry;
-        $geometry2->setGeometryMspid('1');
-        $geometry2->setGeometryData(
-            '{"minx":4800176.698454788,"miny":748903.878,"maxx":7398173.756,"maxy":2483199.121}'
-        );
-        $geometry2->setGeometryToSubtractFrom($geometry);
+// @todo verify with Harald
+// @disabled because migrations/Version20250312220909.php removed the unique constraint on geometry_data
+//        $geometry2 = $this->em->getRepository(Geometry::class)->findAll()[0];
+//        //dump($layer);
+//        self::assertSame($geometry, $geometry2);
+//        $geometry3 = $layer->getGeometry()[0];
+//        self::assertSame($geometry, $geometry3);
+//        $geometry2 = clone $geometry;
+//        $geometry2->setGeometryMspid('1');
+//        $geometry2->setGeometryData(
+//            '{"minx":4800176.698454788,"miny":748903.878,"maxx":7398173.756,"maxy":2483199.121}'
+//        );
+//        $geometry2->setGeometryToSubtractFrom($geometry);
+//        $this->em->persist($geometry2);
         $geometry3 = clone $geometry;
         $geometry3->setGeometryData(
             '{"minx":4800176.698454788,"miny":748903.878,"maxx":7398173.756,"maxy":2483199.120}'
         );
-        $this->em->persist($geometry2);
         $this->em->persist($geometry3);
         $this->em->flush();
-        self::assertSame($geometry->getGeometrySubtractives()[0], $geometry2);
+
+// @todo verify with Harald
+// @disabled because migrations/Version20250312220909.php removed the unique constraint on geometry_data
+//        self::assertSame($geometry->getGeometrySubtractives()[0], $geometry2);
 
         $geometry4 = clone $geometry;
         $validation = $this->validator->validate($geometry4, new UniqueEntity(
@@ -165,7 +167,9 @@ class GameSessionEntitiesTest extends KernelTestCase
         ));
         self::assertSame(1, $validation->count());
         $this->em->persist($geometry4);
-        $this->expectException(UniqueConstraintViolationException::class);
+// @todo verify with Harald
+// @disabled because migrations/Version20250312220909.php removed the unique constraint on geometry_data
+//        $this->expectException(UniqueConstraintViolationException::class);
         $this->em->flush();
     }
 
@@ -436,31 +440,9 @@ class GameSessionEntitiesTest extends KernelTestCase
 
     public static function setUpBeforeClass(): void
     {
-        GameListCreationTest::setUpBeforeClass();
-        // completely removes, creates and migrates the test database
-
-        $app = new Application(static::bootKernel());
-        $input = new ArrayInput([
-            'command' => 'doctrine:database:drop',
-            '--connection' => self::DBNAME,
-            '--force' => true,
-            '--no-interaction' => true,
-        ]);
-        $input->setInteractive(false);
-        $app->doRun($input, new NullOutput());
-
-        $input2 = new ArrayInput([
-            'command' => 'doctrine:database:create',
-            '--connection' => self::DBNAME
-        ]);
-        $input2->setInteractive(false);
-        $app->doRun($input2, new NullOutput());
-
-        $input3 = new ArrayInput([
-            'command' => 'doctrine:migrations:migrate',
-            '--em' => self::DBNAME,
-        ]);
-        $input3->setInteractive(false);
-        $app->doRun($input3, new NullOutput());
+        ResourceHelper::resetDatabases(
+            static::bootKernel()->getProjectDir(),
+            [ResourceHelper::OPTION_GAME_SESSION_COUNT => 1]
+        );
     }
 }

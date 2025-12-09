@@ -5,7 +5,9 @@ namespace App\Domain\API\v1;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameWatchdogServer;
+use App\Entity\SessionAPI\Layer as LayerEntity;
 use App\Entity\SessionAPI\Watchdog;
+use App\Repository\SessionAPI\LayerRepository;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\PromiseInterface;
@@ -13,8 +15,6 @@ use function App\await;
 
 class Game extends Base
 {
-    const MIN_GAME_ERATIME = 12;
-
     /**
      * @apiGroup Game
      * @throws Exception
@@ -75,20 +75,6 @@ class Game extends Base
             ->setGameSessionId($this->getGameSessionId())
             ->CheckGameSessionPasswords();
         return array_merge($data, $passwordchecks);
-    }
-
-    /**
-     * @apiGroup Game
-     * @throws Exception
-     * @api {POST} /game/NextMonth NextMonth
-     * @apiDescription Updates session database to indicate start of next simulated month
-     * @noinspection PhpUnused
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function NextMonth(): void
-    {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query("UPDATE game SET game_currentmonth=game_currentmonth+1");
     }
 
     /**
@@ -219,92 +205,15 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetCurrentMonthAsId(): int
     {
-        $currentMonth = $this->getDatabase()->query("SELECT game_currentmonth, game_state FROM game")[0];
+        $result = $this->getDatabase()->query("SELECT game_currentmonth, game_state FROM game");
+        if (empty($result)) {
+            return -1; // there is no game record, so we are in setup
+        }
+        $currentMonth = $result[0];
         if ($currentMonth["game_state"] == "SETUP") {
             $currentMonth["game_currentmonth"] = -1;
         }
         return $currentMonth["game_currentmonth"];
-    }
-
-    /**
-     * @throws Exception
-     * @noinspection SpellCheckingInspection
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Setupfilename(string $configFilename): void
-    {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query("UPDATE game SET game_configfile=?", array($configFilename));
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetupCountries(array $configData): void
-    {
-        $adminColor = "#FF00FFFF";
-        if (array_key_exists("user_admin_color", $configData)) {
-            $adminColor = $configData["user_admin_color"];
-        }
-        $regionManagerColor = "#00FFFFFF";
-        if (array_key_exists("user_region_manager_color", $configData)) {
-            $regionManagerColor = $configData["user_region_manager_color"];
-        }
-
-        //Admin country.
-        $this->getDatabase()->query(
-            "INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)",
-            array(1, $adminColor, 1)
-        );
-        //Region manager country.
-        $this->getDatabase()->query(
-            "INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)",
-            array(2, $regionManagerColor, 1)
-        );
-
-        foreach ($configData['meta'] as $layerMeta) {
-            if ($layerMeta['layer_name'] == $configData['countries']) {
-                foreach ($layerMeta['layer_type'] as $country) {
-                    $countryId = $country['value'];
-                    $this->getDatabase()->query(
-                        "
-                        INSERT INTO country (country_id, country_name, country_colour, country_is_manager)
-                        VALUES (?, ?, ?, ?)
-                        ",
-                        array($countryId, $country['displayName'], $country['polygonColor'], 0 )
-                    );
-                }
-            }
-        }
-        //Setup Admin Test User so we have a default session we can use for testing.
-        $this->getDatabase()->query("INSERT INTO user (user_lastupdate, user_country_id) VALUES(0, 1)");
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetupGameTime(array $data): void
-    {
-        $this->SetStartDate($data['start']);
-
-        $this->Planning($data['era_planning_months']);
-
-        $this->Realtime($data['era_planning_realtime']);
-        $str = "";
-        $totalEras = 4;
-        $str .= str_repeat($data['era_planning_realtime'] . ",", $totalEras);
-        $str = substr($str, 0, -1);
-
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query(
-            "UPDATE game SET game_planning_era_realtime=?, game_eratime=?",
-            array(
-                $str,
-                max($data['era_total_months'], self::MIN_GAME_ERATIME)
-            )
-        );
     }
 
     //this should probably be moved to Layer instead
@@ -320,30 +229,21 @@ class Game extends Base
     public function Meta(int $user, bool $sort = false, bool $onlyActiveLayers = true)
     {
         $this->getDatabase()->query("UPDATE user SET user_lastupdate=? WHERE user_id=?", array(0, $user));
-
-        $activeQueryPart = "";
+        /** @var LayerRepository $repo */
+        $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
+            ->getRepository(LayerEntity::class);
+        $qb = $repo->createQueryBuilder('l');
+        $qb->where($qb->expr()->isNull('l.originalLayer'));
         if ($onlyActiveLayers) {
-            $activeQueryPart = " AND layer_active = 1 ";
+            $qb->andWhere('l.layerActive = 1');
         }
-
         if ($sort) {
-            $data = $this->getDatabase()->query(
-                "SELECT * FROM layer WHERE layer_original_id IS NULL ".$activeQueryPart." ORDER BY layer_name ASC",
-                array()
-            );
-        } else {
-            $data = $this->getDatabase()->query(
-                "SELECT * FROM layer WHERE layer_original_id IS NULL ".$activeQueryPart,
-                array()
-            );
+            $qb->orderBy('l.layerName', 'ASC');
         }
-
-        for ($i = 0; $i < sizeof($data); $i++) {
-            Layer::FixupLayerMetaData($data[$i]);
-        }
-        $this->addLayerDependenciesToMetaData($data);
-
-        return $data;
+        /** @var LayerEntity[] $layers */
+        $layers = $qb->getQuery()->getResult();
+        $this->addLayerDependencies($layers);
+        return collect($layers)->map(fn(LayerEntity $l) => $repo->normalise($l))->all();
     }
 
     /**
@@ -352,48 +252,56 @@ class Game extends Base
      * Currently, that is, all the grey energy layers depend on the grey cable layer and all the green energy layers
      *   on the green cable layer.
      *
-     * @param array $meta input meta data from Meta()
+     * @param LayerEntity[] $meta all layers
      * @return void
      */
-    private function addLayerDependenciesToMetaData(array &$meta): void
+    private function addLayerDependencies(array $meta): void
     {
         // find cable layers
-        $cableLayers = collect($meta)->filter(fn($l) => $l['layer_editing_type'] === 'cable')->keyBy('layer_id');
+        $cableLayers = collect($meta)->filter(fn(LayerEntity $l) => $l->getLayerEditingType() === 'cable')
+            ->keyBy(fn(LayerEntity $l) => $l->getLayerId());
         // find socket layers
-        $socketLayers = collect($meta)->filter(fn($l) => $l['layer_editing_type'] === 'socket')->keyBy('layer_id');
+        $socketLayers = collect($meta)->filter(fn(LayerEntity $l) => $l->getLayerEditingType() === 'socket')
+            ->keyBy(fn(LayerEntity $l) => $l->getLayerId());
         if ($cableLayers->isEmpty() && $socketLayers->isEmpty()) {
             return; // no cable or socket layers, nothing to do
         }
-
         // now go through all layers
-        foreach ($meta as &$layer) {
-            if ($cableLayers->has($layer['layer_id'])) {
+        foreach ($meta as $layer) {
+            if ($cableLayers->has($layer->getLayerId())) {
                 // if this layer is a cable layer, it does not depend on any other layer
                 continue;
             }
 
-            $layer['layer_dependencies'] = [];
+            $layerDependencies = [];
             if (in_array(
-                $layer['layer_editing_type'],
+                $layer->getLayerEditingType(),
                 ['transformer', 'socket', 'sourcepoint', 'sourcepolygon']
             ) &&
-                null !== $cableLayer = $cableLayers->firstWhere('layer_green', $layer['layer_green'])
+                // find the corresponding green or grey cable layer
+                null !== $cableLayer = $cableLayers->first(
+                    fn(LayerEntity $l) => $l->getLayerGreen() == $layer->getLayerGreen()
+                )
             ) {
                 // add cables: if this layer is of the right other type, add associated cable layer id as a dependency
-                $layer['layer_dependencies'][] = $cableLayer['layer_id'];
+                $layerDependencies[] = $cableLayer->getLayerId();
             }
-            
+
             if (in_array(
-                $layer['layer_editing_type'],
+                $layer->getLayerEditingType(),
                 ['sourcepoint', 'sourcepolygon']
             ) &&
-                null !== $socketLayer = $socketLayers->firstWhere('layer_green', $layer['layer_green'])
+                // find the corresponding green or grey cable layer
+                null !== $socketLayer = $socketLayers->first(
+                    fn(LayerEntity $l) => $l->getLayerGreen() == $layer->getLayerGreen()
+                )
             ) {
                 // add sockets: if this layer is of the right other type, add associated socket layer id as a dependency
-                $layer['layer_dependencies'][] = $socketLayer['layer_id'];
+                $layerDependencies[] = $socketLayer->getLayerId();
             }
+
+            $layer->setLayerDependencies($layerDependencies);
         }
-        unset($layer);
     }
 
     /**
@@ -422,16 +330,6 @@ class Game extends Base
     {
         /** @noinspection SqlWithoutWhere */
         $this->getDatabase()->query("UPDATE game SET game_planning_realtime=?", array($realtime));
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function SetStartDate(int $a_startYear): void
-    {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query("UPDATE game SET game_start=?", array($a_startYear));
     }
 
     /**
@@ -544,7 +442,7 @@ class Game extends Base
             if (empty($watchdogSimSettings)) {
                 continue;
             }
-            $simulationSettings[] = json_decode($watchdogSimSettings, true);
+            $simulationSettings[] = $watchdogSimSettings;
         }
         return [
             'policy_settings' => $policySettings,
@@ -576,7 +474,7 @@ class Game extends Base
     {
         $result = array("year" => -1, "month_of_year" => -1);
         $startYear = $this->getDatabase()->query("SELECT game_start FROM game LIMIT 0,1");
-                
+
         if (count($startYear) == 1) {
             $result["year"] = floor($simulated_month / 12) + $startYear[0]["game_start"];
             $result["month_of_year"] = ($simulated_month % 12) + 1;
@@ -588,8 +486,7 @@ class Game extends Base
      * @throws Exception
      * @return array|PromiseInterface
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetGameDetails(): array|PromiseInterface
+    public function getGameDetails(): array|PromiseInterface
     {
         $promise = $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()
@@ -647,10 +544,8 @@ class Game extends Base
 
     /**
      * @throws Exception
-     * @noinspection PhpUnused
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetCountries(): array
+    public function getCountries(): array
     {
         return $this->getDatabase()->query("SELECT * FROM country WHERE country_name IS NOT NULL");
     }

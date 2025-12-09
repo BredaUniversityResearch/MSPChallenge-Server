@@ -199,7 +199,6 @@ class MEL extends Base
 
         if (empty($data)) {
             //create new layer
-            Log::LogDebug("Note: found reference to MEL layer {$layerName}. Please check its existence under 'meta'.");
             $rasterFormat = json_encode($rasterProperties);
             $layerId = $this->getDatabase()->query(
                 "
@@ -555,7 +554,7 @@ class MEL extends Base
                                     COLUMNS (
                                         months JSON PATH '$.months'
                                     )
-                                ) jt ON TRUE
+                                ) jt ON JSON_EXTRACT(g.geometry_data, '$.%s.months') IS NOT NULL
                         )
                     SELECT DISTINCT l.layer_original_id
                     FROM layer l
@@ -570,6 +569,7 @@ class MEL extends Base
                         )
                    )
 SUBQUERY,
+                    $layerProp['property_name'],
                     $layerProp['property_name']
                 )
             ))
@@ -660,13 +660,14 @@ SUBQUERY,
      * - optionally, the layer type, which is used to filter on the geometry type
      * - optionally, flag to only get ones being constructed
      * - optionally, policy filters to apply
-     * @throws Exception
      * @api {POST} /mel/GeometryExportName Geometry Export Name
      * @apiParam {string} layer name to return the geometry data for
      * @apiParam {int} layer_type type within the layer to return. -1 for all types.
      * @apiParam {bool} construction_only whether to return data only if it's being constructed.
      * @apiParam {string} policy_filters JSON object with the policy filters to apply
      * @apiSuccess {string} JSON Object
+     *
+     * @throws Exception
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GeometryExportName(
@@ -694,6 +695,7 @@ SUBQUERY,
      *
      * @return array|null
      * @throws NonUniqueResultException
+     * @throws Exception
      */
     private function exportAllGeometryFromLayer(
         string $name,
@@ -719,7 +721,7 @@ SUBQUERY,
         $layerGeoType = $layer->getLayerGeoType();
         if ($layerGeoType == LayerGeoType::RASTER) {
             $result["geotype"] = $layerGeoType?->value ?? ''; // enum to string
-            $result["raster"] = $layer->getLayerRaster()['url'] ?? '';
+            $result["raster"] = $layer->getLayerRaster()?->getUrl() ?? '';
             return $result;
         }
 

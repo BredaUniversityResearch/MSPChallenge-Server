@@ -46,7 +46,11 @@ readonly class SimulationHelper
     public function getConfiguredSimulationTypes(int $sessionId, ?array $dataModel = null): array
     {
         $result = [];
-        $dataModel ??= $this->getDataModel($sessionId);
+        try {
+            $dataModel ??= $this->getDataModel($sessionId);
+        } catch (Exception $e) {
+            $dataModel = [];
+        }
         $possibleSims = $this->provider->getComponentsVersions();
         foreach ($possibleSims as $possibleSim => $possibleSimVersion) {
             if (array_key_exists($possibleSim, $dataModel) && is_array($dataModel[$possibleSim])) {

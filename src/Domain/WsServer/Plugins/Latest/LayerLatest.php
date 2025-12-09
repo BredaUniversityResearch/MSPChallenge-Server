@@ -79,7 +79,8 @@ class LayerLatest extends CommonBase
                             'warning_issue_type as type',
                             'warning_x as x',
                             'warning_y as y',
-                            'warning_restriction_id as restriction_id'
+                            'warning_restriction_id as restriction_id',
+                            'custom_restriction_id'
                         )
                         ->from('warning')
                         ->where('warning_last_update > ' . $qb->createPositionalParameter($time))

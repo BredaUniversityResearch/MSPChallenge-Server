@@ -3,30 +3,14 @@
 namespace App\Repository\SessionAPI;
 
 use App\Entity\SessionAPI\Game;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 
-class GameRepository extends EntityRepository
+/**
+ * @extends SessionEntityRepository<Game>
+ */
+class GameRepository extends SessionEntityRepository
 {
-    public function save(Game $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->persist($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
-    public function remove(Game $entity, bool $flush = false): void
-    {
-        $this->getEntityManager()->remove($entity);
-
-        if ($flush) {
-            $this->getEntityManager()->flush();
-        }
-    }
-
     /**
      * @throws NonUniqueResultException
      * @throws NoResultException

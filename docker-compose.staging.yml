@@ -1,11 +1,18 @@
 services:
   php:
-    build:
-      context: .
-      target: frankenphp_prod
+    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:staging
     volumes:
-      - ./:/app
+      - ./running_session_config/:/app/running_session_config
+      - ./raster/:/app/raster
+      - ./session_archive/:/app/session_archive
+      - ./var/log/:/app/var/log
+      - configfiles_data:/app/ServerManager/configfiles
+      - ./ServerManager/session_archive/:/app/ServerManager/session_archive
+      - ./ServerManager/saves/:/app/ServerManager/saves
+      - ./ServerManager/log/:/app/ServerManager/log
+      - ./public/downloads/:/app/public/downloads
       - /app/var/cache
+      - ./.secrets:/app/.secrets
     environment:
       SERVER_NAME: ${SERVER_NAME:-:80}
       APP_SECRET: ${APP_SECRET}
@@ -20,10 +27,7 @@ services:
         protocol: tcp
 
   simulations:
-    build:
-      context: .
-      dockerfile: simulations/linux-x64/Dockerfile
-      args:
-        source_dir: simulations/linux-x64
-    volumes:
-        - ./simulations/linux-x64:/app
+    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:staging
+
+volumes:
+  configfiles_data:

@@ -127,6 +127,7 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
             '--port='.$_ENV['DATABASE_PORT'],
             '--user='.$_ENV['DATABASE_USER'],
             '--password='.$_ENV['DATABASE_PASSWORD'],
+            '--skip-ssl',
             ($_ENV['APP_ENV'] == 'test') ? $this->database.'_test' : $this->database,
         ], $this->kernel->getProjectDir());
         $process->run();

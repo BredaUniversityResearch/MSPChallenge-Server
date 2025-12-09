@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\CommonBase;
 use App\Domain\Common\DatabaseDefaults;
 use Exception;
 use PDO;
@@ -15,7 +16,7 @@ class Database
     private ?string $db_user = null;
     private ?string $db_pass = null;
     public ?string $db_name = null;
-    
+
     private ?PDO $conn = null;
     private bool $isTransactionRunning = false;
 
@@ -37,12 +38,12 @@ class Database
     /**
      * @throws Exception
      */
-    public function __construct(int $overrideSessionId = GameSession::INVALID_SESSION_ID)
+    public function __construct(int $overrideSessionId = CommonBase::INVALID_SESSION_ID)
     {
         // note that it is possible that sessionId is equal to INVALID_SESSION_ID (=-1), in which case the Database
         //   instance is created, but will not do any queries since there will be no valid configuration/connection
-        $this->sessionId = ($overrideSessionId == GameSession::INVALID_SESSION_ID) ?
-            GameSession::GetGameSessionIdForCurrentRequest() : $overrideSessionId;
+        $this->sessionId = ($overrideSessionId == CommonBase::INVALID_SESSION_ID) ?
+            CommonBase::GetGameSessionIdForCurrentRequest() : $overrideSessionId;
 
         if (isset(self::$instances[$this->sessionId])) {
             throw new Exception("Creation of multiple database instances for session: " . $this->sessionId);
@@ -63,13 +64,16 @@ class Database
         self::$instances[$this->sessionId] = null;
     }
 
+    /**
+     * @throws Exception
+     */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function GetInstance(int $overrideSessionId = GameSession::INVALID_SESSION_ID): Database
+    public static function GetInstance(int $overrideSessionId = CommonBase::INVALID_SESSION_ID): Database
     {
         // note that it is possible that sessionId is equal to INVALID_SESSION_ID (=-1), in which case the Database
         //   instance is created, but will not do any queries since there will be no valid configuration/connection
-        $sessionId = ($overrideSessionId == GameSession::INVALID_SESSION_ID) ?
-            GameSession::GetGameSessionIdForCurrentRequest() : $overrideSessionId;
+        $sessionId = ($overrideSessionId == CommonBase::INVALID_SESSION_ID) ?
+            CommonBase::GetGameSessionIdForCurrentRequest() : $overrideSessionId;
         if (!isset(self::$instances[$sessionId])) {
             self::$instances[$sessionId] = new Database($sessionId);
         }
@@ -89,7 +93,7 @@ class Database
         $this->db_user = $dbConfig["user"];
         $this->db_pass = $dbConfig["password"];
 
-        if ($this->sessionId != GameSession::INVALID_SESSION_ID) {
+        if ($this->sessionId != CommonBase::INVALID_SESSION_ID) {
             $this->db_name = $dbConfig["multisession_database_prefix"].$this->sessionId;
             $this->configurationApplied = true;
         } else {
@@ -167,7 +171,7 @@ class Database
             return [];
         }
         $result = array();
-        
+
         try {
             $query = $this->executeQuery($statement, $vars);
         } catch (Exception $e) {
@@ -183,12 +187,12 @@ class Database
         if ($getId == true) {
             return $this->conn->lastInsertID();
         }
-        
+
         // Just making sure we aren't calling fetchAll on an empty result set (update/insert queries)
         //   which will result in a SQLSTATE[HY000] exception.
         if ($query != null && $query->columnCount() > 0) {
             $result = $query->fetchAll(PDO::FETCH_ASSOC) ?: [];
-            
+
             foreach ($result as $key1 => $arr) {
                 foreach ($arr as $key => $var) {
                     $result[$key1][$key] = $var;
@@ -224,7 +228,7 @@ class Database
         if (!$this->connectToDatabase()) {
             return false;
         }
-        
+
         if (false === $query = $this->prepareQuery($statement)) {
             return false;
         }
@@ -329,7 +333,7 @@ class Database
                 $dbConfig["multisession_create_user"],
                 $dbConfig["multisession_create_password"]
             );
-            
+
             $temporaryConnection->query("DROP DATABASE IF EXISTS ".$databaseName);
         }
     }
@@ -343,7 +347,7 @@ class Database
             if ($this->isTransactionRunning) {
                 throw new Exception("Running multiple transactions");
             }
-            
+
             $this->conn->beginTransaction();
             $this->isTransactionRunning = true;
         }
@@ -441,7 +445,7 @@ class Database
         string $databaseName
     ): void {
         $dumpCommand = sprintf(
-            '"%s" --user="%s" --password="%s" --host="%s" --port="%d" "%s" > "%s"',
+            '"%s" --user="%s" --password="%s" --host="%s" --skip-ssl --port="%d" "%s" > "%s"',
             $this->GetMysqlExecutableDirectory().'/bin/mysqldump',
             $databaseUser,
             $dbPassword,

@@ -8,6 +8,7 @@ use App\Entity\Mapping as AppMappings;
 use App\Repository\ServerManager\ImmersiveSessionTypeRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Form\Extension\Core\Type as SymfonyFormType;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[AppMappings\Plurals('Immersive session type', 'Immersive session types')]
 #[ORM\Entity(repositoryClass: ImmersiveSessionTypeRepository::class)]
@@ -24,6 +25,7 @@ class ImmersiveSessionType extends EntityBase
 
     #[AppMappings\Property\TableColumn(label: "Name")]
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "The name field should not be blank.")]
     private ?string $name = null;
 
     #[ORM\Column(type: 'json_document', nullable: true)]
