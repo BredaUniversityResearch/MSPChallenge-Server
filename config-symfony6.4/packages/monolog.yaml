@@ -82,12 +82,7 @@ monolog:
             level: warning
             formatter: monolog.formatter.json
             channels: ['watchdog']
-        client:
-            type: stream
-            path: '%kernel.logs_dir%/client.log'
-            level: warning
-            formatter: monolog.formatter.json
-            channels: ['client']
+
 when@prod:
     monolog:
         handlers:
