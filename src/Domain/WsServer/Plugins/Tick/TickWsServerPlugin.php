@@ -37,6 +37,13 @@ class TickWsServerPlugin extends Plugin
                         'just finished tick for game session id: ' . $gameSessionId,
                         OutputInterface::VERBOSITY_VERY_VERBOSE
                     );
+                })
+                ->otherwise(function ($reason) {
+                    $context = [];
+                    if ($reason instanceof \Throwable) {
+                        $context['exception'] = $reason;
+                    }
+                    $this->getLogger()?->error($reason, $context);
                 });
         });
     }

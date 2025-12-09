@@ -7,6 +7,7 @@ use App\Repository\SessionAPI\LayerRepository;
 use Exception;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 class Layer extends Base
@@ -191,6 +192,7 @@ class Layer extends Base
 
     /**
      * @apiGroup Layer
+     * @throws NotFoundHttpException
      * @throws Exception
      * @api {POST} /layer/GetRaster GetRaster
      * @apiParam layer_name Name of the layer corresponding to the image data.
@@ -204,11 +206,13 @@ class Layer extends Base
         $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
             ->getRepository(\App\Entity\SessionAPI\Layer::class);
         if (null === $layer = $repo->findOneBy(['layerName' => $layer_name])) {
-            throw new Exception("Could not find layer with name " . $layer_name . " to request the raster image for");
+            throw new NotFoundHttpException(
+                "Could not find layer with name " . $layer_name . " to request the raster image for"
+            );
         }
         $rasterData = $layer->getLayerRaster();
         if (null === $url = $rasterData->getUrl()) {
-            throw new Exception("Could not find raster file for layer with name " . $layer_name);
+            throw new NotFoundHttpException("Could not find raster file for layer with name " . $layer_name);
         }
         $path_parts = pathinfo($url);
         $fileExt = $path_parts['extension'];
@@ -232,7 +236,7 @@ class Layer extends Base
 
         // if we still haven't found it, try the original path
         if ($filePath == null || !file_exists($filePath)) {
-            throw new Exception(
+            throw new NotFoundHttpException(
                 "Could not find raster file for layer with name " . $layer_name . " at path " . $filePath
             );
         }

@@ -262,3 +262,13 @@ function await(PromiseInterface $promise, ?LoopInterface $loop = null, $timeout 
 
     return $resolved;
 }
+
+function tc(\Closure $fn, \Psr\Log\LoggerInterface $logger, $context = [])
+{
+    try {
+        return $fn();
+    } catch (\Throwable $e) {
+        $logger->error($e->getMessage(), ['exception' => $e] + $context);
+        throw $e;
+    }
+}

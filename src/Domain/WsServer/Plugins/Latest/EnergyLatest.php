@@ -10,9 +10,6 @@ use function App\tpf;
 
 class EnergyLatest extends CommonBase
 {
-    /**
-     * @throws Exception
-     */
     public function fetchAll(bool $allowEnergyKpiUpdate = true): PromiseInterface
     {
         $toPromiseFunctions[] = tpf(function () {

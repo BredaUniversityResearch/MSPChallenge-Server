@@ -12,7 +12,6 @@ use App\Entity\SessionAPI\ImmersiveSessionStatusResponse;
 use App\MessageHandler\Watchdog\WatchdogCommunicationMessageHandler;
 use Doctrine\ORM\EntityManager;
 use Exception;
-use Psr\Log\LoggerInterface;
 
 class ImmersiveSessionService
 {
@@ -21,7 +20,7 @@ class ImmersiveSessionService
     public function __construct(
         private readonly ConnectionManager $connectionManager,
         private readonly \Predis\Client $redisClient,
-        private readonly LoggerInterface $dockerLogger
+        private readonly DockerApiService $dockerApiService
     ) {
         $this->currentDockerApi = null;
     }
@@ -137,7 +136,7 @@ class ImmersiveSessionService
         $image = $_ENV['IMMERSIVE_SESSIONS_DOCKER_HUB_IMAGE'] ??
             'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server';
         $tag = $_ENV['IMMERSIVE_SESSIONS_DOCKER_HUB_TAG'] ?? ($_ENV['APP_ENV'] == 'dev' ? 'dev' : 'latest');
-        $localImages = $this->dockerApiCall($dockerApi, 'GET', '/images/json', [
+        $localImages = $this->dockerApiService->dockerApiCall($dockerApi, 'GET', '/images/json', [
             'query' => [
                 'filters' => json_encode(['reference' => [$image.':'.$tag]])
             ]
@@ -149,14 +148,14 @@ class ImmersiveSessionService
                 FILTER_VALIDATE_BOOLEAN
             )
         ) {
-            $this->dockerApiCall($dockerApi, 'POST', '/images/create', [
+            $this->dockerApiService->dockerApiCall($dockerApi, 'POST', '/images/create', [
                 'query' => [
                     'fromImage' => $image,
                     'tag' => $tag
                 ],
             ]);
         }
-        $responseContent = $this->dockerApiCall($dockerApi, 'POST', '/containers/create', [
+        $responseContent = $this->dockerApiService->dockerApiCall($dockerApi, 'POST', '/containers/create', [
             'json' => [
                'Image' => $image.':'.$tag,
                'ExposedPorts' => [
@@ -197,7 +196,7 @@ class ImmersiveSessionService
 
         // Start the container
         $containerId = $responseContent['Id'];
-        $this->dockerApiCall($dockerApi, 'POST', "/containers/{$containerId}/start");
+        $this->dockerApiService->dockerApiCall($dockerApi, 'POST', "/containers/{$containerId}/start");
         $conn->setDockerContainerID($containerId);
         $sess
             ->setConnection($conn)
@@ -276,7 +275,7 @@ class ImmersiveSessionService
     {
         $image = $_ENV['IMMERSIVE_SESSIONS_DOCKER_HUB_IMAGE'] ??
             'docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server';
-        return collect($this->dockerApiCall($dockerApi, 'GET', '/containers/json', [
+        return collect($this->dockerApiService->dockerApiCall($dockerApi, 'GET', '/containers/json', [
             'query' => [
                 'all' => true,
                 'filters' => json_encode([
@@ -344,7 +343,7 @@ class ImmersiveSessionService
     public function inspectImmersiveSessionContainer(DockerApi $dockerApi, string $dockerContainerId): array
     {
         $inspectData = collect(
-            $this->dockerApiCall($dockerApi, 'GET', "/containers/{$dockerContainerId}/json") ?? []
+            $this->dockerApiService->dockerApiCall($dockerApi, 'GET', "/containers/{$dockerContainerId}/json") ?? []
         )->all();
         $state = collect($inspectData['State'])->only(['Status', 'Health'])->all();
         $state['Health']['Log'] = collect($state['Health']['Log'] ?? [])->take(-1)->values()->all();
@@ -360,8 +359,8 @@ class ImmersiveSessionService
      */
     public function removeImmersiveSessionContainer(DockerApi $dockerApi, string $dockerContainerId): void
     {
-        $this->dockerApiCall($dockerApi, 'POST', "/containers/{$dockerContainerId}/stop");
-        $this->dockerApiCall($dockerApi, 'DELETE', "/containers/{$dockerContainerId}");
+        $this->dockerApiService->dockerApiCall($dockerApi, 'POST', "/containers/{$dockerContainerId}/stop");
+        $this->dockerApiService->dockerApiCall($dockerApi, 'DELETE', "/containers/{$dockerContainerId}");
     }
 
     /**
@@ -380,58 +379,5 @@ class ImmersiveSessionService
             ->setStatus(ImmersiveSessionStatus::STOPPED);
         $em->persist($sess);
         $em->flush();
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function dockerApiCall(DockerApi $dockerApi, string $method, string $path, array $options = []): ?array
-    {
-        // Build the query string
-        $queryString = http_build_query($options['query'] ?? []);
-        $fullUrl = $dockerApi->createUrl() . $path . ($queryString ? '?' . $queryString : '');
-
-        // Initialize cURL
-        $ch = curl_init();
-
-        // Set cURL options
-        curl_setopt($ch, CURLOPT_URL, $fullUrl);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false); // Stream the response directly
-        $responseContent = '';
-        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use (&$responseContent) {
-            $this->dockerLogger->info($data);
-            $responseContent .= $data;
-            return strlen($data);
-        });
-
-        // Set the POST fields if there is json data
-        if (!empty($options['json'] ?? [])) {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($options['json']));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        }
-
-        // Execute the request
-        curl_exec($ch);
-
-        // Check for errors
-        if (curl_errno($ch)) {
-            $error = curl_error($ch);
-            curl_close($ch);
-            throw new \RuntimeException('curl error: ' . $error);
-        }
-
-        // Get the HTTP status code
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        // Close the cURL handle
-        curl_close($ch);
-
-        // Check for HTTP errors
-        if ($httpCode >= 400) {
-            throw new \RuntimeException('Docker API error: ' . $httpCode . ': ' . $responseContent);
-        }
-
-        return json_decode($responseContent, true);
     }
 }

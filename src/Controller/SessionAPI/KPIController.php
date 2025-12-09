@@ -144,7 +144,7 @@ class KPIController extends BaseController
         try {
             $kpi->BatchPost($kpiValues);
         } catch (Exception $e) {
-            return new MessageJsonResponse(status: 500, message: $e->getMessage());
+            return new MessageJsonResponse(status: $e->getCode() ?: 500, message: $e->getMessage());
         }
 
         $logs[] = 'KPI values posted successfully';

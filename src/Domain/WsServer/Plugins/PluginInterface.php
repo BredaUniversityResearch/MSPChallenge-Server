@@ -7,6 +7,7 @@ use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\ClientConnectionResourceManagerInterface;
 use App\Domain\WsServer\ServerManagerInterface;
 use App\Domain\WsServer\WsServerInterface;
+use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -53,4 +54,7 @@ interface PluginInterface
     public function setSerializer(SerializerInterface $serializer): static;
 
     public function onWsServerEventDispatched(NameAwareEvent $event): void;
+
+    public function getLogger(): ?LoggerInterface;
+    public function setLogger(LoggerInterface $logger): static;
 }

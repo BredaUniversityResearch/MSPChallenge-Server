@@ -52,7 +52,11 @@ class ImmersiveSessionsWsServerPlugin extends Plugin
                     if ($reason instanceof ClientDisconnectedException) {
                         return null;
                     }
-                    return reject($reason);
+                    $context = [];
+                    if ($reason instanceof \Throwable) {
+                        $context['exception'] = $reason;
+                    }
+                    $this->getLogger()?->error($reason, $context);
                 });
         });
     }

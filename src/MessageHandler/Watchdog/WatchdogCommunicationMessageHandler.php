@@ -12,7 +12,7 @@ use App\Message\Watchdog\Message\GameMonthChangedMessage;
 use App\Message\Watchdog\Message\GameStateChangedMessage;
 use App\Message\Watchdog\Message\WatchdogPingMessage;
 use App\Message\Watchdog\Token;
-use App\MessageHandler\GameList\SessionLogHandlerBase;
+use App\MessageHandler\GameList\SessionLogHandler;
 use App\Entity\SessionAPI\EventLog;
 use App\Entity\SessionAPI\Simulation as SimulationEntity;
 use App\Entity\SessionAPI\Watchdog;
@@ -25,7 +25,6 @@ use Exception;
 use JsonException;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\AuthenticationSuccessHandler;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -35,19 +34,19 @@ use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[AsMessageHandler]
-class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
+class WatchdogCommunicationMessageHandler
 {
-    private ConsoleOutput $output;
+    private SessionLogHandler $sessionLogHandler;
 
     public function __construct(
         private readonly ConnectionManager $connectionManager,
         private readonly HttpClientInterface $client,
         private readonly AuthenticationSuccessHandler $authenticationSuccessHandler,
         private readonly VersionsProvider $provider,
+        private readonly LoggerInterface $watchdogLogger,
         LoggerInterface $gameSessionLogger
     ) {
-        parent::__construct($gameSessionLogger);
-        $this->output = new ConsoleOutput();
+        $this->sessionLogHandler = new SessionLogHandler($gameSessionLogger);
     }
 
     /**
@@ -61,13 +60,13 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
     public function __invoke(
         GameMonthChangedMessage|GameStateChangedMessage|WatchdogPingMessage $message
     ): void {
-        $this->setGameSessionId($message->getGameSessionId());
+        $this->sessionLogHandler->setGameSessionId($message->getGameSessionId());
         $em = $this->connectionManager->getGameSessionEntityManager($message->getGameSessionId());
 
         // instead of using $message->getWatchdog() directly, we need to fetch it through doctrine,
         //   such that the entity is loaded into the the current persistence context
         if (null === $watchdog = $em->find(Watchdog::class, $message->getWatchdogId())) {
-            $this->warning('Watchdog not found. Id: '.$message->getWatchdogId());
+            $this->sessionLogHandler->warning('Watchdog not found. Id: '.$message->getWatchdogId());
             return;
         }
 
@@ -126,7 +125,7 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         EntityManagerInterface $em
     ): void {
         if (null === $gameList = $this->getGameList($message->getGameSessionId())) {
-            $this->warning('Game list not found. Id: '.$message->getGameSessionId());
+            $this->sessionLogHandler->warning('Game list not found. Id: '.$message->getGameSessionId());
             return;
         }
         $tokens = $this->getTokensForWatchdog($message->getGameSessionId(), $watchdog);
@@ -191,13 +190,13 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         array $decodedResponse
     ): void {
         if (($decodedResponse["success"] ?? 0) == 1) {
-            $this->info(
+            $this->sessionLogHandler->info(
                 sprintf(
-                    'Watchdog %s: responded with success on requesting %s: %s.',
+                    'Watchdog %s: responded with success on requesting %s.',
                     $watchdog->getServerId()->toRfc4122(),
-                    $uri,
-                    json_encode($context)
-                )
+                    $uri
+                ),
+                $context
             );
             return; // success!
         }
@@ -229,12 +228,18 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         $eventLog = Simulation::createEventLogForWatchdog($message, $severity, $w, $stackTrace)
             ->setSource($source);
         $message = sprintf('Watchdog %s: %s', $w->getServerId()->toRfc4122(), $message);
+        $contextVars = [
+            'watchdogId' => $w->getId(),
+            'watchdogServerId' => $w->getServerId()->toRfc4122(),
+            'source' => $source,
+            'stackTrace' => $stackTrace
+        ];
         switch ($severity) {
             case EventLogSeverity::WARNING:
-                $this->warning($message);
+                $this->sessionLogHandler->warning($message, $contextVars);
                 break;
             default: // EventLogSeverity::ERROR, EventLogSeverity::FATAL
-                $this->error($message);
+                $this->sessionLogHandler->error($message, $contextVars);
                 break;
         }
         return $eventLog;
@@ -254,14 +259,13 @@ class WatchdogCommunicationMessageHandler extends SessionLogHandlerBase
         string $uri,
         array $postValues
     ): void {
-        // output to console
-        $this->output->writeln(
+        $this->watchdogLogger->info(
             sprintf(
-                'Requesting %s on Watchdog %s with values %s',
+                'Requesting %s on Watchdog %s',
                 $uri,
-                $watchdog->getServerId()->toRfc4122(),
-                json_encode($postValues)
-            )
+                $watchdog->getServerId()->toRfc4122()
+            ),
+            $postValues
         );
         try {
             $options = [

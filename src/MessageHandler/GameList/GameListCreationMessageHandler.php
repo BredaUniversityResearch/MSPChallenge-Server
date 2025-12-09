@@ -58,9 +58,11 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Throwable;
+use function App\tc;
 
 #[AsMessageHandler]
-class GameListCreationMessageHandler extends CommonSessionHandlerBase
+class GameListCreationMessageHandler extends CommonSessionHandler
 {
     public function __construct(
         KernelInterface $kernel,
@@ -98,18 +100,20 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         try {
             $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
             $this->validateGameConfig($this->createSessionRunningConfig());
-            $this->notice("Session {$this->gameSession->getName()} creation initiated. Please wait.");
+            $this->sessionLogHandler->notice(
+                "Session {$this->gameSession->getName()} creation initiated. Please wait."
+            );
             $this->setupSessionDatabase();
             $this->migrateSessionDatabase();
             $this->resetSessionRasterStore();
             $this->entityManager->wrapInTransaction(fn() => $this->setupAllEntities());
             $this->finaliseSession($gameList->isDemoSession());
-            $this->notice("Session {$this->gameSession->getName()} created and ready for use.");
+            $this->sessionLogHandler->notice("Session {$this->gameSession->getName()} created and ready for use.");
             $state = 'healthy';
-        } catch (\Throwable $e) {
-            $this->error(
+        } catch (Throwable $e) {
+            $this->sessionLogHandler->error(
                 "Session {$this->gameSession->getName()} failed to create. {problem}",
-                ['problem' => $e->getMessage().' '.$e->getTraceAsString()]
+                ['problem' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
             );
             $state = 'failed';
         }
@@ -127,7 +131,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
     private function setupSessionDatabase(): void
     {
         if ($this->gameSession->getSessionState() != GameSessionStateValue::REQUEST) {
-            $this->notice('Resetting the session database, as this is a session recreate.');
+            $this->sessionLogHandler->notice('Resetting the session database, as this is a session recreate.');
             if ($this->gameSession->getSessionState() != GameSessionStateValue::FAILED) {
                 $this->watchdogCommunicator->changeState(
                     $this->gameSession->getId(),
@@ -141,7 +145,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             $this->resetSessionDatabase();
             return;
         }
-        $this->notice('Creating a new session database, as this is a brand new session.');
+        $this->sessionLogHandler->notice('Creating a new session database, as this is a brand new session.');
         $this->createSessionDatabase();
     }
 
@@ -158,7 +162,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         $content = file_get_contents($gameConfigFilePath);
         is_dir(dirname($sessionConfigStore)) or mkdir(dirname($sessionConfigStore), 0777, true);
         file_put_contents($sessionConfigStore, $content);
-        $this->info("Created the running session config file at {$sessionConfigStore}");
+        $this->sessionLogHandler->info("Created the running session config file at {$sessionConfigStore}");
         return $sessionConfigStore;
     }
 
@@ -175,6 +179,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
      * @throws NotFoundExceptionInterface
      * @throws ContainerExceptionInterface
      * @throws InvalidArgumentException
+     * @throws Throwable
      */
     private function setupAllEntities(): void
     {
@@ -190,10 +195,8 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
     }
 
     /**
-     * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
      * @throws ClientExceptionInterface
      * @throws Exception
      */
@@ -220,7 +223,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         $game->setGameEratime($this->dataModel['era_total_months']);
         $game->setGameCurrentMonth(-1);
         $this->entityManager->persist($game);
-        $this->info('Basic game parameters set up.');
+        $this->sessionLogHandler->info('Basic game parameters set up.');
     }
 
     /**
@@ -254,7 +257,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
                 break;
             }
         }
-        $this->info('All countries set up.');
+        $this->sessionLogHandler->info('All countries set up.');
     }
 
     /**
@@ -270,15 +273,16 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      * @throws ReflectionException
+     * @throws Throwable
      */
     private function importLayerData(SessionSetupContext $context): void
     {
         $username = $this->gameSession->getGameGeoServer()->getUsername();
         $password = $this->gameSession->getGameGeoServer()->getPassword();
         if (empty($username) || empty($password)) {
-            throw new \Exception(
+            tc(fn() => throw new \Exception(
                 "No GeoServer credentials provided, so no GeoServer data will be imported."
-            );
+            ), $this->gameSessionLogger, ['gameSession' => $this->gameSession->getId()]);
         }
 
         $geoServerCommunicator = new GeoServerCommunicator(
@@ -297,7 +301,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         foreach ($this->dataModel['meta'] as $layerMetaData) {
             $layer = $layerRepo->denormalize($layerMetaData);
             $layer->setLayerGroup($this->dataModel['region']);
-            $this->info("Starting import of layer {$layer->getLayerName()}...");
+            $this->sessionLogHandler->info("Starting import of layer {$layer->getLayerName()}...");
             if ($layer->getLayerGeoType() == LayerGeoType::RASTER) {
                 $this->importLayerRasterData($layer, $geoServerCommunicator);
             } else {
@@ -307,7 +311,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             $this->removeLayerGeometryDuplicates($layer);
             $this->entityManager->persist($layer);
             $context->addLayer($layer);
-            $this->info("Finished importing layer {$layer->getLayerName()}.");
+            $this->sessionLogHandler->info("Finished importing layer {$layer->getLayerName()}.");
         }
         $this->checkForDuplicateMspIds($context);
     }
@@ -323,7 +327,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             if (in_array($array, $geometryCoordsDataSets)) {
                 $geometryText = substr($geometry->getGeometryGeometry(), 0, 50).'... - '.
                     substr($geometry->getGeometryData(), 0, 50).'...';
-                $this->warning(
+                $this->sessionLogHandler->warning(
                     "Avoided adding duplicate geometry (based on the combination of coordinates and complete ".
                     "properties set) to layer {$layer->getLayerName()}. Some geometry data: {$geometryText}"
                 );
@@ -351,7 +355,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             }
         }
         if ($counter > 0) {
-            $this->info(
+            $this->sessionLogHandler->info(
                 "Added {$counter} temporal availability restrictions for layer {$layer->getLayerName()}'s types."
             );
         }
@@ -375,13 +379,15 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         GeoServerCommunicator $geoServerCommunicator
     ): void {
         if ($layer->getLayerDownloadFromGeoserver()) {
-            $this->debug('Calling GeoServer to obtain raster metadata.');
+            $this->sessionLogHandler->debug('Calling GeoServer to obtain raster metadata.');
             $rasterMetaData = $geoServerCommunicator->getRasterMetaData(
                 $this->dataModel['region'],
                 $layer->getLayerName()
             );
-            $this->debug("Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}");
-            $this->debug('Calling GeoServer to obtain actual raster data.');
+            $this->sessionLogHandler->debug(
+                "Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}"
+            );
+            $this->sessionLogHandler->debug('Calling GeoServer to obtain actual raster data.');
             $layer->setLayerRaster(
                 ($layer->getLayerRaster() ?? new LayerRaster())
                     ->setUrl($rasterMetaData['url'])
@@ -392,17 +398,19 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
                 $layer,
                 $rasterMetaData
             );
-            $this->debug("Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}");
+            $this->sessionLogHandler->debug(
+                "Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}"
+            );
 
             $layerApi = new \App\Domain\API\v1\Layer();
             $layerApi->setGameSessionId($this->gameSession->getId());
             $layerApi->UpdateRaster($layer, $rasterData);
             foreach ($layerApi->getLogMessages() as $log) {
-                $this->debug($log);
+                $this->sessionLogHandler->debug($log);
             }
             $message = "Successfully retrieved {$layer->getLayerName()} and stored the raster file.";
         }
-        $this->info(
+        $this->sessionLogHandler->info(
             $message ?? "Successfully retrieved {$layer->getLayerName()} without storing a raster file, as requested."
         );
     }
@@ -424,22 +432,28 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         SessionSetupContext $context
     ): void {
         if ($layer->getLayerDownloadFromGeoserver()) {
-            $this->debug('Calling GeoServer to obtain layer description.');
+            $this->sessionLogHandler->debug('Calling GeoServer to obtain layer description.');
             $layersContainer = $geoServerCommunicator->getLayerDescription(
                 $this->dataModel['region'],
                 $layer->getLayerName()
             );
-            $this->debug("Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}");
+            $this->sessionLogHandler->debug(
+                "Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}"
+            );
             foreach ($layersContainer as $layerWithin) {
-                $this->debug("Calling GeoServer to obtain geometry features for layer {$layerWithin['layerName']}.");
+                $this->sessionLogHandler->debug(
+                    "Calling GeoServer to obtain geometry features for layer {$layerWithin['layerName']}."
+                );
                 $geoserverReturn = $geoServerCommunicator->getLayerGeometryFeatures($layerWithin['layerName']);
-                $this->debug("Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}");
+                $this->sessionLogHandler->debug(
+                    "Call to GeoServer completed: {$geoServerCommunicator->getLastCompleteURLCalled()}"
+                );
                 $features = $geoserverReturn['features']
                     ?? throw new \Exception(
                         'Geometry data call did not return a features variable, so something must be wrong.'
                     );
                 $numFeatures = count($features);
-                $this->debug("Starting import of all {$numFeatures} layer geometry features.");
+                $this->sessionLogHandler->debug("Starting import of all {$numFeatures} layer geometry features.");
                 foreach ($features as $feature) {
                     $layerWithinParts = explode(':', $layerWithin['layerName']);
                     $feature['properties']['original_layer_name'] = $layerWithinParts[1] ?? $layerWithinParts[0];
@@ -448,9 +462,11 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
                         $counter[$geometryTypeAdded]++ : $counter[$geometryTypeAdded] = 1;
                 }
                 $geometryTypeDetails = http_build_query($counter ?? '', '', ' ');
-                $this->debug("Import of layer geometry features completed: {$geometryTypeDetails}.");
+                $this->sessionLogHandler->debug("Import of layer geometry features completed: {$geometryTypeDetails}.");
                 if (isset($counter['None'])) {
-                    $this->warning("A total of {$counter['None']} features returned no geometry at all.");
+                    $this->sessionLogHandler->warning(
+                        "A total of {$counter['None']} features returned no geometry at all."
+                    );
                 }
             }
             $message = "Successfully retrieved {$layer->getLayerName()} and stored the geometry in the database.";
@@ -458,7 +474,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
                 $message .= ' Note that at least some of the geometry has auto-generated MSP IDs.';
             }
         }
-        $this->info(
+        $this->sessionLogHandler->info(
             $message ?? "Successfully set up {$layer->getLayerName()} without obtaining geometry, as requested."
         );
     }
@@ -524,31 +540,37 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
     {
         $geometries = $context->getGeometriesWithDuplicateMspId();
         if (empty($geometries)) {
-            $this->info("No duplicate MSP IDs. Yay!");
+            $this->sessionLogHandler->info("No duplicate MSP IDs. Yay!");
             return;
         }
-        $this->error("Duplicate MSP IDs found.");
+        $this->sessionLogHandler->error("Duplicate MSP IDs found.");
         foreach ($geometries as $mspId => $geometryList) {
             $counted = count($geometryList);
-            $this->error("MSP ID {$mspId} has {$counted} duplicates");
+            $this->sessionLogHandler->error("MSP ID {$mspId} has {$counted} duplicates");
             $previousGeometryData = null;
             foreach ($geometryList as $key => $geometry) {
                 $geometryData = $geometry->getGeometryData();
                 if ($previousGeometryData === null) {
-                    $this->error(
+                    $this->sessionLogHandler->error(
                         "MSP ID {$mspId} was used in layer {$geometry->getLayer()->getLayerName()} ".
                         "for a feature with properties {$geometryData}"
                     );
                     $previousGeometryData = $geometryData;
                 } else {
                     if ($previousGeometryData !== $geometryData) {
-                        $this->error("...and for a feature with somehow differing properties: {$geometryData}");
+                        $this->sessionLogHandler->error(
+                            "...and for a feature with somehow differing properties: {$geometryData}"
+                        );
                     } else {
-                        $this->error("...and for another feature but seemingly with the same properties.");
+                        $this->sessionLogHandler->error(
+                            "...and for another feature but seemingly with the same properties."
+                        );
                     }
                 }
                 if ($key == 4 && count($geometryList) > 5) {
-                    $this->error("Now terminating the listing of duplicated geometry to not clog up this log.");
+                    $this->sessionLogHandler->error(
+                        "Now terminating the listing of duplicated geometry to not clog up this log."
+                    );
                     break;
                 }
             }
@@ -569,17 +591,17 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
     private function setupRestrictions(SessionSetupContext $context): void
     {
         if (empty($this->dataModel['restrictions'])) {
-            $this->info('No layer restrictions to set up.');
+            $this->sessionLogHandler->info('No layer restrictions to set up.');
             return;
         }
         $count = count($this->dataModel['restrictions']);
-        $this->info("Found {$count} restriction definitions, commencing setup.");
+        $this->sessionLogHandler->info("Found {$count} restriction definitions, commencing setup.");
         foreach ($this->dataModel['restrictions'] as $restrictionKey => $restrictionConfig) {
             $restrictionKeyText = (int) $restrictionKey + 1;
             foreach ($restrictionConfig as $restrictionItem) {
                 $restriction = new Restriction();
                 if (null === $startLayer = $context->getLayer($restrictionItem['startlayer'] ?? '')) {
-                    $this->warning(
+                    $this->sessionLogHandler->warning(
                         "Start layer {$restrictionItem['startlayer']} used in restriction {$restrictionKeyText} ".
                         "does not seem to exist. Are you sure this layer has been added under the 'meta' object? ".
                         "Restriction skipped."
@@ -587,7 +609,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
                     continue;
                 }
                 if (null === $endLayer = $context->getLayer($restrictionItem['endlayer'] ?? '')) {
-                    $this->warning(
+                    $this->sessionLogHandler->warning(
                         "End layer {$restrictionItem['endlayer']} used in restriction {$restrictionKeyText} does ".
                         "not seem to exist. Are you sure this layer has been added under the 'meta' object? ".
                         "Restriction skipped."
@@ -605,7 +627,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
                 $this->entityManager->persist($restriction);
             }
         }
-        $this->info('Restrictions setup complete.');
+        $this->sessionLogHandler->info('Restrictions setup complete.');
     }
 
     /**
@@ -628,7 +650,9 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         $remainingSims = array_diff($possibleSims, $simulationsDone);
         foreach ($remainingSims as $remainingSim) {
             if (key_exists($remainingSim, $this->dataModel)) {
-                $this->error("Unable to set up {$remainingSim}, as its SessionCreation function does not exist.");
+                $this->sessionLogHandler->error(
+                    "Unable to set up {$remainingSim}, as its SessionCreation function does not exist."
+                );
             }
         }
     }
@@ -664,7 +688,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
      */
     private function MELSessionCreation(SessionSetupContext $context): void
     {
-        $this->info('Setting up simulation MEL...');
+        $this->sessionLogHandler->info('Setting up simulation MEL...');
         $config = $this->dataModel['MEL'];
         if (isset($config["fishing"])) {
             $countries = $context->getCountries(
@@ -681,7 +705,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
                             }
                         }
                         if (!$foundCountry) {
-                            $this->error(
+                            $this->sessionLogHandler->error(
                                 "Country with ID {$country->getCountryId()} is missing a distribution entry ".
                                 "in the initial_fishing_distribution table for fleet {$fleet["name"]} for MEL."
                             );
@@ -707,7 +731,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             $outcomeLayer = $this->setupMELLayer($outcome['name'], $context);
             $this->entityManager->persist($outcomeLayer);
         }
-        $this->info('Finished setting up simulation MEL.');
+        $this->sessionLogHandler->info('Finished setting up simulation MEL.');
     }
 
     /**
@@ -749,7 +773,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
         $playAreaLayers = $context->filterLayers(
             fn(Layer $l, $k) => null !== Util::hasPrefix($l->getLayerName(), LayerRepository::PLAY_AREA_LAYER_PREFIX)
         );
-        $this->info('Found '.count($playAreaLayers).' player area layer(s)');
+        $this->sessionLogHandler->info('Found '.count($playAreaLayers).' player area layer(s)');
         return SELController::getGeometryWithLargestBounds(collect($playAreaLayers)->map(
             fn(Layer $layer) => $layer->getGeometry()->first()
         )->all());
@@ -763,7 +787,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
      */
     private function SELSessionCreation(SessionSetupContext $context): void
     {
-        $this->info('Setting up simulation SEL...');
+        $this->sessionLogHandler->info('Setting up simulation SEL...');
         $boundsConfig = SELController::calculateAlignedSimulationBounds(
             $this->dataModel,
             $this->getPlayAreaGeometryFromContext($context)
@@ -805,12 +829,12 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             }
             $this->entityManager->persist($selOutputLayer);
         }
-        $this->info('Finished setting up simulation SEL.');
+        $this->sessionLogHandler->info('Finished setting up simulation SEL.');
     }
 
     private function CELSessionCreation(): void
     {
-        $this->info('For CEL no setup is required at all. Ready to go.');
+        $this->sessionLogHandler->info('For CEL no setup is required at all. Ready to go.');
     }
 
     /**
@@ -821,14 +845,14 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
     private function setupPlans(SessionSetupContext $context): void
     {
         if (empty($this->dataModel['plans'])) {
-            $this->info('No plans defined, so nothing to import there.');
+            $this->sessionLogHandler->info('No plans defined, so nothing to import there.');
         }
         foreach ($this->dataModel['plans'] as $planConfig) {
             /** @var Plan $plan */
             $plan = $this->normalizer->denormalize($planConfig, Plan::class, null, [
                 AbstractNormalizer::IGNORED_ATTRIBUTES => ['fishing']
             ]);
-            $this->info("Starting import of plan {$plan->getPlanName()}.");
+            $this->sessionLogHandler->info("Starting import of plan {$plan->getPlanName()}.");
             $plan->setCountry($context->getCountry($planConfig['plan_country_id'] ?? -1));
             $plan->setPlanState(PlanState::APPROVED);
             foreach ($planConfig['fishing'] as $fishingConfig) {
@@ -862,7 +886,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             $this->setupPlannedLayerGeometry($planConfig, $plan, $context);
             $this->setupPlannedGrids($planConfig['grids'], $plan, $context);
             $plan->updatePlanConstructionTime();
-            $this->info("Import of plan {$plan->getPlanName()} finished.");
+            $this->sessionLogHandler->info("Import of plan {$plan->getPlanName()} finished.");
             $this->entityManager->persist($plan);
         }
     }
@@ -888,7 +912,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
     {
         $planCableConnectionsConfig = [];
         $planEnergyOutputConfig = [];
-        $this->info(
+        $this->sessionLogHandler->info(
             "Starting import of plan {$plan->getPlanName()}'s {count} layers.",
             ['count' => count($planConfig['layers'])]
         );
@@ -1126,12 +1150,12 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
     private function setupObjectives(SessionSetupContext $context): void
     {
         if (empty($this->dataModel['objectives'])) {
-            $this->info('No objectives to set up.');
+            $this->sessionLogHandler->info('No objectives to set up.');
             return;
         }
         foreach ($this->dataModel['objectives'] as $key => $objectiveConfig) {
             if (null === $country = $context->getCountry($objectiveConfig['country_id'] ?? -1)) {
-                $this->warning(
+                $this->sessionLogHandler->warning(
                     'Country {countryId} set in objective {key} does not seem to exist.',
                     ['key' => $key, 'countryId' => $objectiveConfig['country_id']]
                 );
@@ -1145,7 +1169,7 @@ class GameListCreationMessageHandler extends CommonSessionHandlerBase
             $objective->setObjectiveLastupdate(100);
             $this->entityManager->persist($objective);
         }
-        $this->info(
+        $this->sessionLogHandler->info(
             'A total of {count} objectives were set up successfully.',
             ['count' => count($this->dataModel['objectives'])]
         );

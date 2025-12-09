@@ -25,9 +25,6 @@ class GameLatest extends CommonBase
     private bool $allowEnergyKpiUpdate = true;
 
     /**
-     * @param array $context
-     * @param array $data
-     * @return ToPromiseFunction[]
      * @throws Exception
      */
     private function parallelTasks(array $context, array &$data): array

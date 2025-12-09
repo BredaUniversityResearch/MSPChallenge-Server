@@ -48,6 +48,11 @@ services:
                             # The best practice is to be explicit about your dependencies anyway.
         bind:
             string $projectDir: '%kernel.project_dir%'
+            $dockerLogger: '@monolog.logger.docker'
+            $dockerMonitorLogger: '@monolog.logger.docker_monitor'
+            $dockerMessengerLogger: '@monolog.logger.docker_messenger'
+            $appWsServerLogger: '@monolog.logger.app_ws_server'
+            $watchdogLogger: '@monolog.logger.watchdog'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -59,7 +64,7 @@ services:
     #        - '../src/Entity/'
     #        - '../src/Kernel.php'
     App\:
-        resource: '../src/{Command,Controller}'
+        resource: '../src/{Command,Controller,State}'
     App\Domain\:
         resource: '../src/Domain/{Services}'
 
@@ -168,8 +173,6 @@ services:
     App\Security\MSPAuth2Authenticator:
     App\MessageHandler\Watchdog\WatchdogCommunicationMessageHandler:
     App\MessageHandler\Docker\DockerCommunicationMessageHandler:
-        arguments:
-            $dockerLogger: '@monolog.logger.docker'
 
     App\Domain\Services\SimulationHelper:
         public: true
@@ -188,7 +191,7 @@ services:
     App\Twig\VersionsReturner:
         tags:
             - 'twig.extension'
-    
+
     # https://symfony.com/doc/7.2/components/uid.html#generating-and-inspecting-uuids-ulids-in-the-console
     Symfony\Component\Uid\Command\GenerateUlidCommand: ~
     Symfony\Component\Uid\Command\GenerateUuidCommand: ~
@@ -211,15 +214,11 @@ services:
             $parameters: 'tcp://redis:6379'
 
     App\Validator\ImmersiveSessionTypeJsonSchemaValidator:
-
-    App\Domain\Services\ImmersiveSessionService:
-        arguments:
-            $dockerLogger: '@monolog.logger.docker'
-
     App\EventListener\ApiResponseWrapperListener:
         tags:
             - { name: 'kernel.event_listener', event: 'kernel.response' }
 
+    App\OpenApi\OpenApiFactory:
     App\Form\DynamicEntityFormType:
         arguments:
           $vault: '@secrets.vault'

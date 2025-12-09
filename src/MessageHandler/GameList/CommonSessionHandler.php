@@ -33,7 +33,7 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
+abstract class CommonSessionHandler
 {
     protected ObjectNormalizer $normalizer;
     protected ?string $phpBinary = null;
@@ -64,6 +64,9 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
 
     protected readonly VersionsProvider $provider;
 
+    protected SessionLogHandler $sessionLogHandler;
+    protected LoggerInterface $gameSessionLogger;
+
     /**
      * @throws Exception
      */
@@ -77,8 +80,8 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
         VersionsProvider $provider,
         private readonly SimulationHelper $simulationHelper
     ) {
-        parent::__construct($gameSessionLogger);
         $this->kernel = $kernel;
+        $this->gameSessionLogger = $gameSessionLogger;
         $this->mspServerManagerEntityManager = $connectionManager->getServerManagerEntityManager();
         $this->connectionManager = $connectionManager;
         $this->params = $params;
@@ -86,6 +89,7 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
         $this->watchdogCommunicator = $watchdogCommunicator;
         $this->normalizer = new ObjectNormalizer(null, new CamelCaseToSnakeCaseNameConverter());
         $this->provider = $provider;
+        $this->sessionLogHandler = new SessionLogHandler($gameSessionLogger);
     }
 
     /**
@@ -97,7 +101,7 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
         $this->gameSession = $this->mspServerManagerEntityManager->getRepository(GameList::class)->find($gameList->id)
             ?? throw new Exception('Game session not found, so cannot continue.');
         $sessionId = $this->gameSession->getId();
-        $this->setGameSessionId($sessionId);
+        $this->sessionLogHandler->setGameSessionId($sessionId);
         $this->database = $this->connectionManager->getGameSessionDbName($sessionId);
         $this->entityManager = $this->connectionManager->getGameSessionEntityManager($sessionId);
     }
@@ -115,7 +119,7 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
             '--no-interaction',
             '--env='.$_ENV['APP_ENV']
         ], $this->kernel->getProjectDir());
-        $process->mustRun(fn($type, $buffer) => $this->info($buffer));
+        $process->mustRun(fn($type, $buffer) => $this->sessionLogHandler->info($buffer));
     }
 
     protected function exportSessionDatabase(): string
@@ -151,7 +155,7 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
             '--no-interaction',
             '--env='.$_ENV['APP_ENV']
         ], $this->kernel->getProjectDir());
-        $process->mustRun(fn($type, $buffer) => $this->info($buffer));
+        $process->mustRun(fn($type, $buffer) => $this->sessionLogHandler->info($buffer));
     }
 
     protected function migrateSessionDatabase(): void
@@ -167,7 +171,7 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
             '--env='.$_ENV['APP_ENV']
         ], $this->kernel->getProjectDir());
         $process->setTimeout(null); // Disable the process timeout
-        $process->mustRun(fn($type, $buffer) => $this->info($buffer));
+        $process->mustRun(fn($type, $buffer) => $this->sessionLogHandler->info($buffer));
     }
 
     /**
@@ -177,14 +181,14 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
      */
     protected function resetSessionRasterStore(): void
     {
-        $this->info("Resetting the session raster store...");
+        $this->sessionLogHandler->info("Resetting the session raster store...");
         $this->removeSessionRasterStore();
         $sessionRasterStore = $this->params->get('app.session_raster_dir').$this->gameSession->getId();
         $fileSystem = new Filesystem();
         $dirs = [$sessionRasterStore, $sessionRasterStore . '/archive'];
         $fileSystem->mkdir($dirs);
         $fileSystem->chmod($dirs, 0777); // umask issues in prod can prevent mkdir to create with default 0777
-        $this->info("Reset the session raster store at {$sessionRasterStore}");
+        $this->sessionLogHandler->info("Reset the session raster store at {$sessionRasterStore}");
     }
 
     protected function removeSessionRasterStore(): void
@@ -229,14 +233,14 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
         try {
             $schema->in($gameConfigContents);
         } catch (InvalidValue $e) {
-            $this->error(
+            $this->sessionLogHandler->error(
                 "Session config file {$gameConfigFilepath} failed to pass validation, having meta data: ".
                     json_encode($gameConfigContents->metadata)
             );
-            $this->error($e->getMessage());
+            $this->sessionLogHandler->error($e->getMessage());
             throw new Exception('Session config file invalid, so not continuing.');
         }
-        $this->info(
+        $this->sessionLogHandler->info(
             "Contents of config file {$gameConfigFilepath} were successfully validated, having meta data: ".
             json_encode($gameConfigContents->metadata)
         );
@@ -265,17 +269,17 @@ abstract class CommonSessionHandlerBase extends SessionLogHandlerBase
         foreach ($logs as $log) {
             switch ($log[LogContainerInterface::LOG_FIELD_LEVEL]) {
                 case LogContainerInterface::LOG_LEVEL_DEBUG:
-                    $this->debug($log[LogContainerInterface::LOG_FIELD_MESSAGE]);
+                    $this->sessionLogHandler->debug($log[LogContainerInterface::LOG_FIELD_MESSAGE]);
                     break;
                 case LogContainerInterface::LOG_LEVEL_WARNING:
-                    $this->warning($log[LogContainerInterface::LOG_FIELD_MESSAGE]);
+                    $this->sessionLogHandler->warning($log[LogContainerInterface::LOG_FIELD_MESSAGE]);
                     break;
                 case LogContainerInterface::LOG_LEVEL_ERROR:
-                    $this->error($log[LogContainerInterface::LOG_FIELD_MESSAGE]);
+                    $this->sessionLogHandler->error($log[LogContainerInterface::LOG_FIELD_MESSAGE]);
                     break;
                 case LogContainerInterface::LOG_LEVEL_INFO:
                 default:
-                    $this->info($log[LogContainerInterface::LOG_FIELD_MESSAGE]);
+                    $this->sessionLogHandler->info($log[LogContainerInterface::LOG_FIELD_MESSAGE]);
             }
         }
     }

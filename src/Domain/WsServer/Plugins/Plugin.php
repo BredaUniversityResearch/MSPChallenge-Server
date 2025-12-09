@@ -11,6 +11,7 @@ use App\Domain\WsServer\ServerManagerInterface;
 use App\Domain\WsServer\WsServerInterface;
 use App\Domain\WsServer\WsServerOutput;
 use Exception;
+use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -33,6 +34,8 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
     private ?WsServerInterface $wsServer = null;
 
     private ?SerializerInterface $serializer = null;
+
+    private ?LoggerInterface $logger = null;
 
     public function __construct(
         string $name,
@@ -282,5 +285,16 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
     public function onWsServerEventDispatched(NameAwareEvent $event): void
     {
         // nothing to do, can be implemented by child class.
+    }
+
+    public function getLogger(): ?LoggerInterface
+    {
+        return $this->logger;
+    }
+
+    public function setLogger(LoggerInterface $logger): static
+    {
+        $this->logger = $logger;
+        return $this;
     }
 }

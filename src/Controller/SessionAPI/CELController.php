@@ -49,7 +49,7 @@ class CELController extends BaseController
             return new JsonResponse($cel->ShouldUpdate());
         } catch (Exception $e) {
             return new MessageJsonResponse(
-                status: 500,
+                status: $e->getCode() ?: 500,
                 message: $e->getMessage()
             );
         }

@@ -166,7 +166,7 @@ class UserController extends BaseController
             return new JsonResponse($payload);
         } catch (\Exception $e) {
             return new MessageJsonResponse(
-                status: 500,
+                status: $e->getCode() ?: 500,
                 message: $e->getMessage().PHP_EOL.$e->getTraceAsString()
             );
         }
@@ -245,7 +245,7 @@ class UserController extends BaseController
             return new JsonResponse($payload);
         } catch (\Exception $e) {
             return new MessageJsonResponse(
-                status: 500,
+                status: $e->getCode() ?: 500,
                 message: $e->getMessage().PHP_EOL.$e->getTraceAsString()
             );
         }

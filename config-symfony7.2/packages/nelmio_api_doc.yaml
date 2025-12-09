@@ -1,7 +1,9 @@
+#file: noinspection YAMLSchemaValidation
 nelmio_api_doc:
     html_config:
         assets_mode: 'bundle'
     documentation:
+        openapi: 3.1.0
         # define the order in which tags are shown here, User first
         tags:
             - name: "User"
@@ -31,6 +33,27 @@ nelmio_api_doc:
                     bearerFormat: JWT
                     description: 'call /api/User/RequestSession and copy the value of api_access_token here'
             schemas:
+                WarningIssueStructure:
+                  type: object
+                  properties:
+                    issue_database_id: int
+                    type:
+                      type: string
+                      enum: ['Error', 'Warning', 'Info', 'None']
+                    active:
+                      type: boolean
+                    x:
+                      type: number
+                      format: float
+                    y:
+                      type: number
+                      format: float
+                    restriction_id:
+                      type: int
+                      nullable: true
+                    custom_restriction_id:
+                      type: int
+                      nullable: true
                 ResponseStructure:
                     type: object
                     properties:

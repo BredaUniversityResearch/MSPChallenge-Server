@@ -45,6 +45,13 @@ class DatabaseMigrationsWsServerPlugin extends Plugin
                     $gameSessionIds = $gameSessionIds->all(); // to raw array
 
                     $this->migrations($gameSessionIds);
+                })
+                ->otherwise(function ($reason) {
+                    $context = [];
+                    if ($reason instanceof \Throwable) {
+                        $context['exception'] = $reason;
+                    }
+                    $this->getLogger()?->error($reason, $context);
                 });
         });
     }
