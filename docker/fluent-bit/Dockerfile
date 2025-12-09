@@ -64,5 +64,7 @@ COPY --from=fluent_bit_builder /usr/lib/x86_64-linux-gnu/libyaml-0.so.2 /usr/lib
 COPY --from=fluent_bit_builder /usr/bin/docker /usr/bin/docker
 COPY docker-entrypoint.sh /fluent-bit/etc/docker-entrypoint.sh
 COPY fluent-bit-LICENSE /licenses/fluent-bit-LICENSE
+COPY fluent-bit.tpl.yaml /fluent-bit/etc/fluent-bit.tpl.yaml
+COPY test-logs/ /fluent-bit/etc/test-logs/
 RUN chmod +x /fluent-bit/etc/docker-entrypoint.sh
 ENTRYPOINT ["/fluent-bit/etc/docker-entrypoint.sh"]
