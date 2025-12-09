@@ -32,7 +32,7 @@ services:
         protocol: tcp
 
   simulations:
-    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:latest
+    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:auggis
 
 volumes:
   configfiles_data:
