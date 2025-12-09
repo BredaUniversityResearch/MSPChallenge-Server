@@ -4,8 +4,6 @@ services:
     depends_on:
       - simulations
     volumes:
-      - ./docker/fluent-bit/fluent-bit.tpl.yaml:/fluent-bit/etc/fluent-bit.tpl.yaml
-      - ./docker/fluent-bit/test-logs:/fluent-bit/etc/test-logs:ro
       - symfony_log:/var/log/symfony:ro
       - fluent_bit_output:/fluent-bit/output:rw
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
@@ -52,7 +50,6 @@ services:
     networks:
       - msp_network
     volumes:
-      - ./docker/database/my2_80.sql:/root/my2_80.sql:ro
       - mariadb_data:/var/lib/mysql
     logging:
       driver: "local"
