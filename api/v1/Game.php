@@ -260,32 +260,46 @@ class Game extends Base
         // find cable layers
         $cableLayers = collect($meta)->filter(fn(LayerEntity $l) => $l->getLayerEditingType() === 'cable')
             ->keyBy(fn(LayerEntity $l) => $l->getLayerId());
-        if ($cableLayers->isEmpty()) {
-            return;
+        // find socket layers
+        $socketLayers = collect($meta)->filter(fn(LayerEntity $l) => $l->getLayerEditingType() === 'socket')
+            ->keyBy(fn(LayerEntity $l) => $l->getLayerId());
+        if ($cableLayers->isEmpty() && $socketLayers->isEmpty()) {
+            return; // no cable or socket layers, nothing to do
         }
-        // if cable layers exists, go through all layers
+        // now go through all layers
         foreach ($meta as $layer) {
-            // has to be a non-cable
             if ($cableLayers->has($layer->getLayerId())) {
-                continue;
-            }
-            // if they have the required energy editing type: "transformer", "socket", "sourcepoint" or "sourcepolygon"
-            if (!in_array(
-                $layer->getLayerEditingType(),
-                ['transformer', 'socket', 'sourcepoint', 'sourcepolygon']
-            )) {
-                continue;
-            }
-            // find the corresponding green or grey cable layer
-            if (null === $cableLayer = $cableLayers->first(
-                fn(LayerEntity $l) => $l->getLayerGreen() == $layer->getLayerGreen()
-            )) {
+                // if this layer is a cable layer, it does not depend on any other layer
                 continue;
             }
 
-            // add the associated cable layer id to their dependency
-            $layerDependencies = $layer->getLayerDependencies();
-            $layerDependencies[] = $cableLayer->getLayerId();
+            $layerDependencies = [];
+            if (in_array(
+                $layer->getLayerEditingType(),
+                ['transformer', 'socket', 'sourcepoint', 'sourcepolygon']
+            ) &&
+                // find the corresponding green or grey cable layer
+                null !== $cableLayer = $cableLayers->first(
+                    fn(LayerEntity $l) => $l->getLayerGreen() == $layer->getLayerGreen()
+                )
+            ) {
+                // add cables: if this layer is of the right other type, add associated cable layer id as a dependency
+                $layerDependencies[] = $cableLayer->getLayerId();
+            }
+
+            if (in_array(
+                $layer->getLayerEditingType(),
+                ['sourcepoint', 'sourcepolygon']
+            ) &&
+                // find the corresponding green or grey cable layer
+                null !== $socketLayer = $socketLayers->first(
+                    fn(LayerEntity $l) => $l->getLayerGreen() == $layer->getLayerGreen()
+                )
+            ) {
+                // add sockets: if this layer is of the right other type, add associated socket layer id as a dependency
+                $layerDependencies[] = $socketLayer->getLayerId();
+            }
+
             $layer->setLayerDependencies($layerDependencies);
         }
     }
@@ -460,7 +474,7 @@ class Game extends Base
     {
         $result = array("year" => -1, "month_of_year" => -1);
         $startYear = $this->getDatabase()->query("SELECT game_start FROM game LIMIT 0,1");
-                
+
         if (count($startYear) == 1) {
             $result["year"] = floor($simulated_month / 12) + $startYear[0]["game_start"];
             $result["month_of_year"] = ($simulated_month % 12) + 1;
