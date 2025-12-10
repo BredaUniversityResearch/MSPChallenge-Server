@@ -75,14 +75,13 @@ class ErrorsController extends BaseController
             ) {
                 $diff = array_diff(['message', 'level_name', 'datetime', 'channel'], array_keys($log));
                 if (!empty($diff)) {
-                    $lines[] = [
+                    $log = [
                         'message' => 'Malformed log line, missing fields: ' . implode(', ', $diff),
                         'level_name' => 'WARNING',
                         'datetime' => $line['datetime'] ?? date('c'),
                         'channel' => 'fluent-bit',
                         'context' => ['log' => $log],
                     ];
-                    continue;
                 }
                 $log['extra'] = array_merge($log['extra'] ?? [], $log['context'] ?? []);
                 unset($log['context']);
