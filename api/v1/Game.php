@@ -2,6 +2,7 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameWatchdogServer;
@@ -210,7 +211,7 @@ class Game extends Base
             return -1; // there is no game record, so we are in setup
         }
         $currentMonth = $result[0];
-        if ($currentMonth["game_state"] == "SETUP") {
+        if ($currentMonth["game_state"] == GameStateValue::SETUP->value) {
             $currentMonth["game_currentmonth"] = -1;
         }
         return $currentMonth["game_currentmonth"];
@@ -355,11 +356,12 @@ class Game extends Base
      * @apiDescription Set the current game state
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function State(string $state): void
+    public function State(GameStateValue $state): void
     {
-        $state = strtoupper($state);
         $currentState = $this->getDatabase()->query("SELECT game_state FROM game")[0];
-        if ($currentState["game_state"] == "END" || $currentState["game_state"] == "SIMULATION") {
+        if ($currentState["game_state"] == GameStateValue::END->value ||
+            $currentState["game_state"] == GameStateValue::SIMULATION->value
+        ) {
             throw new Exception("Invalid current state of ".$currentState["game_state"]);
         }
 
@@ -370,12 +372,12 @@ class Game extends Base
             ->update('game')
             ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
             ->set('game_state', $qb->createPositionalParameter($state));
-        if ($currentState["game_state"] == "SETUP") {
+        if ($currentState["game_state"] == GameStateValue::SETUP->value) {
             //Starting plans should be implemented when we any state "PLAY"
             $plan = new Plan();
             await($plan->updateLayerState(0));
 
-            if ($state == "PAUSE") {
+            if ($state == GameStateValue::PAUSE) {
                 $qb->set('game_currentmonth', $qb->createPositionalParameter(0));
             }
         }
@@ -453,7 +455,7 @@ class Game extends Base
     /**
      * @throws Exception
      */
-    private function onGameStateUpdated(string $newGameState): PromiseInterface
+    private function onGameStateUpdated(GameStateValue $newGameState): PromiseInterface
     {
         $simulation = new Simulation();
         $this->asyncDataTransferTo($simulation);
@@ -493,7 +495,9 @@ class Game extends Base
                 ->select(
                     'g.game_start',
                     'g.game_eratime',
+                    'g.game_transition_month',
                     'g.game_currentmonth',
+                    'g.game_transition_state',
                     'g.game_state',
                     'g.game_planning_realtime',
                     'g.game_planning_era_realtime',
@@ -532,8 +536,11 @@ class Game extends Base
             return [
                 "game_start_year" => (int) $state["game_start"],
                 "game_end_month" => $state["game_eratime"] * 4,
+                "game_transition_month" => $state["game_transition_month"] !== null ?
+                    (int) $state["game_transition_month"] : null,
                 "game_current_month" => (int) $state["game_currentmonth"],
-                "game_state" => strtolower($state["game_state"]),
+                "game_transition_state" => $state["game_transition_state"],
+                "game_state" => $state["game_state"],
                 "players_past_hour" => (int) $state["active_last_hour"],
                 "players_active" => (int) $state["active_last_minute"],
                 "game_running_til_time" => $runningTilTime

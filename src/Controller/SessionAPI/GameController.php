@@ -8,6 +8,7 @@ use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Plan;
 use App\Domain\API\v1\Router;
 use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Common\EntityEnums\GameTransitionStateValue;
 use App\Domain\Common\MessageJsonResponse;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\POV\ConfigCreator;
@@ -59,17 +60,16 @@ class GameController extends BaseController
      */
     public function state(
         int $sessionId,
-        string $state,
+        GameStateValue $state,
         WatchdogCommunicator $watchdogCommunicator
     ): void {
-        $state = new GameStateValue(strtolower($state));
         $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
         /** @var GameRepository $repo */
         $repo = $em->getRepository(GameEntity::class);
         $game = $repo->retrieve();
         $currentState = $game->getGameState();
         if ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION) {
-            throw new Exception("Invalid current state of ".$currentState);
+            throw new Exception("Invalid current state of ".$currentState->value);
         }
         if ($currentState == GameStateValue::SETUP) {
             //Starting plans should be implemented when we finish the SETUP phase (PAUSE, PLAY, FASTFORWARD request)
@@ -77,11 +77,17 @@ class GameController extends BaseController
             $plan->setGameSessionId($sessionId);
             await($plan->updateLayerState(0));
             if ($state == GameStateValue::PAUSE) {
-                $game->setGameCurrentMonth(0);
+                $game
+                    ->setGameTransitionMonth(-1)
+                    ->setGameCurrentMonth(0);
             }
         }
-        $game->setGameLastUpdate(microtime(true)); // note: not using mysql's UNIX_TIMESTAMP(NOW(6)) function here
-        $game->setGameState($state);
+        $game
+            ->setGameLastUpdate(microtime(true)) // note: not using mysql's UNIX_TIMESTAMP(NOW(6)) function here
+            ->setGameState($state);
+        if ($currentState != $state) {
+            $game->setGameTransitionState(GameTransitionStateValue::from($currentState->value));
+        }
         $em->flush();
         $watchdogCommunicator->changeState($sessionId, $state, $game->getGameCurrentMonth());
     }

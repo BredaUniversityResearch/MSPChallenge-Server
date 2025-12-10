@@ -776,7 +776,10 @@ class Energy extends Base
                     ->innerJoin('p', 'grid', 'g', 'p.plan_id = g.grid_plan_id')
                     ->where(
                         $qb->expr()->and(
-                            $qb->expr()->neq('p.plan_state', $qb->createPositionalParameter(PlanState::DELETED)),
+                            $qb->expr()->neq(
+                                'p.plan_state',
+                                $qb->createPositionalParameter(PlanState::DELETED->value)
+                            ),
                             $qb->expr()->or(
                                 'p.plan_gametime > ' .
                                     $qb->createPositionalParameter($referencePlanData['plan_gametime']),
@@ -813,7 +816,10 @@ class Energy extends Base
                         ->innerJoin('p', 'grid_removed', 'gr', 'p.plan_id = gr.grid_removed_plan_id')
                         ->where(
                             $qb->expr()->and(
-                                $qb->expr()->neq('p.plan_state', $qb->createPositionalParameter(PlanState::DELETED)),
+                                $qb->expr()->neq(
+                                    'p.plan_state',
+                                    $qb->createPositionalParameter(PlanState::DELETED->value)
+                                ),
                                 $qb->expr()->or(
                                     'p.plan_gametime > ' .
                                         $qb->createPositionalParameter($referencePlanData['plan_gametime']),
@@ -930,7 +936,7 @@ class Energy extends Base
                             ->where($qb->expr()->and(
                                 $qb->expr()->neq(
                                     'plan_connection.plan_state',
-                                    $qb->createPositionalParameter(PlanState::DELETED)
+                                    $qb->createPositionalParameter(PlanState::DELETED->value)
                                 ),
                                 'geometry_start.geometry_active = 1',
                                 'geometry_end.geometry_active = 1',
@@ -1142,14 +1148,14 @@ class Energy extends Base
 
         $geoIds = array_map('intval', $geoIds);
         $whereClause = implode("','", $geoIds);
-            
+
         $result = $this->getDatabase()->query(
             "
             SELECT energy_output_geometry_id FROM energy_output WHERE energy_output_geometry_id IN (".$whereClause.")
             GROUP BY energy_output_geometry_id
             "
         );
-            
+
         if (count($result) == 0) {
             return null;
         }

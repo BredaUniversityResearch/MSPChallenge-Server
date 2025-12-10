@@ -16,7 +16,7 @@ class Policy
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255, enumType: PolicyTypeName::class)]
+    #[ORM\Column(enumType: PolicyTypeName::class)]
     private PolicyTypeName $type = PolicyTypeName::SEASONAL_CLOSURE;
 
     /**

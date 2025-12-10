@@ -168,7 +168,9 @@ class GameListAndSaveSerializer
                 GameConfigVersion::class
             )->find($innerObject) : null,
             'sessionState' => fn($innerObject) => new GameSessionStateValue($innerObject),
-            'gameState' => fn($innerObject) => new GameStateValue($innerObject),
+            'gameState' => fn($innerObject) =>
+                $innerObject instanceof GameStateValue ? $innerObject :
+                    GameStateValue::from($innerObject),
             'gameVisibility' => fn($innerObject) => new GameVisibilityValue($innerObject)
         ];
     }

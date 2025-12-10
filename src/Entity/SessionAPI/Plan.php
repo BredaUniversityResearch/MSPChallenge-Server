@@ -34,7 +34,7 @@ class Plan
     #[ORM\Column(type: Types::INTEGER, length: 5)]
     private ?int $planGametime = null;
 
-    #[ORM\Column(length: 255, enumType: PlanState::class)]
+    #[ORM\Column(enumType: PlanState::class)]
     private PlanState $planState = PlanState::DESIGN;
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true)]
     private ?int $planLockUserId = null;

@@ -53,7 +53,7 @@ class GameListArchiveMessageHandler extends CommonSessionHandler
         $this->gameSession = new GameList($gameList->id);
         $this->watchdogCommunicator->changeState(
             $this->gameSession->getId(),
-            new GameStateValue('end'),
+            GameStateValue::END,
             $this->gameSession->getGameCurrentMonth()
         );
         $this->removeSessionRasterStore();

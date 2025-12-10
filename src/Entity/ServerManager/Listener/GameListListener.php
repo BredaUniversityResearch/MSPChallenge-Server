@@ -69,9 +69,6 @@ class GameListListener
         if (is_null($gameSession->getSessionState())) {
             $gameSession->setSessionState(new GameSessionStateValue('request'));
         }
-        if (is_null($gameSession->getGameState())) {
-            $gameSession->setGameState(new GameStateValue('setup'));
-        }
         if (is_null($gameSession->getGameVisibility())) {
             $gameSession->setGameVisibility(new GameVisibilityValue('public'));
         }

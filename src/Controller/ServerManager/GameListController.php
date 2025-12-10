@@ -176,7 +176,7 @@ class GameListController extends BaseController
             $message
                 ->setGameSessionId($sessionId)
                 ->setWatchdogId($watchdogId)
-                ->setGameState(new GameStateValue($game->getGameState()))
+                ->setGameState($game->getGameState())
                 ->setMonth($gameList->getGameCurrentMonth());
             $messageBus->dispatch($message);
         } catch (Exception $e) {
@@ -300,8 +300,12 @@ class GameListController extends BaseController
         GameController $gameController,
         WatchdogCommunicator $watchdogCommunicator
     ): Response {
+        $state = strtoupper($state);
+        if (null === GameStateValue::tryFrom($state)) {
+            return new MessageJsonResponse(status: 422, message: "Invalid state: $state");
+        }
         $gameController
-            ->state($sessionId, $state, $watchdogCommunicator);
+            ->state($sessionId, GameStateValue::from($state), $watchdogCommunicator);
         return new Response(null, 204);
     }
 

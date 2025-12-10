@@ -8,7 +8,7 @@
                         {{ gameSession.name }}
                         <button class="btn btn-secondary btn-sm"
                             data-session="{{ gameSession.id }}"
-                            data-name="{{ gameSession.name }}"
+                        data-name="{{ gameSession.name }}"
                             data-action="gamelist#sessionEditName">
                             <i class="fa fa-edit"></i>
                         </button>
@@ -19,7 +19,7 @@
                 <tr>
                     <th scope="col">Simulation state</th>
                     <td class="text-right">
-                    {% set gameState = gameSession.gameState %}
+                    {% set gameState = gameSession.gameState.value|lower %}
                     {% if gameSession.sessionState == 'archived' %}
                         {% set gameState = 'irrelevant' %}
                     {% endif %}
@@ -180,7 +180,7 @@
                     <i class="fa fa-archive"></i> Archive Session
                 </button>
             {% endif %}
-            </div>                
+            </div>
         </div>
         <div class="row py-1">
             <div class="col">
@@ -209,7 +209,7 @@
             <div class="col">
             {% if showGameButton('access', gameSession) %}
                 <button class="btn btn-secondary btn-sm"
-                    data-session="{{ gameSession.id }}" 
+                    data-session="{{ gameSession.id }}"
                     data-action="modal-game#openSessionAccessModal">
                     <i class="fa fa-user"></i> Set User Access
                 </button>
