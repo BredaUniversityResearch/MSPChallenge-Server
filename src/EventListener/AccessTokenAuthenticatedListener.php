@@ -53,7 +53,7 @@ class AccessTokenAuthenticatedListener
             $result = $connection->executeQuery($query->getSQL(), $query->getParameters())->fetchAllAssociative();
         } catch (ConnectionException $e) {
             if ($e->getCode() == 1049) { // MySQL Unknown database
-                throw new HttpException(410, 'Session is non-existing');
+                throw new HttpException(410, 'Session is non-existing', previous: $e, code: 410);
             }
             throw $e;
         }
