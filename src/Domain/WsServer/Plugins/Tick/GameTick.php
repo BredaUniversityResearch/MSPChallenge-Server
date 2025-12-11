@@ -222,7 +222,9 @@ class GameTick extends TickBase
             $this->getAsyncDatabase(),
             $this->getAsyncDatabase()->createQueryBuilder()
                 ->select(
+                    'game_transition_state as transition_state',
                     'game_state as state',
+                    'game_transition_month as transition_month',
                     'game_currentmonth as month',
                     'game_planning_gametime as era_gametime',
                     'game_planning_realtime as era_realtime',
@@ -312,7 +314,7 @@ class GameTick extends TickBase
         $qb
             ->update('game')
             ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(4))')
-            ->set('game_transition_month', (string)$tick['month'])
+            ->set('game_transition_month', (string)($tick['transition_month'] ?? $tick['month']))
             ->set('game_currentmonth', (string)$currentMonth)
             ->set('game_planning_monthsdone', (string)$monthsDone);
 
@@ -320,7 +322,7 @@ class GameTick extends TickBase
             //Entire game is done.
             return $this->getAsyncDatabase()->query(
                 $qb
-                    ->set('game_transition_state', $tick['state'])
+                    ->set('game_transition_state', $tick['transition_state'] ?? $tick['state'])
                     ->set('game_state', $qb->createPositionalParameter(GameStateValue::END->value))
             )
             ->then(function (/*Result $result*/) use ($currentMonth) {
@@ -336,7 +338,7 @@ class GameTick extends TickBase
             return $this->getAsyncDatabase()->query(
                 $qb
                     ->set('game_planning_monthsdone', '0')
-                    ->set('game_transition_state', $tick['state'])
+                    ->set('game_transition_state', $tick['transition_state'] ?? $tick['state'])
                     ->set('game_state', $qb->createPositionalParameter(GameStateValue::SIMULATION->value))
             )
             ->then(function (/*Result $result*/) use ($currentMonth) {
@@ -354,7 +356,7 @@ class GameTick extends TickBase
             return $this->getAsyncDatabase()->query(
                 $qb
                     ->set('game_planning_monthsdone', '0')
-                    ->set('game_transition_state', $tick['state'])
+                    ->set('game_transition_state', $tick['transition_state'] ?? $tick['state'])
                     ->set('game_state', $qb->createPositionalParameter(GameStateValue::PLAY->value))
                     ->set('game_planning_realtime', $era_realtime[$era])
             )

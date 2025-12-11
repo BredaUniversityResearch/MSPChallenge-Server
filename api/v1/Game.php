@@ -3,11 +3,15 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Common\EntityEnums\GameTransitionStateValue;
+use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameWatchdogServer;
+use App\Entity\SessionAPI\Game as GameEntity;
 use App\Entity\SessionAPI\Layer as LayerEntity;
 use App\Entity\SessionAPI\Watchdog;
+use App\Repository\SessionAPI\GameRepository;
 use App\Repository\SessionAPI\LayerRepository;
 use Drift\DBAL\Result;
 use Exception;
@@ -349,41 +353,43 @@ class Game extends Base
     }
 
     /**
-     * @apiGroup Game
      * @throws Exception
-     * @api {POST} /game/state State
-     * @apiParam {string} state new state of the game
-     * @apiDescription Set the current game state
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function State(GameStateValue $state): void
-    {
-        $currentState = $this->getDatabase()->query("SELECT game_state FROM game")[0];
-        if ($currentState["game_state"] == GameStateValue::END->value ||
-            $currentState["game_state"] == GameStateValue::SIMULATION->value
-        ) {
-            throw new Exception("Invalid current state of ".$currentState["game_state"]);
+    public static function setStateForSession(
+        int $sessionId,
+        GameStateValue $state,
+        WatchdogCommunicator $watchdogCommunicator
+    ): void {
+        $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
+        /** @var GameRepository $repo */
+        $repo = $em->getRepository(GameEntity::class);
+        $game = $repo->retrieve();
+        $currentState = $game->getGameState();
+        if ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION) {
+            throw new Exception("Invalid current state of ".$currentState->value);
         }
-
-        // prepare update query using builder
-        $qb = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId())
-            ->createQueryBuilder();
-        $qb
-            ->update('game')
-            ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
-            ->set('game_state', $qb->createPositionalParameter($state));
-        if ($currentState["game_state"] == GameStateValue::SETUP->value) {
-            //Starting plans should be implemented when we any state "PLAY"
+        if ($currentState == GameStateValue::SETUP) {
+            //Starting plans should be implemented when we finish the SETUP phase (PAUSE, PLAY, FASTFORWARD request)
             $plan = new Plan();
+            $plan->setGameSessionId($sessionId);
             await($plan->updateLayerState(0));
-
             if ($state == GameStateValue::PAUSE) {
-                $qb->set('game_currentmonth', $qb->createPositionalParameter(0));
+                $game
+                    ->setGameTransitionMonth($game->getGameTransitionMonth() ?? -1)
+                    ->setGameCurrentMonth(0);
             }
         }
-        $qb->executeQuery();
-
-        await($this->onGameStateUpdated($state));
+        $game
+            ->setGameLastUpdate(microtime(true)) // note: not using mysql's UNIX_TIMESTAMP(NOW(6)) function here
+            ->setGameState($state);
+        if ($currentState != $state) {
+            $game->setGameTransitionState(
+                $game->getGameTransitionState() ??
+                    GameTransitionStateValue::from($currentState->value)
+            );
+        }
+        $em->flush();
+        $watchdogCommunicator->changeState($sessionId, $state, $game->getGameCurrentMonth());
     }
 
     /**
@@ -450,16 +456,6 @@ class Game extends Base
             'policy_settings' => $policySettings,
             'simulation_settings' => $simulationSettings
         ];
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function onGameStateUpdated(GameStateValue $newGameState): PromiseInterface
-    {
-        $simulation = new Simulation();
-        $this->asyncDataTransferTo($simulation);
-        return $simulation->changeWatchdogState($newGameState);
     }
 
     /**

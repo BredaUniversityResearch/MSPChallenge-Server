@@ -4,6 +4,7 @@ namespace App\MessageHandler\GameList;
 
 use App\Controller\SessionAPI\GameController;
 use App\Controller\SessionAPI\SELController;
+use App\Domain\API\v1\Game as GameAPI;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameTransitionStateValue;
@@ -76,7 +77,6 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         WatchdogCommunicator $watchdogCommunicator,
         VersionsProvider $provider,
         SimulationHelper $simulationHelper,
-        private readonly GameController $gameController,
         private readonly MessageBusInterface $messageBus,
         private readonly HttpClientInterface $client,
         // e.g. used by GeoServerCommunicator
@@ -1207,11 +1207,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
 
         if ($isDemoSession) {
             $this->entityManager->clear();
-            $this->gameController->state(
-                $this->gameSession->getId(),
-                GameStateValue::PLAY,
-                $this->watchdogCommunicator
-            );
+            GameAPI::setStateForSession($this->gameSession->getId(), GameStateValue::PLAY, $this->watchdogCommunicator);
             $this->logContainer($this->watchdogCommunicator);
             return;
         }
