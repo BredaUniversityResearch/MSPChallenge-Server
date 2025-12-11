@@ -4,8 +4,10 @@ namespace App\MessageHandler\GameList;
 
 use App\Controller\SessionAPI\GameController;
 use App\Controller\SessionAPI\SELController;
+use App\Domain\API\v1\Game as GameAPI;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Common\EntityEnums\GameTransitionStateValue;
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityEnums\PlanState;
 use App\Domain\Common\EntityEnums\RestrictionSort;
@@ -75,7 +77,6 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         WatchdogCommunicator $watchdogCommunicator,
         VersionsProvider $provider,
         SimulationHelper $simulationHelper,
-        private readonly GameController $gameController,
         private readonly MessageBusInterface $messageBus,
         private readonly HttpClientInterface $client,
         // e.g. used by GeoServerCommunicator
@@ -135,12 +136,12 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             if ($this->gameSession->getSessionState() != GameSessionStateValue::FAILED) {
                 $this->watchdogCommunicator->changeState(
                     $this->gameSession->getId(),
-                    new GameStateValue('end'),
+                    GameStateValue::END,
                     $this->gameSession->getGameCurrentMonth()
                 );
             }
             $this->gameSession->setSessionState(new GameSessionStateValue('request'));
-            $this->gameSession->setGameState(new GameStateValue('setup'));
+            $this->gameSession->setGameState(GameStateValue::SETUP);
             $this->mspServerManagerEntityManager->flush();
             $this->resetSessionDatabase();
             return;
@@ -214,14 +215,17 @@ class GameListCreationMessageHandler extends CommonSessionHandler
     private function setupGame(): void
     {
         $game = new Game();
-        $game->setGameId(1);
-        $game->setGameConfigfile(sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId()));
-        $game->setGameStart($this->dataModel['start']);
-        $game->setGamePlanningGametime($this->dataModel['era_planning_months']);
-        $game->setGamePlanningRealtime($this->dataModel['era_planning_realtime']);
-        $game->setGamePlanningEraRealtimeComplete();
-        $game->setGameEratime($this->dataModel['era_total_months']);
-        $game->setGameCurrentMonth(-1);
+        $game
+            ->setGameId(1)
+            ->setGameConfigfile(sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId()))
+            ->setGameStart($this->dataModel['start'])
+            ->setGamePlanningGametime($this->dataModel['era_planning_months'])
+            ->setGamePlanningRealtime($this->dataModel['era_planning_realtime'])
+            ->setGamePlanningEraRealtimeComplete()
+            ->setGameEratime($this->dataModel['era_total_months'])
+            ->setGameTransitionState(GameTransitionStateValue::REQUEST)
+            ->setGameTransitionMonth(-1)
+            ->setGameCurrentMonth(-1);
         $this->entityManager->persist($game);
         $this->sessionLogHandler->info('Basic game parameters set up.');
     }
@@ -1203,18 +1207,14 @@ class GameListCreationMessageHandler extends CommonSessionHandler
 
         if ($isDemoSession) {
             $this->entityManager->clear();
-            $this->gameController->state(
-                $this->gameSession->getId(),
-                GameStateValue::PLAY,
-                $this->watchdogCommunicator
-            );
+            GameAPI::setStateForSession($this->gameSession->getId(), GameStateValue::PLAY, $this->watchdogCommunicator);
             $this->logContainer($this->watchdogCommunicator);
             return;
         }
 
         $this->watchdogCommunicator->changeState(
             $this->gameSession->getId(),
-            new GameStateValue('setup'),
+            GameStateValue::SETUP,
             $this->gameSession->getGameCurrentMonth()
         );
         $this->logContainer($this->watchdogCommunicator);

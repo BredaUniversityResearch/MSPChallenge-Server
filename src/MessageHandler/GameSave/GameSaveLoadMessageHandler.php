@@ -111,7 +111,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
         $this->registerSimulations();
         $this->watchdogCommunicator->changeState(
             $this->gameSession->getId(),
-            new GameStateValue($this->gameSession->getGameState()),
+            $this->gameSession->getGameState(),
             $this->gameSession->getGameCurrentMonth()
         );
         $this->logContainer($this->watchdogCommunicator);
@@ -191,7 +191,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
             $this->sessionLogHandler->notice('This is a save reload into an existing session.');
             $this->watchdogCommunicator->changeState(
                 $this->gameSession->getId(),
-                new GameStateValue('end'),
+                GameStateValue::END,
                 $this->gameSession->getGameCurrentMonth()
             );
             $this->gameSession->setSessionState(new GameSessionStateValue('request'));

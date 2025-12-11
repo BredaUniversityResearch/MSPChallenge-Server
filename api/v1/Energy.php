@@ -1148,14 +1148,14 @@ class Energy extends Base
 
         $geoIds = array_map('intval', $geoIds);
         $whereClause = implode("','", $geoIds);
-            
+
         $result = $this->getDatabase()->query(
             "
             SELECT energy_output_geometry_id FROM energy_output WHERE energy_output_geometry_id IN (".$whereClause.")
             GROUP BY energy_output_geometry_id
             "
         );
-            
+
         if (count($result) == 0) {
             return null;
         }

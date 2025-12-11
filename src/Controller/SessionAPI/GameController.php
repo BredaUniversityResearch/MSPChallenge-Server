@@ -5,18 +5,13 @@ namespace App\Controller\SessionAPI;
 use App\Controller\BaseController;
 use App\Domain\API\APIHelper;
 use App\Domain\API\v1\Game;
-use App\Domain\API\v1\Plan;
-use App\Domain\API\v1\Router;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\MessageJsonResponse;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\POV\ConfigCreator;
 use App\Domain\POV\LayerTags;
 use App\Domain\POV\Region;
-use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
-use App\Entity\SessionAPI\Game as GameEntity;
-use App\Repository\SessionAPI\GameRepository;
 use Exception;
 use OpenApi\Attributes as OA;
 use Psr\Log\LoggerInterface;
@@ -27,9 +22,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use function App\await;
 
 #[Route('/api/{game}', requirements: ['game' => '[gG]ame'])]
@@ -49,41 +41,89 @@ use function App\await;
 )]
 class GameController extends BaseController
 {
-    // not a route yet, should replace /[sessionId]/api/Game/State one day
-
-    /**
-     * @throws RedirectionExceptionInterface
-     * @throws ClientExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws Exception
-     */
-    public function state(
-        int $sessionId,
-        string $state,
-        WatchdogCommunicator $watchdogCommunicator
-    ): void {
-        $state = new GameStateValue(strtolower($state));
-        $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
-        /** @var GameRepository $repo */
-        $repo = $em->getRepository(GameEntity::class);
-        $game = $repo->retrieve();
-        $currentState = $game->getGameState();
-        if ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION) {
-            throw new Exception("Invalid current state of ".$currentState);
+    #[Route(
+        path: '/State',
+        name: 'session_api_game_state',
+        methods: ['POST']
+    )]
+    #[OA\Post(
+        summary: 'Set the current game state',
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\MediaType(
+                mediaType: 'application/x-www-form-urlencoded',
+                schema: new OA\Schema(
+                    required: ['state'],
+                    properties: [
+                        new OA\Property(
+                            property: 'state',
+                            description: 'New state of the game',
+                            type: 'string',
+                            enum: ['PAUSE', 'PLAY', 'END', 'SETUP', 'SIMULATION'] // add all possible values here
+                        )
+                    ]
+                )
+            )
+        ),
+        responses: [
+            new OA\Response(
+                response: 200,
+                description: 'State updated successfully'
+            ),
+            new OA\Response(
+                response: 400,
+                description: 'Bad request',
+                content: new OA\JsonContent(
+                    examples: [
+                        new OA\Examples(
+                            example: 'missing_state',
+                            summary: 'Missing required parameter: state',
+                            value: [
+                                'success' => false,
+                                'message' => 'Missing required parameter: state'
+                            ]
+                        ),
+                        new OA\Examples(
+                            example: 'invalid_state',
+                            summary: 'Invalid state value',
+                            value: [
+                                'success' => false,
+                                'message' => 'Invalid state value: {state}'
+                            ]
+                        )
+                    ]
+                )
+            ),
+            new OA\Response(
+                response: 500,
+                description: 'Invalid current state of ...'
+            )
+        ]
+    )]
+    public function state(Request $request, WatchdogCommunicator $watchdogCommunicator): JsonResponse
+    {
+        if (null == $state = $request->request->get('state')) {
+            return new MessageJsonResponse(
+                status: Response::HTTP_BAD_REQUEST,
+                message: 'Missing required parameter: state'
+            );
         }
-        if ($currentState == GameStateValue::SETUP) {
-            //Starting plans should be implemented when we finish the SETUP phase (PAUSE, PLAY, FASTFORWARD request)
-            $plan = new Plan();
-            $plan->setGameSessionId($sessionId);
-            await($plan->updateLayerState(0));
-            if ($state == GameStateValue::PAUSE) {
-                $game->setGameCurrentMonth(0);
-            }
+        if (null === $state = GameStateValue::tryFrom(strtoupper($state))) {
+            return new MessageJsonResponse(
+                status: Response::HTTP_BAD_REQUEST,
+                message: 'Invalid state value: '.$request->request->get('state')
+            );
         }
-        $game->setGameLastUpdate(microtime(true)); // note: not using mysql's UNIX_TIMESTAMP(NOW(6)) function here
-        $game->setGameState($state);
-        $em->flush();
-        $watchdogCommunicator->changeState($sessionId, $state, $game->getGameCurrentMonth());
+        $sessionId = $this->getSessionIdFromRequest($request);
+        try {
+            Game::setStateForSession($sessionId, $state, $watchdogCommunicator);
+        } catch (Exception $e) {
+            return new MessageJsonResponse(
+                status: $e->getCode() ?: 500,
+                message: $e->getMessage()
+            );
+        }
+        return new MessageJsonResponse(status: 200, message: 'State updated successfully');
     }
 
     #[Route(

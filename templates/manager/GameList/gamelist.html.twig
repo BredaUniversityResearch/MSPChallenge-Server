@@ -25,19 +25,36 @@
                 <td>{{ game.config_file_name }}</td>
                 <td>{{ game.players_past_hour|default(0) }}</td>
                 {% if game.session_state != 'healthy' %}
-                    {% set showState = game.session_state %}
+                    {% set state = game.session_state %}
                 {% else %}
-                    {% set showState = game.game_state %}
+                    {% set state = game.game_state.value|lower %}
                 {% endif %}
-                <td class="state_{{ showState }}">
-                    {{ showState }}
-                    {% if (showState == 'request') %}
-                        <i class="fa fa-spinner fa-pulse" title="Your session is being created."></i>
-                    {% elseif (showState == 'setup') %}
-                        <i class="fa fa-check" title="This session is ready."></i>
+                <td class="state_{{ state }}">
+                    {% if game.game_transition_state is not null %}
+                        {% if game.game_transition_state.value|lower != state %}
+                            {{ game.game_transition_state.value|lower }}
+                        {% endif %}
+                        <i class="fa fa-solid fa-arrow-right"></i>
+                    {% endif %}
+                    {{ state }}
+                    {% if (state == 'request') %}
+                        <i class="fa fa-spinner fa-pulse" title="Your session is being created..."></i>
+                    {% elseif (game.game_transition_state is not null) %}
+                        <i class="fa fa-spinner fa-pulse" title="Running simulations..."></i>
                     {% endif %}
                 </td>
-                <td>{{ game.current_month_formatted }} </td>
+                <td>
+                    {% if game.game_transition_month is not null %}
+                        {% if game.game_transition_month != game.game_current_month %}
+                            {{ game.transition_month_formatted }}
+                        {% endif %}
+                        <i class="fa fa-solid fa-arrow-right"></i>
+                    {% endif %}
+                    {{ game.current_month_formatted }}
+                    {% if (game.game_transition_month is not null) %}
+                        <i class="fa fa-spinner fa-pulse" title="Running simulations..."></i>
+                    {% endif %}
+                </td>
                 <td>{{ game.end_month_formatted }}</td>
                 <td class="text-center">
                 {% if showGameButton('pause', game) %}
@@ -71,8 +88,8 @@
                         <i class="fa fa-save" title="Pause before you can save"></i>
                     </button>
                 {% endif %}
-                    <button class="btn btn-secondary btn-sm" 
-                        data-session="{{ game.id }}" 
+                    <button class="btn btn-secondary btn-sm"
+                        data-session="{{ game.id }}"
                         data-action="modal-game#openSessionDetailsModal">
                         <i class="fa fa-info-circle" title= "Session details"></i>
                     </button>

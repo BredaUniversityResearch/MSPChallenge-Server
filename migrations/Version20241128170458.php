@@ -163,7 +163,7 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
               `watchdog_id` int(10) unsigned NOT NULL,
               `name` varchar(255) NOT NULL,
               `version` varchar(255) DEFAULT NULL,
-              `last_month` int(11) NOT NULL DEFAULT -1,
+              `last_month` int(11) NOT NULL DEFAULT -2,
               `created_at` datetime NOT NULL DEFAULT current_timestamp(),
               `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
               PRIMARY KEY (`id`),

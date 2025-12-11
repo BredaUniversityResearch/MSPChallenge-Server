@@ -73,7 +73,7 @@ class Layer extends EntityBase
     private ?string $layerName = '';
 
     #[Groups(['read'])]
-    #[ORM\Column(name: 'layer_geotype', length: 255, nullable: true, enumType: LayerGeoType::class)]
+    #[ORM\Column(name: 'layer_geotype', nullable: true, enumType: LayerGeoType::class)]
     private ?LayerGeoType $layerGeoType = null;
 
     #[Groups(['read'])]

@@ -1,6 +1,7 @@
 <?php
 namespace App\Domain\WsServer;
 
+use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\GetConstantsTrait;
 use App\Domain\Common\Stopwatch\Stopwatch;
 use App\Domain\Event\NameAwareEvent;
@@ -277,7 +278,13 @@ class WsServer extends EventDispatcher implements
                 $qb->expr()->or(
                     $qb->expr()->in(
                         'game_state',
-                        $qb->createPositionalParameter(['play', 'fastforward' ,'simulation', 'pause', 'setup'])
+                        $qb->createPositionalParameter([
+                            GameStateValue::PLAY->value,
+                            GameStateValue::FASTFORWARD->value,
+                            GameStateValue::SIMULATION->value,
+                            GameStateValue::PAUSE->value,
+                            GameStateValue::SETUP->value
+                        ])
                     )
                 )
             );

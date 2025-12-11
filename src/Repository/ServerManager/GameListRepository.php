@@ -44,7 +44,9 @@ class GameListRepository extends EntityRepository
                 'gsa.gameConfigFilesFilename', 'g.gameCreationTime as game_creation_time', 'ggs.name as geoserver_name',
                 'ggs.address as geoserver_address', 'g.gameStartYear as game_start_year',
                 'g.gameEndMonth as game_end_month', 'g.gameCurrentMonth as game_current_month',
+                'g.gameTransitionMonth as game_transition_month',
                 'g.gameRunningTilTime as game_running_til_time', 'g.sessionState as session_state',
+                'g.gameTransitionState as game_transition_state',
                 'g.gameState as game_state', 'g.playersActive as players_active',
                 'g.playersPastHour as players_past_hour'
             ])
@@ -105,6 +107,10 @@ class GameListRepository extends EntityRepository
                 ->setGameStartYear($session['game_start_year'])
                 ->setGameCurrentMonth($session['game_current_month'])
                 ->getGameCurrentMonthPretty();
+            $session['transition_month_formatted'] = $gameList
+                ->setGameStartYear($session['game_start_year'])
+                ->setGameTransitionMonth($session['game_transition_month'])
+                ->getGameTransitionMonthPretty();
             $session['end_month_formatted'] = $gameList
                 ->setGameEndMonth($session['game_end_month'])
                 ->getGameEndMonthPretty();

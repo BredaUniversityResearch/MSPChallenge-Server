@@ -146,7 +146,7 @@ class WatchdogCommunicationMessageHandler
                 $watchdog->getServerId() == Watchdog::getInternalServerId() ? 'http' : null
             ),
             'game_session_token' => (string)$watchdog->getToken(),
-            'game_state' => $message->getGameState()->__toString(),
+            'game_state' => $message->getGameState()->value,
             'required_simulations' => json_encode($requiredSimulations, JSON_FORCE_OBJECT),
             'api_access_token' => json_encode([
                 'token' => $apiAccessToken->getToken(),

@@ -2,11 +2,16 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Common\EntityEnums\GameTransitionStateValue;
+use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameWatchdogServer;
+use App\Entity\SessionAPI\Game as GameEntity;
 use App\Entity\SessionAPI\Layer as LayerEntity;
 use App\Entity\SessionAPI\Watchdog;
+use App\Repository\SessionAPI\GameRepository;
 use App\Repository\SessionAPI\LayerRepository;
 use Drift\DBAL\Result;
 use Exception;
@@ -210,7 +215,7 @@ class Game extends Base
             return -1; // there is no game record, so we are in setup
         }
         $currentMonth = $result[0];
-        if ($currentMonth["game_state"] == "SETUP") {
+        if ($currentMonth["game_state"] == GameStateValue::SETUP->value) {
             $currentMonth["game_currentmonth"] = -1;
         }
         return $currentMonth["game_currentmonth"];
@@ -348,40 +353,43 @@ class Game extends Base
     }
 
     /**
-     * @apiGroup Game
      * @throws Exception
-     * @api {POST} /game/state State
-     * @apiParam {string} state new state of the game
-     * @apiDescription Set the current game state
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function State(string $state): void
-    {
-        $state = strtoupper($state);
-        $currentState = $this->getDatabase()->query("SELECT game_state FROM game")[0];
-        if ($currentState["game_state"] == "END" || $currentState["game_state"] == "SIMULATION") {
-            throw new Exception("Invalid current state of ".$currentState["game_state"]);
+    public static function setStateForSession(
+        int $sessionId,
+        GameStateValue $state,
+        WatchdogCommunicator $watchdogCommunicator
+    ): void {
+        $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
+        /** @var GameRepository $repo */
+        $repo = $em->getRepository(GameEntity::class);
+        $game = $repo->retrieve();
+        $currentState = $game->getGameState();
+        if ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION) {
+            throw new Exception("Invalid current state of ".$currentState->value);
         }
-
-        // prepare update query using builder
-        $qb = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId())
-            ->createQueryBuilder();
-        $qb
-            ->update('game')
-            ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
-            ->set('game_state', $qb->createPositionalParameter($state));
-        if ($currentState["game_state"] == "SETUP") {
-            //Starting plans should be implemented when we any state "PLAY"
+        if ($currentState == GameStateValue::SETUP) {
+            //Starting plans should be implemented when we finish the SETUP phase (PAUSE, PLAY, FASTFORWARD request)
             $plan = new Plan();
+            $plan->setGameSessionId($sessionId);
             await($plan->updateLayerState(0));
-
-            if ($state == "PAUSE") {
-                $qb->set('game_currentmonth', $qb->createPositionalParameter(0));
+            if ($state == GameStateValue::PAUSE) {
+                $game
+                    ->setGameTransitionMonth($game->getGameTransitionMonth() ?? -1)
+                    ->setGameCurrentMonth(0);
             }
         }
-        $qb->executeQuery();
-
-        await($this->onGameStateUpdated($state));
+        $game
+            ->setGameLastUpdate(microtime(true)) // note: not using mysql's UNIX_TIMESTAMP(NOW(6)) function here
+            ->setGameState($state);
+        if ($currentState != $state) {
+            $game->setGameTransitionState(
+                $game->getGameTransitionState() ??
+                    GameTransitionStateValue::from($currentState->value)
+            );
+        }
+        $em->flush();
+        $watchdogCommunicator->changeState($sessionId, $state, $game->getGameCurrentMonth());
     }
 
     /**
@@ -451,16 +459,6 @@ class Game extends Base
     }
 
     /**
-     * @throws Exception
-     */
-    private function onGameStateUpdated(string $newGameState): PromiseInterface
-    {
-        $simulation = new Simulation();
-        $this->asyncDataTransferTo($simulation);
-        return $simulation->changeWatchdogState($newGameState);
-    }
-
-    /**
      * @apiGroup Game
      * @throws Exception
      * @api {POST} /game/GetActualDateForSimulatedMonth Set Start
@@ -493,7 +491,9 @@ class Game extends Base
                 ->select(
                     'g.game_start',
                     'g.game_eratime',
+                    'g.game_transition_month',
                     'g.game_currentmonth',
+                    'g.game_transition_state',
                     'g.game_state',
                     'g.game_planning_realtime',
                     'g.game_planning_era_realtime',
@@ -532,8 +532,11 @@ class Game extends Base
             return [
                 "game_start_year" => (int) $state["game_start"],
                 "game_end_month" => $state["game_eratime"] * 4,
+                "game_transition_month" => $state["game_transition_month"] !== null ?
+                    (int) $state["game_transition_month"] : null,
                 "game_current_month" => (int) $state["game_currentmonth"],
-                "game_state" => strtolower($state["game_state"]),
+                "game_transition_state" => $state["game_transition_state"],
+                "game_state" => $state["game_state"],
                 "players_past_hour" => (int) $state["active_last_hour"],
                 "players_active" => (int) $state["active_last_minute"],
                 "game_running_til_time" => $runningTilTime

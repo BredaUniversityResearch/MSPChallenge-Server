@@ -4,6 +4,7 @@ namespace App\Controller\ServerManager;
 
 use App\Controller\BaseController;
 use App\Controller\SessionAPI\GameController;
+use App\Domain\API\v1\Game as GameAPI;
 use App\Domain\API\v1\Plan;
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Common\EntityEnums\GameSaveVisibilityValue;
@@ -176,7 +177,7 @@ class GameListController extends BaseController
             $message
                 ->setGameSessionId($sessionId)
                 ->setWatchdogId($watchdogId)
-                ->setGameState(new GameStateValue($game->getGameState()))
+                ->setGameState($game->getGameState())
                 ->setMonth($gameList->getGameCurrentMonth());
             $messageBus->dispatch($message);
         } catch (Exception $e) {
@@ -300,8 +301,11 @@ class GameListController extends BaseController
         GameController $gameController,
         WatchdogCommunicator $watchdogCommunicator
     ): Response {
-        $gameController
-            ->state($sessionId, $state, $watchdogCommunicator);
+        $state = strtoupper($state);
+        if (null === GameStateValue::tryFrom($state)) {
+            return new MessageJsonResponse(status: 422, message: "Invalid state: $state");
+        }
+        GameAPI::setStateForSession($sessionId, GameStateValue::from($state), $watchdogCommunicator);
         return new Response(null, 204);
     }
 
@@ -360,8 +364,7 @@ class GameListController extends BaseController
         $gameSession->setDemoSession(($gameSession->getDemoSession() === 1) ? 0 : 1);
         $entityManager->flush();
         if ($gameSession->getDemoSession() == 1 && $gameSession->getGameState() != GameStateValue::PLAY) {
-            $gameController
-                ->state($sessionId, GameStateValue::PLAY, $watchdogCommunicator);
+            GameAPI::setStateForSession($sessionId, GameStateValue::PLAY, $watchdogCommunicator);
         }
         return new Response(null, 204);
     }

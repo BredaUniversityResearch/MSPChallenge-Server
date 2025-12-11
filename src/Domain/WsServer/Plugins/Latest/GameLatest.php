@@ -2,8 +2,10 @@
 
 namespace App\Domain\WsServer\Plugins\Latest;
 
+use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Simulation;
 use App\Domain\Common\CommonBase;
+use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Domain\Common\ToPromiseFunction;
 use Drift\DBAL\Result;
@@ -210,8 +212,10 @@ class GameLatest extends CommonBase
         return $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()
                 ->select(
+                    'game_transition_state as transition_state',
                     'game_state as state',
                     'game_lastupdate as lastupdate',
+                    'game_transition_month as transition_month',
                     'game_currentmonth as month',
                     'game_start as start',
                     'game_planning_gametime as era_gametime',
@@ -227,7 +231,10 @@ class GameLatest extends CommonBase
             $assureGameLatestUpdate = new Deferred();
             $tick = $result->fetchFirstRow();
             //only update if the game is playing
-            if (!in_array($tick['state'], ['END', 'PAUSE', 'SETUP']) && $tick['lastupdate'] == 0) {
+            if (!in_array(
+                $tick['state'],
+                [GameStateValue::END->value, GameStateValue::PAUSE->value, GameStateValue::SETUP->value]
+            ) && $tick['lastupdate'] == 0) {
                 //if the last update was at time 0, this is the very first tick happening for this game
                 $qb = $this->getAsyncDatabase()->createQueryBuilder();
                 $this->getAsyncDatabase()->query(
@@ -253,7 +260,10 @@ class GameLatest extends CommonBase
                     $secondsPerMonth = $tick['era_realtime'] / $tick['era_gametime'];
 
                     //only update if the game is playing
-                    if ($state != "END" && $state != "PAUSE" && $state != "SETUP") {
+                    if ($state != GameStateValue::END->value &&
+                        $state != GameStateValue::PAUSE->value &&
+                        $state != GameStateValue::SETUP->value
+                    ) {
                         $currentTime = microtime(true);
                         $lastUpdate = $tick['lastupdate'];
                         assert($lastUpdate != 0);
@@ -275,7 +285,7 @@ class GameLatest extends CommonBase
                         if ($showDebug) {
                             wdo("timeleft: " . $tick['era_timeleft'], OutputInterface::VERBOSITY_VERY_VERBOSE);
                         }
-                    } elseif ($state == "PAUSE" || $state == "SETUP") {
+                    } elseif ($state == GameStateValue::PAUSE->value || $state == GameStateValue::SETUP->value) {
                         //[MSP-1116] Seems sensible?
                         $tick['era_timeleft'] = $tick['era_realtime'] - ($tick['era_monthsdone'] * $secondsPerMonth);
                         if ($showDebug) {
