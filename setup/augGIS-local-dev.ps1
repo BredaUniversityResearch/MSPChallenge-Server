@@ -57,6 +57,8 @@ if (Test-Path ".env.local") {
     Write-Host "Backup of .env.local created as $backupFile"
 }
 
+Read-Host "Please switch and connect to the Wi-Fi network to be used for your 'augGIS' session and then press enter to continue"
+
 # Get the IP address of the Wi-Fi network interface
 $netAdapter = Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias Wi-Fi,Ethernet -AddressState Preferred | Select-Object -First 1
 $netAdapter.IPAddress
@@ -75,6 +77,24 @@ IMMERSIVE_SESSIONS_DOCKER_HUB_TAG=$tag
 IMMERSIVE_SESSIONS_HEALTHCHECK_WRITE_MODE=1
 CORS_ALLOW_ORIGIN='^https?://(localhost|127\.0\.0\.1|$wifiIpEscaped)(:[0-9]+)?$'
 "@
+
+$hostsPath = 'C:\Windows\System32\drivers\etc\hosts'
+if (Test-Path $hostsPath) {
+    Write-Host "Found C:\Windows\System32\drivers\etc\hosts, editing:"
+    $ip = $netAdapter.IPAddress
+    (Get-Content $hostsPath) |
+        ForEach-Object {
+            if ($_ -match '^\d{1,3}(\.\d{1,3}){3}\s+host\.docker\.internal$') {
+                "$ip host.docker.internal"
+                Write-Host "* Updated host.docker.internal to $ip"
+            } elseif ($_ -match '^\d{1,3}(\.\d{1,3}){3}\s+gateway\.docker\.internal$') {
+                "$ip gateway.docker.internal"
+                Write-Host "* Updated gateway.docker.internal to $ip"
+            } else {
+                $_
+            }
+        } | Set-Content $hostsPath -Force
+}
 
 docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d --remove-orphans
 exit 0

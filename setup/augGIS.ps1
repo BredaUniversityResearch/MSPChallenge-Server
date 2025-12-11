@@ -113,5 +113,23 @@ JWT_PASSPHRASE=$([guid]::NewGuid().ToString("N"))
 DATABASE_CREATOR_PASSWORD=$([guid]::NewGuid().ToString("N"))
 "@
 
+$hostsPath = 'C:\Windows\System32\drivers\etc\hosts'
+if (Test-Path $hostsPath) {
+    Write-Host "Found C:\Windows\System32\drivers\etc\hosts, editing:"
+    $ip = $netAdapter.IPAddress
+    (Get-Content $hostsPath) |
+        ForEach-Object {
+            if ($_ -match '^\d{1,3}(\.\d{1,3}){3}\s+host\.docker\.internal$') {
+                "$ip host.docker.internal"
+                Write-Host "* Updated host.docker.internal to $ip"
+            } elseif ($_ -match '^\d{1,3}(\.\d{1,3}){3}\s+gateway\.docker\.internal$') {
+                "$ip gateway.docker.internal"
+                Write-Host "* Updated gateway.docker.internal to $ip"
+            } else {
+                $_
+            }
+        } | Set-Content $hostsPath -Force
+}
+
 docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.auggis.yml" up -d
 exit 0
