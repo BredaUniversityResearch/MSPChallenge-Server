@@ -60,9 +60,12 @@ class GameController extends BaseController
      */
     public function state(
         int $sessionId,
-        GameStateValue $state,
+        GameStateValue|string $state,
         WatchdogCommunicator $watchdogCommunicator
     ): void {
+        if (is_string($state)) {
+            $state = GameStateValue::from($state);
+        }
         $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
         /** @var GameRepository $repo */
         $repo = $em->getRepository(GameEntity::class);
