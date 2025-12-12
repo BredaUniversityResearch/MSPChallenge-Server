@@ -60,10 +60,37 @@ if (Test-Path ".env.local") {
 Read-Host "Please switch and connect to the Wi-Fi network to be used for your 'augGIS' session and then press enter to continue"
 
 # Get the IP address of the Wi-Fi network interface
-$netAdapter = Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias Wi-Fi,Ethernet -AddressState Preferred | Select-Object -First 1
-$netAdapter.IPAddress
-$wifiIpEscaped = $netAdapter.IPAddress -replace '\.', '\.'
-Write-Host "Gonna use $($netAdapter.IPAddress) for the MSP server connections"
+$wifiAdapter = Get-NetIPAddress -AddressFamily IPv4 -InterfaceAlias Wi-Fi,Ethernet -AddressState Preferred | Select-Object -First 1
+$wifiIpEscaped = $wifiAdapter.IPAddress -replace '\.', '\.'
+Write-Host "Gonna use $($wifiAdapter.IPAddress) for the MSP server connections"
+
+$ip = $wifiAdapter.IPAddress
+$hostsPath = 'C:\Windows\System32\drivers\etc\hosts'
+if (Test-Path $hostsPath) {
+    Write-Host "Found C:\Windows\System32\drivers\etc\hosts, reading:"
+    try {
+        $newHostsContent = (Get-Content $hostsPath) | ForEach-Object {
+            if ($_ -match '^\d{1,3}(\.\d{1,3}){3}\s+host\.docker\.internal$') {
+                $hostDockerFound = $true
+                "$ip host.docker.internal"
+            } elseif ($_ -match '^\d{1,3}(\.\d{1,3}){3}\s+gateway\.docker\.internal$') {
+                "$ip gateway.docker.internal"
+            } else {
+                $_
+            }
+        }
+        if (-not $hostDockerFound) {
+            Write-Error "Error: host.docker.internal entry not found in hosts file."
+            Write-Warning "Make sure to enable 'Add the *.docker.internal names to the host's /etc/hosts file' in Docker Desktop General settings"
+            exit 1
+        }
+        Write-Host "Found host.docker.internal, updating hosts file with new IP $ip"
+        Set-Content $hostsPath -Force -Value $newHostsContent
+    } catch {
+        Write-Error "Error processing hosts file: $($_.Exception.Message)"
+        Write-Host "Hosts file was not changed."
+    }
+}
 
 # pre-cache the auggis server image
 docker pull docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:$tag
@@ -71,30 +98,12 @@ docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/do
 
 # Write variables to .env.local
 Set-Content -Path ".env.local" -Value @"
-URL_WEB_SERVER_HOST=$($netAdapter.IPAddress)
-URL_WS_SERVER_HOST=$($netAdapter.IPAddress)
+URL_WEB_SERVER_HOST=$($wifiAdapter.IPAddress)
+URL_WS_SERVER_HOST=$($wifiAdapter.IPAddress)
 IMMERSIVE_SESSIONS_DOCKER_HUB_TAG=$tag
 IMMERSIVE_SESSIONS_HEALTHCHECK_WRITE_MODE=1
 CORS_ALLOW_ORIGIN='^https?://(localhost|127\.0\.0\.1|$wifiIpEscaped)(:[0-9]+)?$'
 "@
-
-$hostsPath = 'C:\Windows\System32\drivers\etc\hosts'
-if (Test-Path $hostsPath) {
-    Write-Host "Found C:\Windows\System32\drivers\etc\hosts, editing:"
-    $ip = $netAdapter.IPAddress
-    (Get-Content $hostsPath) |
-        ForEach-Object {
-            if ($_ -match '^\d{1,3}(\.\d{1,3}){3}\s+host\.docker\.internal$') {
-                "$ip host.docker.internal"
-                Write-Host "* Updated host.docker.internal to $ip"
-            } elseif ($_ -match '^\d{1,3}(\.\d{1,3}){3}\s+gateway\.docker\.internal$') {
-                "$ip gateway.docker.internal"
-                Write-Host "* Updated gateway.docker.internal to $ip"
-            } else {
-                $_
-            }
-        } | Set-Content $hostsPath -Force
-}
 
 docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.adminer.yml up -d --remove-orphans
 exit 0
