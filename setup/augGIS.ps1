@@ -95,7 +95,8 @@ if (Test-Path $hostsPath) {
             exit 1
         }
         Write-Host "Found host.docker.internal, updating hosts file with new IP $ip"
-        Set-Content $hostsPath -Force -Value $newHostsContent -ErrorAction Stop
+        New-Item -Path . -Name "hosts.tmp" -Force -ItemType "File" -Value ($newHostsContent -join "`r`n") -ErrorAction Stop | Out-Null
+        Move-Item -Path .\hosts.tmp -Destination $hostsPath -Force -ErrorAction Stop
     } catch {
         Write-Error "Error processing hosts file: $($_.Exception.Message)"
         Write-Warning "Make sure C:\Windows\System32\drivers\etc\hosts is not in use by another program"
