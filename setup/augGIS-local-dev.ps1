@@ -80,7 +80,9 @@ if (Test-Path $hostsPath) {
             }
         }
         if (-not $newHostsContent -or $newHostsContent.Count -eq 0) {
-            Write-Error "Error: newHostsContent is empty. Hosts file will not be updated."
+            Write-Error "Error: newHostsContent is empty. Couldn't read hosts file?"
+            Write-Warning "Make sure C:\Windows\System32\drivers\etc\hosts is not in use by another program"
+            Write-Warning "Make sure to enable 'Add the *.docker.internal names to the host's /etc/hosts file' in Docker Desktop General settings"
             exit 1
         }
         if (-not $hostDockerFound) {
@@ -89,7 +91,7 @@ if (Test-Path $hostsPath) {
             exit 1
         }
         Write-Host "Found host.docker.internal, updating hosts file with new IP $ip"
-        Set-Content $hostsPath -Force -Value $newHostsContent
+        Set-Content $hostsPath -Force -Value $newHostsContent -ErrorAction Stop
     } catch {
         Write-Error "Error processing hosts file: $($_.Exception.Message)"
         Write-Warning "Make sure C:\Windows\System32\drivers\etc\hosts is not in use by another program"
