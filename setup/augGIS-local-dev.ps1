@@ -88,7 +88,9 @@ if (Test-Path $hostsPath) {
         Set-Content $hostsPath -Force -Value $newHostsContent
     } catch {
         Write-Error "Error processing hosts file: $($_.Exception.Message)"
+        Write-Warning "Make sure C:\Windows\System32\drivers\etc\hosts is not in use by another program"
         Write-Host "Hosts file was not changed."
+        exit 1
     }
 }
 
