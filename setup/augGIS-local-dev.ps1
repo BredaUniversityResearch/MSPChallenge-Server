@@ -79,6 +79,10 @@ if (Test-Path $hostsPath) {
                 $_
             }
         }
+        if (-not $newHostsContent -or $newHostsContent.Count -eq 0) {
+            Write-Error "Error: newHostsContent is empty. Hosts file will not be updated."
+            exit 1
+        }
         if (-not $hostDockerFound) {
             Write-Error "Error: host.docker.internal entry not found in hosts file."
             Write-Warning "Make sure to enable 'Add the *.docker.internal names to the host's /etc/hosts file' in Docker Desktop General settings"
