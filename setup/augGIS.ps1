@@ -66,7 +66,36 @@ Write-Host "  branch_name: $branch_name"
 Read-Host "Please switch and connect to the Wi-Fi network to be used for your 'augGIS' session and then press enter to continue"
 $wifiAdapter = Select-WifiAdapter
 $wifiIpEscaped = $wifiAdapter.IPAddress -replace '\.', '\.'
-$wifiAdapter.IPAddress
+Write-Host "Gonna use $($wifiAdapter.IPAddress) for the MSP server connections"
+
+$ip = $wifiAdapter.IPAddress
+$hostsPath = 'C:\Windows\System32\drivers\etc\hosts'
+if (Test-Path $hostsPath) {
+    Write-Host "Found C:\Windows\System32\drivers\etc\hosts, reading:"
+    try {
+        $newHostsContent = (Get-Content $hostsPath) | ForEach-Object {
+            if ($_ -match '^\d{1,3}(\.\d{1,3}){3}\s+host\.docker\.internal$') {
+                $hostDockerFound = $true
+                "$ip host.docker.internal"
+            } elseif ($_ -match '^\d{1,3}(\.\d{1,3}){3}\s+gateway\.docker\.internal$') {
+                "$ip gateway.docker.internal"
+            } else {
+                $_
+            }
+        }
+        if (-not $hostDockerFound) {
+            Write-Error "Error: host.docker.internal entry not found in hosts file."
+            Write-Warning "Make sure to enable 'Add the *.docker.internal names to the host's /etc/hosts file' in Docker Desktop General settings"
+            exit 1
+        }
+        Write-Host "Found host.docker.internal, updating hosts file with new IP $ip"
+        Set-Content $hostsPath -Force -Value $newHostsContent
+    } catch {
+        Write-Error "Error processing hosts file: $($_.Exception.Message)"
+        Write-Host "Hosts file was not changed."
+    }
+}
+
 Write-Host "Gonna use $($wifiAdapter.IPAddress) for the MSP server connections"
 Read-Host "If needed, switch to a network that has an internet connection and then press enter to continue"
 
@@ -112,24 +141,6 @@ MY2_PASSWORD=$([guid]::NewGuid().ToString("N"))
 JWT_PASSPHRASE=$([guid]::NewGuid().ToString("N"))
 DATABASE_CREATOR_PASSWORD=$([guid]::NewGuid().ToString("N"))
 "@
-
-$hostsPath = 'C:\Windows\System32\drivers\etc\hosts'
-if (Test-Path $hostsPath) {
-    Write-Host "Found C:\Windows\System32\drivers\etc\hosts, editing:"
-    $ip = $netAdapter.IPAddress
-    (Get-Content $hostsPath) |
-        ForEach-Object {
-            if ($_ -match '^\d{1,3}(\.\d{1,3}){3}\s+host\.docker\.internal$') {
-                "$ip host.docker.internal"
-                Write-Host "* Updated host.docker.internal to $ip"
-            } elseif ($_ -match '^\d{1,3}(\.\d{1,3}){3}\s+gateway\.docker\.internal$') {
-                "$ip gateway.docker.internal"
-                Write-Host "* Updated gateway.docker.internal to $ip"
-            } else {
-                $_
-            }
-        } | Set-Content $hostsPath -Force
-}
 
 docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.auggis.yml" up -d
 exit 0
