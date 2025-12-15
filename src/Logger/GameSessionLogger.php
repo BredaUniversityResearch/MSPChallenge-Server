@@ -45,6 +45,9 @@ class GameSessionLogger extends AbstractProcessingHandler
         $arr = $record->toArray();
         // hack to make the placeholders work (not sure why monolog fails to do this)
         foreach ($arr['context'] as $key => $val) {
+            if (!is_string($key) || !is_string($val)) {
+                continue;
+            }
             $arr['message'] = str_replace('{'.$key.'}', $val, $arr['message']);
         }
         error_log(

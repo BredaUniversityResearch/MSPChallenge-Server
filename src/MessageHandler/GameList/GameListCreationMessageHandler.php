@@ -547,38 +547,17 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             $this->sessionLogHandler->info("No duplicate MSP IDs. Yay!");
             return;
         }
-        $contextVars = [];
         foreach ($geometries as $mspId => $geometryList) {
             $counted = count($geometryList);
-            $contextVar = [
-                'msp_id' => $mspId,
-                'duplicate_count' => $counted
-            ];
-            $previousGeometryData = null;
-            foreach ($geometryList as $key => $geometry) {
-                $geometryData = $geometry->getGeometryData();
-                if ($previousGeometryData === null) {
-                    $contextVar['messages'][] = "Used in layer {$geometry->getLayer()->getLayerName()} ".
-                        "for a feature with properties {$geometryData}";
-                    $previousGeometryData = $geometryData;
-                } else {
-                    if ($previousGeometryData !== $geometryData) {
-                        $contextVar['messages'][] =
-                            "...and for a feature with somehow differing properties: {$geometryData}";
-                    } else {
-                        $contextVar['messages'][] =
-                            "...and for another feature but seemingly with the same properties.";
-                    }
-                }
-                if ($key == 4 && count($geometryList) > 5) {
-                    $contextVar['messages'][] =
-                        "Now terminating the listing of duplicated geometry to not clog up this log.";
-                    break;
-                }
+            $contextVars = [];
+            if ($_ENV['APP_ENV'] == 'dev') {
+                $contextVars = [
+                    // phpcs:ignoreFile Generic.Files.LineLength.TooLong
+                    'href' => 'http://localhost:8082/?username=&db='.$this->database.'&sql=select l.layer_name%2C g.geometry_data from geometry g inner join layer l on g.geometry_layer_id %3D l.layer_id where geometry_mspid%3D\''.$mspId.'\''
+                ];
             }
-            $contextVars[] = $contextVar;
+            $this->sessionLogHandler->warning("MSP ID {$mspId} has {$counted} duplicates", $contextVars);
         }
-        $this->sessionLogHandler->warning("Duplicate MSP IDs found.", $contextVars);
     }
 
     public static function ensureMultiData(&$geometry): void
