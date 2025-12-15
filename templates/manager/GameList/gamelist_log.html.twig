@@ -10,7 +10,7 @@
                 )
             )
         %}
-        <li class="text-break list-group-item {{ levelClass }}">{{ logLine.message }}</li>
+        <li class="text-break list-group-item {{ levelClass }}">{% if logLine.context.href is defined %}<A href="{{  logLine.context.href|raw }}" target="_blank">{{ logLine.message }}</A>{% else %}{{ logLine.message }}{% endif %}</li>
     {% endfor %}
     </ul>
 </turbo-frame>
