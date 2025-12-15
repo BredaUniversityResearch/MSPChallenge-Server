@@ -547,38 +547,38 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             $this->sessionLogHandler->info("No duplicate MSP IDs. Yay!");
             return;
         }
-        $this->sessionLogHandler->error("Duplicate MSP IDs found.");
+        $contextVars = [];
         foreach ($geometries as $mspId => $geometryList) {
             $counted = count($geometryList);
-            $this->sessionLogHandler->error("MSP ID {$mspId} has {$counted} duplicates");
+            $contextVar = [
+                'msp_id' => $mspId,
+                'duplicate_count' => $counted
+            ];
             $previousGeometryData = null;
             foreach ($geometryList as $key => $geometry) {
                 $geometryData = $geometry->getGeometryData();
                 if ($previousGeometryData === null) {
-                    $this->sessionLogHandler->error(
-                        "MSP ID {$mspId} was used in layer {$geometry->getLayer()->getLayerName()} ".
-                        "for a feature with properties {$geometryData}"
-                    );
+                    $contextVar['messages'][] = "Used in layer {$geometry->getLayer()->getLayerName()} ".
+                        "for a feature with properties {$geometryData}";
                     $previousGeometryData = $geometryData;
                 } else {
                     if ($previousGeometryData !== $geometryData) {
-                        $this->sessionLogHandler->error(
-                            "...and for a feature with somehow differing properties: {$geometryData}"
-                        );
+                        $contextVar['messages'][] =
+                            "...and for a feature with somehow differing properties: {$geometryData}";
                     } else {
-                        $this->sessionLogHandler->error(
-                            "...and for another feature but seemingly with the same properties."
-                        );
+                        $contextVar['messages'][] =
+                            "...and for another feature but seemingly with the same properties.";
                     }
                 }
                 if ($key == 4 && count($geometryList) > 5) {
-                    $this->sessionLogHandler->error(
-                        "Now terminating the listing of duplicated geometry to not clog up this log."
-                    );
+                    $contextVar['messages'][] =
+                        "Now terminating the listing of duplicated geometry to not clog up this log.";
                     break;
                 }
             }
+            $contextVars[] = $contextVar;
         }
+        $this->sessionLogHandler->warning("Duplicate MSP IDs found.", $contextVars);
     }
 
     public static function ensureMultiData(&$geometry): void
