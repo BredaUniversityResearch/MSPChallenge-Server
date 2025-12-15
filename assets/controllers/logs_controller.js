@@ -35,6 +35,7 @@ export default class extends Controller {
         if (levelName !== 'WARNING') {
             levelName = 'ERROR'; // Treat all non-warning levels as ERROR: CRITICAL, ALERT, EMERGENCY, ERROR
         }
+        let lineNumber = logObj.line_number || 0;
         if ((Array.isArray(extra) && extra.length === 0) || (typeof extra === 'object' && Object.keys(extra).length === 0)) {
             extra = '';
         }
@@ -63,6 +64,7 @@ export default class extends Controller {
             row.style.display = "none";
         }
         row.setAttribute('data-message-hash', messageHash);
+        row.setAttribute('data-line-number', lineNumber);
         if (extra) {
             const uniqueId = this.generateUUID();
             try {
@@ -157,7 +159,13 @@ export default class extends Controller {
         rows.sort((a, b) => {
             const timeA = new Date(a.cells[1]?.getAttribute('data-time'));
             const timeB = new Date(b.cells[1]?.getAttribute('data-time'));
-            return timeB - timeA;
+            if (timeB - timeA !== 0) {
+                return timeB - timeA;
+            }
+            // If times are equal, compare by line_number attribute (assumed to be integer)
+            const lineA = parseInt(a.getAttribute('data-line-number'), 10) || 0;
+            const lineB = parseInt(b.getAttribute('data-line-number'), 10) || 0;
+            return lineB - lineA;
         });
         rows.forEach(row => this.logsTarget.appendChild(row));
     }

@@ -547,37 +547,16 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             $this->sessionLogHandler->info("No duplicate MSP IDs. Yay!");
             return;
         }
-        $this->sessionLogHandler->error("Duplicate MSP IDs found.");
         foreach ($geometries as $mspId => $geometryList) {
             $counted = count($geometryList);
-            $this->sessionLogHandler->error("MSP ID {$mspId} has {$counted} duplicates");
-            $previousGeometryData = null;
-            foreach ($geometryList as $key => $geometry) {
-                $geometryData = $geometry->getGeometryData();
-                if ($previousGeometryData === null) {
-                    $this->sessionLogHandler->error(
-                        "MSP ID {$mspId} was used in layer {$geometry->getLayer()->getLayerName()} ".
-                        "for a feature with properties {$geometryData}"
-                    );
-                    $previousGeometryData = $geometryData;
-                } else {
-                    if ($previousGeometryData !== $geometryData) {
-                        $this->sessionLogHandler->error(
-                            "...and for a feature with somehow differing properties: {$geometryData}"
-                        );
-                    } else {
-                        $this->sessionLogHandler->error(
-                            "...and for another feature but seemingly with the same properties."
-                        );
-                    }
-                }
-                if ($key == 4 && count($geometryList) > 5) {
-                    $this->sessionLogHandler->error(
-                        "Now terminating the listing of duplicated geometry to not clog up this log."
-                    );
-                    break;
-                }
+            $contextVars = [];
+            if ($_ENV['APP_ENV'] == 'dev') {
+                $contextVars = [
+                    // phpcs:ignoreFile Generic.Files.LineLength.TooLong
+                    'href' => 'http://localhost:8082/?username=&db='.$this->database.'&sql=select l.layer_name%2C g.geometry_data from geometry g inner join layer l on g.geometry_layer_id %3D l.layer_id where geometry_mspid%3D\''.$mspId.'\''
+                ];
             }
+            $this->sessionLogHandler->warning("MSP ID {$mspId} has {$counted} duplicates", $contextVars);
         }
     }
 
