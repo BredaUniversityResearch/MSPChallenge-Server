@@ -88,6 +88,7 @@ class ErrorsController extends BaseController
                 if (empty($log['extra'])) {
                     unset($log['extra']);
                 }
+                $log['line_number'] = $offset + $lineCount + 1;
                 $lines[] = $log;
             }
             $file->next();
