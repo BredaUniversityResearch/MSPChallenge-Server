@@ -7,6 +7,7 @@ use App\Domain\Common\Stopwatch\Stopwatch;
 use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\ClientConnectionResourceManagerInterface;
+use App\Domain\WsServer\ClientDisconnectedException;
 use App\Domain\WsServer\ServerManagerInterface;
 use App\Domain\WsServer\WsServerInterface;
 use App\Domain\WsServer\WsServerOutput;
@@ -17,6 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Serializer\SerializerInterface;
 use function App\tpf;
+use function React\Promise\reject;
 
 abstract class Plugin extends EventDispatcher implements PluginInterface
 {
@@ -267,15 +269,23 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
                     );
                 })
                 ->otherwise(function ($error) {
-                    if ($error instanceof Exception) {
-                        $this->addOutput(
-                            'Plugin '.$this->getName().' failed: '.$error->getMessage()
-                        );
-                    } else {
-                        $this->addOutput(
-                            'Plugin '.$this->getName().' failed: '.$error
-                        );
+                    if ($error instanceof ClientDisconnectedException) {
+                        return null;
                     }
+                    if ($error instanceof \Throwable) {
+                        $this->getLogger()?->error(
+                            $error->getMessage(),
+                            ['exception' => $error]
+                        );
+                        $this->addOutput('Plugin '.$this->getName().' failed: '.$error->getMessage());
+                    } elseif (is_string($error)) {
+                        $this->getLogger()?->error($error);
+                        $this->addOutput('Plugin '.$this->getName().' failed: '.$error);
+                    } else {
+                        $this->getLogger()?->error('Encountered error', ['reason' => $error]);
+                        $this->addOutput('Plugin '.$this->getName().' failed: '.json_encode($error));
+                    }
+                    return reject($error);
                 });
         });
     }

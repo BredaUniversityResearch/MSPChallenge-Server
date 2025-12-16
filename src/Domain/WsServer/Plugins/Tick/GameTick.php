@@ -322,7 +322,10 @@ class GameTick extends TickBase
             //Entire game is done.
             return $this->getAsyncDatabase()->query(
                 $qb
-                    ->set('game_transition_state', $tick['transition_state'] ?? $tick['state'])
+                    ->set(
+                        'game_transition_state',
+                        $qb->createPositionalParameter($tick['transition_state'] ?? $tick['state'])
+                    )
                     ->set('game_state', $qb->createPositionalParameter(GameStateValue::END->value))
             )
             ->then(function (/*Result $result*/) use ($currentMonth) {
@@ -338,7 +341,10 @@ class GameTick extends TickBase
             return $this->getAsyncDatabase()->query(
                 $qb
                     ->set('game_planning_monthsdone', '0')
-                    ->set('game_transition_state', $tick['transition_state'] ?? $tick['state'])
+                    ->set(
+                        'game_transition_state',
+                        $qb->createPositionalParameter($tick['transition_state'] ?? $tick['state'])
+                    )
                     ->set('game_state', $qb->createPositionalParameter(GameStateValue::SIMULATION->value))
             )
             ->then(function (/*Result $result*/) use ($currentMonth) {
@@ -356,7 +362,10 @@ class GameTick extends TickBase
             return $this->getAsyncDatabase()->query(
                 $qb
                     ->set('game_planning_monthsdone', '0')
-                    ->set('game_transition_state', $tick['transition_state'] ?? $tick['state'])
+                    ->set(
+                        'game_transition_state',
+                        $qb->createPositionalParameter($tick['transition_state'] ?? $tick['state'])
+                    )
                     ->set('game_state', $qb->createPositionalParameter(GameStateValue::PLAY->value))
                     ->set('game_planning_realtime', $era_realtime[$era])
             )

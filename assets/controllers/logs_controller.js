@@ -36,6 +36,7 @@ export default class extends Controller {
             levelName = 'ERROR'; // Treat all non-warning levels as ERROR: CRITICAL, ALERT, EMERGENCY, ERROR
         }
         let lineNumber = logObj.line_number || 0;
+        let logCount = logObj.count || 1;
         if ((Array.isArray(extra) && extra.length === 0) || (typeof extra === 'object' && Object.keys(extra).length === 0)) {
             extra = '';
         }
@@ -47,7 +48,7 @@ export default class extends Controller {
             // Increment count
             const countCell = existingRow.querySelector('td[data-count]');
             let count = parseInt(countCell.textContent, 10) || 1;
-            countCell.textContent = count + 1;
+            countCell.textContent = count + logCount;
             // Update time
             const timeCell = existingRow.querySelector('td[data-time]');
             if (new Date(timeCell.getAttribute('data-time')) < new Date(time)) {
@@ -88,7 +89,7 @@ export default class extends Controller {
             `;
         }
         row.innerHTML = `
-            <td data-count class="w-auto text-nowrap">1</td>
+            <td data-count class="w-auto text-nowrap">${logCount}</td>
             <td data-time="${time}" class="w-auto text-nowrap">${this.timeAgo(time)}</td>
             <td class="w-auto text-nowrap">${channel}</td>
             <td>${message}${extra}</td>

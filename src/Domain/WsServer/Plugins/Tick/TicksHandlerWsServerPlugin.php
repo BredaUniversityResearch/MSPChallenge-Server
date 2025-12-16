@@ -52,13 +52,6 @@ class TicksHandlerWsServerPlugin extends Plugin
                         $this->getWsServer()->registerPlugin($tickPlugin);
                         $this->tickPlugins[$gameSessionId] = $tickPlugin;
                     }
-                })
-                ->otherwise(function ($reason) {
-                    $context = [];
-                    if ($reason instanceof \Throwable) {
-                        $context['exception'] = $reason;
-                    }
-                    $this->getLogger()?->error($reason, $context);
                 });
         });
     }

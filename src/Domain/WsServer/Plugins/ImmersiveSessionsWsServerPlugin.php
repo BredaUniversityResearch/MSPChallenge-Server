@@ -19,7 +19,6 @@ use React\Promise\PromiseInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use function App\tpf;
 use function React\Promise\all;
-use function React\Promise\reject;
 
 class ImmersiveSessionsWsServerPlugin extends Plugin
 {
@@ -47,16 +46,6 @@ class ImmersiveSessionsWsServerPlugin extends Plugin
                         return;
                     }
                     $this->addOutput(json_encode($payloadContainer));
-                })
-                ->otherwise(function ($reason) {
-                    if ($reason instanceof ClientDisconnectedException) {
-                        return null;
-                    }
-                    $context = [];
-                    if ($reason instanceof \Throwable) {
-                        $context['exception'] = $reason;
-                    }
-                    $this->getLogger()?->error($reason, $context);
                 });
         });
     }

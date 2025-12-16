@@ -226,7 +226,8 @@ class WsServer extends EventDispatcher implements
             ->setClientConnectionResourceManager($this)
             ->setServerManager($this)
             ->setSerializer($this->serializer)
-            ->setWsServer($this);
+            ->setWsServer($this)
+            ->setLogger($this->appWsServerLogger);
 
         // wait for loop to be registered
         if (null === $this->loop) {
