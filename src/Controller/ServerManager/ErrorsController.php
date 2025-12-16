@@ -100,10 +100,11 @@ class ErrorsController extends BaseController
             }
         }
 
-        $lines = collect($lines)->groupBy('message')->map(function(Collection $values) {
+        $lines = collect($lines)->groupBy('message')->map(function (Collection $values) {
             $values = $values->sort(function (array $a, array $b) {
                 // It returns -1, 0 or 1 when $a is respectively less than, equal to, or greater than $b
-                $diff = (new \DateTime($b['datetime']))->getTimestamp() <=> (new \DateTime($a['datetime']))->getTimestamp();
+                $diff = (new \DateTime($b['datetime']))->getTimestamp() <=> (new \DateTime($a['datetime']))
+                        ->getTimestamp();
                 if ($diff === 0) {
                     // if same timestamp, compare line numbers
                     return $b['line_number'] <=> $a['line_number'];

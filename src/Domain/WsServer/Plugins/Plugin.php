@@ -269,7 +269,7 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
                     );
                 })
                 ->otherwise(function ($error) {
-                   if ($error instanceof ClientDisconnectedException) {
+                    if ($error instanceof ClientDisconnectedException) {
                         return null;
                     }
                     if ($error instanceof \Throwable) {

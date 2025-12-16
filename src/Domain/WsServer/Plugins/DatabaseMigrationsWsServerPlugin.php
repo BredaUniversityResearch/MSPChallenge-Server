@@ -14,7 +14,6 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use function App\tpf;
 
-
 class DatabaseMigrationsWsServerPlugin extends Plugin
 {
     public static function getDefaultMinIntervalSec(): float
