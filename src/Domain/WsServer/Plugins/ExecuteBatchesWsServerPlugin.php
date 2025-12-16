@@ -64,17 +64,6 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                         return;
                     }
                     $this->addOutput(json_encode($clientToBatchResultContainer));
-                })
-                ->otherwise(function ($reason) {
-                    if ($reason instanceof ClientDisconnectedException) {
-                        return null;
-                    }
-                    $context = [];
-                    if ($reason instanceof \Throwable) {
-                        $context['exception'] = $reason;
-                    }
-                    $this->getLogger()?->error($reason, $context);
-                    return reject($reason);
                 });
         });
     }

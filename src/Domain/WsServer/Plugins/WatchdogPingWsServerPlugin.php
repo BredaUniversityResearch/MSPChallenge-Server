@@ -5,7 +5,6 @@ namespace App\Domain\WsServer\Plugins;
 use App\Domain\API\v1\Simulation;
 use App\Domain\Common\Context;
 use App\Domain\Common\ToPromiseFunction;
-use App\Domain\WsServer\ClientDisconnectedException;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\PromiseInterface;
@@ -42,16 +41,6 @@ class WatchdogPingWsServerPlugin extends Plugin
                     }
                     $gameSessionIds = $gameSessionIds->all(); // to raw array
                     return $this->pingWatchdogs($gameSessionIds);
-                })
-                ->otherwise(function ($reason) {
-                    if ($reason instanceof ClientDisconnectedException) {
-                        return null;
-                    }
-                    $context = [];
-                    if ($reason instanceof \Throwable) {
-                        $context['exception'] = $reason;
-                    }
-                    $this->getLogger()?->error($reason, $context);
                 });
         });
     }
