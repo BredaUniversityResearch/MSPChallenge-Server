@@ -153,7 +153,7 @@ class GameListAndSaveSerializer
         return [
             'gameConfigVersion' => fn($innerObject) => (!is_null($innerObject)) ? $innerObject->getId() : null,
             'sessionState' => fn($innerObject) => ((string) $innerObject),
-            'gameState' => fn($innerObject) => ((string) $innerObject),
+            'gameState' => fn(GameStateValue $innerObject) => ($innerObject->value),
             'gameVisibility' => fn($innerObject) => ((string) $innerObject)
         ];
     }
