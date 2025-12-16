@@ -633,7 +633,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         $remainingSims = array_diff($possibleSims, $simulationsDone);
         foreach ($remainingSims as $remainingSim) {
             if (key_exists($remainingSim, $this->dataModel)) {
-                $this->sessionLogHandler->error(
+                $this->sessionLogHandler->warning(
                     "Unable to set up {$remainingSim}, as its SessionCreation function does not exist."
                 );
             }
