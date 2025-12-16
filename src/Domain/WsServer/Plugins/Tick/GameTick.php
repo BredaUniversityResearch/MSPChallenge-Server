@@ -331,7 +331,8 @@ class GameTick extends TickBase
             ->then(function (/*Result $result*/) use ($currentMonth) {
                 $simulation = new Simulation();
                 $this->asyncDataTransferTo($simulation);
-                return $simulation->changeWatchdogState(GameStateValue::END, $currentMonth);
+                return $simulation->changeWatchdogState(GameStateValue::END, $currentMonth)
+                    ->then(fn(GameStateValue $newState) => $newState->value);
             });
         } elseif (($state == GameStateValue::PLAY->value || $state == GameStateValue::FASTFORWARD->value)
             && $monthsDone >= $tick['era_gametime'] &&
@@ -350,7 +351,8 @@ class GameTick extends TickBase
             ->then(function (/*Result $result*/) use ($currentMonth) {
                 $simulation = new Simulation();
                 $this->asyncDataTransferTo($simulation);
-                return $simulation->changeWatchdogState(GameStateValue::SIMULATION, $currentMonth);
+                return $simulation->changeWatchdogState(GameStateValue::SIMULATION, $currentMonth)
+                    ->then(fn(GameStateValue $newState) => $newState->value);
             });
         } elseif (($state == GameStateValue::SIMULATION->value &&
                 $monthsDone >= $tick['era_time'] - $tick['era_gametime']
@@ -372,7 +374,8 @@ class GameTick extends TickBase
             ->then(function (Result $result) use ($currentMonth) {
                 $simulation = new Simulation();
                 $this->asyncDataTransferTo($simulation);
-                return $simulation->changeWatchdogState(GameStateValue::PLAY, $currentMonth);
+                return $simulation->changeWatchdogState(GameStateValue::PLAY, $currentMonth)
+                    ->then(fn(GameStateValue $newState) => $newState->value);
             });
         } else {
             return $this->getAsyncDatabase()->query($qb)
