@@ -890,7 +890,7 @@ SUBQUERY,
             ));
             $this->appendFromLogContainer($policyData);
             if (false === $filterResult) {
-                $this->log('Skipping policy');
+                $this->log('Skipping policy: ' . $policyData->getPolicyTypeName()->value);
                 continue;
             }
             $policiesToApply[] = $policyData;
