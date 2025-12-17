@@ -1027,6 +1027,9 @@ SQL,
             ->getRepository(GameList::class)
             ->find($gameListId)
             ?->getGameConfigVersion();
+        if (null === $this->gameConfigVersion) {
+            return null;
+        }
         $gameConfigDataModel = $this->gameConfigVersion->getGameConfigComplete()['datamodel'];
         $heatmapSettings = array_filter(
             $gameConfigDataModel['SEL']['heatmap_settings'],
