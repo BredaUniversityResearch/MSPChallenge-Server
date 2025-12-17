@@ -543,6 +543,7 @@ class MEL extends Base
             // * the current month is listed, but the previous month is not
             $qb->orWhere($qb->expr()->in(
                 'layer_id',
+                // phpcs:disable Generic.Files.LineLength.TooLong
                 sprintf(
                     <<< 'SUBQUERY'
                     WITH
@@ -554,7 +555,7 @@ class MEL extends Base
                                     COLUMNS (
                                         months JSON PATH '$.months'
                                     )
-                                ) jt ON JSON_EXTRACT(g.geometry_data, '$.%s.months') IS NOT NULL
+                                ) jt ON JSON_EXTRACT(JSON_UNQUOTE(JSON_EXTRACT(g.geometry_data, '$.%s')), '$.items[*].months') IS NOT NULL
                         )
                     SELECT DISTINCT l.layer_original_id
                     FROM layer l
@@ -572,6 +573,7 @@ SUBQUERY,
                     $layerProp['property_name'],
                     $layerProp['property_name']
                 )
+                // phpcs:enable Generic.Files.LineLength.TooLong
             ))
             ->setParameter('month', pow(2, $currentMonth % 12))
             ->setParameter('prevMonth', pow(2, (($currentMonth-1) % 12)));
