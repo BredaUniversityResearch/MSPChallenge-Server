@@ -96,7 +96,7 @@ class LogController extends BaseController
                 'stack_trace' => $stackTrace,
                 'headers' => array_intersect(
                     ['x-server-id','msp-client-version','x-simulation-name'],
-                    $request->headers->all()
+                    array_keys($request->headers->all())
                 )
             ];
         }
