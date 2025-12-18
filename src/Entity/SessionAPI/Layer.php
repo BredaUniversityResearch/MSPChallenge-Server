@@ -9,8 +9,6 @@ use ApiPlatform\OpenApi\Model\Operation;
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\EntityBase;
-use App\Entity\ServerManager\GameConfigVersion;
-use App\Entity\ServerManager\GameList;
 use App\Repository\SessionAPI\LayerRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -224,8 +222,6 @@ class Layer extends EntityBase
     private ?array $scale = null;
 
     private ?float $ecologyKpiValue = null;
-
-    private ?GameConfigVersion $gameConfigVersion = null;
 
     public function __construct()
     {
@@ -1020,17 +1016,8 @@ SQL,
         if (null === $this->getLayerName()) {
             return null;
         }
-        if (null == $gameListId =  $this->getOriginGameListId()) {
-            return null;
-        }
-        $this->gameConfigVersion ??= ConnectionManager::getInstance()->getServerManagerEntityManager()
-            ->getRepository(GameList::class)
-            ->find($gameListId)
-            ?->getGameConfigVersion();
-        if (null === $this->gameConfigVersion) {
-            return null;
-        }
-        $gameConfigDataModel = $this->gameConfigVersion->getGameConfigComplete()['datamodel'];
+        $game = new \App\Domain\API\v1\Game();
+        $gameConfigDataModel = $game->GetGameConfigValues($this->getOriginSessionLogFilePath() ?? '');
         $heatmapSettings = array_filter(
             $gameConfigDataModel['SEL']['heatmap_settings'],
             fn($x) => $x['layer_name'] === $this->getLayerName()

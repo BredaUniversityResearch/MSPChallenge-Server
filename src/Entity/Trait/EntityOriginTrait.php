@@ -2,11 +2,10 @@
 
 namespace App\Entity\Trait;
 
-use Doctrine\ORM\EntityManagerInterface;
-
 trait EntityOriginTrait
 {
     private ?int $originGameListId = null;
+    private ?string $originSessionLogFilePath = null;
 
     public function getOriginGameListId(): ?int
     {
@@ -16,6 +15,17 @@ trait EntityOriginTrait
     public function setOriginGameListId(int $originGameListId): static
     {
         $this->originGameListId = $originGameListId;
+        return $this;
+    }
+
+    public function getOriginSessionLogFilePath(): ?string
+    {
+        return $this->originSessionLogFilePath;
+    }
+
+    public function setOriginSessionLogFilePath(?string $originSessionLogFilePath): static
+    {
+        $this->originSessionLogFilePath = $originSessionLogFilePath;
         return $this;
     }
 }
