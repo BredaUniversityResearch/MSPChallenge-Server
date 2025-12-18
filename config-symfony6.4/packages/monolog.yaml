@@ -37,6 +37,14 @@ monolog:
         #    type: chromephp
         #    level: info
         main:
+            type: fingers_crossed
+            handler: main_nested
+            action_level: debug
+            excluded_http_codes:
+              - 410 # Session is non-existing
+              - 503 # Session cannot be used at the moment
+            channels: "%black_list_app_channels%"
+        main_nested:
             type: stream
             path: "%kernel.logs_dir%/%kernel.environment%.log"
             level: debug
@@ -87,6 +95,14 @@ when@prod:
     monolog:
         handlers:
             main:
+                type: fingers_crossed
+                handler: main_nested
+                action_level: error
+                excluded_http_codes:
+                  - 410 # Session is non-existing
+                  - 503 # Session cannot be used at the moment
+                channels: "%black_list_app_channels%"
+            main_nested:
                 type: rotating_file
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: error
