@@ -33,6 +33,6 @@ class GameWatchdogServerRepository extends EntityRepository
         if (null === $simulationType = ($watchdogServer->getSimulationSettings()['simulation_type'] ?? null)) {
             return false;
         }
-        return $simulationType === $type;
+        return strtolower($simulationType) === strtolower($type);
     }
 }
