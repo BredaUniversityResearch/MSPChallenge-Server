@@ -12,7 +12,7 @@ export default class extends Controller {
         document.getElementById('logToast').style.display = 'block';
         this.timeout = setInterval(function () {
             document.querySelector('turbo-frame#gameLogExcerpt').reload();
-        }, 2000);
+        }, 3000);
         window.dispatchEvent(new CustomEvent("modal-closing"));
     }
 
