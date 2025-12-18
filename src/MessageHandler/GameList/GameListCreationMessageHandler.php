@@ -2,7 +2,6 @@
 
 namespace App\MessageHandler\GameList;
 
-use App\Controller\SessionAPI\GameController;
 use App\Controller\SessionAPI\SELController;
 use App\Domain\API\v1\Game as GameAPI;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;

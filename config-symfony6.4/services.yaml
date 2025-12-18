@@ -157,6 +157,8 @@ services:
                 '@App\Entity\Listener\ImmersiveSessionConnectionEntityListener',
                 '@App\Entity\Listener\GameEntityListener'
             ]
+            $sessionLogDir: '%app.server_manager_log_dir%'
+            $sessionLogFileNameFormat: '%app.server_manager_log_name%'
         tags:
             - { name: 'doctrine.event_listener', event: 'prePersist' }
             - { name: 'doctrine.event_listener', event: 'postLoad' }

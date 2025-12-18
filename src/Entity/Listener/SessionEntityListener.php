@@ -25,7 +25,9 @@ class SessionEntityListener implements PostLoadEventListenerInterface, PrePersis
     private array $listeners = [];
 
     public function __construct(
-        array $listeners
+        array $listeners,
+        private readonly string $sessionLogDir,
+        private readonly string $sessionLogFileNameFormat
     ) {
         $listeners = array_filter($listeners, function ($listener) {
             return $listener instanceof SubEntityListenerInterface;
@@ -64,7 +66,11 @@ class SessionEntityListener implements PostLoadEventListenerInterface, PrePersis
             (null !== $database = $event->getObjectManager()->getConnection()->getDatabase()) &&
             (1 === preg_match('/'.($_ENV['DBNAME_SESSION_PREFIX'] ?? 'msp_session_').'(\d+)/', $database, $matches))
         ) {
-            $entity->setOriginGameListId((int)$matches[1]);
+            $entity
+                ->setOriginGameListId((int)$matches[1])
+                ->setOriginSessionLogFilePath(
+                    $this->sessionLogDir.sprintf($this->sessionLogFileNameFormat, (int)$matches[1])
+                );
         }
         foreach ($this->listeners as $entityClassName => $listeners) {
             foreach ($listeners as $listener) {
