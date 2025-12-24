@@ -7,9 +7,13 @@ FROM debian:11-slim
 # Install necessary dependencies for running .NET
 RUN apt-get update && apt-get install -y --no-install-recommends \
 		libicu67 \
+		git \
         libgdiplus \
+        bash \
+        procps \
+        nano \
         ca-certificates \
-	;
+	;	
 
 # Set the working directory in the container
 WORKDIR /app
