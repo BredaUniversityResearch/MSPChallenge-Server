@@ -7212,6 +7212,13 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  </summary>
  -----------------------------------------------------------------------
 </member>
+<member name="T:EwECore.Auxiliary.cVisualStyleReader">
+ ===========================================================================
+ <summary>
+ Helper class for serializing a visual style to text.
+ </summary>
+ ===========================================================================
+</member>
 <member name="T:EwECore.cEcotracerGroupInput">
  ---------------------------------------------------------------------------
  <summary>
@@ -7505,6 +7512,9 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
 <member name="F:EwECore.cCore.m_StateManager">
  <summary>Core state manager</summary>
  <remarks>performs actions to bring core state up-to-date</remarks>
+</member>
+<member name="F:EwECore.cCore.m_gameManager">
+ <summary>Manager to access interface specific to the "Game" interface </summary>
 </member>
 <member name="F:EwECore.cCore.m_Functions">
  <summary>Class to wrap stand alone functions for internal and external access.</summary>
@@ -10882,12 +10892,6 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
 <member name="F:EwECore.eTimeSeriesType.TimeForcing">
  <summary>Time forcing, forcing</summary>
 </member>
-<member name="F:EwECore.eTimeSeriesType.FishingEffort">
- <summary>Effort forcing</summary>
-</member>
-<member name="F:EwECore.eTimeSeriesType.FishingMortality">
- <summary>F forcing</summary>
-</member>
 <member name="F:EwECore.eTimeSeriesType.Catches">
  <summary>Absolute catches, reference</summary>
 </member>
@@ -10913,25 +10917,25 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  <summary>Catchabilities (fleet x group, driver)</summary>
 </member>
 <member name="F:EwECore.eTimeSeriesType.OffVesselPrice">
- <summary>Absolute off-vessel price (by fleet x group, driver)</summary>
+ <summary>Absolute off-vessel price (by fleet x group x driver)</summary>
 </member>
 <member name="F:EwECore.eTimeSeriesType.OffVesselPriceRel">
- <summary>Relative off-vessel price (by fleet x group, driver)</summary>
+ <summary>Relative off-vessel price (by fleet x group x driver)</summary>
 </member>
 <member name="F:EwECore.eTimeSeriesType.EffortCost">
- <summary>Effort cost multiplier (by fleet, driver)</summary>
+ <summary>Effort cost multiplier (by fleet x driver)</summary>
 </member>
 <member name="F:EwECore.eTimeSeriesType.EffortCostRel">
- <summary>Effort cost multiplier (by fleet, driver)</summary>
+ <summary>Effort cost multiplier (by fleet x driver)</summary>
 </member>
 <member name="F:EwECore.eTimeSeriesType.SailCost">
- <summary>Absolute Sailing cost (by fleet, driver)</summary>
+ <summary>Absolute Sailing cost (by fleet x driver)</summary>
 </member>
 <member name="F:EwECore.eTimeSeriesType.SailCostRel">
- <summary>Relative sailing cost (multiplier; by fleet, driver)</summary>
+ <summary>Relative sailing cost (multiplier; by fleet x driver)</summary>
 </member>
 <member name="F:EwECore.eTimeSeriesType.FixedCost">
- <summary>Absolute fixed cost (by fleet, driver)</summary>
+ <summary>Absolute fixed cost (by fleet x driver)</summary>
 </member>
 <member name="F:EwECore.eTimeSeriesType.DiscardsTotalAbs">
  <summary>Total discards on a group across all fleets Relative values</summary>
@@ -10940,7 +10944,7 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  <summary>Total discards on a group across all fleets Absolute values</summary>
 </member>
 <member name="F:EwECore.eTimeSeriesType.FixedCostRel">
- <summary>Fixed cost multiplier (by fleet, driver)</summary>
+ <summary>Fixed cost multiplier (by fleet x driver)</summary>
 </member>
 <member name="T:EwECore.eTimeSeriesCategoryType">
  -----------------------------------------------------------------------
@@ -17374,6 +17378,41 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  </summary>
  -----------------------------------------------------------------------
 </member>
+<member name="T:EwECore.cDBUpdate6_70_00_16">
+ --------------------------------------------------------------------------
+ <summary>
+ <para>Database update 6.70.0.16:</para>
+ <para>
+ Changed cVisualStyle serialization format.
+ </para>
+ </summary>
+ --------------------------------------------------------------------------
+</member>
+<member name="T:EwECore.cDBUpdate6_70_00_16.cVisualStyleConverter">
+ ===========================================================================
+ <summary>
+ Helper class for converting a visual style from the old deprecated
+ binary serialization style to the new JSON serialization style.
+ </summary>
+ ===========================================================================
+</member>
+<member name="P:EwECore.cDBUpdate6_70_00_16.UpdateVersion">
+ -----------------------------------------------------------------------
+ <inheritdocs cref="P:EwECore.cDBUpdate.UpdateVersion"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="P:EwECore.cDBUpdate6_70_00_16.UpdateDescription">
+ -----------------------------------------------------------------------
+ <inheritdocs cref="P:EwECore.cDBUpdate.UpdateDescription"/>
+ -----------------------------------------------------------------------
+</member>
+<member name="M:EwECore.cDBUpdate6_70_00_16.ApplyUpdate(EwEUtils.Database.cEwEDatabase@)">
+ -----------------------------------------------------------------------
+ <summary>
+ Go for it.
+ </summary>
+ -----------------------------------------------------------------------
+</member>
 <member name="T:EwECore.cDBUpdate6_70_00_17">
  --------------------------------------------------------------------------
  <summary>
@@ -17422,33 +17461,6 @@ Note that for unexploited top-predators it may not be possible to estimate P/B (
  -----------------------------------------------------------------------
 </member>
 <member name="M:EwECore.cDBUpdate6_70_00_18.ApplyUpdate(EwEUtils.Database.cEwEDatabase@)">
- -----------------------------------------------------------------------
- <summary>
- Go for it.
- </summary>
- -----------------------------------------------------------------------
-</member>
-<member name="T:EwECore.cDBUpdate6_70_19">
- --------------------------------------------------------------------------
- <summary>
- <para>Database update 6.70.19:</para>
- <para>
- SImplified version numbering (but 6.10 won't be possible - we need a change of system!)
- </para>
- </summary>
- --------------------------------------------------------------------------
-</member>
-<member name="P:EwECore.cDBUpdate6_70_19.UpdateVersion">
- -----------------------------------------------------------------------
- <inheritdocs cref="P:EwECore.cDBUpdate.UpdateVersion"/>
- -----------------------------------------------------------------------
-</member>
-<member name="P:EwECore.cDBUpdate6_70_19.UpdateDescription">
- -----------------------------------------------------------------------
- <inheritdocs cref="P:EwECore.cDBUpdate.UpdateDescription"/>
- -----------------------------------------------------------------------
-</member>
-<member name="M:EwECore.cDBUpdate6_70_19.ApplyUpdate(EwEUtils.Database.cEwEDatabase@)">
  -----------------------------------------------------------------------
  <summary>
  Go for it.
@@ -26675,6 +26687,9 @@ min_B_QB: minimum B*QB.
  </summary>
  <remarks></remarks>
 </member>
+<member name="F:EwECore.cEcoSpace.m_pluginManager">
+ <summary>To call the plugins</summary>
+</member>
 <member name="F:EwECore.cEcoSpace.Btime">
  <summary>Sum of Biomass for all the cells in the current time step </summary>
 </member>
@@ -29010,6 +29025,16 @@ pass in params that this method needs instead of obtaining them from the manager
 <member name="F:EwECore.cF2TSDataStructures.AIC">
  <summary>
  Akaike Information Criteria for the last run
+ </summary>
+</member>
+<member name="T:EwECore.cGameServerInterface">
+ <summary>
+ Core data collector for the OceanViz game server.
+ </summary>
+</member>
+<member name="M:EwECore.cGameServerInterface.Clear">
+ <summary>
+ Clear all game server data structures.
  </summary>
 </member>
 <member name="T:EwECore.cPathUtility">
@@ -35228,9 +35253,6 @@ Passed into the Constructor
 <member name="F:EwECore.cTimeSeriesDataStructures.PoolForceCatch">
  <summary>Forced catch. By Group,Time</summary>
 </member>
-<member name="F:EwECore.cTimeSeriesDataStructures.PoolForceLandings">
- <summary>Proportion of total landings. By Fleet,Group,Time</summary>
-</member>
 <member name="F:EwECore.cTimeSeriesDataStructures.PoolForceDiscardProp">
  <summary>Proportion of total catch that is discarded. By Fleet,Group,Time</summary>
 </member>
@@ -36511,7 +36533,8 @@ Passed into the Constructor
  Derived spatial data adapter to insert scaled external spatial/temporal map data into
  the Ecospace data structures at any given moment. This adapter maintains a scale
  for every map layer attached to the adapter, and will translate map values
- to relative values when needed.
+ to relative values when <see cref="!:cSpatialScalarDataAdapter.eScaleType"/> is set to
+ <see cref="!:cSpatialScalarDataAdapter.eScaleType.Relative">relative</see>.
  </summary>
 </member>
 <member name="M:EwECore.SpatialData.cSpatialScalarDataAdapterBase.CanCalculateScalar">
@@ -36794,7 +36817,7 @@ Passed into the Constructor
  </summary>
  <param name="core"></param>
  <param name="dt"></param>
- <returns>Converts an incoming date to a date point within the applied date range</returns>
+ <returns></returns>
  -------------------------------------------------------------------
 </member>
 <member name="T:EwECore.SpatialData.cSpatialDataConnectionManager">
