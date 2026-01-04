@@ -11,7 +11,7 @@ use App\Domain\Services\SimulationHelper;
 use App\Entity\ServerManager\GameSave;
 use App\Logger\GameSessionLogger;
 use App\Message\GameSave\GameSaveCreationMessage;
-use App\MessageHandler\GameList\CommonSessionHandlerBase;
+use App\MessageHandler\GameList\CommonSessionHandler;
 use App\Entity\SessionAPI\Layer;
 use App\Repository\SessionAPI\LayerRepository;
 use App\VersionsProvider;
@@ -31,7 +31,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use ZipArchive;
 
 #[AsMessageHandler]
-class GameSaveCreationMessageHandler extends CommonSessionHandlerBase
+class GameSaveCreationMessageHandler extends CommonSessionHandler
 {
 
     private ?string $shapeFileTempStore = null;

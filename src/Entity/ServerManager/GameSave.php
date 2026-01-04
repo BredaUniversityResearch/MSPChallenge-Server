@@ -293,7 +293,7 @@ class GameSave extends EntityBase
 
         return $this;
     }
-    
+
     public function decodePasswords(): self
     {
         if (isBase64Encoded($this->passwordAdmin)) {
@@ -302,7 +302,7 @@ class GameSave extends EntityBase
         if (isBase64Encoded($this->passwordPlayer)) {
             $this->passwordPlayer = base64_decode($this->passwordPlayer);
         }
-        
+
         return $this;
     }
 
@@ -326,12 +326,12 @@ class GameSave extends EntityBase
         if (null === $this->gameState) {
             return null;
         }
-        return new GameStateValue($this->gameState);
+        return GameStateValue::from($this->gameState);
     }
 
     public function setGameState(GameStateValue $gameState): self
     {
-        $this->gameState = (string)$gameState;
+        $this->gameState = $gameState->value;
 
         return $this;
     }

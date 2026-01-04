@@ -1,15 +1,16 @@
 <turbo-frame id="gameLog{{ type }}">
     <ul class="list-group">
-    {% for logLines in logToastBody %}
-        <li class="text-break list-group-item {{ logLines | replace(
-            {
-                'INFO:': 'list-group-item-primary">',
-                'NOTICE:': 'list-group-item-success">',
-                'ERROR:': 'list-group-item-danger">',
-                'WARNING:': 'list-group-item-warning">',
-                'DEBUG:': 'list-group-item-light">',
-            }) | raw }}
-        </li>
+    {% for logLine in logToastBody %}
+        {% set levelClass =
+            (logLine.level_name == 'NOTICE' ? 'list-group-item-success' :
+                (logLine.level_name == 'ERROR' ? 'list-group-item-danger' :
+                    (logLine.level_name == 'WARNING' ? 'list-group-item-warning' :
+                        (logLine.level_name == 'DEBUG' ? 'list-group-item-light' : 'list-group-item-primary')
+                    )
+                )
+            )
+        %}
+        <li class="text-break list-group-item {{ levelClass }}">{% if logLine.context.href is defined %}<A href="{{  logLine.context.href|raw }}" target="_blank">{{ logLine.message }}</A>{% else %}{{ logLine.message }}{% endif %}</li>
     {% endfor %}
     </ul>
 </turbo-frame>

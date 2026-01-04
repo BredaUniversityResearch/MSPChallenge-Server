@@ -6,8 +6,10 @@ use App\Domain\API\v1\Game;
 use App\Domain\API\v1\Plan;
 use App\Domain\API\v1\Simulation;
 use App\Domain\Common\Context;
+use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Message\GameList\GameListCreationMessage;
 use App\Message\Watchdog\Message\GameMonthChangedMessage;
 use App\SilentFailException;
 use App\Entity\SessionAPI\Watchdog;
@@ -43,25 +45,27 @@ class GameTick extends TickBase
                     if (null !== $promise) {
                         $this->getStopwatch()?->start($contextTryTickServer?->getPath());
                         return $promise
-                            ->then(function () use ($contextTryTickServer) {
+                            ->then(function (?string $newState) use ($contextTryTickServer, $tickData) {
                                 $this->getStopwatch()?->stop($contextTryTickServer?->getPath());
                                 // only activate this after the Tick call has moved out of the client and into the
                                 //   Watchdog
                                 $contextUpdateGameDetails =
                                     $contextTryTickServer?->enter('updateGameDetailsAtServerManager');
                                 $this->getStopwatch()?->start($contextUpdateGameDetails?->getPath());
-                                return $this->updateGameDetailsAtServerManager()
-                                    ->then(function ($result) use ($contextUpdateGameDetails) {
-                                        $this->getStopwatch()?->stop($contextUpdateGameDetails?->getPath());
-                                        return $result;
-                                    });
+                                return $this->updateGameDetailsAtServerManager(
+                                    $tickData['state'] != $newState &&
+                                    $newState == GameStateValue::END->value
+                                )->then(function ($result) use ($contextUpdateGameDetails) {
+                                    $this->getStopwatch()?->stop($contextUpdateGameDetails?->getPath());
+                                    return $result;
+                                });
                             });
                     }
                 }
                 $context = $context?->enter('updateGameDetailsAtServerManager');
                 $this->getStopwatch()?->start($context?->getPath());
                 // only activate this after the Tick call has moved out of the client and into the Watchdog
-                return $this->updateGameDetailsAtServerManager()
+                return $this->updateGameDetailsAtServerManager(false)
                     ->then(function ($result) use ($context) {
                         $this->getStopwatch()?->stop($context?->getPath());
                         return $result;
@@ -95,14 +99,31 @@ class GameTick extends TickBase
     private function tryTickServer(array $tickData, bool $showDebug, ?Context $context): ?PromiseInterface
     {
         $state = $tickData['state'];
+
+        $simulation = new Simulation();
+        $this->asyncDataTransferTo($simulation);
+        $simulation->getUnsynchronizedSimulations($tickData['month'])
+            ->then(function (Result $result) {
+                if ($result->fetchCount() == 0) { // all simulations are up-to-date
+                    $this->getAsyncDatabase()->queryBySQL(
+                        'UPDATE game SET game_transition_state = NULL, game_transition_month = NULL WHERE 1'
+                    );
+                }
+                return null;
+            });
+
         // no "tick" required for these state names
-        if (in_array($state, ['END', 'PAUSE', 'SETUP'])) {
+        if (in_array(
+            $state,
+            [GameStateValue::END->value, GameStateValue::PAUSE->value, GameStateValue::SETUP->value]
+        )) {
             return null;
         }
 
         // check if we should postpone the "tick"
         $diff = microtime(true) - $tickData['lastupdate'];
-        $secondsPerMonth = ($state == 'SIMULATION' || $state == 'FASTFORWARD') ? 0.2 :
+        $secondsPerMonth = ($state == GameStateValue::SIMULATION->value ||
+            $state == GameStateValue::FASTFORWARD->value) ? 0.2 :
             ($tickData['era_realtime'] / $tickData['era_gametime']);
         if ($diff <= $secondsPerMonth) {
             if ($showDebug) {
@@ -143,7 +164,7 @@ class GameTick extends TickBase
     /**
      * @throws Exception
      */
-    private function updateGameDetailsAtServerManager(): PromiseInterface
+    private function updateGameDetailsAtServerManager(bool $gameJustEnded): PromiseInterface
     {
         $game = new Game();
         $this->asyncDataTransferTo($game);
@@ -157,7 +178,34 @@ class GameTick extends TickBase
                 }
                 $qb->where($qb->expr()->eq('id', $game->getGameSessionId()));
                 return $connection->query($qb);
+            })
+            ->then(function (/* Result $result */) use ($gameJustEnded) {
+                if ($gameJustEnded) {
+                    $this->signalDemoSessionRecreate();
+                }
             });
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    private function signalDemoSessionRecreate(): void
+    {
+        $connection = ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection(Loop::get());
+        $qb = $connection->createQueryBuilder();
+        $connection->query(
+            $qb->select('demo_session')->from('game_list')
+                ->where($qb->expr()->eq('id', $this->getGameSessionId()))
+        )->done(function (Result $result) {
+            $row = $result->fetchFirstRow() ?? [];
+            if (!isset($row['demo_session']) || $row['demo_session'] == 0) {
+                return;
+            }
+            SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch(
+                new GameListCreationMessage($this->getGameSessionId(), true)
+            );
+        });
     }
 
     /**
@@ -174,7 +222,9 @@ class GameTick extends TickBase
             $this->getAsyncDatabase(),
             $this->getAsyncDatabase()->createQueryBuilder()
                 ->select(
+                    'game_transition_state as transition_state',
                     'game_state as state',
+                    'game_transition_month as transition_month',
                     'game_currentmonth as month',
                     'game_planning_gametime as era_gametime',
                     'game_planning_realtime as era_realtime',
@@ -211,12 +261,12 @@ class GameTick extends TickBase
                     $context = $contextUpdateLayerState?->enter('advanceGameTime');
                     $this->getStopwatch()?->start($context?->getPath());
                     return $this->advanceGameTime($currentMonth, $monthsDone, $state, $tick)
-                        ->then(function ($result) use ($context) {
+                        ->then(function (?string $newState) use ($context) {
                             $this->getStopwatch()?->stop($context?->getPath());
-                            return $result;
+                            return $newState;
                         });
                 })
-                ->then(function () use ($currentMonth, $contextUpdateLayerState) {
+                ->then(function (?string $newState) use ($currentMonth, $contextUpdateLayerState) {
                     $context = $contextUpdateLayerState?->enter('getWatchdogs');
                     $this->getStopwatch()?->start($context?->getPath());
                     $simulation = new Simulation();
@@ -239,13 +289,15 @@ class GameTick extends TickBase
                             }
                         }
                     );
+                    return $newState;
                 })
-                ->then(function () use ($tick) {
+                ->then(function (?string $newState) use ($tick) {
                     if (($tick['month'] % $tick['autosave_interval_months']) == 0) {
                         $game = new Game();
                         $this->asyncDataTransferTo($game);
                         $game->AutoSaveDatabase(); // this is async by default
                     }
+                    return $newState;
                 });
         });
     }
@@ -262,6 +314,7 @@ class GameTick extends TickBase
         $qb
             ->update('game')
             ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(4))')
+            ->set('game_transition_month', (string)($tick['transition_month'] ?? $tick['month']))
             ->set('game_currentmonth', (string)$currentMonth)
             ->set('game_planning_monthsdone', (string)$monthsDone);
 
@@ -269,27 +322,41 @@ class GameTick extends TickBase
             //Entire game is done.
             return $this->getAsyncDatabase()->query(
                 $qb
-                    ->set('game_state', $qb->createPositionalParameter('END'))
+                    ->set(
+                        'game_transition_state',
+                        $qb->createPositionalParameter($tick['transition_state'] ?? $tick['state'])
+                    )
+                    ->set('game_state', $qb->createPositionalParameter(GameStateValue::END->value))
             )
             ->then(function (/*Result $result*/) use ($currentMonth) {
                 $simulation = new Simulation();
                 $this->asyncDataTransferTo($simulation);
-                return $simulation->changeWatchdogState('END', $currentMonth);
+                return $simulation->changeWatchdogState(GameStateValue::END, $currentMonth)
+                    ->then(fn(GameStateValue $newState) => $newState->value);
             });
-        } elseif (($state == "PLAY" || $state == "FASTFORWARD") && $monthsDone >= $tick['era_gametime'] &&
-            $tick['era_gametime'] < $tick['era_time']) {
+        } elseif (($state == GameStateValue::PLAY->value || $state == GameStateValue::FASTFORWARD->value)
+            && $monthsDone >= $tick['era_gametime'] &&
+            $tick['era_gametime'] < $tick['era_time']
+        ) {
             //planning phase is complete, move to the simulation phase
             return $this->getAsyncDatabase()->query(
                 $qb
                     ->set('game_planning_monthsdone', '0')
-                    ->set('game_state', $qb->createPositionalParameter('SIMULATION'))
+                    ->set(
+                        'game_transition_state',
+                        $qb->createPositionalParameter($tick['transition_state'] ?? $tick['state'])
+                    )
+                    ->set('game_state', $qb->createPositionalParameter(GameStateValue::SIMULATION->value))
             )
             ->then(function (/*Result $result*/) use ($currentMonth) {
                 $simulation = new Simulation();
                 $this->asyncDataTransferTo($simulation);
-                return $simulation->changeWatchdogState('SIMULATION', $currentMonth);
+                return $simulation->changeWatchdogState(GameStateValue::SIMULATION, $currentMonth)
+                    ->then(fn(GameStateValue $newState) => $newState->value);
             });
-        } elseif (($state == "SIMULATION" && $monthsDone >= $tick['era_time'] - $tick['era_gametime']) ||
+        } elseif (($state == GameStateValue::SIMULATION->value &&
+                $monthsDone >= $tick['era_time'] - $tick['era_gametime']
+            ) ||
             $monthsDone >= $tick['era_time']) {
             //simulation is done, reset everything to start a new play phase
             $era = floor($currentMonth / $tick['era_time']);
@@ -297,16 +364,24 @@ class GameTick extends TickBase
             return $this->getAsyncDatabase()->query(
                 $qb
                     ->set('game_planning_monthsdone', '0')
-                    ->set('game_state', $qb->createPositionalParameter('PLAY'))
+                    ->set(
+                        'game_transition_state',
+                        $qb->createPositionalParameter($tick['transition_state'] ?? $tick['state'])
+                    )
+                    ->set('game_state', $qb->createPositionalParameter(GameStateValue::PLAY->value))
                     ->set('game_planning_realtime', $era_realtime[$era])
             )
             ->then(function (Result $result) use ($currentMonth) {
                 $simulation = new Simulation();
                 $this->asyncDataTransferTo($simulation);
-                return $simulation->changeWatchdogState('PLAY', $currentMonth);
+                return $simulation->changeWatchdogState(GameStateValue::PLAY, $currentMonth)
+                    ->then(fn(GameStateValue $newState) => $newState->value);
             });
         } else {
-            return $this->getAsyncDatabase()->query($qb);
+            return $this->getAsyncDatabase()->query($qb)
+                ->then(function (/* Result $result */) use ($state) {
+                    return $state;
+                });
         }
     }
 }

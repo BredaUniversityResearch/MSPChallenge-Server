@@ -20,19 +20,6 @@ class GameSessionLogger extends AbstractProcessingHandler
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    protected function handleWriteByArray(array $record): void
-    {
-        // hack to make the placeholders work (not sure why monolog fails to do this)
-        foreach ($record['context'] as $key => $val) {
-            $record['formatted'] = str_replace('{'.$key.'}', $val, $record['formatted']);
-        }
-        error_log($record['formatted'], 3, $this->getLogFilePath($record['context']['gameSession']));
-    }
-
-    /**
-     * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
-     */
     public function empty(int $gameListId): void
     {
         $fileSystem = new Filesystem();
@@ -49,10 +36,24 @@ class GameSessionLogger extends AbstractProcessingHandler
             sprintf($this->params->get('app.server_manager_log_name'), $gameListId);
     }
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     protected function write(LogRecord $record): void
     {
         $arr = $record->toArray();
-        $arr['formatted'] = $record->formatted;
-        $this->handleWriteByArray($arr);
+        // hack to make the placeholders work (not sure why monolog fails to do this)
+        foreach ($arr['context'] as $key => $val) {
+            if (!is_string($key) || !is_string($val)) {
+                continue;
+            }
+            $arr['message'] = str_replace('{'.$key.'}', $val, $arr['message']);
+        }
+        error_log(
+            json_encode($arr).PHP_EOL,
+            3,
+            $this->getLogFilePath($arr['context']['gameSession'])
+        );
     }
 }

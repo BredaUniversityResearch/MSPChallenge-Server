@@ -1,7 +1,7 @@
 <?php
 namespace App\Domain\WsServer;
 
-use App\Domain\API\v1\Security;
+use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\GetConstantsTrait;
 use App\Domain\Common\Stopwatch\Stopwatch;
 use App\Domain\Event\NameAwareEvent;
@@ -14,12 +14,16 @@ use Exception;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Support\Collection;
 use PDOException;
+use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 use Ratchet\MessageComponentInterface;
 use React\EventLoop\LoopInterface;
 use React\Promise\PromiseInterface;
 use React\Stream\ReadableResourceStream;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Serializer\SerializerInterface;
+use Throwable;
+use function App\tc;
 
 class WsServer extends EventDispatcher implements
     WsServerEventDispatcherInterface,
@@ -48,11 +52,6 @@ class WsServer extends EventDispatcher implements
     private array $clientHeaders = [];
 
     /**
-     * @var Security[]
-     */
-    private array $securityInstances = [];
-
-    /**
      * @var PluginInterface[]
      */
     private array $plugins = [];
@@ -62,7 +61,6 @@ class WsServer extends EventDispatcher implements
      */
     private array $pluginsToRegister = [];
 
-    private DoctrineMigrationsDependencyFactoryHelper $doctrineMigrationsDependencyFactoryHelper;
     private ?Stopwatch $stopwatch = null;
 
     public function getDoctrineMigrationsDependencyFactoryHelper(): DoctrineMigrationsDependencyFactoryHelper
@@ -71,7 +69,9 @@ class WsServer extends EventDispatcher implements
     }
 
     public function __construct(
-        DoctrineMigrationsDependencyFactoryHelper $doctrineMigrationsDependencyFactoryHelper,
+        private DoctrineMigrationsDependencyFactoryHelper $doctrineMigrationsDependencyFactoryHelper,
+        private SerializerInterface $serializer,
+        private LoggerInterface $appWsServerLogger,
         // below is required by legacy to be auto-wired
         \App\Domain\API\APIHelper $apiHelper
     ) {
@@ -190,17 +190,23 @@ class WsServer extends EventDispatcher implements
         unset($this->clients[$conn->resourceId]);
         unset($this->clientInfoContainer[$conn->resourceId]);
         unset($this->clientHeaders[$conn->resourceId]);
-        unset($this->securityInstances[$conn->resourceId]);
 
         $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_DISCONNECTED, $conn->resourceId));
     }
 
+    /**
+     * @throws Throwable
+     */
     public function onError(ConnectionInterface $conn, Exception $e): void
     {
         $conn = new WsServerConnection($conn);
         // detect PDOException, could also be a previous exception
         while (true) {
             if ($e instanceof PDOException) {
+                $this->appWsServerLogger->error(
+                    'Database query error encountered in WsServer: '.$e->getMessage(),
+                    ['exception' => $e]
+                );
                 throw $e; // let the Websocket server crash on database query errors.
             }
             if (null === $previous = $e->getPrevious()) {
@@ -219,7 +225,9 @@ class WsServer extends EventDispatcher implements
             ->setStopwatch($this->stopwatch)
             ->setClientConnectionResourceManager($this)
             ->setServerManager($this)
-            ->setWsServer($this);
+            ->setSerializer($this->serializer)
+            ->setWsServer($this)
+            ->setLogger($this->appWsServerLogger);
 
         // wait for loop to be registered
         if (null === $this->loop) {
@@ -256,12 +264,12 @@ class WsServer extends EventDispatcher implements
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
+     * @throws Throwable
      */
     public function getGameSessionIds(bool $onlyPlaying = false): PromiseInterface
     {
         $connection = $this->getServerManagerDbConnection();
-        $qb = $connection->createQueryBuilder();
+        $qb = tc(fn() => $connection->createQueryBuilder(), $this->appWsServerLogger);
         $qb
             ->select('id')
             ->from('game_list')
@@ -271,7 +279,13 @@ class WsServer extends EventDispatcher implements
                 $qb->expr()->or(
                     $qb->expr()->in(
                         'game_state',
-                        $qb->createPositionalParameter(['play', 'fastforward' ,'simulation', 'pause', 'setup'])
+                        $qb->createPositionalParameter([
+                            GameStateValue::PLAY->value,
+                            GameStateValue::FASTFORWARD->value,
+                            GameStateValue::SIMULATION->value,
+                            GameStateValue::PAUSE->value,
+                            GameStateValue::SETUP->value
+                        ])
                     )
                 )
             );
@@ -304,17 +318,11 @@ class WsServer extends EventDispatcher implements
         return $this;
     }
 
-    /**
-     * @throws Exception
-     */
     public function getGameSessionDbConnection(int $gameSessionId): Connection
     {
         return ConnectionManager::getInstance()->getCachedAsyncGameSessionDbConnection($this->loop, $gameSessionId);
     }
 
-    /**
-     * @throws Exception
-     */
     public function getServerManagerDbConnection(): Connection
     {
         return ConnectionManager::getInstance()->getCachedAsyncServerManagerDbConnection($this->loop);

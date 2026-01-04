@@ -22,7 +22,7 @@ class PlanLayer
     #[ORM\JoinColumn(name: 'plan_layer_layer_id', referencedColumnName: 'layer_id')]
     private ?Layer $layer;
 
-    #[ORM\Column(length: 50, enumType: PlanLayerState::class)]
+    #[ORM\Column(enumType: PlanLayerState::class)]
     private PlanLayerState $planLayerState = PlanLayerState::WAIT;
 
     public function getPlanLayerId(): ?int

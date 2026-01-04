@@ -198,7 +198,7 @@ function parallel(array $toPromiseFunctions, ?int $numThreads = null): Promise
  * @throws Exception when the promise is rejected
  * @throws TimeoutException if the $timeout is given and triggers
  */
-function await(PromiseInterface $promise, LoopInterface $loop = null, $timeout = null)
+function await(PromiseInterface $promise, ?LoopInterface $loop = null, $timeout = null)
 {
     $wait = true;
     $resolved = null;
@@ -261,4 +261,14 @@ function await(PromiseInterface $promise, LoopInterface $loop = null, $timeout =
     }
 
     return $resolved;
+}
+
+function tc(\Closure $fn, \Psr\Log\LoggerInterface $logger, $context = [])
+{
+    try {
+        return $fn();
+    } catch (\Throwable $e) {
+        $logger->error($e->getMessage(), ['exception' => $e] + $context);
+        throw $e;
+    }
 }

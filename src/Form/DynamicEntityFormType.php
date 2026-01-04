@@ -12,7 +12,12 @@ use Symfony\Bundle\FrameworkBundle\Secrets\AbstractVault;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type as SymfonyFormType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 class DynamicEntityFormType extends AbstractType
 {
@@ -28,11 +33,25 @@ class DynamicEntityFormType extends AbstractType
     {
         $entity = $options['data_class'];
         $reflectionClass = new ReflectionClass($entity);
+
+        $isUsingGroups = collect($reflectionClass->getProperties())->reduce(
+            function (bool $carry, \ReflectionProperty $property) {
+                return $carry || null !== Util::getPropertyAttribute($property, Groups::class);
+            },
+            false
+        );
         foreach ($reflectionClass->getProperties() as $property) {
             $propertyName = $property->getName();
             $propertyType = $property->getType();
             $formFieldType = null;
             $formFieldTypeOptions = [];
+
+            if ($isUsingGroups) {
+                $groups = Util::getPropertyAttribute($property, Groups::class)?->getGroups() ?? [];
+                if (!in_array('write', $groups, true)) {
+                    continue; // Skip properties not in the 'write' group
+                }
+            }
             if (null !== Util::getPropertyAttribute($property, ORM\Id::class)) {
                 continue; // Skip ID properties
             }
@@ -50,7 +69,7 @@ class DynamicEntityFormType extends AbstractType
                 Util::getPropertyAttribute($property, AppMappings\Property\FormFieldType::class)) {
                 /** @var AppMappings\Property\FormFieldType $attribute */
                 $formFieldType = $attribute->type;
-                $formFieldTypeOptions = $attribute->options;
+                $formFieldTypeOptions = $this->resolveEnvPlaceholders($attribute->options);
                 if ($formFieldTypeLabel) {
                     $formFieldTypeOptions['label'] ??= $formFieldTypeLabel;
                 }
@@ -80,6 +99,29 @@ class DynamicEntityFormType extends AbstractType
             if (null !== ($formFieldTypeOptions['attr']['placeholder'] ?? null)) {
                 $formFieldTypeOptions['attr']['title'] = "example:\n".$formFieldTypeOptions['attr']['placeholder'];
             }
+            // json_document type handling
+            if ((null !== $attribute = Util::getPropertyAttribute($property, ORM\Column::class)) &&
+                $attribute->type == 'json_document'
+            ) {
+                $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($property) {
+                    $data = $event->getData();
+                    $propertyValue = $property->getValue($data);
+                    if ($propertyValue === null) {
+                        return;
+                    }
+                    $property->setValue($data, json_encode($propertyValue, JSON_PRETTY_PRINT));
+                    $event->setData($data);
+                });
+                $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) use ($property) {
+                    $data = $event->getData();
+                    $propertyValue = $property->getValue($data);
+                    if ($propertyValue === null) {
+                        return;
+                    }
+                    $property->setValue($data, json_decode($propertyValue, true));
+                    $event->setData($data);
+                });
+            }
             $builder->add($propertyName, $formFieldType, $formFieldTypeOptions);
         }
     }
@@ -97,5 +139,31 @@ class DynamicEntityFormType extends AbstractType
             'bool' => SymfonyFormType\CheckboxType::class,
             default => null, // Skip unsupported types
         };
+    }
+
+    /**
+     * Recursively resolve %env(string:VAR_NAME)% placeholders in an array.
+     */
+    private function resolveEnvPlaceholders(array $options): array
+    {
+        foreach ($options as $key => $value) {
+            if (is_array($value)) {
+                $options[$key] = $this->resolveEnvPlaceholders($value);
+            } elseif (is_string($value)) {
+                if (preg_match_all('/%env\(string:([A-Z0-9_]+)\)%/', $value, $matches)) {
+                    $replacements = [];
+                    foreach ($matches[1] as $i => $envName) {
+                        $envValue = $_ENV[$envName] ?? null;
+                        if ($envValue !== null) {
+                            $replacements[$matches[0][$i]] = $envValue;
+                        }
+                    }
+                    if ($replacements) {
+                        $options[$key] = strtr($value, $replacements);
+                    }
+                }
+            }
+        }
+        return $options;
     }
 }

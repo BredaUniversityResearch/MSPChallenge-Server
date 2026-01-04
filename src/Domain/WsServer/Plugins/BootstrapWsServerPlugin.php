@@ -52,7 +52,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
     /**
      * @throws Exception
      */
-    private function changeState(int $state)
+    private function changeState(int $state): void
     {
         if ($this->state == $state) {
             return; // no change
@@ -65,7 +65,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
     /**
      * @throws Exception
      */
-    private function startState(int $state)
+    private function startState(int $state): void
     {
         switch ($state) {
             case self::STATE_AWAIT_PREREQUISITES:
@@ -78,7 +78,8 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
                 $this->startStateRegisterPlugins();
                 break;
             case self::STATE_READY:
-                $this->addOutput('Websocket server is ready');
+                $this->addOutput('*** Websocket server is ready *** ');
+                $this->addOutput('Press "n" -> [Enter] to switch views');
                 break;
         }
     }
@@ -86,7 +87,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
     /**
      * @throws Exception
      */
-    private function endState(int $state)
+    private function endState(int $state): void
     {
         switch ($state) {
             case self::STATE_AWAIT_PREREQUISITES:
@@ -110,6 +111,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
             LatestWsServerPlugin::class
         ]);
         $watchdogPingPlugin = new WatchdogPingWsServerPlugin();
+        $immersiveSessionsPlugin = new ImmersiveSessionsWsServerPlugin();
 
         // then create & register blackfire plugin
         if (($_ENV['BLACKFIRE_APM_ENABLED'] ?? false) &&
@@ -124,6 +126,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
         $this->getWsServer()->registerPlugin($sequencerPlugin);
         $this->getWsServer()->registerPlugin($ticksHandlerPlugin);
         $this->getWsServer()->registerPlugin($watchdogPingPlugin);
+        $this->getWsServer()->registerPlugin($immersiveSessionsPlugin);
 
         // set state ready on next tick
         $this->getLoop()->futureTick(function () {
@@ -134,7 +137,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
     /**
      * @throws Exception
      */
-    private function startStateAwaitPrerequisites()
+    private function startStateAwaitPrerequisites(): void
     {
         $this->getWsServer()->registerPlugin($this->awaitPrerequisitesPlugin);
     }
@@ -142,7 +145,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
     /**
      * @throws Exception
      */
-    private function endStateAwaitPrerequisites()
+    private function endStateAwaitPrerequisites(): void
     {
         $this->getWsServer()->unregisterPlugin($this->awaitPrerequisitesPlugin);
     }
@@ -150,7 +153,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
     /**
      * @throws Exception
      */
-    private function startStateDatabaseMigrations()
+    private function startStateDatabaseMigrations(): void
     {
         $this->getWsServer()->registerPlugin($this->databaseMigrationsPlugin);
     }
@@ -158,7 +161,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
     /**
      * @throws Exception
      */
-    private function endStateDatabaseMigrations()
+    private function endStateDatabaseMigrations(): void
     {
         $this->getWsServer()->unregisterPlugin($this->databaseMigrationsPlugin);
     }
@@ -180,7 +183,7 @@ class BootstrapWsServerPlugin extends Plugin implements EventSubscriberInterface
     /**
      * @throws Exception
      */
-    public function onEvent(NameAwareEvent $event)
+    public function onEvent(NameAwareEvent $event): void
     {
         /** @var Plugin $plugin */
         $plugin = $event->getSubject(); // the plugin that just finished

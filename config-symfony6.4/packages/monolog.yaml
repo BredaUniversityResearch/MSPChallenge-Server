@@ -1,115 +1,111 @@
+parameters:
+  black_list_app_channels:
+    - '!analytics'
+    - '!game_session'
+    - '!docker'
+    - '!docker_messenger'
+    - '!docker_monitor'
+    - '!app_ws_server'
+    - '!watchdog'
+    - '!deprecation' # also exclude deprecation logs from main log file
+  white_list_app_channels:
+    - analytics
+    - game_session
+    - docker
+    - docker_messenger
+    - docker_monitor
+    - app_ws_server
+    - watchdog
+
 monolog:
     channels:
         - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
         - game_session # file-based game session creation and loading log
         - analytics
         - docker
+        - docker_messenger
+        - docker_monitor
+        - app_ws_server
+        - watchdog
     handlers:
+        # uncomment to get logging in your browser
+        # you may have to allow bigger header sizes in your Web server configuration
+        #firephp:
+        #    type: firephp
+        #    level: info
+        #chromephp:
+        #    type: chromephp
+        #    level: info
+        main:
+            type: fingers_crossed
+            handler: main_nested
+            action_level: debug
+            excluded_http_codes:
+              - 410 # Session is non-existing
+              - 503 # Session cannot be used at the moment
+            channels: "%black_list_app_channels%"
+        main_nested:
+            type: stream
+            path: "%kernel.logs_dir%/%kernel.environment%.log"
+            level: debug
+            formatter: monolog.formatter.json
+            channels: "%black_list_app_channels%"
+        console:
+            type: console
+            process_psr_3_messages: false
+            channels: "%white_list_app_channels%"
+        analytics:
+            type: stream
+            path: "%kernel.logs_dir%/analytics.log"
+            level: warning
+            formatter: monolog.formatter.json
+            channels: [ 'analytics' ]
         docker:
             type: stream
             path: '%kernel.logs_dir%/docker.log'
-            level: debug
-            channels: ['docker']
-        docker_stdout:
+            level: warning
+            formatter: monolog.formatter.json
+            channels: ['docker', 'docker_messenger', 'docker_monitor']
+        session_log_handler:
+            type: service
+            id: App\Logger\GameSessionLogger
+            channels: [ "game_session" ]
+            process_psr_3_messages:
+                enabled: true
+        deprecation:
+            type: rotating_file
+            channels: ["deprecation"]
+            path: "%kernel.logs_dir%/deprecation.log"
+            max_files: 7
+            formatter: monolog.formatter.json
+        app_ws_server:
             type: stream
-            path: "php://stdout"
-            level: debug
-            channels: ['docker']
-        docker_stderr:
+            path: '%kernel.logs_dir%/app-ws-server.log'
+            level: warning
+            formatter: monolog.formatter.json
+            channels: ['app_ws_server']
+        watchdog:
             type: stream
-            path: "php://stderr"
-            level: error
-            channels: ['docker']
-
-when@dev:
-    monolog:
-        handlers:
-            analytics:
-                type: stream
-                path: "%kernel.logs_dir%/analytics-%kernel.environment%.log"
-                level: debug
-                channels: [ 'analytics' ]
-            main:
-                type: stream
-                path: "%kernel.logs_dir%/%kernel.environment%.log"
-                level: debug
-                channels: ["!event", "!analytics", "!game_session"]
-            # uncomment to get logging in your browser
-            # you may have to allow bigger header sizes in your Web server configuration
-            #firephp:
-            #    type: firephp
-            #    level: info
-            #chromephp:
-            #    type: chromephp
-            #    level: info
-            console:
-                type: console
-                process_psr_3_messages: false
-                channels: ["!event", "!doctrine", "!console", "!game_session"]
-            session_log_handler:
-                type: service
-                id: App\Logger\GameSessionLogger
-                channels: [ "game_session" ]
-                process_psr_3_messages:
-                    enabled: true
-
-when@test:
-    monolog:
-        handlers:
-            main:
-                type: fingers_crossed
-                action_level: error
-                handler: nested
-                excluded_http_codes: [404, 405]
-                channels: ["!event", "!game_session"]
-            nested:
-                type: stream
-                path: "%kernel.logs_dir%/%kernel.environment%.log"
-                level: debug
-                channels: ["!game_session"]
-            stream:
-                type: stream
-                path: "php://stdout"
-                channels: [ "game_session" ]
+            path: '%kernel.logs_dir%/watchdog.log'
+            level: warning
+            formatter: monolog.formatter.json
+            channels: ['watchdog']
 
 when@prod:
     monolog:
         handlers:
-            analytics:
-                type: stream
-                path: "%kernel.logs_dir%/analytics-%kernel.environment%.log"
-                level: error
-                channels: [ 'analytics' ]
             main:
                 type: fingers_crossed
+                handler: main_nested
                 action_level: error
-                handler: nested
-                excluded_http_codes: [404, 405]
-                buffer_size: 50 # How many messages should be saved? Prevent memory leaks
-                channels: ["!game_session"]
-            nested:
-                type: stream
-                path: php://stderr
-                level: debug
-                formatter: monolog.formatter.json
-                channels: ["!game_session"]
-                handler: rotating_nested
-            rotating_nested:
+                excluded_http_codes:
+                  - 410 # Session is non-existing
+                  - 503 # Session cannot be used at the moment
+                channels: "%black_list_app_channels%"
+            main_nested:
                 type: rotating_file
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
+                level: error
+                formatter: monolog.formatter.json
                 max_files: 7
-                channels: ["!game_session"]
-            console:
-                type: console
-                process_psr_3_messages: false
-                channels: ["!event", "!doctrine", "!game_session"]
-            deprecation:
-                type: stream
-                channels: ["deprecation"]
-                path: php://stderr
-            session_log_handler:
-                type: service
-                id: App\Logger\GameSessionLogger
-                channels: [ "game_session" ]
-                process_psr_3_messages:
-                    enabled: true
+                channels: "%black_list_app_channels%"

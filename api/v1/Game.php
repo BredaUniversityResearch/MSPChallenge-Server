@@ -2,10 +2,17 @@
 
 namespace App\Domain\API\v1;
 
+use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Common\EntityEnums\GameTransitionStateValue;
+use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameWatchdogServer;
+use App\Entity\SessionAPI\Game as GameEntity;
+use App\Entity\SessionAPI\Layer as LayerEntity;
 use App\Entity\SessionAPI\Watchdog;
+use App\Repository\SessionAPI\GameRepository;
+use App\Repository\SessionAPI\LayerRepository;
 use Drift\DBAL\Result;
 use Exception;
 use React\Promise\PromiseInterface;
@@ -13,8 +20,6 @@ use function App\await;
 
 class Game extends Base
 {
-    const MIN_GAME_ERATIME = 12;
-
     /**
      * @apiGroup Game
      * @throws Exception
@@ -75,20 +80,6 @@ class Game extends Base
             ->setGameSessionId($this->getGameSessionId())
             ->CheckGameSessionPasswords();
         return array_merge($data, $passwordchecks);
-    }
-
-    /**
-     * @apiGroup Game
-     * @throws Exception
-     * @api {POST} /game/NextMonth NextMonth
-     * @apiDescription Updates session database to indicate start of next simulated month
-     * @noinspection PhpUnused
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function NextMonth(): void
-    {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query("UPDATE game SET game_currentmonth=game_currentmonth+1");
     }
 
     /**
@@ -219,92 +210,15 @@ class Game extends Base
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function GetCurrentMonthAsId(): int
     {
-        $currentMonth = $this->getDatabase()->query("SELECT game_currentmonth, game_state FROM game")[0];
-        if ($currentMonth["game_state"] == "SETUP") {
+        $result = $this->getDatabase()->query("SELECT game_currentmonth, game_state FROM game");
+        if (empty($result)) {
+            return -1; // there is no game record, so we are in setup
+        }
+        $currentMonth = $result[0];
+        if ($currentMonth["game_state"] == GameStateValue::SETUP->value) {
             $currentMonth["game_currentmonth"] = -1;
         }
         return $currentMonth["game_currentmonth"];
-    }
-
-    /**
-     * @throws Exception
-     * @noinspection SpellCheckingInspection
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Setupfilename(string $configFilename): void
-    {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query("UPDATE game SET game_configfile=?", array($configFilename));
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetupCountries(array $configData): void
-    {
-        $adminColor = "#FF00FFFF";
-        if (array_key_exists("user_admin_color", $configData)) {
-            $adminColor = $configData["user_admin_color"];
-        }
-        $regionManagerColor = "#00FFFFFF";
-        if (array_key_exists("user_region_manager_color", $configData)) {
-            $regionManagerColor = $configData["user_region_manager_color"];
-        }
-
-        //Admin country.
-        $this->getDatabase()->query(
-            "INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)",
-            array(1, $adminColor, 1)
-        );
-        //Region manager country.
-        $this->getDatabase()->query(
-            "INSERT INTO country (country_id, country_colour, country_is_manager) VALUES (?, ?, ?)",
-            array(2, $regionManagerColor, 1)
-        );
-
-        foreach ($configData['meta'] as $layerMeta) {
-            if ($layerMeta['layer_name'] == $configData['countries']) {
-                foreach ($layerMeta['layer_type'] as $country) {
-                    $countryId = $country['value'];
-                    $this->getDatabase()->query(
-                        "
-                        INSERT INTO country (country_id, country_name, country_colour, country_is_manager)
-                        VALUES (?, ?, ?, ?)
-                        ",
-                        array($countryId, $country['displayName'], $country['polygonColor'], 0 )
-                    );
-                }
-            }
-        }
-        //Setup Admin Test User so we have a default session we can use for testing.
-        $this->getDatabase()->query("INSERT INTO user (user_lastupdate, user_country_id) VALUES(0, 1)");
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function SetupGameTime(array $data): void
-    {
-        $this->SetStartDate($data['start']);
-
-        $this->Planning($data['era_planning_months']);
-
-        $this->Realtime($data['era_planning_realtime']);
-        $str = "";
-        $totalEras = 4;
-        $str .= str_repeat($data['era_planning_realtime'] . ",", $totalEras);
-        $str = substr($str, 0, -1);
-
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query(
-            "UPDATE game SET game_planning_era_realtime=?, game_eratime=?",
-            array(
-                $str,
-                max($data['era_total_months'], self::MIN_GAME_ERATIME)
-            )
-        );
     }
 
     //this should probably be moved to Layer instead
@@ -320,30 +234,21 @@ class Game extends Base
     public function Meta(int $user, bool $sort = false, bool $onlyActiveLayers = true)
     {
         $this->getDatabase()->query("UPDATE user SET user_lastupdate=? WHERE user_id=?", array(0, $user));
-
-        $activeQueryPart = "";
+        /** @var LayerRepository $repo */
+        $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
+            ->getRepository(LayerEntity::class);
+        $qb = $repo->createQueryBuilder('l');
+        $qb->where($qb->expr()->isNull('l.originalLayer'));
         if ($onlyActiveLayers) {
-            $activeQueryPart = " AND layer_active = 1 ";
+            $qb->andWhere('l.layerActive = 1');
         }
-
         if ($sort) {
-            $data = $this->getDatabase()->query(
-                "SELECT * FROM layer WHERE layer_original_id IS NULL ".$activeQueryPart." ORDER BY layer_name ASC",
-                array()
-            );
-        } else {
-            $data = $this->getDatabase()->query(
-                "SELECT * FROM layer WHERE layer_original_id IS NULL ".$activeQueryPart,
-                array()
-            );
+            $qb->orderBy('l.layerName', 'ASC');
         }
-
-        for ($i = 0; $i < sizeof($data); $i++) {
-            Layer::FixupLayerMetaData($data[$i]);
-        }
-        $this->addLayerDependenciesToMetaData($data);
-
-        return $data;
+        /** @var LayerEntity[] $layers */
+        $layers = $qb->getQuery()->getResult();
+        $this->addLayerDependencies($layers);
+        return collect($layers)->map(fn(LayerEntity $l) => $repo->normalise($l))->all();
     }
 
     /**
@@ -352,41 +257,56 @@ class Game extends Base
      * Currently, that is, all the grey energy layers depend on the grey cable layer and all the green energy layers
      *   on the green cable layer.
      *
-     * @param array $meta input meta data from Meta()
+     * @param LayerEntity[] $meta all layers
      * @return void
      */
-    private function addLayerDependenciesToMetaData(array &$meta): void
+    private function addLayerDependencies(array $meta): void
     {
         // find cable layers
-        $cableLayers = collect($meta)->filter(fn($l) => $l['layer_editing_type'] === 'cable')->keyBy('layer_id');
-        if ($cableLayers->isEmpty()) {
-            return;
+        $cableLayers = collect($meta)->filter(fn(LayerEntity $l) => $l->getLayerEditingType() === 'cable')
+            ->keyBy(fn(LayerEntity $l) => $l->getLayerId());
+        // find socket layers
+        $socketLayers = collect($meta)->filter(fn(LayerEntity $l) => $l->getLayerEditingType() === 'socket')
+            ->keyBy(fn(LayerEntity $l) => $l->getLayerId());
+        if ($cableLayers->isEmpty() && $socketLayers->isEmpty()) {
+            return; // no cable or socket layers, nothing to do
         }
-        // if cable layers exists, go through all layers
-        foreach ($meta as &$layer) {
-            $layer['layer_dependencies'] = [];
-
-            // has to be a non-cable
-            if ($cableLayers->has($layer['layer_id'])) {
+        // now go through all layers
+        foreach ($meta as $layer) {
+            if ($cableLayers->has($layer->getLayerId())) {
+                // if this layer is a cable layer, it does not depend on any other layer
                 continue;
             }
-            // if they have the required energy editing type: "transformer", "socket", "sourcepoint" or "sourcepolygon"
-            if (!in_array(
-                $layer['layer_editing_type'],
+
+            $layerDependencies = [];
+            if (in_array(
+                $layer->getLayerEditingType(),
                 ['transformer', 'socket', 'sourcepoint', 'sourcepolygon']
-            )) {
-                continue;
+            ) &&
+                // find the corresponding green or grey cable layer
+                null !== $cableLayer = $cableLayers->first(
+                    fn(LayerEntity $l) => $l->getLayerGreen() == $layer->getLayerGreen()
+                )
+            ) {
+                // add cables: if this layer is of the right other type, add associated cable layer id as a dependency
+                $layerDependencies[] = $cableLayer->getLayerId();
             }
 
-            // find the corresponding green or grey cable layer
-            if (null === $cableLayer = $cableLayers->firstWhere('layer_green', $layer['layer_green'])) {
-                continue;
+            if (in_array(
+                $layer->getLayerEditingType(),
+                ['sourcepoint', 'sourcepolygon']
+            ) &&
+                // find the corresponding green or grey cable layer
+                null !== $socketLayer = $socketLayers->first(
+                    fn(LayerEntity $l) => $l->getLayerGreen() == $layer->getLayerGreen()
+                )
+            ) {
+                // add sockets: if this layer is of the right other type, add associated socket layer id as a dependency
+                $layerDependencies[] = $socketLayer->getLayerId();
             }
 
-            // add the associated cable layer id to their dependency
-            $layer['layer_dependencies'][] = $cableLayer['layer_id'];
+            $layer->setLayerDependencies($layerDependencies);
         }
-        unset($layer);
     }
 
     /**
@@ -418,16 +338,6 @@ class Game extends Base
     }
 
     /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function SetStartDate(int $a_startYear): void
-    {
-        /** @noinspection SqlWithoutWhere */
-        $this->getDatabase()->query("UPDATE game SET game_start=?", array($a_startYear));
-    }
-
-    /**
      * @apiGroup Game
      * @throws Exception
      * @api {POST} /game/realtime FutureRealtime
@@ -443,40 +353,43 @@ class Game extends Base
     }
 
     /**
-     * @apiGroup Game
      * @throws Exception
-     * @api {POST} /game/state State
-     * @apiParam {string} state new state of the game
-     * @apiDescription Set the current game state
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function State(string $state): void
-    {
-        $state = strtoupper($state);
-        $currentState = $this->getDatabase()->query("SELECT game_state FROM game")[0];
-        if ($currentState["game_state"] == "END" || $currentState["game_state"] == "SIMULATION") {
-            throw new Exception("Invalid current state of ".$currentState["game_state"]);
+    public static function setStateForSession(
+        int $sessionId,
+        GameStateValue $state,
+        WatchdogCommunicator $watchdogCommunicator
+    ): void {
+        $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
+        /** @var GameRepository $repo */
+        $repo = $em->getRepository(GameEntity::class);
+        $game = $repo->retrieve();
+        $currentState = $game->getGameState();
+        if ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION) {
+            throw new Exception("Invalid current state of ".$currentState->value);
         }
-
-        // prepare update query using builder
-        $qb = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($this->getGameSessionId())
-            ->createQueryBuilder();
-        $qb
-            ->update('game')
-            ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
-            ->set('game_state', $qb->createPositionalParameter($state));
-        if ($currentState["game_state"] == "SETUP") {
-            //Starting plans should be implemented when we any state "PLAY"
+        if ($currentState == GameStateValue::SETUP) {
+            //Starting plans should be implemented when we finish the SETUP phase (PAUSE, PLAY, FASTFORWARD request)
             $plan = new Plan();
+            $plan->setGameSessionId($sessionId);
             await($plan->updateLayerState(0));
-
-            if ($state == "PAUSE") {
-                $qb->set('game_currentmonth', $qb->createPositionalParameter(0));
+            if ($state == GameStateValue::PAUSE) {
+                $game
+                    ->setGameTransitionMonth($game->getGameTransitionMonth() ?? -1)
+                    ->setGameCurrentMonth(0);
             }
         }
-        $qb->executeQuery();
-
-        await($this->onGameStateUpdated($state));
+        $game
+            ->setGameLastUpdate(microtime(true)) // note: not using mysql's UNIX_TIMESTAMP(NOW(6)) function here
+            ->setGameState($state);
+        if ($currentState != $state) {
+            $game->setGameTransitionState(
+                $game->getGameTransitionState() ??
+                    GameTransitionStateValue::from($currentState->value)
+            );
+        }
+        $em->flush();
+        $watchdogCommunicator->changeState($sessionId, $state, $game->getGameCurrentMonth());
     }
 
     /**
@@ -537,22 +450,12 @@ class Game extends Base
             if (empty($watchdogSimSettings)) {
                 continue;
             }
-            $simulationSettings[] = json_decode($watchdogSimSettings, true);
+            $simulationSettings[] = $watchdogSimSettings;
         }
         return [
             'policy_settings' => $policySettings,
             'simulation_settings' => $simulationSettings
         ];
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function onGameStateUpdated(string $newGameState): PromiseInterface
-    {
-        $simulation = new Simulation();
-        $this->asyncDataTransferTo($simulation);
-        return $simulation->changeWatchdogState($newGameState);
     }
 
     /**
@@ -569,7 +472,7 @@ class Game extends Base
     {
         $result = array("year" => -1, "month_of_year" => -1);
         $startYear = $this->getDatabase()->query("SELECT game_start FROM game LIMIT 0,1");
-                
+
         if (count($startYear) == 1) {
             $result["year"] = floor($simulated_month / 12) + $startYear[0]["game_start"];
             $result["month_of_year"] = ($simulated_month % 12) + 1;
@@ -581,15 +484,16 @@ class Game extends Base
      * @throws Exception
      * @return array|PromiseInterface
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetGameDetails(): array|PromiseInterface
+    public function getGameDetails(): array|PromiseInterface
     {
         $promise = $this->getAsyncDatabase()->query(
             $this->getAsyncDatabase()->createQueryBuilder()
                 ->select(
                     'g.game_start',
                     'g.game_eratime',
+                    'g.game_transition_month',
                     'g.game_currentmonth',
+                    'g.game_transition_state',
                     'g.game_state',
                     'g.game_planning_realtime',
                     'g.game_planning_era_realtime',
@@ -628,8 +532,11 @@ class Game extends Base
             return [
                 "game_start_year" => (int) $state["game_start"],
                 "game_end_month" => $state["game_eratime"] * 4,
+                "game_transition_month" => $state["game_transition_month"] !== null ?
+                    (int) $state["game_transition_month"] : null,
                 "game_current_month" => (int) $state["game_currentmonth"],
-                "game_state" => strtolower($state["game_state"]),
+                "game_transition_state" => $state["game_transition_state"],
+                "game_state" => $state["game_state"],
                 "players_past_hour" => (int) $state["active_last_hour"],
                 "players_active" => (int) $state["active_last_minute"],
                 "game_running_til_time" => $runningTilTime
@@ -640,10 +547,8 @@ class Game extends Base
 
     /**
      * @throws Exception
-     * @noinspection PhpUnused
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetCountries(): array
+    public function getCountries(): array
     {
         return $this->getDatabase()->query("SELECT * FROM country WHERE country_name IS NOT NULL");
     }

@@ -42,11 +42,6 @@ class AwaitPrerequisitesWsServerPlugin extends Plugin
             }
             $this->addOutput('Found msp_server_manager database');
             $this->dispatch(new NameAwareEvent(self::EVENT_PREREQUISITES_MET, $this), self::EVENT_PREREQUISITES_MET);
-        })
-        ->otherwise(function ($reason) {
-            // Handle the rejection, and don't propagate. This is like catch without a rethrow
-            $this->addOutput('Awaiting creation of msp_server_manager database: '.$reason->getMessage());
-            return null;
         });
     }
 

@@ -1,0 +1,20 @@
+api_platform:
+    formats:
+        json:
+            mime_types:
+                - application/json
+    error_formats:
+        json:
+            mime_types:
+                - application/problem+json
+                - application/json
+        jsonproblem:
+            mime_types:
+                - application/problem+json
+    enable_swagger_ui: false # since we already have our own nelmio api/doc
+    title: Hello API Platform
+    version: 1.0.0
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']

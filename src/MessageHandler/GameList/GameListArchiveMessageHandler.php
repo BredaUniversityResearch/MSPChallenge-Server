@@ -22,7 +22,7 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 
 #[AsMessageHandler]
-class GameListArchiveMessageHandler extends CommonSessionHandlerBase
+class GameListArchiveMessageHandler extends CommonSessionHandler
 {
     public function __construct(
         KernelInterface $kernel,
@@ -53,7 +53,7 @@ class GameListArchiveMessageHandler extends CommonSessionHandlerBase
         $this->gameSession = new GameList($gameList->id);
         $this->watchdogCommunicator->changeState(
             $this->gameSession->getId(),
-            new GameStateValue('end'),
+            GameStateValue::END,
             $this->gameSession->getGameCurrentMonth()
         );
         $this->removeSessionRasterStore();

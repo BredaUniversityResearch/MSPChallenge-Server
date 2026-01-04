@@ -7,14 +7,18 @@ use App\Domain\Common\Stopwatch\Stopwatch;
 use App\Domain\Common\ToPromiseFunction;
 use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\ClientConnectionResourceManagerInterface;
+use App\Domain\WsServer\ClientDisconnectedException;
 use App\Domain\WsServer\ServerManagerInterface;
 use App\Domain\WsServer\WsServerInterface;
 use App\Domain\WsServer\WsServerOutput;
 use Exception;
+use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Serializer\SerializerInterface;
 use function App\tpf;
+use function React\Promise\reject;
 
 abstract class Plugin extends EventDispatcher implements PluginInterface
 {
@@ -30,6 +34,10 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
     private ?ClientConnectionResourceManagerInterface $clientConnectionResourceManager = null;
     private ?ServerManagerInterface $serverManager = null;
     private ?WsServerInterface $wsServer = null;
+
+    private ?SerializerInterface $serializer = null;
+
+    private ?LoggerInterface $logger = null;
 
     public function __construct(
         string $name,
@@ -72,7 +80,7 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
         $this->messageVerbosity = $messageVerbosity;
     }
 
-    public function addOutput(string $output, ?int $verbosity = null): self
+    public function addOutput(string $output, ?int $verbosity = null): static
     {
         $verbosity ??= $this->messageVerbosity;
         if ($this->isDebugOutputEnabled()) {
@@ -92,8 +100,8 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
     final public function registerToLoop(LoopInterface $loop): void
     {
         $this->dispatch(
-            new NameAwareEvent(self::EVENT_PLUGIN_REGISTERED, $this),
-            self::EVENT_PLUGIN_REGISTERED
+            new NameAwareEvent(static::EVENT_PLUGIN_REGISTERED, $this),
+            static::EVENT_PLUGIN_REGISTERED
         );
         $this->registeredToLoop = true;
         $this->loop = $loop;
@@ -118,8 +126,8 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
     final public function unregisterFromLoop(LoopInterface $loop): void
     {
         $this->dispatch(
-            new NameAwareEvent(self::EVENT_PLUGIN_UNREGISTERED, $this),
-            self::EVENT_PLUGIN_UNREGISTERED
+            new NameAwareEvent(static::EVENT_PLUGIN_UNREGISTERED, $this),
+            static::EVENT_PLUGIN_UNREGISTERED
         );
         $this->registeredToLoop = false; // Note that PluginHelper will take care of the rest.
     }
@@ -128,7 +136,7 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
         return $this->gameSessionIdFilter;
     }
 
-    public function setGameSessionIdFilter(?int $gameSessionIdFilter): self
+    public function setGameSessionIdFilter(?int $gameSessionIdFilter): static
     {
         $this->gameSessionIdFilter = $gameSessionIdFilter;
         return $this;
@@ -145,7 +153,7 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
         return $this->loop;
     }
 
-    public function setLoop(LoopInterface $loop): self
+    public function setLoop(LoopInterface $loop): static
     {
         $this->loop = $loop;
         return $this;
@@ -159,7 +167,7 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
         return $this->stopwatch;
     }
 
-    public function setStopwatch(?Stopwatch $stopwatch): self
+    public function setStopwatch(?Stopwatch $stopwatch): static
     {
         $this->stopwatch = $stopwatch;
         return $this;
@@ -178,7 +186,7 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
 
     public function setClientConnectionResourceManager(
         ClientConnectionResourceManagerInterface $clientConnectionResourceManager
-    ): self {
+    ): static {
         $this->clientConnectionResourceManager = $clientConnectionResourceManager;
         return $this;
     }
@@ -191,7 +199,7 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
         return $this->serverManager;
     }
 
-    public function setServerManager(ServerManagerInterface $serverManager): self
+    public function setServerManager(ServerManagerInterface $serverManager): static
     {
         $this->serverManager = $serverManager;
         return $this;
@@ -208,9 +216,23 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
         return $this->wsServer;
     }
 
-    public function setWsServer(WsServerInterface $wsServer): self
+    public function setWsServer(WsServerInterface $wsServer): static
     {
         $this->wsServer = $wsServer;
+        return $this;
+    }
+
+
+    public function getSerializer(): SerializerInterface
+    {
+        if (null === $this->serializer) {
+            throw new Exception('Attempt to retrieve unknown SerializerInterface');
+        }
+        return $this->serializer;
+    }
+    public function setSerializer(SerializerInterface $serializer): static
+    {
+        $this->serializer = $serializer;
         return $this;
     }
 
@@ -220,11 +242,11 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
             $executionId ??= uniqid();
             $this->dispatch(
                 new NameAwareEvent(
-                    self::EVENT_PLUGIN_EXECUTION_STARTED,
+                    static::EVENT_PLUGIN_EXECUTION_STARTED,
                     $this,
-                    [self::EVENT_ARG_EXECUTION_ID => $executionId]
+                    [static::EVENT_ARG_EXECUTION_ID => $executionId]
                 ),
-                self::EVENT_PLUGIN_EXECUTION_STARTED
+                static::EVENT_PLUGIN_EXECUTION_STARTED
             );
             $tpf = $this->onCreatePromiseFunction($executionId);
             $context = Context::root()->enter($this->getName());
@@ -239,12 +261,31 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
                     );
                     $this->dispatch(
                         new NameAwareEvent(
-                            self::EVENT_PLUGIN_EXECUTION_FINISHED,
+                            static::EVENT_PLUGIN_EXECUTION_FINISHED,
                             $this,
-                            [self::EVENT_ARG_EXECUTION_ID => $executionId]
+                            [static::EVENT_ARG_EXECUTION_ID => $executionId]
                         ),
-                        self::EVENT_PLUGIN_EXECUTION_FINISHED
+                        static::EVENT_PLUGIN_EXECUTION_FINISHED
                     );
+                })
+                ->otherwise(function ($error) {
+                    if ($error instanceof ClientDisconnectedException) {
+                        return null;
+                    }
+                    if ($error instanceof \Throwable) {
+                        $this->getLogger()?->error(
+                            $error->getMessage(),
+                            ['exception' => $error]
+                        );
+                        $this->addOutput('Plugin '.$this->getName().' failed: '.$error->getMessage());
+                    } elseif (is_string($error)) {
+                        $this->getLogger()?->error($error);
+                        $this->addOutput('Plugin '.$this->getName().' failed: '.$error);
+                    } else {
+                        $this->getLogger()?->error('Encountered error', ['reason' => $error]);
+                        $this->addOutput('Plugin '.$this->getName().' failed: '.json_encode($error));
+                    }
+                    return reject($error);
                 });
         });
     }
@@ -254,5 +295,16 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
     public function onWsServerEventDispatched(NameAwareEvent $event): void
     {
         // nothing to do, can be implemented by child class.
+    }
+
+    public function getLogger(): ?LoggerInterface
+    {
+        return $this->logger;
+    }
+
+    public function setLogger(LoggerInterface $logger): static
+    {
+        $this->logger = $logger;
+        return $this;
     }
 }

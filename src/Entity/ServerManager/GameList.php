@@ -3,6 +3,7 @@
 namespace App\Entity\ServerManager;
 
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
+use App\Domain\Common\EntityEnums\GameTransitionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameVisibilityValue;
 use App\Entity\EntityBase;
@@ -55,8 +56,11 @@ class GameList extends EntityBase
     #[ORM\Column]
     private ?int $gameEndMonth = null;
 
+    #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true)]
+    private ?int $gameTransitionMonth = null;
+
     #[ORM\Column]
-    private int $gameCurrentMonth = 0;
+    private int $gameCurrentMonth = -1;
 
     #[ORM\Column(type: Types::BIGINT)]
     private ?int $gameRunningTilTime = null;
@@ -73,8 +77,11 @@ class GameList extends EntityBase
     #[ORM\Column(length: 255)]
     private ?string $sessionState = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $gameState = null;
+    #[ORM\Column(nullable: true, enumType: GameTransitionStateValue::class)]
+    private ?GameTransitionStateValue $gameTransitionState = null;
+
+    #[ORM\Column(enumType: GameStateValue::class, options: ['default' => GameStateValue::SETUP->value])]
+    private GameStateValue $gameState = GameStateValue::SETUP;
 
     #[ORM\Column(length: 255)]
     private ?string $gameVisibility = null;
@@ -219,10 +226,29 @@ class GameList extends EntityBase
         return $this;
     }
 
+    public function getGameTransitionMonth(): ?int
+    {
+        return $this->gameTransitionMonth;
+    }
+
+    public function setGameTransitionMonth(?int $gameTransitionMonth): self
+    {
+        $this->gameTransitionMonth = $gameTransitionMonth;
+        return $this;
+    }
+
+    public function getGameTransitionMonthPretty(): ?string
+    {
+        if (null === $this->gameTransitionMonth) {
+            return null;
+        }
+        return $this->makeDatePretty($this->gameTransitionMonth);
+    }
+
     public function getGameCurrentMonth(): int
     {
         // taken from api/v1/Game.php GetCurrentMonthAsId()
-        if ($this->gameState == 'SETUP') {
+        if ($this->gameState == GameStateValue::SETUP) {
             $this->gameCurrentMonth = -1;
         }
         return $this->gameCurrentMonth;
@@ -287,7 +313,7 @@ class GameList extends EntityBase
         return $this->passwordPlayer;
     }
 
-    
+
     public function encodePasswords(): self
     {
         if (!isBase64Encoded($this->passwordAdmin)) {
@@ -299,7 +325,7 @@ class GameList extends EntityBase
 
         return $this;
     }
-    
+
     public function decodePasswords(): self
     {
         if (isBase64Encoded($this->passwordAdmin)) {
@@ -308,7 +334,7 @@ class GameList extends EntityBase
         if (isBase64Encoded($this->passwordPlayer)) {
             $this->passwordPlayer = base64_decode($this->passwordPlayer);
         }
-        
+
         return $this;
     }
 
@@ -334,17 +360,25 @@ class GameList extends EntityBase
         return $this;
     }
 
-    public function getGameState(): ?GameStateValue
+    public function getGameTransitionState(): ?GameTransitionStateValue
     {
-        if (null === $this->gameState) {
-            return null;
-        }
-        return new GameStateValue($this->gameState);
+        return $this->gameTransitionState;
+    }
+
+    public function setGameTransitionState(?GameTransitionStateValue $gameTransitionState): self
+    {
+        $this->gameTransitionState = $gameTransitionState;
+        return $this;
+    }
+
+    public function getGameState(): GameStateValue
+    {
+        return $this->gameState;
     }
 
     public function setGameState(GameStateValue $gameState): self
     {
-        $this->gameState = (string)$gameState;
+        $this->gameState = $gameState;
 
         return $this;
     }

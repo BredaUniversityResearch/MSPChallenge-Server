@@ -5,6 +5,8 @@ namespace App\Entity\SessionAPI;
 use App\Domain\Common\EntityEnums\RestrictionSort;
 use App\Domain\Common\EntityEnums\RestrictionType;
 use App\Repository\SessionAPI\RestrictionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -28,10 +30,10 @@ class Restriction
     #[ORM\Column(type: Types::STRING, length: 45, nullable: true)]
     private ?string $restrictionStartLayerType;
 
-    #[ORM\Column(length: 255, enumType: RestrictionSort::class)]
+    #[ORM\Column(enumType: RestrictionSort::class)]
     private RestrictionSort $restrictionSort = RestrictionSort::INCLUSION;
 
-    #[ORM\Column(length: 255, enumType: RestrictionType::class)]
+    #[ORM\Column(enumType: RestrictionType::class)]
     private RestrictionType $restrictionType;
 
     #[ORM\Column(type: Types::STRING, length: 512, nullable: true)]

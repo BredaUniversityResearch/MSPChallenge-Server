@@ -14,6 +14,9 @@ use App\Entity\SessionAPI\Watchdog;
 use Exception;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * @extends LoggableEntityRepository<Watchdog>
+ */
 class WatchdogRepository extends LoggableEntityRepository implements LogContainerInterface
 {
     use LogContainerTrait;
