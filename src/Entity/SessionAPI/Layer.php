@@ -1019,7 +1019,7 @@ SQL,
         $game = new \App\Domain\API\v1\Game();
         $gameConfigDataModel = $game->GetGameConfigValues($this->getOriginSessionLogFilePath() ?? '');
         $heatmapSettings = array_filter(
-            $gameConfigDataModel['SEL']['heatmap_settings'],
+            $gameConfigDataModel['SEL']['heatmap_settings'] ?? [],
             fn($x) => $x['layer_name'] === $this->getLayerName()
         );
         if (empty($heatmapSettings)) {

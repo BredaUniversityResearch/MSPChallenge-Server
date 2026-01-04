@@ -2,6 +2,7 @@
 
 namespace App\MessageHandler\GameSave;
 
+use App\Domain\API\v1\Game as GameAPI;
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
@@ -86,6 +87,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
             $state = 'failed';
         }
         $this->gameSession->setSessionState(new GameSessionStateValue($state));
+        $this->mspServerManagerEntityManager->persist($this->gameSession);
         $this->mspServerManagerEntityManager->flush();
     }
 
@@ -101,20 +103,9 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
      */
     private function finaliseSaveLoad(): void
     {
-        /** @var GameRepository $gameRepo */
-        $gameRepo = $this->entityManager->getRepository(Game::class);
-        $game = $gameRepo->retrieve();
-        $game->setGameConfigfile(sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId()));
-        $this->entityManager->persist($game);
-        $this->entityManager->flush();
-
-        $this->registerSimulations();
-        $this->watchdogCommunicator->changeState(
-            $this->gameSession->getId(),
-            $this->gameSession->getGameState(),
-            $this->gameSession->getGameCurrentMonth()
-        );
-        $this->logContainer($this->watchdogCommunicator);
+        // note that it will be flushed by the caller
+        $this->updateStateForSession()
+            ->setGameConfigfile(sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId()));
     }
 
     /**
@@ -194,7 +185,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
                 GameStateValue::END,
                 $this->gameSession->getGameCurrentMonth()
             );
-            $this->gameSession->setSessionState(new GameSessionStateValue('request'));
+            $this->gameSession->setSessionState(new GameSessionStateValue(GameSessionStateValue::REQUEST));
             $this->mspServerManagerEntityManager->flush();
             $this->resetSessionDatabase();
             return;

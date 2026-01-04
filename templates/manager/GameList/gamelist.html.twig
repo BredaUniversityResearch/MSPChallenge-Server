@@ -28,11 +28,12 @@
                     {% set state = game.session_state %}
                 {% else %}
                     {% set state = game.game_state.value|lower %}
+                    {% set transitionState = game.game_transition_state %}
                 {% endif %}
                 <td class="state_{{ state }}">
-                    {% if game.game_transition_state is not null %}
-                        {% if game.game_transition_state.value|lower != state %}
-                            {{ game.game_transition_state.value|lower }}
+                    {% if transitionState is not null %}
+                        {% if transitionState.value|lower != state %}
+                            {{ transitionState.value|lower }}
                         {% endif %}
                         <i class="fa fa-solid fa-arrow-right"></i>
                     {% endif %}
