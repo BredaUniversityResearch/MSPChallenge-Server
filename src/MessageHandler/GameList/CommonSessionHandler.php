@@ -2,21 +2,27 @@
 
 namespace App\MessageHandler\GameList;
 
+use App\Domain\API\v1\Game as GameAPI;
+use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Log\LogContainerInterface;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SimulationHelper;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
+use App\Entity\SessionAPI\Game;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListArchiveMessage;
 use App\Message\GameList\GameListCreationMessage;
 use App\Message\GameSave\GameSaveCreationMessage;
 use App\Message\GameSave\GameSaveLoadMessage;
 use App\Entity\SessionAPI\Watchdog;
+use App\Repository\SessionAPI\GameRepository;
 use App\Repository\SessionAPI\WatchdogRepository;
 use App\VersionsProvider;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -282,5 +288,51 @@ abstract class CommonSessionHandler
                     $this->sessionLogHandler->info($log[LogContainerInterface::LOG_FIELD_MESSAGE]);
             }
         }
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     * @throws Exception
+     */
+    protected function updateStateForSession(): Game
+    {
+        $game = null;
+        $isDemoSession = $this->gameSession->getDemoSession() == 1;
+        if ($isDemoSession) {
+            $this->entityManager->clear();
+            $game = GameAPI::setStateForSession(
+                $this->gameSession->getId(),
+                GameStateValue::PLAY,
+                $this->watchdogCommunicator
+            );
+            $this->logContainer($this->watchdogCommunicator);
+        }
+        if ($game === null) {
+            /** @var GameRepository $gameRepo */
+            $gameRepo = $this->entityManager->getRepository(Game::class);
+            $game = $gameRepo->retrieve();
+        }
+
+        // sync to server manager db game_list table
+        // note that it will be flushed by the caller
+        $this->gameSession
+            ->setGameTransitionMonth($game->getGameTransitionMonth())
+            ->setGameCurrentMonth($game->getGameCurrentMonth())
+            ->setGameTransitionState($game->getGameTransitionState())
+            ->setGameState($game->getGameState());
+
+        if ($isDemoSession) {
+            return $game; // already changed to PLAY above
+        }
+
+        $this->registerSimulations();
+        $this->watchdogCommunicator->changeState(
+            $this->gameSession->getId(),
+            GameStateValue::SETUP,
+            $this->gameSession->getGameCurrentMonth()
+        );
+        $this->logContainer($this->watchdogCommunicator);
+        return $game;
     }
 }

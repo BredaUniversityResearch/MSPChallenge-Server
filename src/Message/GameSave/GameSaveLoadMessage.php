@@ -2,11 +2,11 @@
 
 namespace App\Message\GameSave;
 
-class GameSaveLoadMessage
+readonly class GameSaveLoadMessage
 {
     public function __construct(
-        public readonly int $id,
-        public readonly int $gameSaveId
+        public int $id,
+        public int $gameSaveId
     ) {
         // note that $id refers to the GameList/session ID that needs to be load based on $gameSaveId
     }
