@@ -1,6 +1,7 @@
 <?php
 
 use App\Domain\API\v1\Router;
+use App\Domain\Common\MessageJsonResponse;
 
 header('Content-Type: application/json');
     
@@ -13,23 +14,16 @@ ini_set('memory_limit', '-1');
 
 ob_start();
 
-$outputData = ["success" => false, "message"=> ""];
+/** @var MessageJsonResponse $reponse */
+$response = new MessageJsonResponse(status: 404);
 if (!empty($_GET['query'])) {
-    $outputData = Router::RouteApiCall($_GET['query'], $_POST);
-} else {
-    http_response_code(404);
+    $response = Router::RouteApiCall($_GET['query'], $_POST);
 }
 
-//$outputData["request_url"] = $_SERVER["REQUEST_URI"];
 $pageOutput = ob_get_flush();
 if (!empty($pageOutput)) {
-    $outputData["message"].= PHP_EOL."Additional Debug Information: ".$pageOutput;
-    $outputData["success"] = false;
+    $response->setMessage(($response->getMessage() ?? '').PHP_EOL."Additional Debug Information: ".$pageOutput);
+    $response->setStatusCode(500);
 }
 
-echo json_encode($outputData);
-
-// if (!$has_errored)
-// {
-//  unlink($fname);
-// }
+return $response;

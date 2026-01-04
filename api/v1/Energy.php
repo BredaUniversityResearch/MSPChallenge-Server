@@ -10,6 +10,7 @@ use React\Promise\PromiseInterface;
 use function App\parallel;
 use function App\tpf;
 use function App\await;
+use App\Domain\Common\EntityEnums\PlanState;
 
 class Energy extends Base
 {
@@ -775,6 +776,10 @@ class Energy extends Base
                     ->innerJoin('p', 'grid', 'g', 'p.plan_id = g.grid_plan_id')
                     ->where(
                         $qb->expr()->and(
+                            $qb->expr()->neq(
+                                'p.plan_state',
+                                $qb->createPositionalParameter(PlanState::DELETED->value)
+                            ),
                             $qb->expr()->or(
                                 'p.plan_gametime > ' .
                                     $qb->createPositionalParameter($referencePlanData['plan_gametime']),
@@ -811,6 +816,10 @@ class Energy extends Base
                         ->innerJoin('p', 'grid_removed', 'gr', 'p.plan_id = gr.grid_removed_plan_id')
                         ->where(
                             $qb->expr()->and(
+                                $qb->expr()->neq(
+                                    'p.plan_state',
+                                    $qb->createPositionalParameter(PlanState::DELETED->value)
+                                ),
                                 $qb->expr()->or(
                                     'p.plan_gametime > ' .
                                         $qb->createPositionalParameter($referencePlanData['plan_gametime']),
@@ -925,6 +934,10 @@ class Energy extends Base
                                 'plan_layer_connection.plan_layer_plan_id = plan_connection.plan_id'
                             )
                             ->where($qb->expr()->and(
+                                $qb->expr()->neq(
+                                    'plan_connection.plan_state',
+                                    $qb->createPositionalParameter(PlanState::DELETED->value)
+                                ),
                                 'geometry_start.geometry_active = 1',
                                 'geometry_end.geometry_active = 1',
                                 'geometry_connection.geometry_active = 1',
@@ -1011,8 +1024,9 @@ class Energy extends Base
                     return $this->getAsyncDatabase()->queryBySQL(
                         '
                         SELECT grid_plan_id as plan_id 
-                        FROM grid INNER JOIN plan ON grid.grid_plan_id = plan.plan_id
-                        WHERE grid_persistent = ? AND (
+                        FROM grid 
+                        INNER JOIN plan ON grid.grid_plan_id = plan.plan_id
+                        WHERE grid_persistent = ? AND plan.plan_state <> \'DELETED\' AND (
                             plan.plan_gametime > ? OR (
                                 plan.plan_gametime = ? AND plan.plan_id > ?
                             )
@@ -1038,7 +1052,7 @@ class Energy extends Base
                         SELECT grid_removed_plan_id as plan_id 
                         FROM grid_removed
                         INNER JOIN plan on grid_removed.grid_removed_plan_id = plan.plan_id
-                        WHERE grid_removed_grid_persistent = ? AND (
+                        WHERE grid_removed_grid_persistent = ? AND plan.plan_state <> \'DELETED\' AND (
                             plan.plan_gametime > ? OR (plan.plan_gametime = ? AND plan.plan_id > ?))
                         ',
                         [
@@ -1134,14 +1148,14 @@ class Energy extends Base
 
         $geoIds = array_map('intval', $geoIds);
         $whereClause = implode("','", $geoIds);
-            
+
         $result = $this->getDatabase()->query(
             "
             SELECT energy_output_geometry_id FROM energy_output WHERE energy_output_geometry_id IN (".$whereClause.")
             GROUP BY energy_output_geometry_id
             "
         );
-            
+
         if (count($result) == 0) {
             return null;
         }

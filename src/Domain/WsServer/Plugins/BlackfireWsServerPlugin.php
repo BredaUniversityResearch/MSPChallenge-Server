@@ -49,7 +49,7 @@ class BlackfireWsServerPlugin extends Plugin implements EventSubscriberInterface
         $this->startStateSetup();
     }
 
-    private function signalHandler(int $signalId)
+    private function signalHandler(int $signalId): void
     {
         assert(extension_loaded('pcntl'));
         switch ($signalId) {
@@ -199,7 +199,7 @@ class BlackfireWsServerPlugin extends Plugin implements EventSubscriberInterface
         ];
     }
 
-    public function addOutput(string $output, ?int $verbosity = null): self
+    public function addOutput(string $output, ?int $verbosity = null): static
     {
         parent::addOutput(self::OUTPUT_PREFIX.$output, $verbosity);
         return $this;

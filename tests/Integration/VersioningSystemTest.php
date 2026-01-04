@@ -61,36 +61,44 @@ class VersioningSystemTest extends KernelTestCase
         $this->assertIncompatibleClient((string) $newerMajorClient);
 
         $this->versionProvider = new VersionsProvider(
+            $container->getParameter('app.version_filename'),
             $container->get(KernelInterface::class),
             Version::fromString('4.9.0')
         );
+        $this->versionProvider->setLowestClientVersion(Version::fromString('4.0.0'));
         $this->assertTrue(
             $this->versionProvider->checkCompatibleClient($this->versionProvider->getLowestClientVersion()),
             "Server {$this->versionProvider->getVersion()} &
             {$this->versionProvider->getLowestClientVersion()} incompatible?"
         );
         $this->versionProvider = new VersionsProvider(
+            $container->getParameter('app.version_filename'),
             $container->get(KernelInterface::class),
             Version::fromString('4.9.1')
         );
+        $this->versionProvider->setLowestClientVersion(Version::fromString('4.0.0'));
         $this->assertTrue(
             $this->versionProvider->checkCompatibleClient($this->versionProvider->getLowestClientVersion()),
             "Server {$this->versionProvider->getVersion()} &
             {$this->versionProvider->getLowestClientVersion()} incompatible?"
         );
         $this->versionProvider = new VersionsProvider(
+            $container->getParameter('app.version_filename'),
             $container->get(KernelInterface::class),
             Version::fromString('4.10.0')
         );
+        $this->versionProvider->setLowestClientVersion(Version::fromString('4.0.0'));
         $this->assertTrue(
             $this->versionProvider->checkCompatibleClient($this->versionProvider->getLowestClientVersion()),
             "Server {$this->versionProvider->getVersion()} &
             {$this->versionProvider->getLowestClientVersion()} incompatible?"
         );
         $this->versionProvider = new VersionsProvider(
+            $container->getParameter('app.version_filename'),
             $container->get(KernelInterface::class),
             Version::fromString('5.0.0')
         );
+        $this->versionProvider->setLowestClientVersion(Version::fromString('4.0.0'));
         $this->assertIncompatibleClient($this->versionProvider->getLowestClientVersion());
     }
 

@@ -7,8 +7,10 @@ use App\Domain\Event\NameAwareEvent;
 use App\Domain\WsServer\ClientConnectionResourceManagerInterface;
 use App\Domain\WsServer\ServerManagerInterface;
 use App\Domain\WsServer\WsServerInterface;
+use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 interface PluginInterface
 {
@@ -25,28 +27,34 @@ interface PluginInterface
     public function getMinIntervalSec(): float;
     public function isDebugOutputEnabled(): bool;
     public function setDebugOutputEnabled(bool $debugOutputEnabled): void;
-    public function addOutput(string $output, int $verbosity = OutputInterface::VERBOSITY_NORMAL): self;
+    public function addOutput(string $output, int $verbosity = OutputInterface::VERBOSITY_NORMAL): static;
 
     public function getLoop(): LoopInterface;
-    public function setLoop(LoopInterface $loop): self;
+    public function setLoop(LoopInterface $loop): static;
     public function isRegisteredToLoop(): bool;
     public function registerToLoop(LoopInterface $loop);
     public function unregisterFromLoop(LoopInterface $loop);
 
     public function getGameSessionIdFilter(): ?int;
-    public function setGameSessionIdFilter(?int $gameSessionIdFilter): self;
+    public function setGameSessionIdFilter(?int $gameSessionIdFilter): static;
     public function getStopwatch(): ?Stopwatch;
-    public function setStopwatch(?Stopwatch $stopwatch): self;
+    public function setStopwatch(?Stopwatch $stopwatch): static;
     public function getClientConnectionResourceManager(): ClientConnectionResourceManagerInterface;
     public function setClientConnectionResourceManager(
         ClientConnectionResourceManagerInterface $clientConnectionResourceManager
-    ): self;
+    ): static;
 
     public function getServerManager(): ServerManagerInterface;
-    public function setServerManager(ServerManagerInterface $serverManager): self;
+    public function setServerManager(ServerManagerInterface $serverManager): static;
 
     public function getWsServer(): WsServerInterface;
-    public function setWsServer(WsServerInterface $wsServer): self;
+    public function setWsServer(WsServerInterface $wsServer): static;
+
+    public function getSerializer(): SerializerInterface;
+    public function setSerializer(SerializerInterface $serializer): static;
 
     public function onWsServerEventDispatched(NameAwareEvent $event): void;
+
+    public function getLogger(): ?LoggerInterface;
+    public function setLogger(LoggerInterface $logger): static;
 }

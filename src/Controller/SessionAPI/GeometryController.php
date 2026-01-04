@@ -3,6 +3,7 @@
 namespace App\Controller\SessionAPI;
 
 use App\Controller\BaseController;
+use App\Domain\Common\MessageJsonResponse;
 use App\Entity\SessionAPI\Geometry;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -81,13 +82,9 @@ class GeometryController extends BaseController
         /** @var Geometry $geometry */
         $geometry = $geom->find($id);
         if (null == $geometry) {
-            return new JsonResponse(
-                self::wrapPayloadForResponse(
-                    false,
-                    null,
-                    'Geometry with ID ' . $id . ' not found.'
-                ),
-                404
+            return new MessageJsonResponse(
+                status: 404,
+                message: 'Geometry with ID ' . $id . ' not found.'
             );
         }
         return new Response($geometry->toWkt());

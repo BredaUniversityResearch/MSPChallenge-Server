@@ -29,8 +29,8 @@ class Simulation
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $version = null;
 
-    #[ORM\Column(options: ['default' => -1])]
-    private int $lastMonth = -1;
+    #[ORM\Column(options: ['default' => -2])]
+    private int $lastMonth = -2;
 
     public function getId(): ?int
     {

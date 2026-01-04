@@ -77,8 +77,8 @@ if [ -z "${DATABASE_PASSWORD}" ]; then
 else
     MYSQL_PARAMS="-p${DATABASE_PASSWORD}"
 fi
-MY2_SETUP="ede && (MSYS_NO_PATHCONV=1 docker exec \${COMPOSE_PROJECT_NAME}-database-1 bash -c 'mysql -u root ${MYSQL_PARAMS} < /root/my2_80.sql' || echo 'Failed to import my2_80.sql to database')"
-alias drg="[[ ! -z \"\${COMPOSE_PROJECT_NAME}\" ]] && ${MY2_SETUP} && docker stop ${COMPOSE_PROJECT_NAME}-grafana-1 ; docker rm ${COMPOSE_PROJECT_NAME}-grafana-1 ; MSYS_NO_PATHCONV=1 docker run -d -p 3000:3000 -e MY2_PASSWORD=${MY2_PASSWORD} --name=grafana-1 --label com.docker.compose.project=\${COMPOSE_PROJECT_NAME} --network=\${COMPOSE_PROJECT_NAME}_database --volume \"$PWD/docker/grafana/provisioning:/etc/grafana/provisioning\" --volume \"$PWD/docker/grafana/msp-challenge/:/etc/grafana/msp-challenge\" grafana/grafana-oss:9.1.7"
+MY2_SETUP="ede && (([ ! -f ./docker/database/my2_80.sql ] && echo 'Error: ./docker/database/my2_80.sql not found.' && exit 1) || read -p 'Please change the my2 user password in ./docker/database/my2_80.sql now. It must match the MY2_PASSWORD env. var. Press enter to continue.') ; (MSYS_NO_PATHCONV=1 docker cp ./docker/database/my2_80.sql ${COMPOSE_PROJECT_NAME}-database-1:/root/my2_80.sql && (MSYS_NO_PATHCONV=1 docker exec \${COMPOSE_PROJECT_NAME}-database-1 bash -c 'mysql -u root ${MYSQL_PARAMS} < /root/my2_80.sql' || echo 'Failed to import my2_80.sql to database') ; MSYS_NO_PATHCONV=1 docker exec \${COMPOSE_PROJECT_NAME}-database-1 bash -c 'rm /root/my2_80.sql')"
+alias drg="[[ ! -z \"\${COMPOSE_PROJECT_NAME}\" ]] && ${MY2_SETUP} && docker stop ${COMPOSE_PROJECT_NAME}-grafana-1 ; docker rm ${COMPOSE_PROJECT_NAME}-grafana-1 ; MSYS_NO_PATHCONV=1 docker run -d -p 3000:3000 -e MY2_PASSWORD=${MY2_PASSWORD} --name=grafana-1 --label com.docker.compose.project=\${COMPOSE_PROJECT_NAME} --network=${COMPOSE_PROJECT_NAME}_msp_network --volume \"$PWD/docker/grafana/provisioning:/etc/grafana/provisioning\" --volume \"$PWD/docker/grafana/msp-challenge/:/etc/grafana/msp-challenge\" grafana/grafana-oss:9.1.7"
 # docker (d) + stop (s) + all containers (a)
 alias dsa='docker stop $(docker ps -a -q)'
 # docker (d) + system (s) + prune (p)

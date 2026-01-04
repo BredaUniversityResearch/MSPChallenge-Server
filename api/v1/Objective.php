@@ -107,48 +107,4 @@ class Objective extends Base
             array($completed, $objective_id)
         );
     }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Export(array &$configObject): void
-    {
-        // move to deprecate - was used in the old tools class only as far as I know (Harald)
-        $objectives = $this->getDatabase()->query("SELECT objective_id, 
-					objective_country_id as country_id, 
-					objective_title as title, 
-					objective_description as description, 
-					objective_deadline as deadline 
-				FROM objective WHERE objective_active = 1");
-
-        $configObject['objectives'] = $objectives;
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Import(): void
-    {
-        $game = new Game();
-        $config = $game->GetGameConfigValues();
-
-        if (!isset($config['objectives'])) {
-            return;
-        }
-
-        foreach ($config['objectives'] as $objective) {
-            $this->getDatabase()->query(
-                "
-                INSERT INTO objective (
-                    objective_country_id, objective_title, objective_description, objective_deadline,
-                    objective_lastupdate
-                ) VALUES (?, ?, ?, ?, 100)
-                ",
-                array($objective['country_id'], $objective['title'], $objective['description'], $objective['deadline']),
-                true
-            );
-        }
-    }
 }

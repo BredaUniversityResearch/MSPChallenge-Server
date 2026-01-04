@@ -143,6 +143,17 @@ class ConnectionManager extends DatabaseDefaults
             'type' => 'pool',
             'pool' => 'doctrine.meta_cache_pool'
         ];
+        $config['dql'] = [
+            'string_functions' => [
+                'UUID_SHORT' => 'App\Doctrine\Functions\UuidShortFunction'
+            ]
+        ];
+        $config['filters'] = [
+            'softdeleteable' => [
+                'class' => \Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter::class,
+                'enabled' => true,
+            ]
+        ];
         if (($_ENV['APP_ENV'] ?? null) !== 'prod') {
             return $config;
         }

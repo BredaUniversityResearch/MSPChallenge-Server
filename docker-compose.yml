@@ -1,4 +1,21 @@
 services:
+  fluent-bit:
+    image: docker-hub.mspchallenge.info/cradlewebmaster/fluent-bit:4.2.0
+    depends_on:
+      - simulations
+    volumes:
+      - symfony_log:/var/log/symfony:ro
+      - fluent_bit_output:/fluent-bit/output:rw
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - supervisor_log:/var/log/supervisor:ro\
+      - session_log:/var/log/session:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   redis:
     image: redis:7.2-alpine
     restart: always
@@ -33,7 +50,6 @@ services:
     networks:
       - msp_network
     volumes:
-      - ./docker/database/my2_80.sql:/root/my2_80.sql:ro
       - mariadb_data:/var/lib/mysql
     logging:
       driver: "local"
@@ -42,6 +58,7 @@ services:
     depends_on:
       - database
       - redis
+      - fluent-bit
     restart: unless-stopped
     volumes:
       - caddy_data:/data
@@ -50,8 +67,11 @@ services:
       - vendor_data:/app/vendor:rw
       - node_modules_data:/app/node_modules:rw
       - public_build_data:/app/public/build:rw
-      - /app/var/log
+      - symfony_log:/app/var/log:rw
       - /var/run/docker.sock:/var/run/docker.sock # to communicate with the Docker daemon
+      - supervisor_log:/var/log/supervisor:rw
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - session_log:/app/ServerManager/log:rw
     networks:
       - msp_network
     environment:
@@ -92,7 +112,13 @@ services:
       # other
       APP_ENV: ${APP_ENV:-dev}
       FRAMEWORK_CACHE_APP: ${FRAMEWORK_CACHE_APP:-cache.adapter.redis}
-      IMMERSIVE_TWINS_DOCKER_HUB_TAG: ${IMMERSIVE_TWINS_DOCKER_HUB_TAG:-latest}
+      IMMERSIVE_SESSIONS_DOCKER_HUB_TAG: ${IMMERSIVE_SESSIONS_DOCKER_HUB_TAG:-latest}
+      IMMERSIVE_SESSIONS_HEALTHCHECK_WRITE_MODE: ${IMMERSIVE_SESSIONS_HEALTHCHECK_WRITE_MODE:-0}
+      IMMERSIVE_SESSIONS_DOCKER_FORCE_PULL: ${IMMERSIVE_SESSIONS_DOCKER_FORCE_PULL:-0}
+      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$}
+      AUTH_SERVER_SCHEME: ${AUTH_SERVER_SCHEME:-https}
+      AUTH_SERVER_HOST: ${AUTH_SERVER_HOST:-auth2.mspchallenge.info}
+      AUTH_SERVER_PORT: ${AUTH_SERVER_PORT:-443}
     ports:
       # Websocket server
       - "${WS_SERVER_PORT:-45001}:${WS_SERVER_PORT:-45001}"
@@ -117,7 +143,10 @@ services:
       WATCHDOG_PORT: ${WATCHDOG_PORT:-45000}
       MSP_MEL_EWE_DUMP_ENABLED: "${MSP_MEL_EWE_DUMP_ENABLED:-0}"
     logging:
-      driver: "local"
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - msp_network
 
@@ -132,12 +161,15 @@ volumes:
   mariadb_data:
   caddy_data:
   caddy_config:
-###> symfony/mercure-bundle ###
-###< symfony/mercure-bundle ###
-
+  symfony_log:
+  fluent_bit_output:
+  supervisor_log:
+  session_log:
 ###> doctrine/doctrine-bundle ###
   db-data:
 ###< doctrine/doctrine-bundle ###
+###> symfony/mercure-bundle ###
+###< symfony/mercure-bundle ###
 
 networks:
   msp_network:

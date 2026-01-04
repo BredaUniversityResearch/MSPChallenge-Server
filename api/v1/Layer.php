@@ -3,22 +3,15 @@
 namespace App\Domain\API\v1;
 
 use App\Domain\Services\ConnectionManager;
+use App\Repository\SessionAPI\LayerRepository;
 use Exception;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 
 class Layer extends Base
 {
-    private GeoServer $geoServer;
-
-    public function __construct()
-    {
-        $this->geoServer = new GeoServer();
-    }
-
-    public function getGeoServer(): GeoServer
-    {
-        return $this->geoServer;
-    }
-
     /**
      * @apiGroup Layer
      * @apiDescription Set a layer as inactive, without actually deleting it completely from the session database
@@ -78,7 +71,7 @@ class Layer extends Base
         );
 
         $all = array();
-            
+
         // this part actually subtracts the latter geometry from the former geometry
         foreach ($geometry as $shape) {
             $g = array();
@@ -157,14 +150,14 @@ class Layer extends Base
      * @apiGroup Layer
      * @apiDescription Get all geometry in a single layer
      * @param int $layer_id
-     * @return array|null
+     * @return array
      * @throws Exception
      * @api {POST} /layer/get/ Get
      * @apiParam {int} layer_id id of the layer to return
      * @apiSuccess {string} JSON JSON object
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Get(int $layer_id): ?array
+    public function Get(int $layer_id): array
     {
         $vectorCheck = $this->getDatabase()->query(
             "SELECT layer_geotype FROM layer WHERE layer_id = ?",
@@ -173,7 +166,7 @@ class Layer extends Base
         if (empty($vectorCheck[0]["layer_geotype"]) || $vectorCheck[0]["layer_geotype"] == "raster") {
             throw new Exception("Not a vector layer.");
         }
-            
+
         $data = $this->getDatabase()->query("SELECT 
 					geometry_id as id, 
 					geometry_geometry as geometry, 
@@ -189,20 +182,17 @@ class Layer extends Base
 				FROM layer 
 				LEFT JOIN geometry ON layer.layer_id=geometry.geometry_layer_id
 				WHERE layer.layer_id = ? ORDER BY geometry_FID, geometry_subtractive", array($layer_id));
-            
+
         if (empty($data) || empty($data[0]["geometry"])) {
-            return null;
+            return [];
         }
 
-        if (false === $result = self::MergeGeometry($data)) {
-            return null;
-        }
-
-        return $result;
+        return self::MergeGeometry($data);
     }
 
     /**
      * @apiGroup Layer
+     * @throws NotFoundHttpException
      * @throws Exception
      * @api {POST} /layer/GetRaster GetRaster
      * @apiParam layer_name Name of the layer corresponding to the image data.
@@ -211,271 +201,51 @@ class Layer extends Base
      *   encoded file
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetRaster(string $layer_name, int $month = -1): array
+    public function GetRaster(string $layer_name, ?int $month = null): array
     {
-        $layerData = $this->getDatabase()->query(
-            "SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?",
-            array($layer_name)
-        );
-        if (count($layerData) != 1) {
-            throw new Exception("Could not find layer with name " . $layer_name . " to request the raster image for");
+        $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
+            ->getRepository(\App\Entity\SessionAPI\Layer::class);
+        if (null === $layer = $repo->findOneBy(['layerName' => $layer_name])) {
+            throw new NotFoundHttpException(
+                "Could not find layer with name " . $layer_name . " to request the raster image for"
+            );
         }
-
-        $filePath = null;
-        if (null !== $rasterData = json_decode($layerData[0]['layer_raster'], true)) {
-            $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
+        $rasterData = $layer->getLayerRaster();
+        if (null === $url = $rasterData->getUrl()) {
+            throw new NotFoundHttpException("Could not find raster file for layer with name " . $layer_name);
         }
-
-        $path_parts = pathinfo($rasterData['url']);
+        $path_parts = pathinfo($url);
         $fileExt = $path_parts['extension'];
         $filename = $path_parts['filename'];
         $archivedRasterDataUrlFormat = "archive/%s_%d.%s";
-        if ($month >= 0) {
+
+        $game = new Game();
+        $this->asyncDataTransferTo($game);
+        $curMonth = $game->GetCurrentMonthAsId();
+        $month ??= $curMonth;
+
+        // use the archive first if it exists
+        $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).
+            sprintf($archivedRasterDataUrlFormat, $filename, $month, $fileExt);
+        // if not, traverse backwards in time until one is found
+        while (!file_exists($filePath) && $month >= 0) {
+            $month--;
             $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).
                 sprintf($archivedRasterDataUrlFormat, $filename, $month, $fileExt);
-            while (!file_exists($filePath) && $month > 0) {
-                $month--;
-                $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).
-                    sprintf($archivedRasterDataUrlFormat, $filename, $month, $fileExt);
-            }
         }
-            
-        if ($filePath === null || !file_exists($filePath)) {
-            // final try.... if $month = 0 and you couldn't find the file so far, just return the very original
-            //  (which is either the original path when nothing is archived or the archived one of the setup phase)
-            if ($month == 0) {
-                $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).
-                    sprintf($archivedRasterDataUrlFormat, $filename, -1, $fileExt);
-                if (!file_exists($filePath)) {
-                    $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
-                }
-                if (!file_exists($filePath)) {
-                    throw new Exception(
-                        "Could not find raster file for layer with name " . $layer_name . " at path " . $filePath
-                    );
-                }
-            } else {
-                throw new Exception(
-                    "Could not find raster file for layer with name " . $layer_name . " at path " . $filePath
-                );
-            }
+
+        // if we still haven't found it, try the original path
+        if ($filePath == null || !file_exists($filePath)) {
+            throw new NotFoundHttpException(
+                "Could not find raster file for layer with name " . $layer_name . " at path " . $filePath
+            );
         }
+        $this->log("Retrieved raster image for layer with name " . $layer_name . " from path " . $filePath);
         $imageData = file_get_contents($filePath);
-
-        $result['displayed_bounds'] = $rasterData['boundingbox'];
+        $result['displayed_bounds'] = $rasterData->getBoundingbox();
         $result['image_data'] = base64_encode($imageData);
+        $result['logs'] = $this->getLogMessages();
         return $result;
-    }
-
-    /**
-     * @apiGroup Layer
-     * @apiDescription Import metadata for a set of layers as defined under 'meta' in the session's config file
-     * @throws Exception
-     * @api {POST} /layer/ImportMeta
-     * @apiParam {string} configFilename
-     * @apiParam {string} geoserver_url
-     * @apiParam {string} geoserver_username
-     * @apiParam {string} geoserver_password
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function ImportMeta(
-        string $configFilename,
-        string $geoserver_url,
-        string $geoserver_username,
-        string $geoserver_password
-    ): void {
-        $game = new Game();
-        $data = $game->GetGameConfigValues($configFilename);
-        $metaData = $data['meta'];
-        $region = $data['region'];
-
-        $geoServer = new GeoServer();
-        $geoServer
-            ->setBaseurl($geoserver_url)
-            ->setUsername($geoserver_username)
-            ->setPassword($geoserver_password);
-        $allLayers = $geoServer->GetAllRemoteLayers($region);
-
-        foreach ($metaData as $layerMetaData) {
-            $dbLayerId = $this->VerifyLayerExists($layerMetaData["layer_name"], $allLayers);
-            if ($dbLayerId != -1) {
-                $this->ImportMetaForLayer($layerMetaData, $dbLayerId);
-                $this->VerifyLayerTypesForLayer($layerMetaData, $dbLayerId);
-            } else {
-                Log::LogWarning("Could not find layer with name ".$layerMetaData["layer_name"]." in the database");
-            }
-        }
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function VerifyLayerTypesForLayer(array $layerData, int $layerId): void
-    {
-        $allTypes = $this->getDatabase()->query(
-            "SELECT geometry_type FROM geometry WHERE geometry_layer_id=? GROUP BY geometry_type",
-            array($layerId)
-        );
-        $jsonType = $layerData['layer_type'];
-        $errorTypes = array();
-
-        foreach ($allTypes as $t) {
-            $typelist = explode(",", $t['geometry_type']);
-            foreach ($typelist as $singletype) {
-                //set a default type if one wasn't found
-                if (!isset($jsonType[$singletype]) && !in_array($singletype, $errorTypes)) {
-                    self::Error($layerData['layer_name'] . " Type " . $singletype .
-                        " was set in the geometry but was not found in the config file");
-                    array_push($errorTypes, $singletype);
-
-                    //update the json array with the new type if it's not set, just to avoid errors on the client
-                    $jsonType[$singletype] = json_decode(
-                        "{\"displayName\" : \"default\",\"displayPolygon\":true,\"polygonColor\":\"#6CFF1C80\",
-                        \"polygonPatternName\":5,\"displayLines\":true,\"lineColor\":\"#7AC943FF\",
-                        \"displayPoints\":false,\"pointColor\":\"#7AC943FF\",\"pointSize\":1.0}",
-                        true
-                    );
-                }
-            }
-        }
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function VerifyLayerExists(string $layerName, array $struct): int
-    {
-        //check if the layer exists
-        $d = $this->getDatabase()->query("SELECT layer_id FROM layer WHERE layer_name=?", array($layerName));
-
-        if (empty($d)) {
-            Log::LogWarning($layerName ." was not found. Has this layer been renamed or removed?");
-            if (in_array($layerName, $struct)) {
-                self::Error($layerName . " exists on geoserver but not in your database. Try recreating the database.");
-            } else {
-                self::Error($layerName . " has not been found on geoserver. Are you sure this file exists?");
-            }
-            return -1;
-        } else {
-            return $d[0]["layer_id"];
-        }
-    }
-
-    /**
-     * @param string $key
-     * @param mixed|null $val
-     * @return mixed|null
-     */
-    private function metaValueValidation(string $key, $val)
-    {
-        // all key-based validation first
-        if ($key == 'layer_type') {
-            return json_encode($val, JSON_FORCE_OBJECT);
-        }
-        $convertZeroToNull = [
-            'layer_entity_value_max' // float - used to convert 0.0 to null
-        ];
-        if (in_array($key, $convertZeroToNull)) {
-            if (empty($val)) {
-                return null; // meaning: null returned if value was "", null, 0, 0.0 or false
-            }
-        }
-
-        // all value-based validation second
-        if (is_array($val) || is_object($val)) {
-            if (false === $result = json_encode($val)) {
-                return '';
-            }
-            return $result;
-        }
-        if ($val == null) {
-            return '';
-        }
-
-        return $val;
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    private function ImportMetaForLayer(array $layerData, int $dbLayerId)
-    {
-        //these meta vars are to be ignored in the importer
-        $ignoreList = array(
-            "layer_id",
-            "layer_name",
-            "layer_original_id",
-            "layer_raster",
-            "layer_width",
-            "layer_height",
-            "layer_raster_material",
-            "layer_raster_pattern",
-            "layer_raster_minimum_value_cutoff",
-            "layer_raster_color_interpolation",
-            "layer_raster_filter_mode",
-            "approval",
-            "layer_download_from_geoserver",
-            "layer_property_as_type"
-        );
-
-        $inserts = "";
-        $insertarr = array();
-        foreach ($layerData as $key => $val) {
-            if (in_array($key, $ignoreList)) {
-                continue;
-            } else {
-                $inserts .= $key . "=?, ";
-                array_push($insertarr, $this->metaValueValidation($key, $val));
-            }
-        }
-
-        $inserts = substr($inserts, 0, -2);
-
-        array_push($insertarr, $dbLayerId);
-        $this->getDatabase()->query("UPDATE layer SET " . $inserts . " WHERE layer_id=?", $insertarr);
-
-        //Import raster specific information.
-        if ($layerData["layer_geotype"] == "raster") {
-            $sqlRasterInfo = $this->getDatabase()->query(
-                "SELECT layer_raster FROM layer WHERE layer_id=?",
-                array($dbLayerId)
-            );
-            $existingRasterInfo = json_decode($sqlRasterInfo[0]["layer_raster"], true);
-
-            if (isset($layerData["layer_raster_material"])) {
-                $existingRasterInfo["layer_raster_material"] = $layerData["layer_raster_material"];
-            }
-            if (isset($layerData["layer_raster_pattern"])) {
-                $existingRasterInfo["layer_raster_pattern"] = $layerData["layer_raster_pattern"];
-            }
-            if (isset($layerData["layer_raster_minimum_value_cutoff"])) {
-                $existingRasterInfo["layer_raster_minimum_value_cutoff"] =
-                    $layerData["layer_raster_minimum_value_cutoff"];
-            }
-            if (isset($layerData["layer_raster_color_interpolation"])) {
-                $existingRasterInfo["layer_raster_color_interpolation"] =
-                    $layerData["layer_raster_color_interpolation"];
-            }
-            if (isset($layerData["layer_raster_filter_mode"])) {
-                $existingRasterInfo["layer_raster_filter_mode"] = $layerData["layer_raster_filter_mode"];
-            }
-
-            $this->getDatabase()->query(
-                "
-                UPDATE layer SET layer_raster = ?
-                WHERE layer_id = ?
-                ",
-                array(json_encode($existingRasterInfo), $dbLayerId)
-            );
-        }
-
-        $this->getDatabase()->query(
-            "UPDATE layer SET layer_type=? WHERE layer_id=?",
-            array(json_encode($layerData['layer_type'], JSON_FORCE_OBJECT), $dbLayerId)
-        );
     }
 
     /**
@@ -541,25 +311,6 @@ class Layer extends Base
 
     /**
      * @apiGroup Layer
-     * @apiDescription Create a new empty layer
-     * @throws Exception
-     * @api {POST} /layer/post/:id Post
-     * @apiParam {string} name name of the layer
-     * @apiParam {string} geotype geotype of the layer
-     * @apiSuccess {int} id id of the new layer
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function Post(string $name, string $geotype): int
-    {
-        return (int)$this->getDatabase()->query(
-            "INSERT INTO layer (layer_name, layer_geotype) VALUES (?, ?)",
-            array($name, $geotype),
-            true
-        );
-    }
-
-    /**
-     * @apiGroup Layer
      * @apiDescription Update the meta data of a layer
      * @throws Exception
      * @api {POST} /layer/UpdateMeta UpdateMeta
@@ -591,212 +342,93 @@ class Layer extends Base
     }
 
     /**
-     * called from MEL, SEL, REL
-     * @apiGroup Layer
      * @throws Exception
-     * @api {POST} /layer/UpdateRaster
-     * @apiParam {string} layer_name Name of the layer the raster image is for.
-     * @apiParam {array} raster_bounds 2x2 array of doubles specifying [[min X, min Y], [max X, max Y]]
-     * @apiParam {string} image_data Base64 encoded string of image data.
-     * @apiDescription UpdateRaster updates raster image
-     * @noinspection PhpUnused
      */
+    // @todo: remove raster_bounds support ? REL/REL/RiskModel.cs in simulations uses it, but REL isn't used anymore?
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function UpdateRaster(string $layer_name, string $image_data, array $raster_bounds = null): array
-    {
-        $layerData = $this->getDatabase()->query(
-            "SELECT layer_id, layer_raster FROM layer WHERE layer_name = ?",
-            array($layer_name)
-        );
-        if (count($layerData) != 1) {
-            throw new Exception("Could not find layer with name " . $layer_name . " to update the raster image");
-        }
-        $this->log('Updating raster for layer '.$layer_name);
-
-        $rasterData = json_decode($layerData[0]['layer_raster'], true);
-        $rasterDataUpdated = false;
-        if (empty($rasterData['url'])) {
-            throw new Exception("Could not update raster for layer ".$layer_name.
+    public function UpdateRaster(
+        \App\Entity\SessionAPI\Layer $layer,
+        string $imageData,
+        array $raster_bounds = null,
+        ?int $month = null
+    ): void {
+        $rasterData = $layer->getLayerRaster();
+        if ($rasterData?->getUrl() === null) {
+            throw new Exception("Could not update raster for layer ".$layer->getLayerName().". ".
                 " raster file name was not specified in raster metadata");
         }
 
-        if (!empty($raster_bounds)) {
-            $rasterData['boundingbox'] = $raster_bounds;
-            $rasterDataUpdated = true;
+        $game = new Game();
+        $this->asyncDataTransferTo($game);
+        $curMonth = $game->GetCurrentMonthAsId();
+        $month ??= $curMonth;
+
+        // we are processing the next month, so:
+        // - replace the current one in raster/ folder,
+        // - allow raster bounds updates
+        if ($month == $curMonth) {
+            Store::EnsureFolderExists(Store::GetRasterStoreFolder($this->getGameSessionId()));
+            $f = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData->getUrl();
+
+            try {
+                $fileSystem = new Filesystem();
+                $fileSystem->dumpFile(
+                    $f,
+                    $imageData
+                );
+                $this->log('Stored image_data to '.$f);
+            } catch (IOException $e) {
+                $this->log('Failed to save given image_data to '.$f.':'.$e->getMessage(), self::LOG_LEVEL_ERROR);
+            }
+
+            // raster bounds update
+            $rasterDataUpdated = false;
+            if (!empty($raster_bounds)) {
+                $this->log('Set raster for layer '.$layer->getLayerName());
+                $layer->setLayerRaster($rasterData->setBoundingbox($raster_bounds));
+                $rasterDataUpdated = true;
+            }
+
+            // update the layer record
+            $layer
+                ->setLayerLastupdate(microtime(true))
+                ->setLayerMelupdate(1);
+            $this->log(sprintf(
+                'Updated layer %s with id %d',
+                ($rasterDataUpdated ? ' incl. raster data' : ''),
+                $layer->getLayerId()
+            ));
         }
 
-        $imageData = base64_decode($image_data);
-        Store::EnsureFolderExists(Store::GetRasterStoreFolder($this->getGameSessionId()));
-        $f = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
-        if (false ===
-            file_put_contents($f, $imageData)) {
-            $this->log('Failed to save given image_data to '.$f, self::LOG_LEVEL_ERROR);
-        } else {
-            $this->log('Stored image_data to file '.$f);
-        }
-
-        // Pre-archive the raster file
+        // (Pre-)archive the raster file
         Store::EnsureFolderExists(Store::GetRasterArchiveFolder($this->getGameSessionId()));
-        $layerPathInfo = pathinfo($rasterData['url']);
+        $layerPathInfo = pathinfo($rasterData->getUrl());
         $layerFileName = $layerPathInfo["filename"];
         $layerFileExt = $layerPathInfo["extension"];
-        $gameData = $this->getDatabase()->query("SELECT game_currentmonth FROM game")[0];
-        $curMonth = intval($gameData['game_currentmonth']);
-        $newFileName = $layerFileName."_".$curMonth.".".$layerFileExt;
-        $archivedFile = Store::GetRasterArchiveFolder($this->getGameSessionId()).$newFileName;
-        if (false ===
-            copy($f, $archivedFile)) {
-            $this->log(sprintf('Failed to copy %s to file %s for archiving', $f, $archivedFile), self::LOG_LEVEL_ERROR);
-        } else {
-            $this->log(sprintf('Copied %s to file %s for archiving', $f, $archivedFile));
-        }
+        $newFileName = $layerFileName."_".$month.".".$layerFileExt;
+        $f = Store::GetRasterArchiveFolder($this->getGameSessionId()).$newFileName;
 
-        if ($rasterDataUpdated) {
-            $this->getDatabase()->query(
-                "UPDATE layer SET layer_lastupdate=UNIX_TIMESTAMP(NOW(6)), layer_melupdate=1, layer_raster=? ".
-                    "WHERE layer_id = ?",
-                array(json_encode($rasterData), $layerData[0]['layer_id'])
+        try {
+            $fileSystem = new Filesystem();
+            $fileSystem->dumpFile(
+                $f,
+                $imageData
             );
-        } else {
-            $this->getDatabase()->query(
-                "UPDATE layer SET layer_lastupdate=UNIX_TIMESTAMP(NOW(6)), layer_melupdate=1 WHERE layer_id=?",
-                array($layerData[0]['layer_id'])
-            );
+            $this->log('Archived image_data to '.$f);
+        } catch (IOException $e) {
+            $this->log('Failed to archive image_data to '.$f.':'.$e->getMessage(), self::LOG_LEVEL_ERROR);
         }
-        $this->log(sprintf(
-            'Updated layer record%s with id %d',
-            ($rasterDataUpdated ? ' incl. raster data' : ''),
-            $layerData[0]['layer_id']
-        ));
-
-        return ['logs' => $this->getLogMessages()];
     }
 
     /**
-     * @throws Exception
-     */
-    public function getExportLayerDescriptions(
-        string $workspace,
-        string $layer
-    ): array {
-        $response = $this->geoServer->ows(
-            $workspace
-            . "/ows?service=WMS&version=1.1.1&request=DescribeLayer&layers="
-            . urlencode($workspace)
-            . ":"
-            . urlencode($layer)
-            . "&outputFormat=application/json"
-        );
-        $data = json_decode($response, true, 512, JSON_BIGINT_AS_STRING);
-        if (json_last_error() != JSON_ERROR_NONE) {
-            $data = [];
-            $data["layerDescriptions"] = [];
-            $data["error"] = "Failed to decode JSON response from Geoserver. Error: "
-                .json_last_error_msg()
-                .". Response: "
-                .PHP_EOL
-                .$response;
-        }
-        return $data;
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function GetExport(
-        string $workspace,
-        string $layer,
-        string $format = "GML",
-        array $layerData = [],
-        ?array $rasterMeta = null
-    ): ?string {
-        //this downloads the data from GeoServer through their REST API
-        $maxGMLFeatures = 1000000;
-        $layer = str_replace(" ", "%20", $layer);
-            
-        if ($format == "GML") {
-            $url = $workspace . "/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=" . urlencode($workspace) .
-                ":" . urlencode($layer) . "&maxFeatures=" . $maxGMLFeatures;
-        } elseif ($format == "CSV") {
-            $url = $workspace . "/ows?service=WFS&version=1.0.0&outputFormat=csv&request=GetFeature&typeName=" .
-                urlencode($workspace) . ":" . urlencode($layer) . "&maxFeatures=" . $maxGMLFeatures;
-        } elseif ($format == "JSON") {
-            $url = $workspace . "/ows?service=WFS&version=1.0.0&outputFormat=json&request=GetFeature&typeName=" .
-                urlencode($workspace) . ":" . urlencode($layer) . "&maxFeatures=" . $maxGMLFeatures;
-        } elseif ($format == "PNG") {
-            if ($rasterMeta === null) {
-                throw new Exception("Tried to export ".$layer." from geoserver in format ".$format.
-                    " but rasterMeta was not specified");
-            }
-            $deltaSizeX = $rasterMeta["boundingbox"][1][0] - $rasterMeta["boundingbox"][0][0];
-            $deltaSizeY = $rasterMeta["boundingbox"][1][1] - $rasterMeta["boundingbox"][0][1];
-            $widthRatioMultiplier = $deltaSizeX / $deltaSizeY;
-                                
-            if (empty($layerData['layer_height'])) {
-                throw new Exception('Missing required "layer_height" in layer data');
-            }
-
-            $height = $layerData['layer_height'];
-            $width = $height * $widthRatioMultiplier;
-            $bounds = $rasterMeta["boundingbox"][0][0].",".$rasterMeta["boundingbox"][0][1].",".
-                $rasterMeta["boundingbox"][1][0].",".$rasterMeta["boundingbox"][1][1];
-            $url = $workspace . "/wms/reflect?layers=" . urlencode($workspace) . ":" .
-                urlencode($layer) . "&format=image/png&transparent=FALSE&width=" . round($width) . "&height=" .
-                $height . "&bbox=".$bounds;
-        } else {
-            throw new Exception("Incorrect format, use GML, CSV, JSON or PNG");
-        }
-        return $this->geoServer->ows($url);
-    }
-
-    /**
-     * @throws Exception
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function ReturnRasterById(int $layer_id = 0): string
-    {
-        if (empty($layer_id)) {
-            throw new Exception("Empty layer_id.");
-        }
-
-        $layerData = $this->getDatabase()->query(
-            "SELECT layer_id, layer_raster FROM layer WHERE layer_id = ?",
-            array($layer_id)
-        );
-        if (count($layerData) != 1) {
-            throw new Exception("Could not find layer with id " . $layer_id . " to request the raster image for");
-        }
-
-        $rasterData = json_decode($layerData[0]['layer_raster'], true);
-        $filePath = Store::GetRasterStoreFolder($this->getGameSessionId()).$rasterData['url'];
-        if (!file_exists($filePath)) {
-            throw new Exception("Could not find raster file at path " . $filePath);
-        }
-        return file_get_contents($filePath);
-    }
-
-    /**
-     * @throws Exception
+     * @throws Exception|ExceptionInterface
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     private function GetMetaForLayerById(int $layerId): array
     {
-        $data = $this->getDatabase()->query("SELECT * FROM layer WHERE layer_id=?", array($layerId));
-        if (empty($data)) {
-            return [];
-        }
-        Layer::FixupLayerMetaData($data[0]);
-        return $data[0];
-    }
-
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function FixupLayerMetaData(array &$data): void
-    {
-        $data['layer_type'] = json_decode($data['layer_type'], true);
-        $data['layer_info_properties'] = (isset($data['layer_info_properties'])) ?
-            json_decode($data['layer_info_properties']) : null;
-        $data['layer_text_info'] = (isset($data['layer_text_info'])) ? json_decode($data['layer_text_info']) : null;
-        $data['layer_tags'] =  (isset($data['layer_tags'])) ? json_decode($data['layer_tags']) : null;
+        /** @var LayerRepository $repo */
+        $repo = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getGameSessionId())
+            ->getRepository(\App\Entity\SessionAPI\Layer::class);
+        return $repo->normalise($repo->find($layerId));
     }
 }

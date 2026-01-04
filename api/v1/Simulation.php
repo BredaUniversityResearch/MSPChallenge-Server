@@ -155,8 +155,10 @@ class Simulation extends Base
     /**
      * @throws Exception
      */
-    public function changeWatchdogState(string $newWatchdogGameState, ?int $currentMonth = null): PromiseInterface
-    {
+    public function changeWatchdogState(
+        GameStateValue $newWatchdogGameState,
+        ?int $currentMonth = null
+    ): PromiseInterface {
         return $this->getWatchdogs()->then(function (array $watchdogs) use (
             $newWatchdogGameState,
             $currentMonth
@@ -178,10 +180,11 @@ class Simulation extends Base
                 $message
                     ->setGameSessionId($this->getGameSessionId())
                     ->setWatchdogId($watchdog->getId())
-                    ->setGameState(new GameStateValue($newWatchdogGameState))
+                    ->setGameState($newWatchdogGameState)
                     ->setMonth($currentMonth);
                 SymfonyToLegacyHelper::getInstance()->getMessageBus()->dispatch($message);
             }
+            return $newWatchdogGameState;
         });
     }
 

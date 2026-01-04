@@ -12,7 +12,7 @@ use App\Domain\Services\SimulationHelper;
 use App\Entity\ServerManager\GameSave;
 use App\Logger\GameSessionLogger;
 use App\Message\GameSave\GameSaveLoadMessage;
-use App\MessageHandler\GameList\CommonSessionHandlerBase;
+use App\MessageHandler\GameList\CommonSessionHandler;
 use App\Entity\SessionAPI\Game;
 use App\Repository\SessionAPI\GameRepository;
 use App\VersionsProvider;
@@ -35,7 +35,7 @@ use function App\rcopy;
 use function App\rrmdir;
 
 #[AsMessageHandler]
-class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
+class GameSaveLoadMessageHandler extends CommonSessionHandler
 {
     private GameSaveZipFileValidator $validator;
 
@@ -66,7 +66,9 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
         }
         try {
             $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
-            $this->notice("Save reload into session {$this->gameSession->getName()} initiated. Please wait.");
+            $this->sessionLogHandler->notice(
+                "Save reload into session {$this->gameSession->getName()} initiated. Please wait."
+            );
             $this->openSaveZip();
             $this->validateGameConfig($this->importSessionRunningConfig());
             $this->setupSessionDatabase();
@@ -74,12 +76,12 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
             $this->migrateSessionDatabase();
             $this->importRasterStore();
             $this->finaliseSaveLoad();
-            $this->notice("Session {$this->gameSession->getName()} loaded and ready for use.");
+            $this->sessionLogHandler->notice("Session {$this->gameSession->getName()} loaded and ready for use.");
             $state = 'healthy';
         } catch (\Throwable $e) {
-            $this->error(
+            $this->sessionLogHandler->error(
                 "Session {$this->gameSession->getName()} failed to create. {problem}",
-                ['problem' => $e->getMessage().' '.$e->getTraceAsString()]
+                ['problem' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
             );
             $state = 'failed';
         }
@@ -109,7 +111,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
         $this->registerSimulations();
         $this->watchdogCommunicator->changeState(
             $this->gameSession->getId(),
-            new GameStateValue($this->gameSession->getGameState()),
+            $this->gameSession->getGameState(),
             $this->gameSession->getGameCurrentMonth()
         );
         $this->logContainer($this->watchdogCommunicator);
@@ -125,16 +127,18 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
         $this->resetSessionRasterStore();
         $sessionRasterStore = $this->params->get('app.session_raster_dir').$this->gameSession->getId();
         $sessionRasterStoreTemp = $this->params->get('app.session_raster_dir').'temp';
-        $this->info("Unpacking raster files...");
+        $this->sessionLogHandler->info("Unpacking raster files...");
         if (!$this->validator->getZipArchive()->extractTo($sessionRasterStoreTemp)) {
             throw new Exception('ExtractTo failed.');
         } else {
-            $this->debug('ExtractTo succeeded.');
+            $this->sessionLogHandler->debug('ExtractTo succeeded.');
         }
-        $this->info("Now moving all raster files to their proper place... This could take a bit longer.");
+        $this->sessionLogHandler->info(
+            "Now moving all raster files to their proper place... This could take a bit longer."
+        );
         rcopy($sessionRasterStoreTemp."/raster", $sessionRasterStore);
         rrmdir($sessionRasterStoreTemp);
-        $this->info("Raster files moved.");
+        $this->sessionLogHandler->info("Raster files moved.");
     }
 
     /**
@@ -171,7 +175,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
         $sessionConfigStore = $this->params->get('app.session_config_dir').
             sprintf($sessionConfigFileName, $this->gameSession->getId());
         file_put_contents($sessionConfigStore, $sessionConfigContents);
-        $this->info("Imported the saved session config file to {$sessionConfigStore}");
+        $this->sessionLogHandler->info("Imported the saved session config file to {$sessionConfigStore}");
         return $sessionConfigStore;
     }
 
@@ -184,10 +188,10 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
     private function setupSessionDatabase(): void
     {
         if ($this->gameSession->getSessionState() == GameSessionStateValue::HEALTHY) {
-            $this->notice('This is a save reload into an existing session.');
+            $this->sessionLogHandler->notice('This is a save reload into an existing session.');
             $this->watchdogCommunicator->changeState(
                 $this->gameSession->getId(),
-                new GameStateValue('end'),
+                GameStateValue::END,
                 $this->gameSession->getGameCurrentMonth()
             );
             $this->gameSession->setSessionState(new GameSessionStateValue('request'));
@@ -195,7 +199,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
             $this->resetSessionDatabase();
             return;
         }
-        $this->notice('This is a save reload into a new session..');
+        $this->sessionLogHandler->notice('This is a save reload into a new session..');
         $this->resetSessionDatabase();
     }
 
@@ -204,7 +208,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
      */
     private function importSessionDatabase(): void
     {
-        $this->debug('Session database dump import attempt starting... This might take a while.');
+        $this->sessionLogHandler->debug('Session database dump import attempt starting... This might take a while.');
         $tempDumpFile = $this->tempStoreDbExportInSaveZip();
         $mysqlBinary = (new ExecutableFinder)->find('mysql');
         $process = new Process([
@@ -213,11 +217,12 @@ class GameSaveLoadMessageHandler extends CommonSessionHandlerBase
             '--port='.$_ENV['DATABASE_PORT'],
             '--user='.$_ENV['DATABASE_USER'],
             '--password='.$_ENV['DATABASE_PASSWORD'],
+            '--skip-ssl',
             ($_ENV['APP_ENV'] == 'test') ? $this->database.'_test' : $this->database
         ], $this->kernel->getProjectDir(), null, "source {$tempDumpFile}", 300);
-        $process->mustRun(fn($type, $buffer) => $this->info($buffer));
+        $process->mustRun(fn($type, $buffer) => $this->sessionLogHandler->info($buffer));
         // as usually nothing comes out of the buffer...
-        $this->debug('Session database dump import attempt completed.');
+        $this->sessionLogHandler->debug('Session database dump import attempt completed.');
         $fileSystem = new Filesystem();
         $fileSystem->remove($tempDumpFile);
     }

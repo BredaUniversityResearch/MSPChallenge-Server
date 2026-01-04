@@ -16265,19 +16265,31 @@
     "dependencies": {
       "groups": [
         {
-          "name": "Energy",
+          "name": "Birds, Mammals, Benthos",
           "entries": [
             {
-              "name": "Wind Farm",
-              "id": 1,
+              "name": "Cetaceans",
+              "id": 35,
               "multiline": false,
-              "link": "Energy:Wind Farms"
+              "link": "Cetaceans"
             },
             {
-              "name": "Oil & Gas Installations",
-              "id": 4,
-              "multiline": true,
-              "link": "Energy:Oil_%26_Gas_Installations"
+              "name": "Seals",
+              "id": 36,
+              "multiline": false,
+              "link": "Seals"
+            },
+            {
+              "name": "Birds",
+              "id": 37,
+              "multiline": false,
+              "link": "Birds"
+            },
+            {
+              "name": "Benthos",
+              "id": 39,
+              "multiline": false,
+              "link": "Benthos"
             }
           ]
         },
@@ -16285,10 +16297,10 @@
           "name": "Cables & Pipelines",
           "entries": [
             {
-              "name": "Electricity Cables",
+              "name": "Power Cables",
               "id": 5,
               "multiline": false,
-              "link": "Energy_Cables"
+              "link": "Power_Cables"
             },
             {
               "name": "Pipelines",
@@ -16297,113 +16309,44 @@
               "link": "Pipelines"
             },
             {
-              "name": "Telecom Cables",
+              "name": "Other Cables",
               "id": 7,
               "multiline": false,
-              "link": "Telecom_Cables"
+              "link": "Other_Cables"
             }
           ]
         },
         {
-          "name": "Shipping",
+          "name": "Energy",
           "entries": [
             {
-              "name": "Ports",
-              "id": 9,
-              "multiline": false,
-              "link": "Ports"
+              "name": "Wind Farms",
+              "id": 1,
+              "multiline": true,
+              "link": "Wind_Farms"
             },
             {
-              "name": "Separation Zones",
-              "id": 12,
-              "multiline": false,
-              "link": "Separation_Zones"
+              "name": "Wave Farms",
+              "id": 2,
+              "multiline": true,
+              "link": "Wave_Farms"
             },
             {
-              "name": "Anchorages",
-              "id": 41,
-              "multiline": false,
-              "link": "Anchorages"
+              "name": "Tidal Farms",
+              "id": 3,
+              "multiline": true,
+              "link": "Tidal_Farms"
             },
             {
-              "name": "IMO Routes",
-              "id": 42,
-              "multiline": false,
-              "link": "IMO_Routes"
+              "name": "Oil & Gas Platforms",
+              "id": 4,
+              "multiline": true,
+              "link": "Oil_%26_Gas_Platforms"
             }
           ]
         },
         {
-          "name": "Shipping Intensity",
-          "entries": [
-            {
-              "name": "Cargo Intensity",
-              "id": 13,
-              "multiline": false,
-              "link": "Cargo_Intensity"
-            },
-            {
-              "name": "Ferry Intensity",
-              "id": 14,
-              "multiline": false,
-              "link": "Ferry_Intensity"
-            },
-            {
-              "name": "Maintenance Intensity",
-              "id": 15,
-              "multiline": true,
-              "link": "Maintenance_Intensity"
-            },
-            {
-              "name": "Passenger Intensity",
-              "id": 16,
-              "multiline": true,
-              "link": "Shipping_Intensity"
-            },
-            {
-              "name": "Tanker Intensity",
-              "id": 17,
-              "multiline": false,
-              "link": "Tanker_Intensity"
-            }
-          ]
-        },
-        {
-          "name": "Other human activities",
-          "entries": [
-            {
-              "name": "Military areas",
-              "id": 19,
-              "multiline": false,
-              "link": "Military_Areas"
-            }
-          ]
-        },
-        {
-          "name": "Fishing",
-          "entries": [
-            {
-              "name": "Bottom Trawl Catch",
-              "id": 20,
-              "multiline": true,
-              "link": "Bottom_Trawl_Catch"
-            },
-            {
-              "name": "Drift & Fixed Nets Catch",
-              "id": 21,
-              "multiline": true,
-              "link": "Drift_and_Fixed_Nets_Catch"
-            },
-            {
-              "name": "Industrial & Pelagic Trawl Catch",
-              "id": 22,
-              "multiline": true,
-              "link": "Industrial_and_Pelagic_Trawl_Catch"
-            }
-          ]
-        },
-        {
-          "name": "Environment\n& Protection",
+          "name": "Environment \n& Protection",
           "entries": [
             {
               "name": "Bathymetry",
@@ -16415,36 +16358,7 @@
               "name": "Marine Protected Area",
               "id": 24,
               "multiline": true,
-              "link": "Marine_Protected_Areas"
-            }
-          ]
-        },
-        {
-          "name": "Pressures",
-          "entries": [
-            {
-              "name": "Artificial Substrate",
-              "id": 25,
-              "multiline": false,
-              "link": "Artificial_Substrate"
-            },
-            {
-              "name": "Bottom Disturbance",
-              "id": 26,
-              "multiline": true,
-              "link": "Bottom_Disturbace"
-            },
-            {
-              "name": "Noise",
-              "id": 27,
-              "multiline": false,
-              "link": "Noise"
-            },
-            {
-              "name": "Surface Disturbance",
-              "id": 28,
-              "multiline": true,
-              "link": "Surface_Disturbance"
+              "link": "Marine_Protected_Area"
             }
           ]
         },
@@ -16490,481 +16404,183 @@
           ]
         },
         {
-          "name": "Birds, Mammals, Benthos",
+          "name": "Fishing",
           "entries": [
             {
-              "name": "Cetaceans",
-              "id": 35,
+              "name": "Active Demersal Fleet",
+              "id": 20,
+              "multiline": true,
+              "link": "Active_Demersal_Fleet"
+            },
+            {
+              "name": "Active Pelagic Fleet",
+              "id": 22,
+              "multiline": true,
+              "link": "Active_Pelagic_Fleet"
+            },
+            {
+              "name": "Passive Pelagic Fleet ",
+              "id": 118,
               "multiline": false,
-              "link": "Cetaceans"
+              "link": "Passive_Pelagic_Fleet_"
+            }
+          ]
+        },
+        {
+          "name": "Other human activities",
+          "entries": [
+            {
+              "name": "Algae Farms",
+              "id": 46,
+              "multiline": true,
+              "link": "Algae_Farms"
             },
             {
-              "name": "Seals",
-              "id": 36,
+              "name": "Munition Dumps",
+              "id": 48,
+              "multiline": true,
+              "link": "Munition_Dumps"
+            },
+            {
+              "name": "Military Areas",
+              "id": 105,
               "multiline": false,
-              "link": "Seals"
+              "link": "Military_Areas"
             },
             {
-              "name": "Windfarm Avoiding Seabirds",
-              "id": 37,
-              "multiline": true,
-              "link": "Windfarm_Avoiding_Seabirds"
+              "name": "Shellfish Farms",
+              "id": 113,
+              "multiline": false,
+              "link": "Shellfish_Farms"
             },
             {
-              "name": "Windfarm Indifferent Seabirds",
-              "id": 38,
+              "name": "Sand & Gravel Extraction",
+              "id": 114,
               "multiline": true,
-              "link": "Windfarm_Indifferent_Seabirds"
+              "link": "Sand_%26_Gravel_Extraction"
             },
             {
-              "name": "Benthic Invertebrates",
-              "id": 39,
+              "name": "Fish Farms",
+              "id": 115,
+              "multiline": false,
+              "link": "Fish_Farms"
+            }
+          ]
+        },
+        {
+          "name": "Pressures",
+          "entries": [
+            {
+              "name": "Artificial Substrate",
+              "id": 25,
+              "multiline": false,
+              "link": "Artificial_Substrate"
+            },
+            {
+              "name": "Bottom Disturbance",
+              "id": 26,
               "multiline": true,
-              "link": "Benthic_Invertebrates"
+              "link": "Bottom_Disturbance"
+            },
+            {
+              "name": "Surface Disturbance",
+              "id": 28,
+              "multiline": true,
+              "link": "Surface_Disturbance"
+            },
+            {
+              "name": "Noise",
+              "id": 108,
+              "multiline": false,
+              "link": "Noise"
+            }
+          ]
+        },
+        {
+          "name": "Shipping",
+          "entries": [
+            {
+              "name": "Ports",
+              "id": 9,
+              "multiline": false,
+              "link": "Ports"
+            },
+            {
+              "name": "Disposal Sites",
+              "id": 10,
+              "multiline": true,
+              "link": "Disposal_Sites"
+            },
+            {
+              "name": "Separation Zones",
+              "id": 12,
+              "multiline": false,
+              "link": "Separation_Zones"
+            },
+            {
+              "name": "Anchorages",
+              "id": 109,
+              "multiline": false,
+              "link": "Anchorages"
+            },
+            {
+              "name": "Shipping Routes",
+              "id": 111,
+              "multiline": true,
+              "link": "Shipping_Routes"
+            }
+          ]
+        },
+        {
+          "name": "Shipping Intensity",
+          "entries": [
+            {
+              "name": "Cargo Shipping ",
+              "id": 13,
+              "multiline": false,
+              "link": "Cargo_Shipping_"
+            },
+            {
+              "name": "Ferry Shipping",
+              "id": 14,
+              "multiline": false,
+              "link": "Ferry_Shipping"
+            },
+            {
+              "name": "Maintenance Shipping",
+              "id": 15,
+              "multiline": true,
+              "link": "Maintenance_Shipping"
+            },
+            {
+              "name": "Passenger Shipping",
+              "id": 16,
+              "multiline": true,
+              "link": "Passenger_Shipping"
+            },
+            {
+              "name": "Total Shipping Intensity",
+              "id": 45,
+              "multiline": true,
+              "link": "Total_Shipping_Intensity"
+            },
+            {
+              "name": "Tanker Shipping ",
+              "id": 101,
+              "multiline": false,
+              "link": "Tanker_Shipping_"
             }
           ]
         }
       ],
       "links": [
         {
-          "fromId": 1,
-          "toId": 25,
+          "fromId": 25,
+          "toId": 39,
           "severity": 2,
-          "description": "Wind turbine pylons in the water as well as their foundations on the seabed. "
+          "description": "Benthic species are attracted to artificial substrate"
         },
-        {
-          "fromId": 4,
-          "toId": 25,
-          "severity": 1,
-          "description": "Oil & gas rig pylons in the water as well as their foundations on the seabed. "
-        },
-        {
-          "fromId": 6,
-          "toId": 25,
-          "severity": 1,
-          "description": "Pipelines laid on the seabed (so not dug into it). "
-        },
-        {
-          "fromId": 7,
-          "toId": 25,
-          "severity": 1,
-          "description": "Cable laid on the seabed (so not dug into it). "
-        },
-        {
-          "fromId": 5,
-          "toId": 25,
-          "severity": 1,
-          "description": "Electricity cable laid on the seabed (so not dug into it). "
-        },
-        {
-          "fromId": 9,
-          "toId": 25,
-          "severity": 3,
-          "description": "All the port infrastructure in the water and on the seabed. "
-        },
-        {
-          "fromId": 4,
-          "toId": 27,
-          "severity": 1,
-          "description": "Drill pipes in the water and drill bits on the seabed. "
-        },
-        {
-          "fromId": 6,
-          "toId": 27,
-          "severity": 2,
-          "description": "Pipelines laid on the seabed or dug into it. Non-existent once completed. "
-        },
-        {
-          "fromId": 1,
-          "toId": 27,
-          "severity": 3,
-          "description": "Wind energy turbine construction in water and on the seabed. Diminished once completed. "
-        },
-        {
-          "fromId": 5,
-          "toId": 27,
-          "severity": 2,
-          "description": "Cable laid on or dug into the seabed. Non-existent once completed. "
-        },
-        {
-          "fromId": 7,
-          "toId": 27,
-          "severity": 2,
-          "description": "Cable laid on or dug into the seabed. Non-existent once completed. "
-        },
-        {
-          "fromId": 13,
-          "toId": 27,
-          "severity": 3,
-          "description": "Larger container or bulk cargo vessels sailing at sea. "
-        },
-        {
-          "fromId": 14,
-          "toId": 27,
-          "severity": 3,
-          "description": "Ferries making short-sea trips back and forth. "
-        },
-        {
-          "fromId": 15,
-          "toId": 27,
-          "severity": 3,
-          "description": "Specialised construction and maintenance vessels for e.g. wind farms and oil & gas installations. "
-        },
-        {
-          "fromId": 16,
-          "toId": 27,
-          "severity": 3,
-          "description": "Ocean liners or cruise ships sailing at sea. "
-        },
-        {
-          "fromId": 17,
-          "toId": 27,
-          "severity": 3,
-          "description": "Large tankers typically transporting oil or gas. "
-        },
-        {
-          "fromId": 9,
-          "toId": 27,
-          "severity": 3,
-          "description": "Vessels arriving and departing, loading and unloading cargo and passengers. "
-        },
-        {
-          "fromId": 41,
-          "toId": 28,
-          "severity": 1,
-          "description": "Vessels using buoys to hold, wait or bunker raw materials. "
-        },
-        {
-          "fromId": 4,
-          "toId": 28,
-          "severity": 1,
-          "description": "Oil & gas rig pylons and drilling operations in the water. "
-        },
-        {
-          "fromId": 6,
-          "toId": 28,
-          "severity": 2,
-          "description": "Pipelines laid on the seabed or dug into it. Non-existent once completed. "
-        },
-        {
-          "fromId": 1,
-          "toId": 28,
-          "severity": 2,
-          "description": "Wind energy turbine construction in water and on the seabed. Non-existent once completed. "
-        },
-        {
-          "fromId": 13,
-          "toId": 28,
-          "severity": 3,
-          "description": "Larger container or bulk cargo vessels sailing at sea. "
-        },
-        {
-          "fromId": 14,
-          "toId": 28,
-          "severity": 3,
-          "description": "Ferries making short-sea trips back and forth. "
-        },
-        {
-          "fromId": 15,
-          "toId": 28,
-          "severity": 3,
-          "description": "Specialised construction and maintenance vessels for e.g. wind farms and oil & gas installations. "
-        },
-        {
-          "fromId": 16,
-          "toId": 28,
-          "severity": 3,
-          "description": "Ocean liners or cruise ships sailing at sea. "
-        },
-        {
-          "fromId": 17,
-          "toId": 28,
-          "severity": 3,
-          "description": "Large tankers typically transporting oil or gas. "
-        },
-        {
-          "fromId": 9,
-          "toId": 28,
-          "severity": 3,
-          "description": "All the port infrastructure in the water. "
-        },
-        {
-          "fromId": 41,
-          "toId": 26,
-          "severity": 1,
-          "description": "Anchored Buoys tugging and scraping the seabed. "
-        },
-        {
-          "fromId": 5,
-          "toId": 26,
-          "severity": 1,
-          "description": "Electricity cable laid on or dug into the seabed. Non-existent once completed. "
-        },
-        {
-          "fromId": 4,
-          "toId": 26,
-          "severity": 1,
-          "description": "Oil & gas rig drilling and extraction operations on the seabed. "
-        },
-        {
-          "fromId": 6,
-          "toId": 26,
-          "severity": 2,
-          "description": "Pipelines laid on the seabed or dug into it. Almost non-existent once completed. "
-        },
-        {
-          "fromId": 1,
-          "toId": 26,
-          "severity": 2,
-          "description": "Wind energy turbine construction on the seabed. Non-existent once completed. "
-        },
-        {
-          "fromId": 19,
-          "toId": 26,
-          "severity": 2,
-          "description": "Ammunition being dumped on the seabed. So only applicable to that type of military area. "
-        },
-        {
-          "fromId": 7,
-          "toId": 26,
-          "severity": 1,
-          "description": "Cable laid on or dug into the seabed. Non-existent once completed. "
-        },
-        {
-          "fromId": 5,
-          "toId": 20,
-          "severity": -3,
-          "description": "Scraping fishing nets over an electricity cable laid on or in the seabed is dangerous. "
-        },
-        {
-          "fromId": 4,
-          "toId": 20,
-          "severity": -3,
-          "description": "Fishing nets in the water column and over the seabed at an operational oil or gas extraction platform are dangerous. "
-        },
-        {
-          "fromId": 6,
-          "toId": 20,
-          "severity": -3,
-          "description": "Scraping fishing nets over a pipeline laid on or in the seabed is dangerous. "
-        },
-        {
-          "fromId": 1,
-          "toId": 20,
-          "severity": -3,
-          "description": "Scraping fishing nets over the seabed at a wind farm is dangerous. "
-        },
-        {
-          "fromId": 19,
-          "toId": 20,
-          "severity": -3,
-          "description": "Scraping fishing nets over the seabed at an ammunition dump is dangerous. "
-        },
-        {
-          "fromId": 7,
-          "toId": 20,
-          "severity": -3,
-          "description": "Scraping fishing nets over a telecom cable laid on or in the seabed is dangerous. "
-        },
-        {
-          "fromId": 13,
-          "toId": 20,
-          "severity": -3,
-          "description": "Bottom trawlers always steer clear of known or popular cargo vessel routes. "
-        },
-        {
-          "fromId": 14,
-          "toId": 20,
-          "severity": -3,
-          "description": "Bottom trawlers always steer clear of known or popular ferry routes. "
-        },
-        {
-          "fromId": 15,
-          "toId": 20,
-          "severity": -3,
-          "description": "Bottom trawlers always steer clear of known or popular maintenance vessel routes. "
-        },
-        {
-          "fromId": 16,
-          "toId": 20,
-          "severity": -3,
-          "description": "Bottom trawlers always steer clear of known or popular passenger vessel routes. "
-        },
-        {
-          "fromId": 17,
-          "toId": 20,
-          "severity": -3,
-          "description": "Bottom trawlers always steer clear of known or popular tanker vessel routes. "
-        },
-        {
-          "fromId": 9,
-          "toId": 20,
-          "severity": -3,
-          "description": "Bottom trawlers never fish right next to or just outside of ports, they sail out a bit first. "
-        },
-        {
-          "fromId": 24,
-          "toId": 20,
-          "severity": -3,
-          "description": "If desired, bottom trawling can be banned from operating in a particular Marine Protected Area. "
-        },
-        {
-          "fromId": 5,
-          "toId": 22,
-          "severity": -3,
-          "description": "Fishing nets in the water column during construction of an electricity cable are dangerous. Non-existent once completed. "
-        },
-        {
-          "fromId": 4,
-          "toId": 22,
-          "severity": -3,
-          "description": "Fishing nets in the water column at an operational oil or gas extraction platform are dangerous. "
-        },
-        {
-          "fromId": 6,
-          "toId": 22,
-          "severity": -3,
-          "description": "Fishing nets in the water column during construction of a pipeline are dangerous. Non-existent once completed. "
-        },
-        {
-          "fromId": 1,
-          "toId": 22,
-          "severity": -3,
-          "description": "Fishing nets in the water column at a wind farm are dangerous. "
-        },
-        {
-          "fromId": 7,
-          "toId": 22,
-          "severity": -3,
-          "description": "Fishing nets in the water column during construction of a telecom cable are dangerous. Non-existent once completed. "
-        },
-        {
-          "fromId": 13,
-          "toId": 22,
-          "severity": -3,
-          "description": "Industrial & pelagic trawlers always steer clear of known or popular cargo vessel routes. "
-        },
-        {
-          "fromId": 14,
-          "toId": 22,
-          "severity": -3,
-          "description": "Industrial & pelagic always steer clear of known or popular ferry routes. "
-        },
-        {
-          "fromId": 15,
-          "toId": 22,
-          "severity": -3,
-          "description": "Industrial & pelagic trawlers always steer clear of known or popular maintenance vessel routes. "
-        },
-        {
-          "fromId": 16,
-          "toId": 22,
-          "severity": -3,
-          "description": "Industrial & pelagic trawlers always steer clear of known or popular passenger vessel routes. "
-        },
-        {
-          "fromId": 17,
-          "toId": 22,
-          "severity": -3,
-          "description": "Industrial & pelagic trawlers always steer clear of known or popular tanker vessel routes. "
-        },
-        {
-          "fromId": 9,
-          "toId": 22,
-          "severity": -3,
-          "description": "Industrial & pelagic trawlers never fish right next to or just outside of ports, they sail out a bit first. "
-        },
-        {
-          "fromId": 24,
-          "toId": 22,
-          "severity": -3,
-          "description": "If desired, industrial & pelagic trawling can be banned from operating in a particular Marine Protected Area. "
-        },
-        {
-          "fromId": 5,
-          "toId": 21,
-          "severity": -3,
-          "description": "Drift & fixed nets in the water column during construction of an electricity cable are dangerous. Non-existent once completed. "
-        },
-        {
-          "fromId": 4,
-          "toId": 21,
-          "severity": -3,
-          "description": "Drift & fixed nets in the water column at an operational oil or gas extraction platform are dangerous. "
-        },
-        {
-          "fromId": 6,
-          "toId": 21,
-          "severity": -3,
-          "description": "Drift & fixed nets in the water column during construction of a pipeline are dangerous. Non-existent once completed. "
-        },
-        {
-          "fromId": 1,
-          "toId": 21,
-          "severity": -3,
-          "description": "Drift & fixed nets in the water column during construction of a wind farm are dangerous. Non-existent once completed. "
-        },
-        {
-          "fromId": 7,
-          "toId": 21,
-          "severity": -3,
-          "description": "Drift & fixed nets in the water column during construction of a telecom cable are dangerous. Non-existent once completed. "
-        },
-        {
-          "fromId": 13,
-          "toId": 21,
-          "severity": -3,
-          "description": "Drift & fixed net fishers always steer clear of known or popular cargo vessel routes. "
-        },
-        {
-          "fromId": 14,
-          "toId": 21,
-          "severity": -3,
-          "description": "Drift & fixed net fishers always steer clear of known or popular ferry routes. "
-        },
-        {
-          "fromId": 15,
-          "toId": 21,
-          "severity": -3,
-          "description": "Drift & fixed net fishers always steer clear of known or popular maintenance vessel routes. "
-        },
-        {
-          "fromId": 16,
-          "toId": 21,
-          "severity": -3,
-          "description": "Drift & fixed net fishers always steer clear of known or popular passenger vessel routes. "
-        },
-        {
-          "fromId": 17,
-          "toId": 21,
-          "severity": -3,
-          "description": "Drift & fixed net fishers always steer clear of known or popular tanker vessel routes. "
-        },
-        {
-          "fromId": 9,
-          "toId": 21,
-          "severity": -3,
-          "description": "Drift & fixed net fishers never fish right next to or just outside of ports, they sail out a bit first. "
-        },
-        {
-          "fromId": 24,
-          "toId": 21,
-          "severity": -3,
-          "description": "If desired, drift & fixed net fishers can be banned from operating in a particular Marine Protected Area. "
-        },
-        {
-          "fromId": 19,
-          "toId": 21,
-          "severity": -3,
-          "description": "Drift or fixed net fishing at an ammunition dump is dangerous. "
-        },
-        {
-          "fromId": 1,
-          "toId": 15,
-          "severity": 1,
-          "description": "The existance of wind farms increases maintenance shipping "
-        },
-        {
+		{
           "fromId": 1,
           "toId": 13,
           "severity": -3,
@@ -16978,27 +16594,219 @@
         },
         {
           "fromId": 1,
+          "toId": 15,
+          "severity": 1,
+          "description": "The existance of wind farms increases maintenance shipping "
+        },
+        {
+          "fromId": 1,
           "toId": 16,
           "severity": -3,
           "description": "Passenger vessels not allowed in wind farms "
         },
         {
           "fromId": 1,
-          "toId": 17,
+          "toId": 20,
+          "severity": -3,
+          "description": "Scraping fishing nets over the seabed at a wind farm is dangerous. "
+        },
+        {
+          "fromId": 1,
+          "toId": 22,
+          "severity": -3,
+          "description": "No active pelagic fishing in wind farms"
+        },
+        {
+          "fromId": 1,
+          "toId": 25,
+          "severity": 1,
+          "description": "Wind turbine pylons in the water as well as their foundations on the seabed. "
+        },
+        {
+          "fromId": 1,
+          "toId": 26,
+          "severity": 2,
+          "description": "Wind energy turbine construction on the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 1,
+          "toId": 28,
+          "severity": 2,
+          "description": "Wind energy turbine construction in water and on the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 1,
+          "toId": 101,
           "severity": -3,
           "description": "Tanker vessels not allowed in wind farms "
+        },
+        {
+          "fromId": 1,
+          "toId": 108,
+          "severity": 3,
+          "description": "Wind energy turbine construction in water and on the seabed. Diminished once completed. "
+        },
+        {
+          "fromId": 1,
+          "toId": 118,
+          "severity": -3,
+          "description": "No  passive pelagic fishing in wind farms"
+        },
+        {
+          "fromId": 2,
+          "toId": 13,
+          "severity": -3,
+          "description": "Cargo vessels not allowed in wave farms "
+        },
+        {
+          "fromId": 2,
+          "toId": 14,
+          "severity": -3,
+          "description": "Ferries not allowed in wave farms "
+        },
+        {
+          "fromId": 2,
+          "toId": 15,
+          "severity": 1,
+          "description": "The existance of wave farms increases maintenance shipping "
+        },
+        {
+          "fromId": 2,
+          "toId": 16,
+          "severity": -3,
+          "description": "Passenger vessels not allowed in wave farms "
+        },
+        {
+          "fromId": 2,
+          "toId": 20,
+          "severity": -3,
+          "description": "Scraping fishing nets over the seabed at a wave farm is dangerous. "
+        },
+        {
+          "fromId": 2,
+          "toId": 22,
+          "severity": -3,
+          "description": "No active pelagic fishing in wave farms"
+        },
+        {
+          "fromId": 2,
+          "toId": 25,
+          "severity": 1,
+          "description": "Wave energy turbine on the seabed. "
+        },
+        {
+          "fromId": 2,
+          "toId": 26,
+          "severity": 2,
+          "description": "Wave energy turbine being constructed on the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 2,
+          "toId": 28,
+          "severity": 2,
+          "description": "Wave energy turbine construction on the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 2,
+          "toId": 101,
+          "severity": -3,
+          "description": "Tanker Vessels not allowed in wave farms "
+        },
+        {
+          "fromId": 2,
+          "toId": 108,
+          "severity": 2,
+          "description": "Wave energy turbine construction on the seabed. Diminished once completed. "
+        },
+        {
+          "fromId": 2,
+          "toId": 118,
+          "severity": -3,
+          "description": "No  passive pelagic fishing in wave farms"
+        },
+        {
+          "fromId": 3,
+          "toId": 13,
+          "severity": -3,
+          "description": "Cargo vessels not allowed in tidal farms "
+        },
+        {
+          "fromId": 3,
+          "toId": 14,
+          "severity": -3,
+          "description": "Ferries not allowed in tidal farms "
+        },
+        {
+          "fromId": 3,
+          "toId": 15,
+          "severity": 1,
+          "description": "The existance of tidal farms increases maintenance shipping "
+        },
+        {
+          "fromId": 3,
+          "toId": 16,
+          "severity": -3,
+          "description": "Passenger vessels not allowed in tidal farms "
+        },
+        {
+          "fromId": 3,
+          "toId": 20,
+          "severity": -3,
+          "description": "Scraping fishing nets over the seabed at a tidal farm is dangerous. "
+        },
+        {
+          "fromId": 3,
+          "toId": 22,
+          "severity": -3,
+          "description": "Fishing nets in the water column at a tidal farm are dangerous. "
+        },
+        {
+          "fromId": 3,
+          "toId": 25,
+          "severity": 1,
+          "description": "Tidal energy turbine on the seabed. "
+        },
+        {
+          "fromId": 3,
+          "toId": 26,
+          "severity": 2,
+          "description": "Tidal energy turbine being constructed on the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 3,
+          "toId": 28,
+          "severity": 2,
+          "description": "Tidal energy turbine construction on the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 3,
+          "toId": 101,
+          "severity": -3,
+          "description": "Tanker Vessels not allowed in tidal farms "
+        },
+        {
+          "fromId": 3,
+          "toId": 108,
+          "severity": 2,
+          "description": "Tidal energy turbine construction on the seabed. Diminished once completed. "
+        },
+        {
+          "fromId": 3,
+          "toId": 118,
+          "severity": -3,
+          "description": "No passive pelagic fishing in tidal farms"
         },
         {
           "fromId": 4,
           "toId": 13,
           "severity": -3,
-          "description": "Cargo Vessels Not Allowed To Cross Oil And Gas Installations "
+          "description": "Cargo vessels not allowed near oil and gas platforms "
         },
         {
           "fromId": 4,
           "toId": 14,
           "severity": -3,
-          "description": "Ferry Vessels Not Allowed To Cross Oil And Gas Installations "
+          "description": "Ferry vessels not allowed near oil and gas platforms "
         },
         {
           "fromId": 4,
@@ -17010,37 +16818,235 @@
           "fromId": 4,
           "toId": 16,
           "severity": -3,
-          "description": "Passenger  vessels not allowed to cross oil and gas installations "
+          "description": "Passenger  vessels not allowed to near oil and gas platforms "
         },
         {
           "fromId": 4,
-          "toId": 17,
+          "toId": 20,
           "severity": -3,
-          "description": "Tanker  Vessels Not Allowed To Cross Oil And Gas Installations "
+          "description": "No fishing allowed close to oil and gas platforms"
+        },
+        {
+          "fromId": 4,
+          "toId": 22,
+          "severity": -3,
+          "description": "No fishing allowed close to oil and gas platforms"
+        },
+        {
+          "fromId": 4,
+          "toId": 25,
+          "severity": 1,
+          "description": "Oil & gas rig pylons in the water as well as their foundations on the seabed. "
+        },
+        {
+          "fromId": 4,
+          "toId": 26,
+          "severity": 1,
+          "description": "Oil & gas rig drilling and extraction operations on the seabed. "
+        },
+        {
+          "fromId": 4,
+          "toId": 28,
+          "severity": 1,
+          "description": "Drill pipes in the water and drill bits on the surface. Non-existent once completed. "
+        },
+        {
+          "fromId": 4,
+          "toId": 101,
+          "severity": -3,
+          "description": "Tanker vessels not allowed near oil and gas platforms "
+        },
+        {
+          "fromId": 4,
+          "toId": 108,
+          "severity": 1,
+          "description": "Drill pipes in the water and drill bits on the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 4,
+          "toId": 118,
+          "severity": -3,
+          "description": "No fishing allowed close to oil and gas platforms"
+        },
+        {
+          "fromId": 5,
+          "toId": 25,
+          "severity": 1,
+          "description": "Electricity cable laid on the seabed (so not dug into it). "
+        },
+        {
+          "fromId": 5,
+          "toId": 26,
+          "severity": 1,
+          "description": "Electricity cable laid on or dug into the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 5,
+          "toId": 108,
+          "severity": 2,
+          "description": "Cable laid on or dug into the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 6,
+          "toId": 20,
+          "severity": -3,
+          "description": "Active demersal fishing is not allowed on top of pipelines"
+        },
+        {
+          "fromId": 6,
+          "toId": 25,
+          "severity": 1,
+          "description": "Pipelines laid on the seabed (so not dug into it). "
+        },
+        {
+          "fromId": 6,
+          "toId": 26,
+          "severity": 2,
+          "description": "Pipelines laid on the seabed or dug into it. Almost non-existent once completed. "
+        },
+        {
+          "fromId": 6,
+          "toId": 28,
+          "severity": 1,
+          "description": "Pipelines laid on the seabed or dug into it. Non-existent once completed. "
+        },
+        {
+          "fromId": 6,
+          "toId": 108,
+          "severity": 2,
+          "description": "Pipelines laid on the seabed or dug into it. Non-existent once completed. "
+        },
+        {
+          "fromId": 7,
+          "toId": 25,
+          "severity": 1,
+          "description": "Cables laid on the seabed (so not dug into it). "
+        },
+        {
+          "fromId": 7,
+          "toId": 26,
+          "severity": 1,
+          "description": "Cable laid on or dug into the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 7,
+          "toId": 108,
+          "severity": 2,
+          "description": "Cable laid on or dug into the seabed. Non-existent once completed. "
+        },
+        {
+          "fromId": 9,
+          "toId": 25,
+          "severity": 3,
+          "description": "All the port infrastructure in the water and on the seabed"
+        },
+        {
+          "fromId": 9,
+          "toId": 108,
+          "severity": 3,
+          "description": "Vessels arriving and departing, loading and unloading cargo and passengers"
+        },
+        {
+          "fromId": 9,
+          "toId": 45,
+          "severity": 3,
+          "description": "Vessels arriving and departing"
+        },
+        {
+          "fromId": 10,
+          "toId": 26,
+          "severity": 3,
+          "description": "Materials (sand, gravel) being dump on the seabed"
         },
         {
           "fromId": 12,
           "toId": 13,
           "severity": -3,
-          "description": "There is no cargo shipping in separation zones for cargo vessels "
+          "description": "There is no cargo shipping in no shipping zones for cargo vessels "
         },
         {
           "fromId": 12,
           "toId": 14,
           "severity": -3,
-          "description": "There is no ferry shipping in no separation zones for ferries "
+          "description": "There is no ferry shipping in no shipping zones for ferries "
         },
         {
           "fromId": 12,
           "toId": 16,
           "severity": -3,
-          "description": "There is no passenger shipping in separation zones for passenger vessels "
+          "description": "There is no passenger shipping in no shipping zones for passenger vessels "
         },
         {
           "fromId": 12,
-          "toId": 17,
+          "toId": 101,
           "severity": -3,
-          "description": "There is no tanker shipping in separation zones for tanker vessels "
+          "description": "There is no tanker shipping in no shipping zones for tanker vessels "
+        },
+        {
+          "fromId": 20,
+          "toId": 29,
+          "severity": -1,
+          "description": "Active demersal fleets catch cod "
+        },
+        {
+          "fromId": 20,
+          "toId": 30,
+          "severity": -2,
+          "description": "Active demersal fleets catch demersal fish "
+        },
+        {
+          "fromId": 20,
+          "toId": 31,
+          "severity": -2,
+          "description": "Bottom trawlers catch flatfish "
+        },
+        {
+          "fromId": 20,
+          "toId": 32,
+          "severity": -2,
+          "description": "Active demersal fleets catch herring"
+        },
+        {
+          "fromId": 20,
+          "toId": 39,
+          "severity": -1,
+          "description": "Active demersal fleets catch benthic species"
+        },
+        {
+          "fromId": 22,
+          "toId": 29,
+          "severity": -1,
+          "description": "Active pelagic fleets catch cod "
+        },
+        {
+          "fromId": 22,
+          "toId": 31,
+          "severity": -1,
+          "description": "Active pelagic fleets catch flatfish"
+        },
+        {
+          "fromId": 22,
+          "toId": 32,
+          "severity": -2,
+          "description": "Active pelagic fleets catch herring"
+        },
+        {
+          "fromId": 22,
+          "toId": 33,
+          "severity": -1,
+          "description": "Active pelagic fleets catch mackerel"
+        },
+        {
+          "fromId": 22,
+          "toId": 34,
+          "severity": -2,
+          "description": "Active pelagic fleets catch sandeel"
+        },
+        {
+          "fromId": 22,
+          "toId": 35,
+          "severity": -1,
+          "description": "Active pelatic fleets catch cetaceans "
         },
         {
           "fromId": 23,
@@ -17062,33 +17068,27 @@
         },
         {
           "fromId": 23,
-          "toId": 17,
+          "toId": 101,
           "severity": -1,
           "description": "Tanker vessels avoid shallow waters "
         },
         {
-          "fromId": 42,
-          "toId": 13,
-          "severity": 2,
-          "description": "Cargo vessels prefer IMO Routes "
+          "fromId": 24,
+          "toId": 20,
+          "severity": -3,
+          "description": "Active demersal fleets can be banned from operating in MPAs"
         },
         {
-          "fromId": 42,
-          "toId": 17,
-          "severity": 2,
-          "description": "Tanker vessels prefer IMO Routes "
+          "fromId": 24,
+          "toId": 22,
+          "severity": -3,
+          "description": "Active pelagic fleets can be banned from operating in MPAs"
         },
         {
-          "fromId": 42,
-          "toId": 16,
-          "severity": 2,
-          "description": "Passenger vessels prefer IMO Routes "
-        },
-        {
-          "fromId": 27,
-          "toId": 29,
-          "severity": -1,
-          "description": "Cod avoids noisy areas "
+          "fromId": 24,
+          "toId": 118,
+          "severity": -3,
+          "description": "Passive pelagic fleets can be banned from operating in MPAs"
         },
         {
           "fromId": 26,
@@ -17097,88 +17097,22 @@
           "description": "Cod avoids bottom disturbance "
         },
         {
-          "fromId": 27,
-          "toId": 35,
-          "severity": -3,
-          "description": "Cetaceans avoid noisy areas "
-        },
-        {
-          "fromId": 28,
-          "toId": 35,
-          "severity": -1,
-          "description": "Cetaceans avoid surface disturbance "
-        },
-        {
-          "fromId": 27,
-          "toId": 36,
-          "severity": -3,
-          "description": "Seals avoid noise "
-        },
-        {
-          "fromId": 28,
-          "toId": 36,
-          "severity": -1,
-          "description": "Seals avoid surface disturbance "
-        },
-        {
-          "fromId": 27,
-          "toId": 37,
-          "severity": -3,
-          "description": "Windfarm Avoiding Seabirds avoid noise "
-        },
-        {
-          "fromId": 28,
-          "toId": 37,
-          "severity": -1,
-          "description": "Windfarm Avoiding Seabirds avoid surface disturbance "
-        },
-        {
-          "fromId": 27,
-          "toId": 38,
-          "severity": -3,
-          "description": "Windfarm Indifferent Seabirds avoid noise "
-        },
-        {
-          "fromId": 28,
-          "toId": 38,
-          "severity": -1,
-          "description": "Windfarm Indifferent Seabirds avoid surface disturbance "
-        },
-        {
-          "fromId": 27,
-          "toId": 30,
-          "severity": -2,
-          "description": "Demersal fish avoid noise "
-        },
-        {
           "fromId": 26,
           "toId": 30,
           "severity": -1,
           "description": "Demersal fish avoid bottom disturbance "
         },
         {
-          "fromId": 27,
-          "toId": 32,
+          "fromId": 26,
+          "toId": 31,
+          "severity": -1,
+          "description": "Flatfish avoids bottom disturbance "
+        },
+        {
+          "fromId": 26,
+          "toId": 33,
           "severity": -3,
-          "description": "Herring avoids noisy areas "
-        },
-        {
-          "fromId": 28,
-          "toId": 32,
-          "severity": -1,
-          "description": "Herring avoids surface disturbance "
-        },
-        {
-          "fromId": 27,
-          "toId": 34,
-          "severity": -1,
-          "description": "Sandeel avoids noisy areas "
-        },
-        {
-          "fromId": 28,
-          "toId": 34,
-          "severity": -1,
-          "description": "Sandeel avoids surface disturbance "
+          "description": "Mackerel avoids bottom disturbance"
         },
         {
           "fromId": 26,
@@ -17187,10 +17121,22 @@
           "description": "Sandeel avoids bottom disturbance "
         },
         {
-          "fromId": 27,
-          "toId": 33,
+          "fromId": 26,
+          "toId": 39,
+          "severity": -3,
+          "description": "Benthic species are highly affected by bottom disturbance "
+        },
+        {
+          "fromId": 28,
+          "toId": 29,
           "severity": -1,
-          "description": "Mackerel avoids noisy areas "
+          "description": "Cod avoids surface disturbance "
+        },
+        {
+          "fromId": 28,
+          "toId": 32,
+          "severity": -1,
+          "description": "Herring avoids surface disturbance"
         },
         {
           "fromId": 28,
@@ -17199,148 +17145,34 @@
           "description": "Mackerel avoids surface disturbance "
         },
         {
-          "fromId": 27,
-          "toId": 31,
-          "severity": -1,
-          "description": "Flatfish avoids noisy areas "
-        },
-        {
-          "fromId": 26,
-          "toId": 31,
-          "severity": -1,
-          "description": "Flatfish avoids surface disturbance "
-        },
-        {
-          "fromId": 26,
-          "toId": 39,
-          "severity": -3,
-          "description": "Benthic invertebrates highly affected by bottom disturbance "
-        },
-        {
-          "fromId": 35,
+          "fromId": 28,
           "toId": 34,
           "severity": -1,
-          "description": "Sandeel (and sprat) are the main preys of cetaceans "
+          "description": "Sandeel avoids surface disturbance "
         },
         {
-          "fromId": 35,
-          "toId": 32,
-          "severity": -2,
-          "description": "Cetaceans are herring's predators "
-        },
-        {
-          "fromId": 35,
-          "toId": 33,
+          "fromId": 28,
+          "toId": 35,
           "severity": -1,
-          "description": "Cetaceans are mackerel's predators "
+          "description": "Cetaceans avoid surface disturbance "
         },
         {
-          "fromId": 35,
-          "toId": 30,
+          "fromId": 28,
+          "toId": 36,
           "severity": -1,
-          "description": "Cetaceans are demersal fish predators "
+          "description": "Seals avoid surface disturbance "
         },
         {
-          "fromId": 36,
-          "toId": 34,
-          "severity": -2,
-          "description": "Sandeel (and sprat) are the main preys of seals "
-        },
-        {
-          "fromId": 36,
-          "toId": 31,
-          "severity": -2,
-          "description": "Seals prey on flatfish  "
-        },
-        {
-          "fromId": 36,
-          "toId": 29,
+          "fromId": 28,
+          "toId": 37,
           "severity": -1,
-          "description": "Seals prey on cod  "
-        },
-        {
-          "fromId": 36,
-          "toId": 30,
-          "severity": -1,
-          "description": "Seals prey on demersal fish  "
-        },
-        {
-          "fromId": 37,
-          "toId": 32,
-          "severity": -1,
-          "description": "Windfarm avoiding seabirds prey on herring  "
-        },
-        {
-          "fromId": 37,
-          "toId": 34,
-          "severity": -2,
-          "description": "Windfarm avoiding seabirds prey on sandeel (and sprat)  "
-        },
-        {
-          "fromId": 37,
-          "toId": 33,
-          "severity": -1,
-          "description": "Windfarm avoiding seabirds prey on mackerel  "
-        },
-        {
-          "fromId": 37,
-          "toId": 39,
-          "severity": -2,
-          "description": "Windfarm avoiding seabirds prey on benthic invertebrates  "
-        },
-        {
-          "fromId": 38,
-          "toId": 32,
-          "severity": -1,
-          "description": "Windfarm indifferent seabirds prey on herring  "
-        },
-        {
-          "fromId": 38,
-          "toId": 34,
-          "severity": -2,
-          "description": "Windfarm indifferent seabirds prey on sandeel (and sprat)  "
-        },
-        {
-          "fromId": 38,
-          "toId": 30,
-          "severity": -1,
-          "description": "Windfarm indifferent seabirds prey on demersal fish  "
-        },
-        {
-          "fromId": 38,
-          "toId": 39,
-          "severity": -1,
-          "description": "Windfarm indifferent seabirds prey on benthic invertebrates  "
-        },
-        {
-          "fromId": 29,
-          "toId": 32,
-          "severity": -1,
-          "description": "Cod prey on herring  "
-        },
-        {
-          "fromId": 29,
-          "toId": 34,
-          "severity": -1,
-          "description": "Cod prey on sandeel (and sprat)  "
+          "description": "Birds avoid surface disturbance"
         },
         {
           "fromId": 29,
           "toId": 30,
           "severity": -1,
-          "description": "Cod prey on demersal fish  "
-        },
-        {
-          "fromId": 29,
-          "toId": 39,
-          "severity": -2,
-          "description": "Cod prey on benthic invertebrates  "
-        },
-        {
-          "fromId": 29,
-          "toId": 33,
-          "severity": -1,
-          "description": "Cod prey on Mackerel  "
+          "description": "Cod preys on demersal fish  "
         },
         {
           "fromId": 29,
@@ -17349,10 +17181,28 @@
           "description": "Cod prey on flatfish  "
         },
         {
-          "fromId": 30,
+          "fromId": 29,
           "toId": 32,
+          "severity": -1,
+          "description": "Cod preys on herring  "
+        },
+        {
+          "fromId": 29,
+          "toId": 33,
+          "severity": -1,
+          "description": "Cod preys on mackerel  "
+        },
+        {
+          "fromId": 29,
+          "toId": 34,
+          "severity": -1,
+          "description": "Cod preys on sandeel"
+        },
+        {
+          "fromId": 29,
+          "toId": 39,
           "severity": -2,
-          "description": "Demersal fish prey on herring  "
+          "description": "Cod preys on benthic species"
         },
         {
           "fromId": 30,
@@ -17362,9 +17212,15 @@
         },
         {
           "fromId": 30,
-          "toId": 34,
-          "severity": -3,
-          "description": "Demersal fish prey on sandeel "
+          "toId": 31,
+          "severity": -1,
+          "description": "Demersal fish prey on flatfish "
+        },
+        {
+          "fromId": 30,
+          "toId": 32,
+          "severity": -2,
+          "description": "Demersal fish prey on herring  "
         },
         {
           "fromId": 30,
@@ -17374,45 +17230,15 @@
         },
         {
           "fromId": 30,
-          "toId": 31,
-          "severity": -1,
-          "description": "Demersal fish prey on flatfish "
+          "toId": 34,
+          "severity": -3,
+          "description": "Demersal fish prey on sandeel "
         },
         {
           "fromId": 30,
           "toId": 39,
           "severity": -2,
-          "description": "Demersal fish prey on benthic invertebrates"
-        },
-        {
-          "fromId": 32,
-          "toId": 39,
-          "severity": -1,
-          "description": "Herring prey on benthic invertebrates "
-        },
-        {
-          "fromId": 34,
-          "toId": 39,
-          "severity": -2,
-          "description": "Sandeel prey on benthic invertebrates "
-        },
-        {
-          "fromId": 33,
-          "toId": 34,
-          "severity": -2,
-          "description": "Mackerel prey on sandeel "
-        },
-        {
-          "fromId": 33,
-          "toId": 39,
-          "severity": -2,
-          "description": "Mackerel prey on benthic invertebrate "
-        },
-        {
-          "fromId": 31,
-          "toId": 34,
-          "severity": -1,
-          "description": "Flatfish prey on sandeel "
+          "description": "Demersal fish prey on benthic species"
         },
         {
           "fromId": 31,
@@ -17422,81 +17248,453 @@
         },
         {
           "fromId": 31,
+          "toId": 34,
+          "severity": -1,
+          "description": "Flatfish prey on sandeel "
+        },
+        {
+          "fromId": 31,
           "toId": 39,
           "severity": -3,
-          "description": "Flatfish prey on benthic invertebrates "
+          "description": "Flatfish prey on benthic species"
+        },
+        {
+          "fromId": 32,
+          "toId": 39,
+          "severity": -1,
+          "description": "Herring preys on benthic species"
+        },
+        {
+          "fromId": 33,
+          "toId": 34,
+          "severity": -2,
+          "description": "Mackerel preys on sandeel"
+        },
+        {
+          "fromId": 33,
+          "toId": 39,
+          "severity": -2,
+          "description": "Mackerel prey on benthic species"
+        },
+        {
+          "fromId": 34,
+          "toId": 39,
+          "severity": -1,
+          "description": "Sandeel preys on benthic species"
+        },
+        {
+          "fromId": 35,
+          "toId": 30,
+          "severity": -1,
+          "description": "Cetaceans prey on demersal fish"
+        },
+        {
+          "fromId": 35,
+          "toId": 32,
+          "severity": -2,
+          "description": "Cetaceans prey on herring"
+        },
+        {
+          "fromId": 35,
+          "toId": 33,
+          "severity": -1,
+          "description": "Cetaceans prey on mackerel"
+        },
+        {
+          "fromId": 35,
+          "toId": 34,
+          "severity": -1,
+          "description": "Cetaceans prey on sandeel  "
+        },
+        {
+          "fromId": 36,
+          "toId": 29,
+          "severity": -1,
+          "description": "Seals prey on cod "
+        },
+        {
+          "fromId": 36,
+          "toId": 30,
+          "severity": -1,
+          "description": "Seals prey on demersal fish  "
+        },
+        {
+          "fromId": 36,
+          "toId": 31,
+          "severity": -2,
+          "description": "Seals prey on flatfish  "
+        },
+        {
+          "fromId": 36,
+          "toId": 32,
+          "severity": -1,
+          "description": "Seals prey on herring"
+        },
+        {
+          "fromId": 36,
+          "toId": 34,
+          "severity": -2,
+          "description": "Seals prey on sandeel"
+        },
+        {
+          "fromId": 37,
+          "toId": 29,
+          "severity": -1,
+          "description": "Birds prey on cod"
+        },
+        {
+          "fromId": 37,
+          "toId": 30,
+          "severity": -1,
+          "description": "Birds prey on demersal fish"
+        },
+        {
+          "fromId": 37,
+          "toId": 32,
+          "severity": -1,
+          "description": "Birds prey on herring"
+        },
+        {
+          "fromId": 37,
+          "toId": 33,
+          "severity": -1,
+          "description": "Birds prey on mackerel"
+        },
+        {
+          "fromId": 37,
+          "toId": 34,
+          "severity": -1,
+          "description": "Birds prey on sandeel"
+        },
+        {
+          "fromId": 37,
+          "toId": 39,
+          "severity": -1,
+          "description": "Birds prey on benthic species"
         },
         {
           "fromId": 39,
           "toId": 39,
           "severity": -3,
-          "description": "Benthic invertebrates prey on each other"
+          "description": "Benthic species prey on each other"
         },
         {
-          "fromId": 20,
+          "fromId": 45,
+          "toId": 28,
+          "severity": 3,
+          "description": "Ocean liners or cruise ships sailing at sea"
+        },
+        {
+          "fromId": 45,
+          "toId": 108,
+          "severity": 3,
+          "description": "Specialised construction and maintenance vessels for e.g. wind farms and oil and gas installations"
+        },
+        {
+          "fromId": 46,
+          "toId": 15,
+          "severity": 1,
+          "description": "Increase of shipping activity"
+        },
+        {
+          "fromId": 46,
+          "toId": 20,
+          "severity": -3,
+          "description": "No fishing in algae farms"
+        },
+        {
+          "fromId": 46,
+          "toId": 22,
+          "severity": -3,
+          "description": "No fishing in algae farms"
+        },
+        {
+          "fromId": 46,
+          "toId": 25,
+          "severity": 1,
+          "description": "Aquaculture structures in the water"
+        },
+        {
+          "fromId": 46,
+          "toId": 28,
+          "severity": -1,
+          "description": "Possible decrease of nutrients"
+        },
+        {
+          "fromId": 46,
+          "toId": 118,
+          "severity": -3,
+          "description": "No fishing in algae farms"
+        },
+        {
+          "fromId": 48,
+          "toId": 20,
+          "severity": -3,
+          "description": "Scraping fishing nets over the seabed at an ammunition dump is dangerous"
+        },
+        {
+          "fromId": 48,
+          "toId": 26,
+          "severity": 1,
+          "description": "Ammunition being dumped on the seabed. So only applicable to that type of military area. "
+        },
+        {
+          "fromId": 105,
+          "toId": 28,
+          "severity": 1,
+          "description": "Military exercise contributes to surface disturbance"
+        },
+        {
+          "fromId": 105,
+          "toId": 108,
+          "severity": 1,
+          "description": "Military exercise contributes to noise"
+        },
+        {
+          "fromId": 108,
           "toId": 29,
           "severity": -1,
-          "description": "Bottom trawlers catch cod "
+          "description": "Cod avoids noisy areas "
         },
         {
-          "fromId": 20,
+          "fromId": 108,
           "toId": 30,
           "severity": -2,
-          "description": "Bottom trawlers catch demersal fish "
+          "description": "Demersal fish avoid noise "
         },
         {
-          "fromId": 20,
+          "fromId": 108,
           "toId": 31,
-          "severity": -2,
-          "description": "Bottom trawlers catch flatfish "
-        },
-        {
-          "fromId": 20,
-          "toId": 39,
           "severity": -1,
-          "description": "Bottom trawlers catch benthic invertebrates "
+          "description": "Flatfish avoids noise"
         },
         {
-          "fromId": 22,
+          "fromId": 108,
           "toId": 32,
-          "severity": -2,
-          "description": "Industrial and pelagic trawlers catch herring "
+          "severity": -3,
+          "description": "Herring avoids noise"
         },
         {
-          "fromId": 22,
-          "toId": 34,
-          "severity": -2,
-          "description": "Industrial and pelagic trawlers catch sandeel "
-        },
-        {
-          "fromId": 22,
+          "fromId": 108,
           "toId": 33,
           "severity": -1,
-          "description": "Industrial and pelagic trawlers catch mackerel "
+          "description": "Mackerel avoids noise"
         },
         {
-          "fromId": 21,
-          "toId": 35,
+          "fromId": 108,
+          "toId": 34,
           "severity": -1,
-          "description": "Drift and fixed nets catch cetaceans as by-catch "
+          "description": "Sandeel avoids noise "
         },
         {
-          "fromId": 21,
+          "fromId": 108,
+          "toId": 35,
+          "severity": -3,
+          "description": "Cetaceans avoid noise"
+        },
+        {
+          "fromId": 108,
+          "toId": 36,
+          "severity": -3,
+          "description": "Seals avoid noise "
+        },
+        {
+          "fromId": 108,
+          "toId": 37,
+          "severity": -3,
+          "description": "Birds avoid noise "
+        },
+        {
+          "fromId": 109,
+          "toId": 20,
+          "severity": -3,
+          "description": "Active demersal fleets avoid anchorages"
+        },
+        {
+          "fromId": 109,
+          "toId": 22,
+          "severity": -3,
+          "description": "Active pelagic fleets avoid anchorages"
+        },
+		{
+          "fromId": 109,
+          "toId": 118,
+          "severity": -3,
+          "description": "Passive pelagic fleets avoid anchorages"
+        },
+        {
+          "fromId": 109,
+          "toId": 26,
+          "severity": 1,
+          "description": "Anchored Buoys tugging and scraping the seabed"
+        },
+        {
+          "fromId": 109,
+          "toId": 28,
+          "severity": 1,
+          "description": "Vessels using buoys to hold, wait or bunker raw materials"
+        },
+        {
+          "fromId": 111,
+          "toId": 13,
+          "severity": 2,
+          "description": "Cargo vessels prefer to navigate  through shipping routes"
+        },
+        {
+          "fromId": 111,
+          "toId": 16,
+          "severity": 2,
+          "description": "Passenger vessels prefer to navigate  through shipping routes"
+        },
+        {
+          "fromId": 111,
+          "toId": 20,
+          "severity": -3,
+          "description": "Active demersal fleets always steer clear of known or popular shipping routes"
+        },
+        {
+          "fromId": 111,
+          "toId": 22,
+          "severity": -3,
+          "description": "Active pelagic fleets always steer clear of known or popular shipping routes"
+        },
+        {
+          "fromId": 111,
+          "toId": 101,
+          "severity": 2,
+          "description": "Tanker vessels prefer to navigate  through shipping routes"
+        },
+        {
+          "fromId": 111,
+          "toId": 118,
+          "severity": -3,
+          "description": "Passive pelagic fleets always steer clear of known or popular shipping routes"
+        },
+        {
+          "fromId": 113,
+          "toId": 15,
+          "severity": 1,
+          "description": "Increase of shipping activity"
+        },
+        {
+          "fromId": 113,
+          "toId": 20,
+          "severity": -3,
+          "description": "No fishing in shellfish farms"
+        },
+        {
+          "fromId": 113,
+          "toId": 22,
+          "severity": -3,
+          "description": "No fishing in shellfish farms"
+        },
+        {
+          "fromId": 113,
+          "toId": 25,
+          "severity": 1,
+          "description": "Aquaculture structures in the water"
+        },
+        {
+          "fromId": 113,
+          "toId": 26,
+          "severity": 1,
+          "description": "Slight increase of nutrients on the sea bottom due to organic material released from shellfish"
+        },
+        {
+          "fromId": 113,
+          "toId": 118,
+          "severity": -3,
+          "description": "No fishing in shellfish farms"
+        },
+        {
+          "fromId": 114,
+          "toId": 26,
+          "severity": 3,
+          "description": "Shovels and pipes scraping and extracting from the seabed"
+        },
+        {
+          "fromId": 114,
+          "toId": 108,
+          "severity": 2,
+          "description": "Cranes, shovels and pipes in the water and on the seabed"
+        },
+        {
+          "fromId": 115,
+          "toId": 15,
+          "severity": 1,
+          "description": "Increase of shipping activity"
+        },
+        {
+          "fromId": 115,
+          "toId": 20,
+          "severity": -3,
+          "description": "No fishing in fish farms"
+        },
+        {
+          "fromId": 115,
+          "toId": 22,
+          "severity": -3,
+          "description": "No fishing in fish farms"
+        },
+        {
+          "fromId": 115,
+          "toId": 25,
+          "severity": 1,
+          "description": "Aquaculture structures in the water"
+        },
+        {
+          "fromId": 115,
+          "toId": 28,
+          "severity": 1,
+          "description": "Possible excess of nutrients "
+        },
+        {
+          "fromId": 115,
+          "toId": 118,
+          "severity": -3,
+          "description": "No fishing in fish farms"
+        },
+        {
+          "fromId": 118,
           "toId": 29,
           "severity": -1,
-          "description": "Drift and fixed nets catch cod "
+          "description": "Passive pelagic fleets catch cod "
         },
         {
-          "fromId": 21,
+          "fromId": 118,
           "toId": 31,
           "severity": -2,
           "description": "Drift and fixed nets catch flatfish "
         },
         {
-          "fromId": 21,
+          "fromId": 118,
+          "toId": 32,
+          "severity": -2,
+          "description": "Passive pelagic fleets catch herring"
+        },
+        {
+          "fromId": 118,
+          "toId": 35,
+          "severity": -1,
+          "description": "Passive pelagic fleets catch cetaceans"
+        },
+        {
+          "fromId": 118,
           "toId": 39,
           "severity": -1,
-          "description": "Drift and fixed nets catch benthic invertebrates "
+          "description": "Passive pelagic fleets catch benthic species"
+        },
+        {
+          "fromId": 45,
+          "toId": 28,
+          "severity": 3,
+          "description": "Total shipping intensity contributes to the surface disturbance pressure "
+        },
+        {
+          "fromId": 45,
+          "toId": 108,
+          "severity": 3,
+          "description": "Total shipping intensity contributes to the noise pressure"
         }
       ]
     },
@@ -40621,7 +40819,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 0,
-        "layer_tooltip": "Harbor Porpoise Abundance",
+        "layer_tooltip": "",
         "layer_information": "",
         "layer_media": null,
         "layer_text_info": null,
