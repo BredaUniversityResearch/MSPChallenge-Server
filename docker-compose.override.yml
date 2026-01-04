@@ -48,6 +48,7 @@ services:
     environment:
       # this forces non-ssl
       SERVER_NAME: :80
+      FRANKENPHP_WORKER_CONFIG: watch
       MERCURE_EXTRA_DIRECTIVES: demo
       # force web(socket) server over 8080 (mitmproxy reverse proxy)
       WEB_SERVER_HOST: host.docker.internal

@@ -1,5 +1,7 @@
 worker {
 	file ./public/index.php
 	# num <num> # Sets the number of PHP threads to start, defaults to 2x the number of available CPUs.
+
+	# from Symfony 7.4, remove this. See: https://github.com/dunglas/symfony-docker/pull/873/files
 	env APP_RUNTIME Runtime\FrankenPhpSymfony\Runtime
 }

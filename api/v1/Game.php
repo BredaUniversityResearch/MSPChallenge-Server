@@ -359,7 +359,7 @@ class Game extends Base
         int $sessionId,
         GameStateValue $state,
         WatchdogCommunicator $watchdogCommunicator
-    ): void {
+    ): GameEntity {
         $em = ConnectionManager::getInstance()->getGameSessionEntityManager($sessionId);
         /** @var GameRepository $repo */
         $repo = $em->getRepository(GameEntity::class);
@@ -390,6 +390,7 @@ class Game extends Base
         }
         $em->flush();
         $watchdogCommunicator->changeState($sessionId, $state, $game->getGameCurrentMonth());
+        return $game;
     }
 
     /**

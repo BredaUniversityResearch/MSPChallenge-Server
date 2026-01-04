@@ -36,6 +36,7 @@ use App\Entity\SessionAPI\PlanLayer;
 use App\Entity\SessionAPI\PlanMessage;
 use App\Entity\SessionAPI\PlanRestrictionArea;
 use App\Entity\SessionAPI\Restriction;
+use App\Repository\SessionAPI\GameRepository;
 use App\Repository\SessionAPI\LayerRepository;
 use App\VersionsProvider;
 use Doctrine\DBAL\Exception;
@@ -107,7 +108,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             $this->migrateSessionDatabase();
             $this->resetSessionRasterStore();
             $this->entityManager->wrapInTransaction(fn() => $this->setupAllEntities());
-            $this->finaliseSession($gameList->isDemoSession());
+            $this->finaliseSession();
             $this->sessionLogHandler->notice("Session {$this->gameSession->getName()} created and ready for use.");
             $state = 'healthy';
         } catch (Throwable $e) {
@@ -119,6 +120,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         }
         $this->gameSession->setSessionState(new GameSessionStateValue($state));
         $this->gameSession->getGameConfigVersion()->setLastPlayedTime(time());
+        $this->mspServerManagerEntityManager->persist($this->gameSession);
         $this->mspServerManagerEntityManager->flush();
     }
 
@@ -139,7 +141,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
                     $this->gameSession->getGameCurrentMonth()
                 );
             }
-            $this->gameSession->setSessionState(new GameSessionStateValue('request'));
+            $this->gameSession->setSessionState(new GameSessionStateValue(GameSessionStateValue::REQUEST));
             $this->gameSession->setGameState(GameStateValue::SETUP);
             $this->mspServerManagerEntityManager->flush();
             $this->resetSessionDatabase();
@@ -199,12 +201,28 @@ class GameListCreationMessageHandler extends CommonSessionHandler
      * @throws RedirectionExceptionInterface
      * @throws ClientExceptionInterface
      * @throws Exception
+     * @throws \Exception
      */
-    private function finaliseSession(bool $isDemoSession): void
+    private function finaliseSession(): void
     {
         // some final custom queries
         $this->completeGeometryRecords();
-        $this->setupGameWatchdogAndAccess($isDemoSession);
+
+        // not turning game_session into a Doctrine Entity as the whole table will be deprecated
+        // as soon as the session API has been ported to Symfony, so this is just for backward compatibility
+        $this->gameSession->encodePasswords();
+        $qb = $this->entityManager->getConnection()->createQueryBuilder();
+        $qb->insert('game_session')
+            ->values(
+                [
+                    'game_session_password_admin' =>
+                        $qb->createPositionalParameter($this->gameSession->getPasswordAdmin()),
+                    'game_session_password_player' =>
+                        $qb->createPositionalParameter($this->gameSession->getPasswordPlayer() ?? '')
+                ]
+            )
+            ->executeStatement();
+        $this->updateStateForSession();
     }
 
     /**
@@ -1155,46 +1173,5 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             'A total of {count} objectives were set up successfully.',
             ['count' => count($this->dataModel['objectives'])]
         );
-    }
-
-    /**
-     * @throws \Exception
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ClientExceptionInterface
-     * @throws Exception
-     */
-    private function setupGameWatchdogAndAccess(bool $isDemoSession): void
-    {
-        // not turning game_session into a Doctrine Entity as the whole table will be deprecated
-        // as soon as the session API has been ported to Symfony, so this is just for backward compatibility
-        $this->gameSession->encodePasswords();
-        $qb = $this->entityManager->getConnection()->createQueryBuilder();
-        $qb->insert('game_session')
-            ->values(
-                [
-                    'game_session_password_admin' =>
-                        $qb->createPositionalParameter($this->gameSession->getPasswordAdmin()),
-                    'game_session_password_player' =>
-                        $qb->createPositionalParameter($this->gameSession->getPasswordPlayer() ?? '')
-                ]
-            )
-            ->executeStatement();
-
-        $this->registerSimulations();
-
-        if ($isDemoSession) {
-            $this->entityManager->clear();
-            GameAPI::setStateForSession($this->gameSession->getId(), GameStateValue::PLAY, $this->watchdogCommunicator);
-            $this->logContainer($this->watchdogCommunicator);
-            return;
-        }
-
-        $this->watchdogCommunicator->changeState(
-            $this->gameSession->getId(),
-            GameStateValue::SETUP,
-            $this->gameSession->getGameCurrentMonth()
-        );
-        $this->logContainer($this->watchdogCommunicator);
     }
 }

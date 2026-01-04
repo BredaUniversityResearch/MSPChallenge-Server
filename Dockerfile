@@ -24,7 +24,6 @@ VOLUME /app/var/
 
 # persistent / runtime deps
 # hadolint ignore=DL3008
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
 		acl \
 		file \
@@ -90,6 +89,7 @@ FROM frankenphp_base AS frankenphp_dev
 
 ENV APP_ENV=dev
 ENV XDEBUG_MODE=off
+ENV FRANKENPHP_WORKER_CONFIG=watch
 
 # dev-only supervisor config
 COPY --link docker/supervisor/supervisor.d/dev/*.ini /etc/supervisor.d/
@@ -129,8 +129,7 @@ RUN set -eux; \
   composer install --no-cache --prefer-dist --no-dev --no-autoloader --no-scripts --no-progress
 
 # copy sources
-COPY --link . ./
-RUN rm -Rf frankenphp/
+COPY --link --exclude=frankenphp/ . ./
 
 # Install dependencies and build assets
 RUN set -eux; \
@@ -141,7 +140,7 @@ RUN set -eux; \
 
 # Install PHP dependencies
 RUN set -eux; \
-    mkdir -p var/cache var/log; \
+    mkdir -p var/cache var/log var/share; \
     composer dump-autoload --classmap-authoritative --no-dev; \
     composer dump-env prod; \
     IS_BUILD=true composer run-script --no-dev post-install-cmd; \
