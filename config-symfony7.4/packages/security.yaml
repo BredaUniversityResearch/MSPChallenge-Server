@@ -1,12 +1,6 @@
 security:
-    # Enabled in Symfony 7 by default:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
-    # password_hashers:
-    #    Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
-        # users_in_memory: { memory: null } # Symfony 7
         local_users:
             entity:
                 class: 'App\Entity\ServerManager\User'
@@ -19,7 +13,7 @@ security:
         # activate different ways to authenticate
         # https://symfony.com/doc/current/security.html#the-firewall
         dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            pattern: ^/(_profiler|_wdt|assets|build)|css|images|js)/
             security: false
         open:
             pattern: ^/(api/doc(\.json)?|manager/gamelist|\d+/api/(User/RequestToken|User/RequestSession|[g|G]ame/CreatePOVConfig))
@@ -36,37 +30,49 @@ security:
             custom_authenticators:
                 - App\Security\MSPAuth2Authenticator
 
-# Enabled in Symfony 7 by default:
-#        main:
-#            lazy: true
-#            provider: users_in_memory
-#
-#            # activate different ways to authenticate
-#            # https://symfony.com/doc/current/security.html#the-firewall
-#
-#            # https://symfony.com/doc/current/security/impersonating_user.html
-#            # switch_user: true
-
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/\/*\d+/\/*api/\/*(GameSession/\w+|Plan/ExportPlansToJson|[s|S]imulation/GetWatchdogTokenForServer|User/getProviders|User/checkExists|[g|G]ame/StartWatchdog|[g|G]ame/Config|Layer/MetaByName), roles: PUBLIC_ACCESS }
         - { path: '%app.firewall_api_pattern%', roles: IS_AUTHENTICATED_FULLY }
 
-        # Disabled in Symfony 7 by default:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
-
-# Enabled in Symfony 7 by default:
-#when@test:
-#    security:
-#        password_hashers:
-#            # By default, password hashers are resource intensive and take time. This is
-#            # important to generate secure password hashes. In tests however, secure hashes
-#            # are not important, waste resources and increase test times. The following
-#            # reduces the work factor to the lowest possible values.
-#            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
-#                algorithm: auto
-#                cost: 4 # Lowest possible value for bcrypt
-#                time_cost: 3 # Lowest possible value for argon
-#                memory_cost: 10 # Lowest possible value for argon
+# Symfony 7 default:
+# security:
+#     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+#     password_hashers:
+#         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+#
+#     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+#     providers:
+#         users_in_memory: { memory: null }
+#
+#     firewalls:
+#         dev:
+#             # Ensure dev tools and static assets are always allowed
+#             pattern: ^/(_profiler|_wdt|assets|build)/
+#             security: false
+#         main:
+#             lazy: true
+#             provider: users_in_memory
+#
+#             # Activate different ways to authenticate:
+#             # https://symfony.com/doc/current/security.html#the-firewall
+#
+#             # https://symfony.com/doc/current/security/impersonating_user.html
+#             # switch_user: true
+#
+#     # Note: Only the *first* matching rule is applied
+#     access_control:
+#         # - { path: ^/admin, roles: ROLE_ADMIN }
+#         # - { path: ^/profile, roles: ROLE_USER }
+#
+# when@test:
+#     security:
+#         password_hashers:
+#             # Password hashers are resource-intensive by design to ensure security.
+#             # In tests, it's safe to reduce their cost to improve performance.
+#             Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+#                 algorithm: auto
+#                 cost: 4 # Lowest possible value for bcrypt
+#                 time_cost: 3 # Lowest possible value for argon
+#                 memory_cost: 10 # Lowest possible value for argon
