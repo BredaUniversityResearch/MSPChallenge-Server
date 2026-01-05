@@ -318,7 +318,7 @@
             "ref": "6acd9ff4f7fd5626d2962109bd4ebab351d43c43"
         },
         "files": [
-            "./assets/bootstrap.js",
+            "./assets/stimulus_bootstrap.js",
             "./assets/controllers.json",
             "./assets/controllers/hello_controller.js"
         ]

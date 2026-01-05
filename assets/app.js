@@ -1,4 +1,4 @@
-import './bootstrap.js';
+import './stimulus_bootstrap.js';
 /*
  * Welcome to your app's main JavaScript file!
  *
@@ -7,8 +7,6 @@ import './bootstrap.js';
  */
 // any CSS you import will output into a single css file (app.css in this case)
 import './styles/app.scss';
-// start the Stimulus application
-import './bootstrap';
 
 /*
  * https://symfony.com/doc/current/frontend/encore/bootstrap.html#importing-bootstrap-javascript
