@@ -4,30 +4,28 @@ framework:
     annotations:
         enabled: false
     secret: '%env(APP_SECRET)%'
-    #csrf_protection: true
     http_method_override: false
     handle_all_throwables: true
-
-# Enabled in Symfony 7 by default:
-#    # Note that the session will be started ONLY if you read or write from it.
-#    session: true # Symfony 7
-    
     # Enables session support. Note that the session will ONLY be started if you read or write from it.
-    # Remove or comment this section to explicitly disable session support.    
+    # Remove or comment this section to explicitly disable session support.
+# Symfony 7 default:
+#    # Note that the session will be started ONLY if you read or write from it.
+#    session: true
     session:
         handler_id: null
         cookie_secure: auto
         cookie_samesite: lax
         storage_factory_id: session.storage.factory.native
-
-    #esi: true
-    #fragments: true
     php_errors:
         log: true
-
     secrets:
       vault_directory: '%kernel.project_dir%/.secrets'
 
+# Symfony 7 default:
+#    #esi: true
+#    #fragments: true
+
+# Enabled in Symfony 7 by default:
 when@test:
     framework:
         test: true
