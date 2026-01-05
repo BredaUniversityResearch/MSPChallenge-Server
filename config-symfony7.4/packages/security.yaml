@@ -34,7 +34,7 @@ security:
             provider: local_users
             lazy: true
             custom_authenticators:
-                - App\Security\MSPAuth2Authenticator            
+                - App\Security\MSPAuth2Authenticator
 
 # Enabled in Symfony 7 by default:
 #        main:

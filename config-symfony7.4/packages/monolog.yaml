@@ -7,7 +7,6 @@ parameters:
     - '!docker_monitor'
     - '!app_ws_server'
     - '!watchdog'
-    - '!client'
     - '!deprecation' # also exclude deprecation logs from main log file
   white_list_app_channels:
     - analytics
@@ -16,7 +15,6 @@ parameters:
     - docker_messenger
     - docker_monitor
     - app_ws_server
-    - client
     - watchdog
 
 monolog:
@@ -28,26 +26,33 @@ monolog:
         - docker_messenger
         - docker_monitor
         - app_ws_server
-        - client
         - watchdog
     handlers:
-            # uncomment to get logging in your browser
-            # you may have to allow bigger header sizes in your Web server configuration
-            #firephp:
-            #    type: firephp
-            #    level: info
-            #chromephp:
-            #    type: chromephp
-            #    level: info
+        # uncomment to get logging in your browser
+        # you may have to allow bigger header sizes in your Web server configuration
+        #firephp:
+        #    type: firephp
+        #    level: info
+        #chromephp:
+        #    type: chromephp
+        #    level: info
         main:
+            type: fingers_crossed
+            handler: main_nested
+            action_level: debug
+            excluded_http_codes:
+              - 410 # Session is non-existing
+              - 503 # Session cannot be used at the moment
+            channels: "%black_list_app_channels%"
+        main_nested:
             type: stream
             path: "%kernel.logs_dir%/%kernel.environment%.log"
             level: debug
             formatter: monolog.formatter.json
             channels: "%black_list_app_channels%"
-            console:
-                type: console
-                process_psr_3_messages: false
+        console:
+            type: console
+            process_psr_3_messages: false
             channels: "%white_list_app_channels%"
         analytics:
             type: stream
@@ -61,12 +66,12 @@ monolog:
             level: warning
             formatter: monolog.formatter.json
             channels: ['docker', 'docker_messenger', 'docker_monitor']
-            session_log_handler:
-                type: service
-                id: App\Logger\GameSessionLogger
-                channels: [ "game_session" ]
-                process_psr_3_messages:
-                    enabled: true
+        session_log_handler:
+            type: service
+            id: App\Logger\GameSessionLogger
+            channels: [ "game_session" ]
+            process_psr_3_messages:
+                enabled: true
         deprecation:
             type: rotating_file
             channels: ["deprecation"]
@@ -74,27 +79,30 @@ monolog:
             max_files: 7
             formatter: monolog.formatter.json
         app_ws_server:
-                type: stream
+            type: stream
             path: '%kernel.logs_dir%/app-ws-server.log'
             level: warning
             formatter: monolog.formatter.json
             channels: ['app_ws_server']
         watchdog:
-                type: stream
+            type: stream
             path: '%kernel.logs_dir%/watchdog.log'
             level: warning
             formatter: monolog.formatter.json
             channels: ['watchdog']
-        client:
-            type: stream
-            path: '%kernel.logs_dir%/client.log'
-            level: warning
-            formatter: monolog.formatter.json
-            channels: ['client']
+
 when@prod:
     monolog:
         handlers:
             main:
+                type: fingers_crossed
+                handler: main_nested
+                action_level: error
+                excluded_http_codes:
+                  - 410 # Session is non-existing
+                  - 503 # Session cannot be used at the moment
+                channels: "%black_list_app_channels%"
+            main_nested:
                 type: rotating_file
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: error
