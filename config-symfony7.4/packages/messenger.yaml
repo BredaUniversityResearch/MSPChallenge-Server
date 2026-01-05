@@ -1,11 +1,5 @@
 framework:
     messenger:
-        # Symfony 6+ Option "reset_on_message" at "framework.messenger" is deprecated. It does nothing and will be removed in version 7.0.
-        # reset_on_message: true
-
-        # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
-        failure_transport: failed
-
         transports:
             docker:
                 dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
@@ -28,20 +22,6 @@ framework:
                     table_name: 'messenger_analytics'
                     queue_name: 'analytics'
             async:
-# Enabled in Symfony 7 by default:
-#                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
-#                options:
-#                    use_notify: true
-#                    check_delayed_interval: 60000
-#                retry_strategy:
-#                    max_retries: 3
-#                    multiplier: 2
-#            failed: 'doctrine://default?queue_name=failed'
-#            # sync: 'sync://'
-#        default_bus: messenger.bus.default
-#        buses:
-#            messenger.bus.default: []
-
                 dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
                 options:
                     table_name: 'messenger_async_processes'
@@ -53,18 +33,31 @@ framework:
                     queue_name: 'failed'
 
         routing:
-# Enabled in Symfony 7 by default:
-#            Symfony\Component\Mailer\Messenger\SendEmailMessage: async
-#            Symfony\Component\Notifier\Message\ChatMessage: async
-#            Symfony\Component\Notifier\Message\SmsMessage: async
-            # Route your messages to the transports
-            # 'App\Message\YourMessage': async
-
             'App\Message\Docker\DockerCommunicationMessageBase': docker
             'App\Message\Analytics\AnalyticsMessageBase': analytics
-            'App\Message\GameList\GameListCreationMessage': async            
+            'App\Message\GameList\GameListCreationMessage': async
             'App\Message\GameList\GameListArchiveMessage': async
             'App\Message\GameSave\GameSaveCreationMessage': async
             'App\Message\GameSave\GameSaveLoadMessage': async
             'App\Message\Watchdog\Message\WatchdogMessageBase': watchdog
 
+
+# Symfony 7 default:
+#        # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
+#        failure_transport: failed
+#        transports:
+#            # https://symfony.com/doc/current/messenger.html#transport-configuration
+#            # async: '%env(MESSENGER_TRANSPORT_DSN)%'
+#            # failed: 'doctrine://default?queue_name=failed'
+#            sync: 'sync://'
+#
+#        routing:
+#            # Route your messages to the transports
+#            # 'App\Message\YourMessage': async
+# when@test:
+#    framework:
+#        messenger:
+#            transports:
+#                # replace with your transport name here (e.g., my_transport: 'in-memory://')
+#                # For more Messenger testing tools, see https://github.com/zenstruck/messenger-test
+#                async: 'in-memory://'
