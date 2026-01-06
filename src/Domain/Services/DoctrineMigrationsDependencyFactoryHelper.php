@@ -53,9 +53,9 @@ class DoctrineMigrationsDependencyFactoryHelper
                 return ConnectionManager::getInstance()->getCachedDbConnection($name);
             }
 
-            protected function resetService(string $name): Connection
+            protected function resetService(string $name): void
             {
-                return ConnectionManager::getInstance()->getCachedDbConnection($name);
+                // no reset logic needed for this example
             }
         };
 
