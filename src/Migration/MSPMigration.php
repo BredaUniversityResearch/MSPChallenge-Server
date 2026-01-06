@@ -12,7 +12,7 @@ use Doctrine\DBAL\Schema\Table;
 use IntlException;
 use MessageFormatter;
 
-abstract class MSPMigration extends AbstractMigration implements ContainerAwareMigrationInterface
+abstract class MSPMigration extends AbstractMigration
 {
     private ?MSPDatabaseType $databaseType = null;
 

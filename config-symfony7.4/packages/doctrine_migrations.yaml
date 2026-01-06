@@ -7,4 +7,4 @@ doctrine_migrations:
     # Whether to wrap migrations in a single transaction.
     transactional: true
     services:
-        Doctrine\Migrations\Version\MigrationFactory: 'App\Migrations\ContainerAwareMigrationFactory'
+        Doctrine\Migrations\Version\MigrationFactory: 'App\Migration\ContainerAwareMigrationFactory'

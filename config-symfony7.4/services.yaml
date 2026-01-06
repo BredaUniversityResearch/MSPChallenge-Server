@@ -227,7 +227,10 @@ services:
         arguments:
           $vault: '@secrets.vault'
 
-    App\Migrations\ContainerAwareMigrationFactory:
+    Doctrine\Migrations\Version\DbalMigrationFactory: ~
+    App\Migration\ContainerAwareMigrationFactory:
+        decorates: Doctrine\Migrations\Version\DbalMigrationFactory
+        arguments: ['@.inner', '@service_container']
 
 when@dev:
     parameters:
