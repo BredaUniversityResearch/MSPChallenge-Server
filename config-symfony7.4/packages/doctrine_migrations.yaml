@@ -6,4 +6,5 @@ doctrine_migrations:
     enable_profiler: false
     # Whether to wrap migrations in a single transaction.
     transactional: true
-
+    services:
+        Doctrine\Migrations\Version\MigrationFactory: 'App\Migrations\ContainerAwareMigrationFactory'
