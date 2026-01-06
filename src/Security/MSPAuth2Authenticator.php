@@ -57,7 +57,8 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
     public function authenticate(Request $request): Passport
     {
         // get the token from Session or GET
-        $apiToken = $request->get('token') ?? $request->getSession()->get('token') ?? null;
+        $apiToken = $request->query->get('token') ?? $request->request->get('token') ??
+            $request->getSession()->get('token') ?? null;
         if (empty($apiToken)) {
             throw new MSPAuth2RedirectException();
         }

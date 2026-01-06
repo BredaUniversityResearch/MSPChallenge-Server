@@ -158,7 +158,9 @@ class SettingController extends BaseController
         $user = $security->getUser();
         $auth2Communicator->setToken($user->getToken());
         try {
-            $auth2Communicator->delResource(str_replace('/api/', '', $request->get('delurl')));
+            $auth2Communicator->delResource(
+                str_replace('/api/', '', $request->request->get('delurl'))
+            );
         } catch (Throwable $e) {
             return new Response($e->getMessage(), 422);
         }

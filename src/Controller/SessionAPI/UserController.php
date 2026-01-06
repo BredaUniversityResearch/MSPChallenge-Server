@@ -144,7 +144,7 @@ class UserController extends BaseController
     ): Response {
         $sessionId = $this->getSessionIdFromRequest($request);
         // check if country_id get parameter is an int
-        if (!ctype_digit($request->get('country_id'))) {
+        if (!ctype_digit($request->request->get('country_id'))) {
             return new MessageJsonResponse(status: 400, message: 'Invalid country_id value. Must be an integer');
         }
 
@@ -152,13 +152,13 @@ class UserController extends BaseController
             $user = new User();
             $user->setGameSessionId($sessionId);
             $payload = $user->RequestSession(
-                $request->get('build_timestamp', ''),
-                (int)$request->get('country_id'),
-                $request->get('user_name'),
-                $request->get('country_password', '')
+                $request->request->get('build_timestamp', ''),
+                (int)$request->request->get('country_id'),
+                $request->request->get('user_name'),
+                $request->request->get('country_password', '')
             );
             $user->setUserId($payload['session_id']);
-            $user->setUsername($request->get('user_name'));
+            $user->setUsername($request->request->get('user_name'));
             $jsonResponse = $authenticationSuccessHandler->handleAuthenticationSuccess($user);
             $responseData = json_decode($jsonResponse->getContent());
             $payload['api_access_token'] = $responseData->token;
@@ -211,7 +211,7 @@ class UserController extends BaseController
         $sessionId = $this->getSessionIdFromRequest($request);
         try {
             // if refresh does not exist, or is not valid, or we don't know about it, then don't continue
-            $currentRefreshToken = $request->get('api_refresh_token');
+            $currentRefreshToken = $request->request->get('api_refresh_token');
             if (is_null($currentRefreshToken)) {
                 throw new \Exception('Cannot continue without a refresh token');
             }

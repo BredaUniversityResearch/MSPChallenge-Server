@@ -129,7 +129,7 @@ class GameListController extends BaseController
     ): Response {
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
-        $gameSession->setName($request->get('name'));
+        $gameSession->setName($request->request->get('name'));
         $errors = $validator->validate($gameSession);
         if (count($errors) > 0) {
             return new Response(null, 422);
