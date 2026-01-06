@@ -5,6 +5,7 @@ namespace App\Entity\SessionAPI;
 use App\Domain\Common\EntityEnums\EventLogSeverity;
 use App\Repository\SessionAPI\EventLogRepository;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
@@ -19,7 +20,8 @@ class EventLog
 
     #[Gedmo\Timestampable(on: 'create')]
     #[ORM\Column(name: 'event_log_time', type: Types::DATETIME_MUTABLE)]
-    protected ?DateTime $time;
+    // @phpstan-ignore-next-line DateTimeInterface|null but database expects DateTimeInterface
+    protected ?DateTimeInterface $time;
 
     #[ORM\Column(name: 'event_log_source', length: 75)]
     // @phpstan-ignore-next-line string|null but database expects string
@@ -46,12 +48,12 @@ class EventLog
         return $this->id;
     }
 
-    public function getTime(): ?DateTime
+    public function getTime(): DateTimeInterface
     {
         return $this->time;
     }
 
-    public function setTime(DateTime $time): void
+    public function setTime(DateTimeInterface $time): void
     {
         $this->time = $time;
     }

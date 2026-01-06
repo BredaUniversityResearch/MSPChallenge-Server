@@ -40,10 +40,12 @@ class GameSave extends EntityBase
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    // @phpstan-ignore-next-line GameServer|null but database expects
     private ?GameServer $gameServer = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'watchdog_server_id', nullable: false)]
+    // @phpstan-ignore-next-line GameWatchdogServer|null but database expects
     private ?GameWatchdogServer $gameWatchdogServer = null;
 
     #[ORM\Column(type: Types::BIGINT)]
@@ -113,6 +115,7 @@ class GameSave extends EntityBase
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[ORM\Version] # converts the type 'datetime' to 'timestamp'.
+    // @phpstan-ignore-next-line DateTimeInterface|null but database expects DateTimeInterface
     private ?\DateTimeInterface $saveTimestamp = null;
 
     #[ORM\Column(length: 45)]

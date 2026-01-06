@@ -26,6 +26,7 @@ class GameConfigVersion extends EntityBase
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'gameConfigVersion')]
     #[ORM\JoinColumn(name: 'game_config_files_id', nullable: false)]
+    // @phpstan-ignore-next-line GameConfigFile|null but database expects
     private ?GameConfigFile $gameConfigFile = null;
 
     #[ORM\Column]

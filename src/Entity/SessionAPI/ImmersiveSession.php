@@ -132,6 +132,7 @@ class ImmersiveSession
     #[Groups(['read'])]
     #[Gedmo\Timestampable(on: 'update')]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    // @phpstan-ignore-next-line DateTime|null but database expects DateTimeInterface
     protected $updatedAt;
 
     public function getId(): ?int

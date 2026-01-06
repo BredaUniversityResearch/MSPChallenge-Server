@@ -30,6 +30,7 @@ class User extends EntityBase implements UserInterface
     private ?string $refreshToken = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    // @phpstan-ignore-next-line DateTimeInterface|null but database expects DateTimeInterface
     private ?\DateTimeInterface $refreshTokenExpiration = null;
 
     #[ORM\Column(length: 255, nullable: true)]

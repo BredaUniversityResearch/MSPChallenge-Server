@@ -22,6 +22,7 @@ class User
 
     #[ORM\ManyToOne(inversedBy: 'users')]
     #[ORM\JoinColumn(name: 'user_country_id', referencedColumnName: 'countryId', nullable: false)]
+    // @phpstan-ignore-next-line Country|null but database expects
     private ?Country $userCountry = null;
 
     #[ORM\Column(length: 1, nullable: true, options: ['default' => 0])]

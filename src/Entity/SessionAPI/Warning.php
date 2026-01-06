@@ -109,6 +109,7 @@ class Warning
     private ?Layer $layer = null;
 
     #[ORM\Column(name: 'warning_issue_type', enumType: WarningIssueType::class)]
+    // @phpstan-ignore-next-line WarningIssueType|null but database expects
     private ?WarningIssueType $issueType = null;
 
     #[ORM\Column(name: 'warning_x')]
