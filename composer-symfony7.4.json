@@ -7,7 +7,7 @@
         "ext-imagick": "You only require imagick for image processing, e.g. for POV config creation."
     },
     "require": {
-        "php": ">=8.2",
+        "php": ">=8.3",
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-iconv": "*",
