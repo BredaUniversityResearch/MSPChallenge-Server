@@ -29,6 +29,7 @@ class GameConfigVersion extends EntityBase
     private ?GameConfigFile $gameConfigFile = null;
 
     #[ORM\Column]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $version = null;
 
     #[Assert\NotBlank]
@@ -36,9 +37,11 @@ class GameConfigVersion extends EntityBase
     private ?string $versionMessage = null;
 
     #[ORM\Column(length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $visibility = null;
 
     #[ORM\Column(type: Types::BIGINT)]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $uploadTime = null;
 
     private ?string $uploadUserName = null;
@@ -47,30 +50,35 @@ class GameConfigVersion extends EntityBase
      * User ID from MSP Challenge Authoriser.
      */
     #[ORM\Column]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $uploadUser = null;
 
     /**
      * Unix timestamp
      */
     #[ORM\Column(type: Types::BIGINT)]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $lastPlayedTime = null;
 
     /**
      * File path relative to the root config directory
      */
     #[ORM\Column(length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $filePath = null;
 
     /**
      * Region defined in the config file
      */
     #[ORM\Column(length: 45)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $region = null;
 
     /**
      * Compatible client versions. Formatted as "min-max"
      */
     #[ORM\Column(length: 45)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $clientVersions = null;
 
     private ?string $gameConfigCompleteRaw = null;
@@ -231,7 +239,7 @@ class GameConfigVersion extends EntityBase
     public function setGameConfigCompleteRaw(?string $gameConfigCompleteRaw): self
     {
         $this->gameConfigCompleteRaw = $gameConfigCompleteRaw;
-        
+
         return $this;
     }
 

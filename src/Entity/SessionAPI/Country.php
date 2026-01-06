@@ -25,31 +25,31 @@ class Country
     #[ORM\Column(type: Types::INTEGER, length: 1, nullable: true, options: ['default' => 0])]
     private ?int $countryIsManager;
 
-    #[ORM\OneToMany(mappedBy: 'country', targetEntity: Objective::class, cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: Objective::class, mappedBy: 'country', cascade: ['persist'])]
     private Collection $objective;
 
-    #[ORM\OneToMany(mappedBy: 'country', targetEntity: Plan::class, cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: Plan::class, mappedBy: 'country', cascade: ['persist'])]
     private Collection $plan;
 
-    #[ORM\OneToMany(mappedBy: 'country', targetEntity: Fishing::class, cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: Fishing::class, mappedBy: 'country', cascade: ['persist'])]
     private Collection $fishing;
 
-    #[ORM\OneToMany(mappedBy: 'country', targetEntity: PlanMessage::class, cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: PlanMessage::class, mappedBy: 'country', cascade: ['persist'])]
     private Collection $planMessage;
 
-    #[ORM\OneToMany(mappedBy: 'country', targetEntity: PlanRestrictionArea::class, cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: PlanRestrictionArea::class, mappedBy: 'country', cascade: ['persist'])]
     private Collection $planRestrictionArea;
 
-    #[ORM\OneToMany(mappedBy: 'country', targetEntity: Geometry::class, cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: Geometry::class, mappedBy: 'country', cascade: ['persist'])]
     private Collection $geometry;
 
-    #[ORM\OneToMany(mappedBy: 'country', targetEntity: GridEnergy::class, cascade: ['persist'])]
+    #[ORM\OneToMany(targetEntity: GridEnergy::class, mappedBy: 'country', cascade: ['persist'])]
     private Collection $gridEnergy;
 
     /**
      * @var Collection<int, User>
      */
-    #[ORM\OneToMany(mappedBy: 'country', targetEntity: User::class, orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'country', orphanRemoval: true)]
     private Collection $users;
 
     public function __construct()

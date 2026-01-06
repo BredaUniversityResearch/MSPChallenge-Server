@@ -23,15 +23,18 @@ class Plan
     private ?Country $country = null;
 
     #[ORM\Column(type: Types::STRING, length: 75)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $planName = null;
 
     #[ORM\Column(type: Types::TEXT, length: 75)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $planDescription = "";
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTime $planTime;
 
     #[ORM\Column(type: Types::INTEGER, length: 5)]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $planGametime = null;
 
     #[ORM\Column(enumType: PlanState::class)]
@@ -40,29 +43,35 @@ class Plan
     private ?int $planLockUserId = null;
 
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 0])]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $planLastupdate = 0;
 
     #[ORM\Column(type: Types::STRING, length: 20, options: ['default' => 'NONE'])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $planPreviousstate = 'NONE';
 
     #[ORM\Column(type: Types::SMALLINT, length: 4, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $planActive = 1;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true)]
     private ?int $planConstructionstart = null;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $planType = 0;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $planEnergyError = 0;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $planAltersEnergyDistribution = 0;
 
     #[ORM\OneToMany(
-        mappedBy: 'plan',
         targetEntity: PlanLayer::class,
+        mappedBy: 'plan',
         cascade: ['persist', 'remove'],
         orphanRemoval: true
     )]

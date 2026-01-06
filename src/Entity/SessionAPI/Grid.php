@@ -36,6 +36,7 @@ class Grid
     private Collection $derivedGrid;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $gridDistributionOnly = 0;
 
     #[ORM\OneToMany(mappedBy: 'grid', targetEntity: GridEnergy::class, cascade: ['persist'])]

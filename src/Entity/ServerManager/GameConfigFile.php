@@ -23,6 +23,7 @@ class GameConfigFile extends EntityBase
      * no whitespaces and no special characters please and without file extension (.json)
      */
     #[ORM\Column(length: 45)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $filename = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

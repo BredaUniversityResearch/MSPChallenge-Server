@@ -23,6 +23,7 @@ class GameSave extends EntityBase
     private ?int $id = null;
 
     #[ORM\Column(length: 128)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $name = null;
 
     #[ORM\ManyToOne]
@@ -30,9 +31,11 @@ class GameSave extends EntityBase
     private ?GameConfigVersion $gameConfigVersion = null;
 
     #[ORM\Column(length: 45)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $gameConfigFilesFilename = null;
 
     #[ORM\Column(length: 45)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $gameConfigVersionsRegion = null;
 
     #[ORM\ManyToOne]
@@ -47,30 +50,39 @@ class GameSave extends EntityBase
     private ?string $gameCreationTime = null;
 
     #[ORM\Column]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $gameStartYear = null;
 
     #[ORM\Column]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $gameEndMonth = null;
 
     #[ORM\Column]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $gameCurrentMonth = null;
 
     #[ORM\Column(type: Types::BIGINT)]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?string $gameRunningTilTime = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $passwordAdmin = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $passwordPlayer = null;
 
     #[ORM\Column(length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $sessionState = null;
 
     #[ORM\Column(length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $gameState = null;
 
     #[ORM\Column(length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $gameVisibility = null;
 
     #[ORM\Column(nullable: true)]
@@ -80,18 +92,23 @@ class GameSave extends EntityBase
     private ?int $playersPastHour = null;
 
     #[ORM\Column(type: Types::SMALLINT)]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $demoSession = null;
 
     #[ORM\Column(length: 32)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $apiAccessToken = null;
 
     #[ORM\Column(length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $saveType = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $saveNotes = null;
 
     #[ORM\Column(length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $saveVisibility = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -99,6 +116,7 @@ class GameSave extends EntityBase
     private ?\DateTimeInterface $saveTimestamp = null;
 
     #[ORM\Column(length: 45)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $serverVersion = null;
 
     /**

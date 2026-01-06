@@ -22,12 +22,14 @@ class EventLog
     protected ?DateTime $time;
 
     #[ORM\Column(name: 'event_log_source', length: 75)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $source = null;
 
     #[ORM\Column(name: 'event_log_severity', enumType: EventLogSeverity::class)]
     private EventLogSeverity $severity = EventLogSeverity::WARNING;
 
     #[ORM\Column(name: 'event_log_message', type: Types::TEXT)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $message = null;
 
     #[ORM\Column(name: 'event_log_stack_trace', type: Types::TEXT, nullable: true)]

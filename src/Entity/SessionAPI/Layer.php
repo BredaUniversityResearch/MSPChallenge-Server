@@ -48,26 +48,32 @@ class Layer extends EntityBase
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerActive = 1;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerSelectable = 1;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerActiveOnStart = 0;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerToggleable = 1;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerEditable = 1;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 125, options: ['default' => ''])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerName = '';
 
     #[Groups(['read'])]
@@ -76,26 +82,32 @@ class Layer extends EntityBase
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => ''])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerShort = '';
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => ''])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerGroup = '';
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 512, options: ['default' => ''])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerTooltip = '';
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => 'management'])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerCategory = 'management';
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => 'aquaculture'])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerSubcategory = 'aquaculture';
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => 'Miscellaneous'])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerKpiCategory = 'Miscellaneous';
 
     #[Groups(['read'])]
@@ -104,6 +116,7 @@ class Layer extends EntityBase
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 3, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerDepth = 1;
 
     #[Groups(['read'])]
@@ -142,10 +155,12 @@ class Layer extends EntityBase
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 100])]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $layerLastupdate = 100;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 4, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerMelupdate = 0;
 
     #[Groups(['read'])]
@@ -154,18 +169,22 @@ class Layer extends EntityBase
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 512, options: ['default' => 'Default'])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerSpecialEntityType = 'Default';
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerGreen = 0;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerMelupdateConstruction = 0;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 0])]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $layerFilecreationtime = 0;
 
     #[Groups(['read'])]

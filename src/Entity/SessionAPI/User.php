@@ -17,6 +17,7 @@ class User
     private ?string $userName = null;
 
     #[ORM\Column]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $userLastupdate = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]

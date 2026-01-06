@@ -27,26 +27,31 @@ class GameGeoServer extends EntityBase
     #[AppMappings\Property\TableColumn(label: "Name")]
     #[Assert\NotBlank]
     #[ORM\Column(length: 128)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $name = null;
 
     #[AppMappings\Property\TableColumn(label: "Fully-qualified URL")]
     #[Assert\NotBlank]
     #[Assert\Url]
     #[ORM\Column(length: 255, unique: true)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $address = null;
 
     #[AppMappings\Property\FormFieldType(type: SecretsChoiceType::class)]
     #[Assert\NotBlank]
     #[ORM\Column(name: 'username', length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $usernameSecret = null;
 
     #[AppMappings\Property\FormFieldType(type: SecretsChoiceType::class)]
     #[Assert\NotBlank]
     #[ORM\Column(name: 'password', length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $passwordSecret = null;
 
     #[AppMappings\Property\TableColumn(action: true, toggleable: true, availability: true)]
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => 1])]
+    // @phpstan-ignore-next-line bool|null but database expects bool
     private ?bool $available = true;
 
     private ?AbstractVault $vault;

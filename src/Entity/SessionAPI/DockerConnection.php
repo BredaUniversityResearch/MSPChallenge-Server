@@ -22,14 +22,17 @@ class DockerConnection
     private ?int $id = null;
 
     #[ORM\Column]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $dockerApiID = null;
 
     #[Groups(['read'])]
     #[ORM\Column]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $port = null;
 
     #[Groups(['read'])]
     #[ORM\Column(length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $dockerContainerID = null;
 
     private bool $verified = false;

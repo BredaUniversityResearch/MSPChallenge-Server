@@ -38,12 +38,14 @@ class GameWatchdogServer extends EntityBase implements WatchdogInterface
     #[AppMappings\Property\TableColumn(label: "Server name")]
     #[Assert\NotBlank]
     #[ORM\Column(length: 128, unique: true)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $name = null;
 
     #[AppMappings\Property\TableColumn(label: "Fully-qualified URL")]
     #[Assert\NotBlank]
     #[AcmeAssert\Address]
     #[ORM\Column(length: 255, unique: true)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $address = null;
 
     #[ORM\Column(options: ['default' => 80])]
@@ -88,6 +90,7 @@ class GameWatchdogServer extends EntityBase implements WatchdogInterface
 
     #[AppMappings\Property\TableColumn(action: true, toggleable: true, availability: true)]
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => 1])]
+    // @phpstan-ignore-next-line bool|null but database expects bool
     private ?bool $available = true;
 
     public function getName(): ?string

@@ -25,6 +25,7 @@ class GameList extends EntityBase
 
     #[Assert\NotBlank]
     #[ORM\Column(length: 128)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $name = null;
 
     #[Assert\Expression(
@@ -48,12 +49,15 @@ class GameList extends EntityBase
     private ?GameWatchdogServer $gameWatchdogServer = null;
 
     #[ORM\Column(type: Types::BIGINT)]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $gameCreationTime = null;
 
     #[ORM\Column]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $gameStartYear = null;
 
     #[ORM\Column]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $gameEndMonth = null;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true)]
@@ -63,11 +67,13 @@ class GameList extends EntityBase
     private int $gameCurrentMonth = -1;
 
     #[ORM\Column(type: Types::BIGINT)]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $gameRunningTilTime = null;
 
     #[Assert\NotBlank]
     #[AcmeAssert\ContainsValidExternalUsers]
     #[ORM\Column(type: Types::TEXT)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $passwordAdmin = null;
 
     #[AcmeAssert\ContainsValidExternalUsers]
@@ -75,6 +81,7 @@ class GameList extends EntityBase
     private ?string $passwordPlayer = null;
 
     #[ORM\Column(length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $sessionState = null;
 
     #[ORM\Column(nullable: true, enumType: GameTransitionStateValue::class)]
@@ -84,6 +91,7 @@ class GameList extends EntityBase
     private GameStateValue $gameState = GameStateValue::SETUP;
 
     #[ORM\Column(length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $gameVisibility = null;
 
     #[ORM\Column(nullable: true)]

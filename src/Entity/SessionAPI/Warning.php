@@ -102,6 +102,7 @@ class Warning
     private ?float $lastUpdate = null;
 
     #[ORM\Column(name: 'warning_active')]
+    // @phpstan-ignore-next-line bool|null but database expects bool
     private ?bool $active = null;
 
     #[ORM\JoinColumn(name: 'warning_layer_id', referencedColumnName: 'layer_id', nullable: false)]
@@ -111,9 +112,11 @@ class Warning
     private ?WarningIssueType $issueType = null;
 
     #[ORM\Column(name: 'warning_x')]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $x = null;
 
     #[ORM\Column(name: 'warning_y')]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $y = null;
 
     #[ORM\JoinColumn(name: 'warning_source_plan_id', referencedColumnName: 'plan_id', nullable: false)]

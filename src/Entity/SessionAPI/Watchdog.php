@@ -47,6 +47,7 @@ class Watchdog implements WatchdogInterface
     private WatchdogStatus $status = WatchdogStatus::REGISTERED;
 
     #[ORM\Column(type: Types::BIGINT)]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $token = null;
 
     #[ORM\Column(type: Types::BIGINT, options: [

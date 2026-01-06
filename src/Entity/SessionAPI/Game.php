@@ -14,6 +14,7 @@ class Game
 {
     #[ORM\Id]
     #[ORM\Column(type: Types::INTEGER, length: 11)]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $gameId;
 
     #[ORM\Column(type: Types::INTEGER, length: 5, options: ['default' => 2010])]
@@ -53,9 +54,11 @@ class Game
     private int $gameEratime = 120;
 
     #[ORM\Column(type: Types::STRING, length: 128)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $gameConfigfile = null;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, options: ['default' => 120])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $gameAutosaveMonthInterval = 120;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]

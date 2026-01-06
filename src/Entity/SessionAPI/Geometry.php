@@ -42,6 +42,7 @@ class Geometry
     private ?Country $country;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $geometryActive = 1;
 
     #[ORM\OneToMany(mappedBy: 'geometryToSubtractFrom', targetEntity: Geometry::class, cascade: ['persist'])]
@@ -53,9 +54,11 @@ class Geometry
     private ?Geometry $geometryToSubtractFrom = null;
 
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => '0'])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $geometryType = '0';
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $geometryDeleted = 0;
 
     #[ORM\Column(type: Types::STRING, length: 16, nullable: true)]

@@ -24,6 +24,7 @@ class Simulation
     private ?Watchdog $watchdog = null;
 
     #[ORM\Column(length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]

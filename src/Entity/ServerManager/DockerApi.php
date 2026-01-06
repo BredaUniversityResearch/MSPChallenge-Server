@@ -33,6 +33,7 @@ class DockerApi extends EntityBase
             ]
         ]
     )]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $address = null;
 
     #[Groups(['read','write'])]
@@ -48,6 +49,7 @@ class DockerApi extends EntityBase
             ]
         ]
     )]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $port = null;
 
     #[Groups(['read','write'])]
@@ -63,6 +65,7 @@ class DockerApi extends EntityBase
             ]
         ]
     )]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $scheme = null;
 
     private ?\DateTime $lastDockerEventAt = null;

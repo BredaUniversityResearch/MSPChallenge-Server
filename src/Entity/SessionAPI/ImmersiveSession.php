@@ -41,6 +41,7 @@ class ImmersiveSession
     #[Groups(['read', 'write'])]
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "The name field should not be blank.")]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $name = null;
 
     #[Groups(['read', 'write'])]
@@ -90,18 +91,22 @@ class ImmersiveSession
 
     #[Groups(['read', 'write'])]
     #[ORM\Column]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $bottomLeftX = null;
 
     #[Groups(['read', 'write'])]
     #[ORM\Column]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $bottomLeftY = null;
 
     #[Groups(['read', 'write'])]
     #[ORM\Column]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $topRightX = null;
 
     #[Groups(['read', 'write'])]
     #[ORM\Column]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $topRightY = null;
 
     #[Groups(['read', 'write'])]
