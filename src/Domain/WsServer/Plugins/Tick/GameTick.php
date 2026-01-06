@@ -359,7 +359,7 @@ class GameTick extends TickBase
             ) ||
             $monthsDone >= $tick['era_time']) {
             //simulation is done, reset everything to start a new play phase
-            $era = floor($currentMonth / $tick['era_time']);
+            $era = (int)floor($currentMonth / $tick['era_time']);
             $era_realtime = explode(',', $tick['planning_era_realtime']);
             return $this->getAsyncDatabase()->query(
                 $qb
