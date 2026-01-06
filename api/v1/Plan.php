@@ -533,9 +533,9 @@ class Plan extends Base
                 //  let db handle it and see
                 return parallel($toPromiseFunctions);
             })
-            ->done(
+            ->then(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // we do not care about the result
+                    $deferred->resolve(null); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -582,7 +582,7 @@ class Plan extends Base
                 "Plan had errors upon reaching the implementation date. Plan has been archived."
             );
         }
-        
+
         //plan is implemented, set plan to IMPLEMENTED and handle energy grid
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         return $this->getAsyncDatabase()->query(
@@ -969,10 +969,10 @@ class Plan extends Base
             });
         }
         parallel($toPromiseFunctions)
-            ->done(
+            ->then(
                 /** @var Result[] $results */
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // we do not care about the result
+                    $deferred->resolve(null); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -1008,9 +1008,9 @@ class Plan extends Base
                 array($plan)
             );
         })
-        ->done(
+        ->then(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -1542,9 +1542,9 @@ class Plan extends Base
                 ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                 ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($id)))
         )
-        ->done(
+        ->then(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -1649,9 +1649,9 @@ class Plan extends Base
             $qb->where($where);
             return $this->getAsyncDatabase()->query($qb);
         })
-        ->done(
+        ->then(
             function (/* ?Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -1852,10 +1852,10 @@ class Plan extends Base
                 return null;
             });
         })
-        ->done(
+        ->then(
             /** @var null $dummy */
             function (/* $dummy */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);

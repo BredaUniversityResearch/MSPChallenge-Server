@@ -208,7 +208,7 @@ abstract class MSPMigration extends AbstractMigration
         }
     }
 
-    abstract protected function getDatabaseType(): ?MSPDatabaseType;
+    abstract protected function getDatabaseType(): MSPDatabaseType;
     abstract protected function onUp(Schema $schema): void;
     abstract protected function onDown(Schema $schema): void;
 }

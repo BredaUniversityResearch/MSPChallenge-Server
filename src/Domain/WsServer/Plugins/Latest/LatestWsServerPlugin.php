@@ -54,7 +54,7 @@ class LatestWsServerPlugin extends Plugin
                     }
                     $this->addOutput(json_encode($payloadContainer));
                 })
-                ->otherwise(function ($reason) {
+                ->catch(function ($reason) {
                     $context = [];
                     if ($reason instanceof \Throwable) {
                         $context['exception'] = $reason;

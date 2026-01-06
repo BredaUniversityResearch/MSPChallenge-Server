@@ -11,7 +11,6 @@ parameters:
     - '#^Access to an undefined property Ratchet\\ConnectionInterface\:\:\$resourceId\.$#'
   stubFiles:
     - stubs/Doctrine-Common-DataFixtures-FixtureInterface.stub
-    - stubs/Doctrine-DBAL-Exception.stub
     - stubs/Doctrine-DBAL-Exception-InvalidArgumentException.stub
     - stubs/Doctrine-DBAL-Query-QueryBuilder.stub
     - stubs/Drift-DBAL-Connection.stub

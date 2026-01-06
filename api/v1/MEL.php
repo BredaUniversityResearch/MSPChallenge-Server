@@ -486,7 +486,7 @@ class MEL extends Base
             WHERE
                 rn = 1
             AND
-                enabled = 'true';            
+                enabled = 'true';
             SQL,
             ['currentMonth' => (new Game())->GetCurrentMonthAsId()]
         );
@@ -550,7 +550,7 @@ class MEL extends Base
                         geometry_with_months AS (
                             SELECT g.geometry_layer_id, jt.months
                             FROM
-                                geometry g 
+                                geometry g
                                 JOIN JSON_TABLE(JSON_UNQUOTE(JSON_EXTRACT(g.geometry_data, '$.%s')), '$.items[*]'
                                     COLUMNS (
                                         months JSON PATH '$.months'
@@ -630,7 +630,7 @@ SUBQUERY,
     public function GetFishing(int $game_month): array
     {
         $data = $this->getDatabase()->query(
-            "SELECT SUM(fishing_amount) as scalar, fishing_type as name FROM fishing 
+            "SELECT SUM(fishing_amount) as scalar, fishing_type as name FROM fishing
 									LEFT JOIN plan ON plan.plan_id=fishing.fishing_plan_id
 									WHERE fishing_active = 1 AND plan_gametime <= ?
 									GROUP BY fishing_type",

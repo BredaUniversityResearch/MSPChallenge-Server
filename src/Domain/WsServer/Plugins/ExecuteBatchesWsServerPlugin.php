@@ -215,7 +215,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
         // set batch as "communicated"
         $deferred = new Deferred();
         $this->getBatch($connResourceId)->setCommunicated($batchGuid)
-            ->done(
+            ->then(
                 function (/* Result $result */) use ($deferred, $value) {
                     $deferred->resolve($value);
                 },

@@ -180,7 +180,7 @@ class Warning extends Base
             });
         }
         parallel($toPromiseFunctions)
-            ->done(
+            ->then(
                 function (/* array $results */) use ($deferred, $planlayer_id) {
                     $qb = $this->getAsyncDatabase()->createQueryBuilder();
                     $this->getAsyncDatabase()->query(
@@ -200,7 +200,7 @@ class Warning extends Base
                                 $qb->expr()->eq('warning_layer_id', $qb->createPositionalParameter($planlayer_id))
                             )
                     )
-                    ->done(function (Result $result) use ($deferred) {
+                    ->then(function (Result $result) use ($deferred) {
                         $deferred->resolve(
                             collect(($result->fetchAllRows() ?? []) ?: [])
                                 ->map(function ($issue) {

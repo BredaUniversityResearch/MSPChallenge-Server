@@ -227,6 +227,11 @@ services:
         arguments:
           $vault: '@secrets.vault'
 
+    DoctrineMigrations\Version20241128170458:
+        tags: [ 'doctrine_migrations.migration' ]
+        arguments:
+            $container: '@service_container'
+
 when@dev:
     parameters:
         app.guraas_game_id: '3318cf30-f78d-4284-b530-a329005c248a'

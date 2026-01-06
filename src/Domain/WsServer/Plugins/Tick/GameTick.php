@@ -149,7 +149,7 @@ class GameTick extends TickBase
                 $this->getStopwatch()?->stop($context?->getPath());
                 if ($result->fetchCount() == 0) { // all simulations are up-to-date
                     return $this->serverTickInternal($showDebug, $context)
-                        ->otherwise(function (SilentFailException $e) {
+                        ->catch(function (SilentFailException $e) {
                             // Handle the rejection, and don't propagate. This is like catch without a rethrow
                             return null;
                         });
@@ -197,7 +197,7 @@ class GameTick extends TickBase
         $connection->query(
             $qb->select('demo_session')->from('game_list')
                 ->where($qb->expr()->eq('id', $this->getGameSessionId()))
-        )->done(function (Result $result) {
+        )->then(function (Result $result) {
             $row = $result->fetchFirstRow() ?? [];
             if (!isset($row['demo_session']) || $row['demo_session'] == 0) {
                 return;

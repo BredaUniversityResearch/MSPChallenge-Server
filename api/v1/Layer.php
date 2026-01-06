@@ -46,8 +46,8 @@ class Layer extends Base
             "
             SELECT geometry_id, geometry_FID, geometry_geometry, geometry_layer_id, geometry_type, geometry_data,
                 geometry_mspid
-            FROM layer 
-            LEFT JOIN geometry ON geometry_layer_id=layer.layer_id 
+            FROM layer
+            LEFT JOIN geometry ON geometry_layer_id=layer.layer_id
             LEFT JOIN plan_layer ON plan_layer_layer_id=layer.layer_id
             LEFT JOIN plan ON plan_layer_plan_id=plan.plan_id
             WHERE geometry.geometry_active=? AND (
@@ -63,8 +63,8 @@ class Layer extends Base
         $subtractiveArr = $this->getDatabase()->query(
             "
             SELECT geometry_id, geometry_FID, geometry_geometry, geometry_layer_id, geometry_type, geometry_data,
-                geometry_subtractive 
-            FROM geometry 
+                geometry_subtractive
+            FROM geometry
             WHERE geometry_layer_id=? AND geometry_subtractive<>? AND geometry_active=?
             ",
             array($layer_id, 0, 1)
@@ -167,9 +167,9 @@ class Layer extends Base
             throw new Exception("Not a vector layer.");
         }
 
-        $data = $this->getDatabase()->query("SELECT 
-					geometry_id as id, 
-					geometry_geometry as geometry, 
+        $data = $this->getDatabase()->query("SELECT
+					geometry_id as id,
+					geometry_geometry as geometry,
 					geometry_country_id as country,
 					geometry_FID as FID,
 					geometry_data as data,
@@ -179,7 +179,7 @@ class Layer extends Base
 					geometry_persistent as persistent,
 					geometry_mspid as mspid,
 					geometry_active as active
-				FROM layer 
+				FROM layer
 				LEFT JOIN geometry ON layer.layer_id=geometry.geometry_layer_id
 				WHERE layer.layer_id = ? ORDER BY geometry_FID, geometry_subtractive", array($layer_id));
 

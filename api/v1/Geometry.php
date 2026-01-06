@@ -23,6 +23,7 @@ class Geometry extends Base
      * @param int $plan
      * @return int|PromiseInterface
      * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
      * @api {post} /geometry/post Post
      * @apiDescription Create a new geometry entry in a plan
      * @apiParam {int} layer id of layer to post in
@@ -62,10 +63,10 @@ class Geometry extends Base
                     'geometry_country_id' => $qb->createPositionalParameter($country)
                 ])
         )
-        ->done(
+        ->then(
             function (Result $result) use ($deferred, $plan, $persistent) {
                 if (null === $newId = $result->getLastInsertedId()) {
-                    $deferred->reject();
+                    $deferred->reject(new \RuntimeException('Could not retrieve last inserted id'));
                     return null;
                 }
 
@@ -99,7 +100,7 @@ class Geometry extends Base
                 }
 
                 parallel($toPromiseFunctions)
-                    ->done(
+                    ->then(
                         function () use ($deferred, $newId) {
                             $deferred->resolve($newId);
                         },
@@ -168,9 +169,9 @@ class Geometry extends Base
             }
             return null; // nothing to do.
         })
-        ->done(
+        ->then(
             function (/* ?Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -202,7 +203,7 @@ class Geometry extends Base
                 ->set('geometry_country_id', $qb->createPositionalParameter($country))
                 ->where($qb->expr()->eq('geometry_id', $qb->createPositionalParameter($id)))
         )
-        ->done(
+        ->then(
             function (Result $result) use ($deferred, $id) {
                 $deferred->resolve($id);
             },
@@ -235,9 +236,9 @@ class Geometry extends Base
                 ->set('geometry_type', $qb->createPositionalParameter($type))
                 ->where($qb->expr()->eq('geometry_id', $qb->createPositionalParameter($id)))
         )
-        ->done(
+        ->then(
             function (Result $result) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -272,9 +273,9 @@ class Geometry extends Base
                     ->with($qb->expr()->eq('geometry_subtractive', $qb->createPositionalParameter($id)))
                 )
         )
-        ->done(
+        ->then(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -303,9 +304,9 @@ class Geometry extends Base
             'plan_delete_geometry_persistent' => $id,
             'plan_delete_layer_id' => $layer
         ])
-        ->done(
+        ->then(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -339,9 +340,9 @@ class Geometry extends Base
                     ->with($qb->expr()->eq('plan_delete_geometry_persistent', $qb->createPositionalParameter($id)))
                 )
         )
-        ->done(
+        ->then(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);

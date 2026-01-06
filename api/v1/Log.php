@@ -46,7 +46,7 @@ class Log extends Base
     public function postEvent(EventLog $eventLog): ?PromiseInterface
     {
         if (null === $eventLog->getMessage()) {
-            resolve(); // do not do anything.
+            return resolve(null); // do not do anything.
         }
         $eventLog->setTime(new DateTime());
         $data = [
@@ -66,9 +66,9 @@ class Log extends Base
         }
         $deferred = new Deferred();
         $this->getAsyncDatabase()->insert('event_log', $data)
-            ->done(
+            ->then(
                 function () use ($deferred) {
-                    $deferred->resolve(); // we do not care about the result
+                    $deferred->resolve(null); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
