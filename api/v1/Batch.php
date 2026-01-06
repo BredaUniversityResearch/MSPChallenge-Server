@@ -213,7 +213,7 @@ class Batch extends Base
     /**
      * @throws Exception
      */
-    public function setCommunicated(string $batchGuid): Promise
+    public function setCommunicated(string $batchGuid): PromiseInterface
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         /** @noinspection PhpIncompatibleReturnTypeInspection */
@@ -229,7 +229,7 @@ class Batch extends Base
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
-    public function executeQueuedBatch(string $batchGuid, string $serverId): Promise
+    public function executeQueuedBatch(string $batchGuid, string $serverId): PromiseInterface
     {
         // get batch tasks to execute
         $this->cachedBatchResults[$batchGuid] = [];

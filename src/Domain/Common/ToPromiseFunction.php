@@ -3,8 +3,7 @@
 namespace App\Domain\Common;
 
 use Closure;
-use React\Promise\CancellablePromiseInterface;
-use React\Promise\ExtendedPromiseInterface;
+use React\Promise\PromiseInterface;
 
 class ToPromiseFunction
 {
@@ -16,7 +15,7 @@ class ToPromiseFunction
         $this->function = $function;
     }
 
-    public function __invoke(): ExtendedPromiseInterface&CancellablePromiseInterface
+    public function __invoke(): PromiseInterface
     {
         return ($this->function)($this->getContext());
     }

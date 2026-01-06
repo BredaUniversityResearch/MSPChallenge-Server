@@ -268,23 +268,15 @@ abstract class Plugin extends EventDispatcher implements PluginInterface
                         static::EVENT_PLUGIN_EXECUTION_FINISHED
                     );
                 })
-                ->otherwise(function ($error) {
+                ->catch(function (\Throwable $error) {
                     if ($error instanceof ClientDisconnectedException) {
                         return null;
                     }
-                    if ($error instanceof \Throwable) {
-                        $this->getLogger()?->error(
-                            $error->getMessage(),
-                            ['exception' => $error]
-                        );
-                        $this->addOutput('Plugin '.$this->getName().' failed: '.$error->getMessage());
-                    } elseif (is_string($error)) {
-                        $this->getLogger()?->error($error);
-                        $this->addOutput('Plugin '.$this->getName().' failed: '.$error);
-                    } else {
-                        $this->getLogger()?->error('Encountered error', ['reason' => $error]);
-                        $this->addOutput('Plugin '.$this->getName().' failed: '.json_encode($error));
-                    }
+                    $this->getLogger()?->error(
+                        $error->getMessage(),
+                        ['exception' => $error]
+                    );
+                    $this->addOutput('Plugin '.$this->getName().' failed: '.$error->getMessage());
                     return reject($error);
                 });
         });

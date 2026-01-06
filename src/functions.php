@@ -20,7 +20,7 @@ use Symfony\Component\Yaml\Yaml;
 use Throwable;
 use function React\Promise\all;
 
-function query(Connection $connection, QueryBuilder $qb): Promise
+function query(Connection $connection, QueryBuilder $qb): PromiseInterface
 {
     return $connection->query($qb);
 }
@@ -37,24 +37,16 @@ function resolveOnFutureTick(Deferred $deferred, $resolveValue = null, ?LoopInte
     return $deferred;
 }
 
-function assertFulfilled(ExtendedPromiseInterface $promise, ?Closure $onFullfulled = null): void
+function assertFulfilled(PromiseInterface $promise, ?Closure $onFullfilled = null): void
 {
-    $promise->done(
-        $onFullfulled,
-        function ($reason) {
-            if (is_string($reason)) {
-                echo $reason;
-                exit(1);
-            }
-            if ($reason instanceof Throwable) {
-                echo(
-                    $reason->getMessage() . PHP_EOL . 'in ' .
-                    $reason->getFile() . '@' . $reason->getLine() . PHP_EOL .
-                    $reason->getTraceAsString()
-                );
-                exit(1);
-            }
-            echo 'error, reason: ' . print_r($reason, true);
+    $promise->then(
+        $onFullfilled,
+        function (Throwable $reason) {
+            echo(
+                $reason->getMessage() . PHP_EOL . 'in ' .
+                $reason->getFile() . '@' . $reason->getLine() . PHP_EOL .
+                $reason->getTraceAsString()
+            );
             exit(1);
         }
     );
@@ -68,7 +60,7 @@ function tpf(Closure $function): ToPromiseFunction
 /**
  * @param ToPromiseFunction[] $toPromiseFunctions
  */
-function chain(array $toPromiseFunctions): Promise
+function chain(array $toPromiseFunctions): PromiseInterface
 {
     $deferred = new Deferred();
     if (false === $toPromiseFunction = reset($toPromiseFunctions)) {
@@ -115,7 +107,7 @@ function chain(array $toPromiseFunctions): Promise
 /**
  * @param ToPromiseFunction[] $toPromiseFunctions
  */
-function parallel(array $toPromiseFunctions, ?int $numThreads = null): Promise
+function parallel(array $toPromiseFunctions, ?int $numThreads = null): PromiseInterface
 {
     // default is a thread per task
     if (null === $numThreads) {
@@ -188,17 +180,18 @@ function parallel(array $toPromiseFunctions, ?int $numThreads = null): Promise
  *
  * If the deprecated `$timeout` argument is given and the promise is still pending once the
  * timeout triggers, this will `cancel()` the promise and throw a `TimeoutException`.
- * This implies that if you pass a really small (or negative) value, it will still
+ * This implies that if you pass a tiny (or negative) value, it will still
  * start a timer and will thus trigger at the earliest possible time in the future.
  *
  * @param PromiseInterface $promise
- * @param ?LoopInterface   $loop
- * @param ?float           $timeout [deprecated] (optional) maximum timeout in seconds or null=wait forever
+ * @param ?LoopInterface $loop
+ * @param ?float $timeout [deprecated] (optional) maximum timeout in seconds or null=wait forever
  * @return mixed returns whatever the promise resolves to
  * @throws Exception when the promise is rejected
  * @throws TimeoutException if the $timeout is given and triggers
+ * @throws Throwable
  */
-function await(PromiseInterface $promise, ?LoopInterface $loop = null, $timeout = null)
+function await(PromiseInterface $promise, ?LoopInterface $loop = null, ?float $timeout = null): mixed
 {
     $wait = true;
     $resolved = null;
@@ -247,22 +240,23 @@ function await(PromiseInterface $promise, ?LoopInterface $loop = null, $timeout 
         if (!$exception instanceof Throwable) {
             $exception = new \UnexpectedValueException(
                 'Promise rejected with unexpected value of type ' .
+                    // @phpstan-ignore-next-line function.impossibleType: Call to function is_object() with null will always evaluate to false
                     (is_object($exception) ? get_class($exception) : gettype($exception))
             );
         } elseif (!$exception instanceof \Exception) { // so it is a Throwable but not an Exception
             $exception = new \UnexpectedValueException(
-                'Promise rejected with unexpected ' . get_class($exception) . ': ' . $exception->getMessage(),
+                'Promise rejected with unexpected '.get_class($exception).': '.$exception->getMessage(),
                 $exception->getCode(),
                 $exception
             );
         }
-
         throw $exception;
     }
 
     return $resolved;
 }
 
+// try-catch with logging
 function tc(\Closure $fn, \Psr\Log\LoggerInterface $logger, $context = [])
 {
     try {

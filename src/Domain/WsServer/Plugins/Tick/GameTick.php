@@ -211,7 +211,7 @@ class GameTick extends TickBase
     /**
      * @throws Exception
      */
-    private function serverTickInternal(bool $showDebug, ?Context $context): Promise
+    private function serverTickInternal(bool $showDebug, ?Context $context): PromiseInterface
     {
         $context = $context?->enter('serverTickInternal');
         $this->getStopwatch()?->start($context?->getPath());

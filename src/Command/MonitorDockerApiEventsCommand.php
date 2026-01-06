@@ -112,13 +112,14 @@ class MonitorDockerApiEventsCommand extends Command
                         );
                     });
                 },
-                function (Exception $e) use ($dockerApi) {
+                function (\Throwable $e) use ($dockerApi) {
                     $this->outputDockerApiMessage(
                         $dockerApi->getId(),
                         'error',
                         'Failed to connect to Docker events endpoint: '.$e->getMessage()
                     );
                     $this->loop->addTimer(10, fn() => $this->createConnectionFunction($dockerApi)());
+                    return null;
                 }
             );
         };
