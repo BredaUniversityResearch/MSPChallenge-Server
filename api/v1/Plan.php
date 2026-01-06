@@ -1900,12 +1900,6 @@ class Plan extends Base
         $game = new Game();
         $fullConfig = $game->GetGameConfigValues();
         $config = $fullConfig['restrictions'];
-
-        if (!is_array($config)) {
-            self::Warning("No restrictions found in the current config file.");
-            return;
-        }
-
         foreach ($config as $restrictionObj) {
             foreach ($restrictionObj as $restriction) {
                 $layerStart = $this->getDatabase()->query(
