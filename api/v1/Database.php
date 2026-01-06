@@ -253,17 +253,7 @@ class Database
      */
     public function executePreparedQuery(PDOStatement $query, ?array $vars):  bool
     {
-        if ($vars != null) {
-            if (!is_array($vars)) {
-                throw new Exception(
-                    "Failed to execute prepared statement. Vars is not an array. Value: ".
-                    var_export($vars, true)." Query: ".$query->queryString
-                );
-            }
-            return $query->execute($vars);
-        } else {
-            return $query->execute();
-        }
+        return $query->execute($vars);
     }
 
     /**
