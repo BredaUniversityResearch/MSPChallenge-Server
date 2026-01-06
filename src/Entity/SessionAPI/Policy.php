@@ -27,9 +27,12 @@ class Policy
     #[ORM\Column(type: 'json_document', nullable: true, options: ['default' => 'NULL'])]
     private mixed $data = null;
 
+    /**
+     * @var Collection<int, PlanPolicy>
+     */
     #[ORM\OneToMany(
-        mappedBy: 'policy',
         targetEntity: PlanPolicy::class,
+        mappedBy: 'policy',
         cascade: ['persist','remove'],
         orphanRemoval: true
     )]

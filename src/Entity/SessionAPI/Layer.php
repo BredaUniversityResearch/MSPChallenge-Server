@@ -39,7 +39,10 @@ class Layer extends EntityBase
     #[ORM\Column(type: Types::INTEGER, length: 11)]
     private ?int $layerId = null;
 
-    #[ORM\OneToMany(mappedBy: 'originalLayer', targetEntity: Layer::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, Layer>
+     */
+    #[ORM\OneToMany(targetEntity: Layer::class, mappedBy: 'originalLayer', cascade: ['persist'])]
     private Collection $derivedLayer;
 
     #[ORM\ManyToOne(targetEntity: Layer::class, cascade: ['persist'], inversedBy: 'derivedLayer')]
@@ -199,31 +202,55 @@ class Layer extends EntityBase
     #[ORM\Column(type: 'json_document', nullable: true)]
     private mixed $layerTags = null;
 
-    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: Geometry::class, cascade: ['persist'], orphanRemoval: true)]
+    /**
+     * @var Collection<int, Geometry>
+     */
+    #[ORM\OneToMany(targetEntity: Geometry::class, mappedBy: 'layer', cascade: ['persist'], orphanRemoval: true)]
     private Collection $geometry;
 
-    #[ORM\OneToMany(mappedBy: 'restrictionStartLayer', targetEntity: Restriction::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, Restriction>
+     */
+    #[ORM\OneToMany(targetEntity: Restriction::class, mappedBy: 'restrictionStartLayer', cascade: ['persist'])]
     private Collection $restrictionStart;
 
-    #[ORM\OneToMany(mappedBy: 'restrictionEndLayer', targetEntity: Restriction::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, Restriction>
+     */
+    #[ORM\OneToMany(targetEntity: Restriction::class, mappedBy: 'restrictionEndLayer', cascade: ['persist'])]
     private Collection $restrictionEnd;
 
+    /**
+     * @var Collection<int, Layer>
+     */
     #[ORM\ManyToMany(targetEntity: Layer::class, mappedBy: 'pressureGeneratingLayer', cascade: ['persist'])]
     private Collection $pressure;
 
+    /**
+     * @var Collection<int, Layer>
+     */
     #[ORM\JoinTable(name: 'mel_layer')]
     #[ORM\JoinColumn(name: 'mel_layer_pressurelayer', referencedColumnName: 'layer_id')]
     #[ORM\InverseJoinColumn(name: 'mel_layer_layer_id', referencedColumnName: 'layer_id')]
     #[ORM\ManyToMany(targetEntity: Layer::class, inversedBy: 'pressure', cascade: ['persist'])]
     private Collection $pressureGeneratingLayer;
 
-    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PlanLayer::class, cascade: ['persist'], orphanRemoval: true)]
+    /**
+     * @var Collection<int, PlanLayer>
+     */
+    #[ORM\OneToMany(targetEntity: PlanLayer::class, mappedBy: 'layer', cascade: ['persist'], orphanRemoval: true)]
     private Collection $planLayer;
 
-    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PlanDelete::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, PlanDelete>
+     */
+    #[ORM\OneToMany(targetEntity: PlanDelete::class, mappedBy: 'layer', cascade: ['persist'])]
     private Collection $planDelete;
 
-    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PlanRestrictionArea::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, PlanRestrictionArea>
+     */
+    #[ORM\OneToMany(targetEntity: PlanRestrictionArea::class, mappedBy: 'layer', cascade: ['persist'])]
     private Collection $planRestrictionArea;
 
     private bool $layerGeometryWithGeneratedMspids = false;

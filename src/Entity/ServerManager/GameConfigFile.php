@@ -29,7 +29,10 @@ class GameConfigFile extends EntityBase
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
 
-    #[OneToMany(mappedBy: 'gameConfigFile', targetEntity: GameConfigVersion::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, GameConfigVersion>
+     */
+    #[OneToMany(targetEntity: GameConfigVersion::class, mappedBy: 'gameConfigFile', cascade: ['persist'])]
     private Collection $gameConfigVersion;
 
     public function __construct()

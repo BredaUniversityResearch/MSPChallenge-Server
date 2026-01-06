@@ -32,25 +32,40 @@ class Grid
     #[ORM\JoinColumn(name: 'grid_persistent', referencedColumnName: 'grid_id')]
     private ?Grid $originalGrid;
 
-    #[ORM\OneToMany(mappedBy: 'originalGrid', targetEntity: Grid::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, Grid>
+     */
+    #[ORM\OneToMany(targetEntity: Grid::class, mappedBy: 'originalGrid', cascade: ['persist'])]
     private Collection $derivedGrid;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
     // @phpstan-ignore-next-line int|null but database expects int
     private ?int $gridDistributionOnly = 0;
 
-    #[ORM\OneToMany(mappedBy: 'grid', targetEntity: GridEnergy::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, GridEnergy>
+     */
+    #[ORM\OneToMany(targetEntity: GridEnergy::class, mappedBy: 'grid', cascade: ['persist'])]
     private Collection $gridEnergy;
 
+    /**
+     * @var Collection<int, Plan>
+     */
     #[ORM\ManyToMany(targetEntity: Plan::class, mappedBy: 'gridToRemove', cascade: ['persist'])]
     private Collection $planToRemove;
 
+    /**
+     * @var Collection<int, Geometry>
+     */
     #[ORM\JoinTable(name: 'grid_source')]
     #[ORM\JoinColumn(name: 'grid_source_grid_id', referencedColumnName: 'grid_id')]
     #[ORM\InverseJoinColumn(name: 'grid_source_geometry_id', referencedColumnName: 'geometry_id')]
     #[ORM\ManyToMany(targetEntity: Geometry::class, inversedBy: 'sourceForGrid', cascade: ['persist'])]
     private Collection $sourceGeometry;
 
+    /**
+     * @var Collection<int, Geometry>
+     */
     #[ORM\JoinTable(name: 'grid_socket')]
     #[ORM\JoinColumn(name: 'grid_socket_grid_id', referencedColumnName: 'grid_id')]
     #[ORM\InverseJoinColumn(name: 'grid_socket_geometry_id', referencedColumnName: 'geometry_id')]

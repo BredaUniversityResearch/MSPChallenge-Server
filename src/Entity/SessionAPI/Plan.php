@@ -69,6 +69,9 @@ class Plan
     // @phpstan-ignore-next-line int|null but database expects int
     private ?int $planAltersEnergyDistribution = 0;
 
+    /**
+     * @var Collection<int, PlanLayer>
+     */
     #[ORM\OneToMany(
         targetEntity: PlanLayer::class,
         mappedBy: 'plan',
@@ -77,32 +80,50 @@ class Plan
     )]
     private Collection $planLayer;
 
-    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanDelete::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, PlanDelete>
+     */
+    #[ORM\OneToMany(targetEntity: PlanDelete::class, mappedBy: 'plan', cascade: ['persist'])]
     private Collection $planDelete;
 
-    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: Fishing::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, Fishing>
+     */
+    #[ORM\OneToMany(targetEntity: Fishing::class, mappedBy: 'plan', cascade: ['persist'])]
     private Collection $fishing;
 
+    /**
+     * @var Collection<int, PlanMessage>
+     */
     #[ORM\OneToMany(
-        mappedBy: 'plan',
         targetEntity: PlanMessage::class,
+        mappedBy: 'plan',
         cascade: ['persist', 'remove'],
         orphanRemoval: true
     )]
     private Collection $planMessage;
 
-    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanRestrictionArea::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, PlanRestrictionArea>
+     */
+    #[ORM\OneToMany(targetEntity: PlanRestrictionArea::class, mappedBy: 'plan', cascade: ['persist'])]
     private Collection $planRestrictionArea;
 
+    /**
+     * @var Collection<int, Grid>
+     */
     #[ORM\JoinTable(name: 'grid_removed')]
     #[ORM\JoinColumn(name: 'grid_removed_plan_id', referencedColumnName: 'plan_id')]
     #[ORM\InverseJoinColumn(name: 'grid_removed_grid_persistent', referencedColumnName: 'grid_id')]
     #[ORM\ManyToMany(targetEntity: Grid::class, inversedBy: 'planToRemove', cascade: ['persist'])]
     private Collection $gridToRemove;
 
+    /**
+     * @var Collection<int, PlanPolicy>
+     */
     #[ORM\OneToMany(
-        mappedBy: 'plan',
         targetEntity: PlanPolicy::class,
+        mappedBy: 'plan',
         cascade: ['persist', 'remove'],
         orphanRemoval: true
     )]

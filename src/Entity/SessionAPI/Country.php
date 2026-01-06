@@ -25,24 +25,45 @@ class Country
     #[ORM\Column(type: Types::INTEGER, length: 1, nullable: true, options: ['default' => 0])]
     private ?int $countryIsManager;
 
+    /**
+     * @var Collection<int, Objective>
+     */
     #[ORM\OneToMany(targetEntity: Objective::class, mappedBy: 'country', cascade: ['persist'])]
     private Collection $objective;
 
+    /**
+     * @var Collection<int, Plan>
+     */
     #[ORM\OneToMany(targetEntity: Plan::class, mappedBy: 'country', cascade: ['persist'])]
     private Collection $plan;
 
+    /**
+     * @var Collection<int, Fishing>
+     */
     #[ORM\OneToMany(targetEntity: Fishing::class, mappedBy: 'country', cascade: ['persist'])]
     private Collection $fishing;
 
+    /**
+     * @var Collection<int, PlanMessage>
+     */
     #[ORM\OneToMany(targetEntity: PlanMessage::class, mappedBy: 'country', cascade: ['persist'])]
     private Collection $planMessage;
 
+    /**
+     * @var Collection<int, PlanRestrictionArea>
+     */
     #[ORM\OneToMany(targetEntity: PlanRestrictionArea::class, mappedBy: 'country', cascade: ['persist'])]
     private Collection $planRestrictionArea;
 
+    /**
+     * @var Collection<int, Geometry>
+     */
     #[ORM\OneToMany(targetEntity: Geometry::class, mappedBy: 'country', cascade: ['persist'])]
     private Collection $geometry;
 
+    /**
+     * @var Collection<int, GridEnergy>
+     */
     #[ORM\OneToMany(targetEntity: GridEnergy::class, mappedBy: 'country', cascade: ['persist'])]
     private Collection $gridEnergy;
 
