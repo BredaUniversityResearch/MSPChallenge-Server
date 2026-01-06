@@ -109,7 +109,7 @@ class LayerLatest extends CommonBase
                 foreach ($layers as $key => $layer) {
                     /** @var Result[] $results */
                     $layers[$key]['geometry'] = $results['geometry-'.$key]->fetchAllRows();
-                    $layers[$key]['geometry'] = Base::MergeGeometry($layers[$key]['geometry']);
+                    $layers[$key]['geometry'] = Base::mergeGeometry($layers[$key]['geometry']);
                     $layers[$key]['issues'] = ($results['issues-'.$key]->fetchAllRows() ?? []) ?: [];
                 }
                 $deleted = ($results['deleted']->fetchAllRows() ?? []) ?: [];

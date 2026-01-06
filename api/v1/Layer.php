@@ -187,7 +187,7 @@ class Layer extends Base
             return [];
         }
 
-        return self::MergeGeometry($data);
+        return self::mergeGeometry($data);
     }
 
     /**

@@ -55,8 +55,7 @@ abstract class Base extends CommonBase
      * @param bool $encode
      * @return array
      */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public static function MergeGeometry(array $data, bool $encode = false): array
+    public static function mergeGeometry(array $data, bool $encode = false): array
     {
         if (self::$more) {
             self::Debug($data);
@@ -69,7 +68,7 @@ abstract class Base extends CommonBase
             $geom = array(
                 "id" => $d['id'],
                 "geometry" => json_decode($d['geometry'], true),
-                "subtractive" => array(),
+                "subtractive" => [],
                 "persistent" => $d['persistent'],
                 "mspid" => ($d['mspid'] == null) ? 0 : $d['mspid'],
                 "type" => $d['type'],
@@ -87,13 +86,10 @@ abstract class Base extends CommonBase
             if (isset($d['subtractive']) && $d['subtractive'] != 0) {
                 foreach ($arr as &$g) {
                     if ($g['id'] == $d['subtractive']) {
-                        if (!is_array($g['subtractive'])) {
-                            $g['subtractive'] = array();
-                        }
-
                         array_push($g['subtractive'], $geom);
                     }
                 }
+                unset($g);
             } else {
                 array_push($arr, $geom);
             }
@@ -104,6 +100,7 @@ abstract class Base extends CommonBase
                 $arr[sizeof($arr) - 1]['data'] = json_decode($d['data'] ?? '');
             }
         }
+        unset($d);
 
         if ($encode) {
             $arr = json_encode($arr) ?: [];
