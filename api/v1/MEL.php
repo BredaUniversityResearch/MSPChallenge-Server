@@ -722,7 +722,7 @@ SUBQUERY,
         $result = [];
         $layerGeoType = $layer->getLayerGeoType();
         if ($layerGeoType == LayerGeoType::RASTER) {
-            $result["geotype"] = $layerGeoType?->value ?? ''; // enum to string
+            $result["geotype"] = $layerGeoType->value ?? ''; // enum to string
             $result["raster"] = $layer->getLayerRaster()?->getUrl() ?? '';
             return $result;
         }
@@ -763,7 +763,7 @@ SUBQUERY,
         $q = $qb->getQuery();
         /** @var \App\Entity\SessionAPI\Layer[] $layers */
         $layers = $q->getResult();
-        $result["geotype"] = $layerGeoType ?->value ?? ''; // enum to string;
+        $result["geotype"] = $layerGeoType->value ?? ''; // enum to string;
         $result["geometry"] = [];
         foreach ($layers as $l) {
             // export each geometry linked to the layer

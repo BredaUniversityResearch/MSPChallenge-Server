@@ -675,7 +675,7 @@ class Geometry
                 break;
             default:
                 throw new \RuntimeException(
-                    'Encountered unexpected layer geo type: '.($layer->getLayerGeoType()?->value ?? 'empty')
+                    'Encountered unexpected layer geo type: '.($layer->getLayerGeoType()->value ?? 'empty')
                 );
         }
         return $jsonArray;
