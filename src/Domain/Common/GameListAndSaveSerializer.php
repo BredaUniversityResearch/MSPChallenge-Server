@@ -158,9 +158,6 @@ class GameListAndSaveSerializer
         ];
     }
 
-    /**
-     * @throws Exception
-     */
     private function getGenericDenormalizeCallbacks(): array
     {
         return [
