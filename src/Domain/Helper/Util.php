@@ -15,8 +15,9 @@ class Util
         if ($bytes === 0) {
             return '0 b';
         }
-        $unit=array('b','kb','mb','gb','tb','pb');
-        return @round($bytes/pow(1024, ($i=floor(log($bytes, 1024)))), 2).' '.$unit[$i];
+        $unit = array('b','kb','mb','gb','tb','pb');
+        $i = (int)floor(log($bytes, 1024));
+        return @round($bytes/pow(1024, $i), 2).' '.$unit[$i];
     }
 
     public static function getHumanReadableDuration(float $milliseconds): string
