@@ -715,7 +715,9 @@ class SEL extends Base
                     );
                 } else {
                     $melConfig = &$globalConfig["MEL"];
-                    if (!is_array($melConfig) ||
+                    if (
+                        // @phpstan-ignore-next-line function.alreadyNarrowedType
+                        !is_array($melConfig) ||
                         !array_key_exists("x_min", $melConfig) ||
                         !array_key_exists("y_min", $melConfig) ||
                         !array_key_exists("x_max", $melConfig) ||
