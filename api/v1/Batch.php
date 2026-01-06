@@ -62,7 +62,7 @@ class Batch extends Base
 
     /**
      * @param int $batchId
-     * @param array{int: array{call_id: int, group: string, end_point: string, endpoint_data: string}} $requests
+     * @param array{int: array{call_id: int, group: string, end_point: string, endpoint_data: string, endpoint: string}} $requests
      * @throws Exception
      */
     private function addToBatch(
