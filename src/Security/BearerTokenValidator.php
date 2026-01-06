@@ -1,7 +1,6 @@
 <?php
 namespace App\Security;
 
-use Lcobucci\Clock\FrozenClock;
 use Lcobucci\JWT\Encoding\JoseEncoder;
 use Lcobucci\JWT\Token;
 use Lcobucci\JWT\Token\DataSet;

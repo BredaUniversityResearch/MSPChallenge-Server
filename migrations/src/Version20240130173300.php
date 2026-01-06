@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use App\Migration\MSPDatabaseType;
+use App\Migration\MSPMigration;
 use Doctrine\DBAL\Schema\Schema;
 
 final class Version20240130173300 extends MSPMigration

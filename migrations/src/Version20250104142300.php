@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use App\Migration\MSPDatabaseType;
+use App\Migration\MSPMigration;
 use Doctrine\DBAL\Schema\Schema;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 final class Version20250104142300 extends MSPMigration
 {
     public function getDescription(): string

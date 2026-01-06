@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use App\Migration\MSPDatabaseType;
+use App\Migration\MSPMigration;
 use App\Entity\Interface\WatchdogInterface;
 use App\Entity\SessionAPI\Watchdog;
 use Doctrine\DBAL\Schema\Schema;

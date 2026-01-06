@@ -1,6 +1,6 @@
 <?php
 
-namespace DoctrineMigrations;
+namespace App\Migration;
 
 use App\Domain\Common\Enum;
 

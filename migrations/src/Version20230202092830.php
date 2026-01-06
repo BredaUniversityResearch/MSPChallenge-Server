@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use App\Migration\MSPDatabaseType;
+use App\Migration\MSPMigration;
 use App\Domain\API\v1\GeneralPolicyType;
 use App\Domain\API\v1\Plan;
 use Doctrine\DBAL\Exception;
@@ -12,9 +14,6 @@ use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\Types;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 final class Version20230202092830 extends MSPMigration
 {
     public function getDescription(): string

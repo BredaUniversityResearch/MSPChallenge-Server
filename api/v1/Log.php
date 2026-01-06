@@ -41,7 +41,7 @@ class Log extends Base
     }
 
     /**
-     * @throws Exception
+     * @throws Exception|\Throwable
      */
     public function postEvent(EventLog $eventLog): ?PromiseInterface
     {

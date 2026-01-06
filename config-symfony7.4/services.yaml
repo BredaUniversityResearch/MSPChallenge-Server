@@ -227,10 +227,13 @@ services:
         arguments:
           $vault: '@secrets.vault'
 
-    DoctrineMigrations\Version20241128170458:
-        tags: [ 'doctrine_migrations.migration' ]
+    App\Migration\CustomMigrationFactory:
         arguments:
-            $container: '@service_container'
+            - '@service_container'
+        public: true
+
+    doctrine_migrations.migration_factory:
+        alias: App\Migration\CustomMigrationFactory
 
 when@dev:
     parameters:

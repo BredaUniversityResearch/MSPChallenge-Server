@@ -10,21 +10,16 @@ use App\Domain\Common\InternalSimulationName;
 use App\Domain\Services\SimulationHelper;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\SessionAPI\Watchdog;
-use Doctrine\DBAL\Connection;
+use App\Migration\ContainerAwareMigrationInterface;
+use App\Migration\MSPDatabaseType;
+use App\Migration\MSPMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Exception;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-final class Version20241128170458 extends MSPMigration
+final class Version20241128170458 extends MSPMigration implements ContainerAwareMigrationInterface
 {
-    public function __construct(
-        Connection                 $connection,
-        LoggerInterface            $logger,
-        private ContainerInterface $container
-    ) {
-        parent::__construct($connection, $logger);
-    }
+    private ?ContainerInterface $container = null;
 
     public function getDescription(): string
     {
@@ -192,5 +187,10 @@ final class Version20241128170458 extends MSPMigration
             ADD `game_session_watchdog_token` bigint NOT NULL AFTER `game_session_watchdog_address`
             SQL
         );
+    }
+
+    public function setContainer(ContainerInterface $container): void
+    {
+        $this->container = $container;
     }
 }

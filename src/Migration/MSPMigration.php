@@ -1,6 +1,6 @@
 <?php
 
-namespace DoctrineMigrations;
+namespace App\Migration;
 
 use App\Domain\Helper\Util;
 use Closure;
@@ -12,7 +12,7 @@ use Doctrine\DBAL\Schema\Table;
 use IntlException;
 use MessageFormatter;
 
-abstract class MSPMigration extends AbstractMigration
+abstract class MSPMigration extends AbstractMigration implements ContainerAwareMigrationInterface
 {
     private ?MSPDatabaseType $databaseType = null;
 
