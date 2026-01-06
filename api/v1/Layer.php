@@ -235,7 +235,7 @@ class Layer extends Base
         }
 
         // if we still haven't found it, try the original path
-        if ($filePath == null || !file_exists($filePath)) {
+        if (!file_exists($filePath)) {
             throw new NotFoundHttpException(
                 "Could not find raster file for layer with name " . $layer_name . " at path " . $filePath
             );
