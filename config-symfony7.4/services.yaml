@@ -227,6 +227,8 @@ services:
         arguments:
           $vault: '@secrets.vault'
 
+    App\Migrations\ContainerAwareMigrationFactory:
+
 when@dev:
     parameters:
         app.guraas_game_id: '3318cf30-f78d-4284-b530-a329005c248a'
