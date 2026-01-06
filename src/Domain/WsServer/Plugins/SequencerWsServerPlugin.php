@@ -31,6 +31,7 @@ class SequencerWsServerPlugin extends Plugin implements EventSubscriberInterface
                 $class = $d;
                 $constructorParams = [];
             } else {
+                // @phpstan-ignore-next-line function.alreadyNarrowedType
                 assert(is_array($d), 'Encountered invalid element for array $pluginConstructionDataContainer');
                 $class = $d['class'];
                 $constructorParams = $d['constructor_params'] ?? [];
