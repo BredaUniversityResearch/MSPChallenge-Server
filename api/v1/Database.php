@@ -4,7 +4,6 @@ namespace App\Domain\API\v1;
 
 use App\Domain\Common\CommonBase;
 use App\Domain\Common\DatabaseDefaults;
-use App\Domain\Services\SymfonyToLegacyHelper;
 use Exception;
 use PDO;
 use PDOException;
@@ -105,9 +104,9 @@ class Database
         return $this->configurationApplied;
     }
 
-    private function connectToDatabase(bool $refresh = false): bool
+    private function connectToDatabase(): bool
     {
-        if ($this->conn == null || $refresh) {
+        if ($this->conn == null) {
             // check if configuration has been applied
             if (!$this->SetupConfiguration()) {
                 return false;
@@ -173,34 +172,19 @@ class Database
         }
         $result = array();
 
-        $query = null;
         try {
             $query = $this->executeQuery($statement, $vars);
         } catch (Exception $e) {
-            if ($e->getCode() == 2006) { // MySQL server has gone away
-                // log warning and try to reconnect once. I know, mis-using the analytics logger for this
-                SymfonyToLegacyHelper::getInstance()->getAnalyticsLogger()->warning($e->getMessage());
-                $e = null; // reset exception such that we can try again
-                $this->connectToDatabase(true); // reconnect
-                try {
-                    $query = $this->executeQuery($statement, $vars);
-                } catch (Exception $otherE) {
-                    // fall through to throwing the exception below
-                    $e = $otherE;
-                }
-            }
-            if ($e != null) {
-                throw new Exception(
-                    "Query exception: ".$e->getMessage()." Query: ".
-                    str_replace(array("\n", "\r", "\t"), " ", var_export($statement, true)).
-                    " Vars: ".str_replace(array("\n", "\r"), "", var_export($vars, true)),
-                    (int)$e->getCode(), // just pass the original exception code
-                    $e // pass previous such that it is possible to debug back to the original exception
-                );
-            }
+            throw new Exception(
+                "Query exception: ".$e->getMessage()." Query: ".
+                str_replace(array("\n", "\r", "\t"), " ", var_export($statement, true)).
+                " Vars: ".str_replace(array("\n", "\r"), "", var_export($vars, true)),
+                (int)$e->getCode(), // just pass the original exception code
+                $e // pass previous such that it is possible to debug back to the original exception
+            );
         }
 
-        if ($getId) {
+        if ($getId == true) {
             return $this->conn->lastInsertID();
         }
 
