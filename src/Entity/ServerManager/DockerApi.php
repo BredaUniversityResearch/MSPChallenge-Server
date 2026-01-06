@@ -7,7 +7,7 @@ use App\Entity\Mapping as AppMappings;
 use App\Repository\ServerManager\ImmersiveSessionDockerApiRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Form\Extension\Core\Type as SymfonyFormType;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[AppMappings\Plurals('Docker API', 'Docker APIs')]

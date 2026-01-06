@@ -7,7 +7,7 @@ use App\Entity\ServerManager\DockerApi;
 use App\Entity\Trait\LazyLoadersTrait;
 use App\Repository\SessionAPI\DockerConnectionRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: DockerConnectionRepository::class)]
 class DockerConnection
