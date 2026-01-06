@@ -165,7 +165,7 @@ class LatestWsServerPlugin extends Plugin
             ->getClientInfoPerSessionCollection();
         $gameSessionId = $this->getGameSessionIdFilter();
         if ($gameSessionId != null) {
-            $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($gameSessionId);
+            $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only([$gameSessionId]);
         }
         $promises = [];
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {

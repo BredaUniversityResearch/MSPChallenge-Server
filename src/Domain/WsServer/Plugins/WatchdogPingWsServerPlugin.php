@@ -37,7 +37,7 @@ class WatchdogPingWsServerPlugin extends Plugin
                         });
                     $gameSessionId = $this->getGameSessionIdFilter();
                     if ($gameSessionId != null) {
-                        $gameSessionIds = $gameSessionIds->only($gameSessionId);
+                        $gameSessionIds = $gameSessionIds->only([$gameSessionId]);
                     }
                     $gameSessionIds = $gameSessionIds->all(); // to raw array
                     return $this->pingWatchdogs($gameSessionIds);
@@ -60,7 +60,7 @@ class WatchdogPingWsServerPlugin extends Plugin
             $toPromiseFunctions[] = tpf(fn() => $simulation->pingWatchdogs());
         }
         if (empty($toPromiseFunctions)) {
-            return resolve();
+            return resolve(null);
         }
         return parallel($toPromiseFunctions);
     }
