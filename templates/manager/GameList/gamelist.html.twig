@@ -31,7 +31,7 @@
                     {% set transitionState = game.game_transition_state %}
                 {% endif %}
                 <td class="state_{{ state }}">
-                    {% if transitionState is not null %}
+                    {% if transitionState is defined and transitionState is not null %}
                         {% if transitionState.value|lower != state %}
                             {{ transitionState.value|lower }}
                         {% endif %}
