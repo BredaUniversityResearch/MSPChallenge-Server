@@ -8,6 +8,7 @@ use Lcobucci\JWT\Token\DataSet;
 use Lcobucci\JWT\Token\Parser;
 use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Validator;
+use Symfony\Component\Clock\Clock;
 
 class BearerTokenValidator
 {
@@ -54,7 +55,7 @@ class BearerTokenValidator
             // this might throw an exception because token is no longer valid
             (new Validator())->assert(
                 $this->unencryptedToken,
-                new LooseValidAt(new FrozenClock(new \DateTimeImmutable()))
+                new LooseValidAt(new Clock())
             );
             return true;
         } catch (\Exception $e) {
