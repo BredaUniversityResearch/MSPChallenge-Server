@@ -98,7 +98,6 @@ class MonitorDockerApiEventsCommand extends Command
             $browser->requestStreaming('GET', $eventsUrl)->then(
                 function (ResponseInterface $response) use ($dockerApi) {
                     $body = $response->getBody();
-                    assert($body instanceof \Psr\Http\Message\StreamInterface);
                     assert($body instanceof \React\Stream\ReadableStreamInterface);
                     $buffer = '';
                     $body->on('data', $this->createStreamDataReceivedFunction($dockerApi, $buffer));
