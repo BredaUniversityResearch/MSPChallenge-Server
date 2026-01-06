@@ -7,7 +7,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use App\Controller\BaseController;
 use App\Domain\Common\EntityEnums\GameSaveVisibilityValue;
 use App\Entity\ServerManager\GameSave;
@@ -70,7 +70,7 @@ class GameSaveController extends BaseController
             return new Response(null, 422);
         }
         $fileSystem = new Filesystem();
-        
+
         $saveFileName = sprintf($this->getParameter('app.server_manager_save_name'), $saveId);
         $saveFilePath = $this->getParameter('app.server_manager_save_dir').$saveFileName;
         if (!$fileSystem->exists($saveFilePath)) {
