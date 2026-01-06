@@ -52,14 +52,15 @@ class Watchdog implements WatchdogInterface
 
     #[ORM\Column(type: Types::BIGINT, options: [
         'generated' => 'ALWAYS',
-        'as' => 'if(`deleted_at` is null,0,UNIX_TIMESTAMP(deleted_at))'])
-    ]
+        'as' => 'if(`deleted_at` is null,0,UNIX_TIMESTAMP(deleted_at))'
+    ])]
+    // @phpstan-ignore-next-line doctrine.columnType
     private int $archived;
 
     /**
      * @var Collection<int, Simulation>
      */
-    #[ORM\OneToMany(mappedBy: 'watchdog', targetEntity: Simulation::class, cascade: ['persist'], orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Simulation::class, mappedBy: 'watchdog', cascade: ['persist'], orphanRemoval: true)]
     private Collection $simulations;
 
     public function __construct()

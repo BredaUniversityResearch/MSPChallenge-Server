@@ -49,7 +49,8 @@ class GameSave extends EntityBase
     private ?GameWatchdogServer $gameWatchdogServer = null;
 
     #[ORM\Column(type: Types::BIGINT)]
-    private ?string $gameCreationTime = null;
+    // @phpstan-ignore-next-line int|null but database expects int
+    private ?int $gameCreationTime = null;
 
     #[ORM\Column]
     // @phpstan-ignore-next-line int|null but database expects int
@@ -207,12 +208,12 @@ class GameSave extends EntityBase
         return $this;
     }
 
-    public function getGameCreationTime(): ?string
+    public function getGameCreationTime(): ?int
     {
         return $this->gameCreationTime;
     }
 
-    public function setGameCreationTime(string $gameCreationTime): self
+    public function setGameCreationTime(int $gameCreationTime): self
     {
         $this->gameCreationTime = $gameCreationTime;
 
