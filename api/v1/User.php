@@ -178,12 +178,14 @@ class User extends Base implements JWTUserInterface
             $minDate = new DateTime("@0");
             $minBuildDate = $minDate;
             $maxBuildDate = new DateTime(); // now
+            // @phpstan-ignore-next-line function.alreadyNarrowedType
             if (array_key_exists("client_build_date_min", $versionConfig)) {
                 $minBuildDate = DateTime::createFromFormat(
                     DateTimeInterface::ATOM,
                     $versionConfig["client_build_date_min"]
                 );
             }
+            // @phpstan-ignore-next-line function.alreadyNarrowedType
             if (array_key_exists("client_build_date_max", $versionConfig)) {
                 $maxBuildDate = DateTime::createFromFormat(
                     DateTimeInterface::ATOM,
