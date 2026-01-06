@@ -227,13 +227,13 @@ services:
         arguments:
           $vault: '@secrets.vault'
 
-    App\Migration\CustomMigrationFactory:
+    App\Migration\ContainerAwareMigrationFactory:
         arguments:
             - '@service_container'
         public: true
 
     doctrine_migrations.migration_factory:
-        alias: App\Migration\CustomMigrationFactory
+        alias: App\Migration\ContainerAwareMigrationFactory
 
 when@dev:
     parameters:
