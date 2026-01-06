@@ -15,8 +15,8 @@ class GameSaveZipFileValidator
     private ZipArchive $saveZip;
     private bool $valid = true;
     private array $errors = [];
-    private ?string $configFileName;
-    private ?string $dbDumpFileName;
+    private string $configFileName;
+    private string $dbDumpFileName;
     private GameSave $gameSave;
     private KernelInterface $kernel;
 

@@ -19,7 +19,7 @@ use function App\await;
 
 class User extends Base implements JWTUserInterface
 {
-    private ?string $user_name;
+    private string $user_name;
     private ?int $user_id;
 
     // @note "Make the constructor final to prevent the class from being extended"
@@ -42,7 +42,7 @@ class User extends Base implements JWTUserInterface
             ->from('game_list')
             ->where($qb->expr()->eq('id', $this->getGameSessionId()));
         $passwordData = $connection->executeQuery($qb->getSQL())->fetchAllAssociative();
-        
+
         if (!parent::isNewPasswordFormat($passwordData[0]["password_admin"])
             || !parent::isNewPasswordFormat($passwordData[0]["password_player"])
         ) {
