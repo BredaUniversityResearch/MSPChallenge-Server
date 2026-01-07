@@ -6,6 +6,7 @@ use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SimulationHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameList;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListArchiveMessage;
@@ -32,7 +33,9 @@ class GameListArchiveMessageHandler extends CommonSessionHandler
         GameSessionLogger $gameSessionLogFileHandler,
         WatchdogCommunicator $watchdogCommunicator,
         VersionsProvider $provider,
-        SimulationHelper $simulationHelper
+        SimulationHelper $simulationHelper,
+        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
     ) {
         parent::__construct(...func_get_args());
     }

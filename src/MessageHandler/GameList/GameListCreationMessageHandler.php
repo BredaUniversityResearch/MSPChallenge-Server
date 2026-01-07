@@ -3,7 +3,6 @@
 namespace App\MessageHandler\GameList;
 
 use App\Controller\SessionAPI\SELController;
-use App\Domain\API\v1\Game as GameAPI;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameTransitionStateValue;
@@ -16,6 +15,7 @@ use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SimulationHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\SessionAPI\LayerRaster;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListCreationMessage;
@@ -36,7 +36,6 @@ use App\Entity\SessionAPI\PlanLayer;
 use App\Entity\SessionAPI\PlanMessage;
 use App\Entity\SessionAPI\PlanRestrictionArea;
 use App\Entity\SessionAPI\Restriction;
-use App\Repository\SessionAPI\GameRepository;
 use App\Repository\SessionAPI\LayerRepository;
 use App\VersionsProvider;
 use Doctrine\DBAL\Exception;
@@ -77,6 +76,8 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         WatchdogCommunicator $watchdogCommunicator,
         VersionsProvider $provider,
         SimulationHelper $simulationHelper,
+        // SymfonyToLegacyHelper is required by legacy to be auto-wire, has its own ::getInstance()
+        SymfonyToLegacyHelper $symfonyToLegacyHelper,
         private readonly MessageBusInterface $messageBus,
         private readonly HttpClientInterface $client,
         // e.g. used by GeoServerCommunicator
