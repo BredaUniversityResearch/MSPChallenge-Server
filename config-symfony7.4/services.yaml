@@ -230,7 +230,7 @@ services:
     Doctrine\Migrations\Version\DbalMigrationFactory: ~
     App\Migration\ContainerAwareMigrationFactory:
         decorates: Doctrine\Migrations\Version\DbalMigrationFactory
-        arguments: ['@.inner', '@service_container']
+        arguments: ['@.inner', '@service_container', '@App\Domain\Services\ConnectionManager']
 
 when@dev:
     parameters:

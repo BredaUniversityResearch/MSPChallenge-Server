@@ -30,9 +30,9 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
      * @return void
      * @throws Exception
      */
-    public function insertSimulationRecords(): void
+    public function insertSimulationRecords(string $schemaName): void
     {
-        $result = preg_match('/msp_session_(\d+)/', $this->connection->getDatabase(), $matches);
+        $result = preg_match('/msp_session_(\d+)/', $schemaName, $matches);
         $this->abortIf(
             $result !== 1,
             'Database name does not match the expected format: msp_session_{id}'
@@ -169,7 +169,7 @@ final class Version20241128170458 extends MSPMigration implements ContainerAware
         // phpcs:enable Generic.Files.LineLength.TooLong
 
         $this->insertWatchdogRecord();
-        $this->insertSimulationRecords();
+        $this->insertSimulationRecords($schema->getName());
         // phpcs:ignore Generic.Files.LineLength.TooLong
         $this->addSql('ALTER TABLE `game_session` DROP `game_session_watchdog_address`, DROP `game_session_watchdog_token`');
         // phpcs:ignore Generic.Files.LineLength.TooLong

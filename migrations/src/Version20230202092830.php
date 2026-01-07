@@ -35,7 +35,7 @@ final class Version20230202092830 extends MSPMigration
             $this->write("Column plan_type for table plan is not a string, already migrated?");
             return;
         }
-        $qb = $this->connection->createQueryBuilder();
+        $qb = $this->connectionManager->getCachedDbConnection($schema->getName())->createQueryBuilder();
         $result = $qb
             ->select('plan_id, plan_type')
             ->from('plan')
@@ -57,13 +57,17 @@ final class Version20230202092830 extends MSPMigration
         }
     }
 
+    /**
+     * @throws SchemaException
+     * @throws Exception
+     */
     protected function onDown(Schema $schema): void
     {
         if (!$this->checkPreRequisites($schema, Types::INTEGER)) {
             $this->write("Column plan_type for table plan is not a integer, already down-grated?");
             return;
         }
-        $qb = $this->connection->createQueryBuilder();
+        $qb = $this->connectionManager->getCachedDbConnection($schema->getName())->createQueryBuilder();
         $result = $qb
             ->select('plan_id, plan_type')
             ->from('plan')

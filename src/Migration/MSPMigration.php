@@ -3,8 +3,8 @@
 namespace App\Migration;
 
 use App\Domain\Helper\Util;
+use App\Domain\Services\ConnectionManager;
 use Closure;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\Migrations\AbstractMigration;
@@ -15,6 +15,19 @@ use MessageFormatter;
 
 abstract class MSPMigration extends AbstractMigration
 {
+    /**
+     * Trying to prevent usage of $this->connection, to enforce the use of addSql() only.
+     * Note that the usage of addSql() is required to have the migration being executed on the right connection.
+     *   The one provided by AbstractMigration will always be set to the default connection, which may not be correct
+     * @see AbstractMigration::$connection*
+     *
+     * @deprecated Use addSql() instead for migration queries, they will be wrapped in a single transaction on the right
+     *   connection. Or, for querying @see ConnectionManager to get the right connection for read queries.
+     */
+    protected $connection;
+
+    protected ConnectionManager $connectionManager;
+
     private ?MSPDatabaseType $databaseType = null;
 
     private function validateSchema(Schema $schema): void
@@ -107,29 +120,6 @@ abstract class MSPMigration extends AbstractMigration
             $this->countColumns($schema) - $numColumns,
             $this->countIndexes($schema) - $numIndexes
         );
-    }
-
-    /**
-     * Magic property access handler to prevent accidental use of $this->connection in migrations.
-     *
-     * Any attempt to access $this->connection in a migration will throw a LogicException,
-     * enforcing the use of addSql() for all database operations.
-     *
-     * This does not affect Doctrine internals, but will catch accidental usage in migration code.
-     *
-     * Note that the usage of addSql() is required to have the migration being executed on the right connection.
-     *   The one provided by AbstractMigration will always be set to the default connection, which may not be correct
-     */
-    public function __get($name)
-    {
-        if ($name === 'connection') {
-            throw new \LogicException(
-                'Direct usage of $this->connection is forbidden in migrations. '.
-                'Use $this->addSql() instead to ensure the correct connection is used.'
-            );
-        }
-        // Optionally, forward to parent or throw for other properties
-        throw new \LogicException("Undefined property: " . static::class . '::$' . $name);
     }
 
     /**
@@ -235,4 +225,9 @@ abstract class MSPMigration extends AbstractMigration
     abstract protected function getDatabaseType(): MSPDatabaseType;
     abstract protected function onUp(Schema $schema): void;
     abstract protected function onDown(Schema $schema): void;
+
+    public function setConnectionManager(ConnectionManager $connectionManager): void
+    {
+        $this->connectionManager = $connectionManager;
+    }
 }
