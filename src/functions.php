@@ -240,8 +240,8 @@ function await(PromiseInterface $promise, ?LoopInterface $loop = null, ?float $t
         if (!$exception instanceof Throwable) {
             $exception = new \UnexpectedValueException(
                 'Promise rejected with unexpected value of type ' .
-                    // @phpstan-ignore-next-line function.impossibleType
                     //   Call to function is_object() with null will always evaluate to false
+                    // @phpstan-ignore-next-line function.impossibleType
                     (is_object($exception) ? get_class($exception) : gettype($exception))
             );
         } elseif (!$exception instanceof \Exception) { // so it is a Throwable but not an Exception

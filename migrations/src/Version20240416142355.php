@@ -26,28 +26,18 @@ final class Version20240416142355 extends MSPMigration
      */
     protected function onUp(Schema $schema): void
     {
-        if (1 !== $this->connection->insert('game_config_files', [
-            'filename' => 'Western_Baltic_Sea_basic',
-            'description' => 'Western Baltic Sea basic configuration file supplied by BUas',
-        ])) {
-            throw new Exception('Failed to insert game_config_files record');
-        }
+        // Insert the new game_config_files record
+        // phpcs:ignoreFile Generic.Files.LineLength.TooLong
+        $this->addSql(
+            "INSERT INTO game_config_files (filename, description) VALUES ('Western_Baltic_Sea_basic', 'Western Baltic Sea basic configuration file supplied by BUas')"
+        );
 
-        $gameConfigFileId = $this->connection->lastInsertId();
-        if (1 !== $this->connection->insert('game_config_version', [
-            'game_config_files_id' => $gameConfigFileId,
-            'version' => 1,
-            'version_message' => 'See www.mspchallenge.info',
-            'visibility' => 'active',
-            'upload_time' => 1713277131,
-            'upload_user' => 1,
-            'last_played_time' => 0,
-            'file_path' => 'Western_Baltic_Sea_basic/Western_Baltic_Sea_basic_1.json',
-            'region' => 'balticline',
-            'client_versions' => 'Any',
-        ])) {
-            throw new Exception('Failed to insert game_config_version record');
-        }
+        // Insert the new game_config_version record, using the id of the just-inserted game_config_files row
+        // This is safe because the migration is transactional and no concurrent inserts can occur
+        $this->addSql(
+            "INSERT INTO game_config_version (game_config_files_id, version, version_message, visibility, upload_time, upload_user, last_played_time, file_path, region, client_versions) " .
+            "SELECT MAX(id), 1, 'See www.mspchallenge.info', 'active', 1713277131, 1, 0, 'Western_Baltic_Sea_basic/Western_Baltic_Sea_basic_1.json', 'balticline', 'Any' FROM game_config_files WHERE filename = 'Western_Baltic_Sea_basic'"
+        );
     }
 
     protected function onDown(Schema $schema): void
@@ -56,7 +46,7 @@ final class Version20240416142355 extends MSPMigration
         $this->addSql(
             <<< 'SQL'
             DELETE FROM `game_config_version` WHERE `filename` = 'Western_Baltic_Sea_basic';
-            DELETE FROM `game_config_files` WHERE `file_path` = 'Western_Baltic_Sea_basic/Western_Baltic_Sea_basic_1.json';
+            DELETE FROM `game_config_files` WHERE `file_path` = 'Western_Baltic_Sea_basic/Western_Baltic_Sea_basic_1.json'
 SQL
         );
     }
