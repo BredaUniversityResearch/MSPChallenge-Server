@@ -709,7 +709,7 @@ SUBQUERY,
         $qb = $conn->createQueryBuilder();
         /** @var ?\App\Entity\SessionAPI\Layer $layer */
         $layer = $qb
-            ->from('App:Layer', 'l')
+            ->from(\App\Entity\SessionAPI\Layer::class, 'l')
             ->select('l')
             ->where('l.layerName = :name')
             ->setParameter('name', $name)
@@ -731,7 +731,7 @@ SUBQUERY,
         $qb = $conn->createQueryBuilder();
         $qb
             ->select('l, pl, ge') // p, pp, pol, pt, ptft, pft
-            ->from('App:Layer', 'l')
+            ->from(\App\Entity\SessionAPI\Layer::class, 'l')
             ->leftJoin('l.planLayer', 'pl')
             ->leftJoin('l.geometry', 'ge')
             ->where('l.layerId = :layerId OR l.originalLayer = :layerId')

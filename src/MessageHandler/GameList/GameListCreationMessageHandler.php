@@ -796,8 +796,8 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         foreach ($this->dataModel["SEL"]["heatmap_settings"] as $heatmap) {
             if (null === $selOutputLayer = $context->getLayer($heatmap['layer_name'] ?? '')) {
                 throw new \Exception(
-                    'The layer '.$heatmap['layer_name'].' referenced in the heatmap settings has not been 
-                    found in the database, so cannot continue. Are you sure it has been defined separately as an 
+                    'The layer '.$heatmap['layer_name'].' referenced in the heatmap settings has not been
+                    found in the database, so cannot continue. Are you sure it has been defined separately as an
                     actual layer in the configuration file?'
                 );
             }
@@ -896,7 +896,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
     {
         // final step to avoid client complaints, note that this likely confuses Doctrine a bit, hence at the end
         $qb = $this->entityManager->createQueryBuilder();
-        $qb->update('App:Geometry', 'g')
+        $qb->update(Geometry::class, 'g')
             ->set('g.originalGeometry', 'g.geometryId')
             ->where($qb->expr()->isNull('g.originalGeometry'))
             ->getQuery()
