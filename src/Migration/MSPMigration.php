@@ -124,7 +124,8 @@ abstract class MSPMigration extends AbstractMigration
     {
         if ($name === 'connection') {
             throw new \LogicException(
-                'Direct usage of $this->connection is forbidden in migrations. Use $this->addSql() instead to ensure the correct connection is used.'
+                'Direct usage of $this->connection is forbidden in migrations. '.
+                'Use $this->addSql() instead to ensure the correct connection is used.'
             );
         }
         // Optionally, forward to parent or throw for other properties

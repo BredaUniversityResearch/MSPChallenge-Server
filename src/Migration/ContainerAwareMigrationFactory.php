@@ -22,4 +22,3 @@ readonly class ContainerAwareMigrationFactory implements MigrationFactory
         return $migration;
     }
 }
-
