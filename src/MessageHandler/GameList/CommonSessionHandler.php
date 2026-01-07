@@ -8,6 +8,7 @@ use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Log\LogContainerInterface;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SimulationHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameList;
 use App\Entity\ServerManager\GameSave;
 use App\Entity\SessionAPI\Game;
@@ -73,6 +74,8 @@ abstract class CommonSessionHandler
     protected SessionLogHandler $sessionLogHandler;
     protected LoggerInterface $gameSessionLogger;
 
+    protected SymfonyToLegacyHelper $symfonyToLegacyHelper;
+
     /**
      * @throws Exception
      */
@@ -84,7 +87,9 @@ abstract class CommonSessionHandler
         GameSessionLogger $gameSessionLogFileHandler,
         WatchdogCommunicator $watchdogCommunicator,
         VersionsProvider $provider,
-        private readonly SimulationHelper $simulationHelper
+        private readonly SimulationHelper $simulationHelper,
+        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
     ) {
         $this->kernel = $kernel;
         $this->gameSessionLogger = $gameSessionLogger;
