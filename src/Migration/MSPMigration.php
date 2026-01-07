@@ -5,6 +5,8 @@ namespace App\Migration;
 use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
 use Closure;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\Migrations\AbstractMigration;
@@ -16,16 +18,19 @@ use MessageFormatter;
 abstract class MSPMigration extends AbstractMigration
 {
     /**
-     * Trying to prevent usage of $this->connection, to enforce the use of addSql() only.
-     * Note that the usage of addSql() is required to have the migration being executed on the right connection.
-     *   The one provided by AbstractMigration will always be set to the default connection, which may not be correct
-     * @see AbstractMigration::$connection*
+     * @internal @deprecated Try to prevent usage of $this->connection, to enforce the use of addSql() only.
      *
-     * @deprecated Use addSql() instead for migration queries, they will be wrapped in a single transaction on the right
-     *   connection. Or, for querying @see ConnectionManager to get the right connection for read queries.
+     * Note that the usage of addSql() is required to have the migration being executed wrapped in a single transaction.
+     *
+     * Only use $connection for read queries!!!!
+     *
+     * The one provided by AbstractMigration will always be set to the default connection, which may not be correct
+     * So it is overwritten to the right connection by the ConnectionManager before executing the migration.
+     *
      */
     protected $connection;
 
+    private ?Connection $readConnection = null;
     protected ConnectionManager $connectionManager;
 
     private ?MSPDatabaseType $databaseType = null;
@@ -102,9 +107,16 @@ abstract class MSPMigration extends AbstractMigration
         });
     }
 
+    /**
+     * @throws IntlException
+     * @throws Exception
+     */
     private function migrate(Schema $schema, Closure $migrationFunction): void
     {
         $this->validateSchema($schema);
+
+        $this->readConnection = $this->connectionManager->getCachedDbConnection($schema->getName());
+        $this->connection = $this->readConnection;
 
         // collect data to detect changes after migration
         $numTables = count($schema->getTables());
@@ -120,6 +132,11 @@ abstract class MSPMigration extends AbstractMigration
             $this->countColumns($schema) - $numColumns,
             $this->countIndexes($schema) - $numIndexes
         );
+    }
+
+    protected function getReadConnection(): Connection
+    {
+        return $this->readConnection;
     }
 
     /**
