@@ -13,7 +13,7 @@ security:
         # activate different ways to authenticate
         # https://symfony.com/doc/current/security.html#the-firewall
         dev:
-            pattern: ^/(_profiler|_wdt|assets|build)|css|images|js)/
+            pattern: ^/(_profiler|_wdt|assets|build|css|images|js)/
             security: false
         open:
             pattern: ^/(api/doc(\.json)?|manager/gamelist|\d+/api/(User/RequestToken|User/RequestSession|[g|G]ame/CreatePOVConfig))
