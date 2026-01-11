@@ -10,12 +10,11 @@ use App\Domain\Common\GameSaveZipFileValidator;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SimulationHelper;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameSave;
 use App\Logger\GameSessionLogger;
 use App\Message\GameSave\GameSaveLoadMessage;
 use App\MessageHandler\GameList\CommonSessionHandler;
-use App\Entity\SessionAPI\Game;
-use App\Repository\SessionAPI\GameRepository;
 use App\VersionsProvider;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -48,7 +47,9 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
         GameSessionLogger $gameSessionLogFileHandler,
         WatchdogCommunicator $watchdogCommunicator,
         VersionsProvider $provider,
-        SimulationHelper $simulationHelper
+        SimulationHelper $simulationHelper,
+        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
     ) {
         parent::__construct(...func_get_args());
     }
