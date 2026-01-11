@@ -36,6 +36,7 @@ use App\Entity\SessionAPI\PlanLayer;
 use App\Entity\SessionAPI\PlanMessage;
 use App\Entity\SessionAPI\PlanRestrictionArea;
 use App\Entity\SessionAPI\Restriction;
+use App\Repository\SessionAPI\GameRepository;
 use App\Repository\SessionAPI\LayerRepository;
 use App\VersionsProvider;
 use Doctrine\DBAL\Exception;
