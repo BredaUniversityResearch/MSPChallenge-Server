@@ -784,7 +784,11 @@ SUBQUERY,
 
         // todo(MH) there is probably a way to get it working with
         //   ConnectionManager::getInstance()->getCachedServerManagerDbConnection()->getNativeConnection()
-        $this->pdo ??= new \PDO("mysql:host=$_ENV[DATABASE_HOST];port=$_ENV[DATABASE_PORT]", 'root', $_ENV['DATABASE_PASSWORD'] ?? '');
+        $this->pdo ??= new \PDO(
+            "mysql:host=$_ENV[DATABASE_HOST];port=$_ENV[DATABASE_PORT]",
+            'root',
+            $_ENV['DATABASE_PASSWORD'] ?? ''
+        );
         // convert our geometry using mariadb's GIS features
         try {
             if ($options['include_original_polygon'] ?? false) {
