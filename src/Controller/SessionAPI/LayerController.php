@@ -878,7 +878,7 @@ class LayerController extends BaseController
         try {
             $em->persist($layerEntity);
             $em->flush();
-            $logs[] = sprintf('Successfully flushed layer with id %d', $layerEntity->getLayerId());
+            $logs[] = sprintf('Successfully flushed layer with id %d and raster %s', $layerEntity->getLayerId(), json_encode($layerEntity->getLayerRaster()));
         } catch (Exception $e) {
             $logs[] = sprintf('Failed to flush layer with id %d', $layerEntity->getLayerId());
         }
