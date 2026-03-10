@@ -366,7 +366,7 @@ class Layer extends Base
         // raster bounds update
         $rasterDataUpdated = false;
         if (!empty($raster_bounds)) {
-            $this->log('Set raster for layer '.$layer->getLayerName());
+            $this->log('Set raster bounds for layer '.$layer->getLayerName());
             $layer
                 ->setLayerLastupdate(microtime(true))
                 ->setLayerRaster($rasterData->setBoundingbox($raster_bounds));
