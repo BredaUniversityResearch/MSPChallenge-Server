@@ -370,8 +370,8 @@ class Layer extends Base
                 ->setLayerLastupdate(microtime(true))
                 // clone data, see https://github.com/dunglas/doctrine-json-odm/issues/21
                 ->setLayerRaster(clone $rasterData->setBoundingbox($raster_bounds));
-            $this->log('Set raster bounds for layer '.$layer->getLayerName().', raster: '.
-                json_encode($layer->getLayerRaster()));
+            $this->log('Set raster bounds for layer '.$layer->getLayerName().': '.
+                json_encode($layer->getLayerRaster()->getBoundingbox()));
             $rasterDataUpdated = true;
         }
 
