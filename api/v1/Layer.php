@@ -369,8 +369,8 @@ class Layer extends Base
             $layer
                 ->setLayerLastupdate(microtime(true))
                 ->setLayerRaster($rasterData->setBoundingbox($raster_bounds));
-            $this->log('Set raster bounds for layer '.$layer->getLayerName().': '.
-                json_encode($rasterData->getBoundingbox()));
+            $this->log('Set raster bounds for layer '.$layer->getLayerName().', raster: '.
+                json_encode($layer->getLayerRaster()));
             $rasterDataUpdated = true;
         }
 
