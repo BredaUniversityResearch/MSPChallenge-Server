@@ -871,7 +871,7 @@ class LayerController extends BaseController
                 $rasterBounds,
                 $month
             );
-            $logs[] = $layer->getLogMessages();
+            $logs = $layer->getLogMessages();
         } catch (Exception $e) {
             return new MessageJsonResponse(status: $e->getCode() ?: 500, message: $e->getMessage());
         }
