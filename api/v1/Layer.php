@@ -363,6 +363,18 @@ class Layer extends Base
         $curMonth = $game->GetCurrentMonthAsId();
         $month ??= $curMonth;
 
+        // raster bounds update
+        $rasterDataUpdated = false;
+        if (!empty($raster_bounds)) {
+            $layer
+                ->setLayerLastupdate(microtime(true))
+                // clone data, see https://github.com/dunglas/doctrine-json-odm/issues/21
+                ->setLayerRaster(clone $rasterData->setBoundingbox($raster_bounds));
+            $this->log('Set raster bounds for layer '.$layer->getLayerName().': '.
+                json_encode($layer->getLayerRaster()->getBoundingbox()));
+            $rasterDataUpdated = true;
+        }
+
         // we are processing the next month, so:
         // - replace the current one in raster/ folder,
         // - allow raster bounds updates
@@ -381,24 +393,16 @@ class Layer extends Base
                 $this->log('Failed to save given image_data to '.$f.':'.$e->getMessage(), self::LOG_LEVEL_ERROR);
             }
 
-            // raster bounds update
-            $rasterDataUpdated = false;
-            if (!empty($raster_bounds)) {
-                $this->log('Set raster for layer '.$layer->getLayerName());
-                $layer->setLayerRaster($rasterData->setBoundingbox($raster_bounds));
-                $rasterDataUpdated = true;
-            }
-
             // update the layer record
             $layer
                 ->setLayerLastupdate(microtime(true))
                 ->setLayerMelupdate(1);
-            $this->log(sprintf(
-                'Updated layer %s with id %d',
-                ($rasterDataUpdated ? ' incl. raster data' : ''),
-                $layer->getLayerId()
-            ));
         }
+        $this->log(sprintf(
+            'Updated layer %s with id %d',
+            ($rasterDataUpdated ? ' incl. raster data' : ''),
+            $layer->getLayerId()
+        ));
 
         // (Pre-)archive the raster file
         Store::EnsureFolderExists(Store::GetRasterArchiveFolder($this->getGameSessionId()));

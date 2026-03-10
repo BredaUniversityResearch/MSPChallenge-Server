@@ -401,6 +401,11 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         Layer $layer,
         GeoServerCommunicator $geoServerCommunicator
     ): void {
+        $layer->setLayerRaster(
+            ($layer->getLayerRaster() ?? new LayerRaster())
+                // no spaces allowed
+                ->setUrl(str_replace(" ", "_", $layer->getLayerName()).'.png')
+        );
         if ($layer->getLayerDownloadFromGeoserver()) {
             $this->sessionLogHandler->debug('Calling GeoServer to obtain raster metadata.');
             $rasterMetaData = $geoServerCommunicator->getRasterMetaData(
