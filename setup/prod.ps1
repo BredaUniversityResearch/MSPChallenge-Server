@@ -95,7 +95,7 @@ param(
     [ValidateRange(0, 1)] # in favor of boolean, giving issues in Linux command line
     [int]$EnableGui = 1,
     [string]$CaddyMercureJwtSecret = ([guid]::NewGuid().ToString("N")),
-    [string]$BranchName = "dev",
+    [string]$BranchName = "or-else",
     [string]$AppSecret = ([guid]::NewGuid().ToString("N")),
     [string]$DatabasePassword = ([guid]::NewGuid().ToString("N")),
     [string]$My2UserPassword = ([guid]::NewGuid().ToString("N")),
