@@ -2,6 +2,7 @@
 
 namespace App\MessageHandler\GameSave;
 
+use App\Domain\API\v1\Game as GameAPI;
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;

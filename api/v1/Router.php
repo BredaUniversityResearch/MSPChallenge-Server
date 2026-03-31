@@ -195,6 +195,9 @@ class Router
                 // PHP code parsing errors are caught in the shutdown function as defined in helpers.php
                 $success = false;
 
+                // Log the error to php error log (stderr if configured)
+                error_log(self::ErrorString($e));
+
                 // @phpstan-ignore-next-line "Left/Right side of && is always true".
                 if ($CallWantsTransaction && $startDatabaseTransaction) {
                     Database::GetInstance($class->getGameSessionId())->DBRollbackTransaction();
