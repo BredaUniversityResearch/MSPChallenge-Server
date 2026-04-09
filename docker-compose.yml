@@ -41,6 +41,7 @@ services:
       '--sql-mode=NO_ZERO_IN_DATE,NO_ZERO_DATE,NO_ENGINE_SUBSTITUTION',
       '--key-buffer-size=33554432',
       '--max-allowed-packet=33554432',
+      '--group-concat-max-len=33554432',
       '--sort-buffer-size=33554432',
       '--net-buffer-length=65536',
       '--read-buffer-size=1048576',
