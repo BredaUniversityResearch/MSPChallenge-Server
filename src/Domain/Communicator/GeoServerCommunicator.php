@@ -5,7 +5,9 @@ namespace App\Domain\Communicator;
 use App\Domain\Common\CacheItemConfig;
 use App\Entity\SessionAPI\Layer;
 use App\VersionsProvider;
+use Exception;
 use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -107,57 +109,168 @@ class GeoServerCommunicator extends AbstractCommunicator
      * @param int|null $cacheLifetime The lifetime of the cache in seconds.
      *   If null, default values are used, see setCacheLifeTimeDefaults(). 0 = infinite.
      * @return array
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
      * @throws InvalidArgumentException
      * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws Exception
      */
     public function getRasterMetaData(string $workspace, string $layerName, ?int $cacheLifetime = null): array
     {
-        $metaCheckType = $this->getResource(
-            "rest/workspaces/${workspace}/layers/${layerName}",
+        // Step 1: DescribeLayer to get owsURL and owsType (JSON, works for non-admin users)
+        $describeLayer = $this->getResource(
+            "ows?service=WMS&version=1.1.1&request=DescribeLayer&layers={$workspace}:{$layerName}".
+            '&outputFormat=application/json',
             true,
-            new CacheItemConfig("layers~${workspace}~${layerName}", $cacheLifetime)
+            new CacheItemConfig("DescribeLayer~{$workspace}~{$layerName}", $cacheLifetime)
         );
-        $layerType = $metaCheckType['layer']['type'] ?? throw new \Exception(
-            "Layer type (raster or WMS store) could not be ascertained, so cannot continue with ${layerName}"
+
+        $layerDescriptions = $describeLayer['layerDescriptions'] ?? throw new Exception(
+            "DescribeLayer returned no layerDescriptions for {$layerName}"
         );
-        switch ($layerType) {
-            case "RASTER":
-                $meta = $this->getResource(
-                    "rest/workspaces/${workspace}/coverages/${layerName}.json",
-                    true,
-                    new CacheItemConfig("coverages~${workspace}~${layerName}", $cacheLifetime)
-                );
-                $bb = $meta['coverage']['nativeBoundingBox'] ??
-                throw new \Exception(
-                    "Native bounding box could not be ascertained for local raster layer ${layerName}"
-                );
-            break;
-            case "WMS":
-                $meta = $this->getResource(
-                    "rest/workspaces/${workspace}/wmslayers/${layerName}",
-                    true,
-                    new CacheItemConfig("wmslayers~${workspace}~${layerName}", $cacheLifetime)
-                );
-                $bb = $meta['wmsLayer']['nativeBoundingBox'] ??
-                throw new \Exception(
-                    "Native bounding box could not be ascertained for WMS raster layer ${layerName}"
-                );
-                break;
-            default:
-                throw new \Exception(
-                    "Layer ${layerName} returned an unsupported type {$metaCheckType['layer']['type']}"
-                );
-        }
+        $description = $layerDescriptions[0] ?? throw new Exception(
+            "DescribeLayer returned empty layerDescriptions for {$layerName}"
+        );
+
+        $rawOwsURL = $description['owsURL'] ?? throw new \Exception(
+            "DescribeLayer returned no owsURL for {$layerName}"
+        );
+        // Strip everything up to and including 'geoserver/' to get a relative URL
+        $owsURL = preg_replace('#^.*geoserver/#', '', $rawOwsURL);
+        $owsType = strtoupper($description['owsType'] ?? '');
+        $typeName = $description['typeName'] ?? "{$workspace}:{$layerName}";
+
+        // Step 2: fetch bounding box via the appropriate OGC describe operation
+        $bb = match ($owsType) {
+            'WCS' => $this->getBoundingBoxFromWCS($owsURL, $typeName, $workspace, $layerName, $cacheLifetime),
+            'WFS' => $this->getBoundingBoxFromWFS($owsURL, $typeName, $workspace, $layerName, $cacheLifetime),
+            default => throw new Exception(
+                "Unsupported owsType '{$owsType}' for layer {$layerName}"
+            ),
+        };
+
         return [
-            "url" => "${layerName}.png",
+            "url" => "{$layerName}.png",
             "boundingbox" => [
                 [$bb['minx'], $bb['miny']],
                 [$bb['maxx'], $bb['maxy']]
             ]
+        ];
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws RedirectionExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws Exception
+     */
+    private function getBoundingBoxFromWCS(
+        string $owsURL,
+        string $typeName,
+        string $workspace,
+        string $layerName,
+        ?int $cacheLifetime
+    ): array {
+        $url = $owsURL . "service=WCS&version=1.1.1&request=DescribeCoverage&identifiers=" . urlencode($typeName);
+
+        $xml = $this->getResource(
+            $url,
+            false,
+            new CacheItemConfig("WCSDescribeCoverage~{$workspace}~{$layerName}", $cacheLifetime)
+        );
+
+        $crawler = new Crawler($xml);
+
+        // Find a projected (non-CRS84) bounding box for native coordinates
+        $bboxNode = $crawler->filterXPath(
+            '//ows:BoundingBox[not(contains(@crs, "CRS84"))]'
+        );
+
+        if (!$bboxNode->count()) {
+            // Fall back to CRS84 (lon/lat) if no projected bbox found
+            $bboxNode = $crawler->filterXPath('//ows:BoundingBox');
+        }
+
+        if (!$bboxNode->count()) {
+            throw new Exception(
+                "WCS DescribeCoverage returned no BoundingBox for {$layerName}"
+            );
+        }
+
+        $lower = explode(' ', $bboxNode->filterXPath('//ows:LowerCorner')->text());
+        $upper = explode(' ', $bboxNode->filterXPath('//ows:UpperCorner')->text());
+
+        if (count($lower) < 2 || count($upper) < 2) {
+            throw new Exception(
+                "WCS DescribeCoverage BoundingBox has unexpected format for {$layerName}"
+            );
+        }
+
+        return [
+            'minx' => (float) $lower[0],
+            'miny' => (float) $lower[1],
+            'maxx' => (float) $upper[0],
+            'maxy' => (float) $upper[1],
+        ];
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws RedirectionExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws Exception
+     */
+    private function getBoundingBoxFromWFS(
+        string $owsURL,
+        string $typeName,
+        string $workspace,
+        string $layerName,
+        ?int $cacheLifetime
+    ): array {
+        // WFS DescribeFeatureType only gives schema, not bbox.
+        // Use WMS GetCapabilities scoped to workspace instead.
+        $capsURL = str_replace('wfs', 'wms', rtrim($owsURL, '?')).
+            "?service=WMS&version=1.1.1&request=GetCapabilities";
+
+        $xml = $this->getResource(
+            $capsURL,
+            false,
+            new CacheItemConfig("WMSCapabilities~{$workspace}", $cacheLifetime)
+        );
+
+        $crawler = new Crawler($xml);
+
+        $layers = $crawler->filterXPath(
+            "//Layer[Name='{$workspace}:{$layerName}' or Name='{$layerName}']"
+        );
+
+        if (!$layers->count()) {
+            throw new Exception(
+                "Layer {$layerName} not found in WMS GetCapabilities for workspace {$workspace}"
+            );
+        }
+
+        $bboxNode = $layers->filterXPath('BoundingBox')->first();
+
+        if (!$bboxNode->count()) {
+            throw new Exception(
+                "No BoundingBox found in WMS GetCapabilities for layer {$layerName}"
+            );
+        }
+
+        return [
+            'minx' => (float) $bboxNode->attr('minx'),
+            'miny' => (float) $bboxNode->attr('miny'),
+            'maxx' => (float) $bboxNode->attr('maxx'),
+            'maxy' => (float) $bboxNode->attr('maxy'),
         ];
     }
 
@@ -186,7 +299,7 @@ class GeoServerCommunicator extends AbstractCommunicator
         $widthRatioMultiplier = $deltaSizeX / $deltaSizeY;
 
         if (empty($layer->getLayerHeight())) {
-            throw new \Exception('Missing required "layer_height" in layer data');
+            throw new Exception('Missing required "layer_height" in layer data');
         }
 
         $width = round($layer->getLayerHeight() * $widthRatioMultiplier);
@@ -245,7 +358,7 @@ class GeoServerCommunicator extends AbstractCommunicator
             new CacheItemConfig("DescribeLayer~${workspace}~${layerName}", $cacheLifetime)
         );
         return $response["layerDescriptions"]
-            ?? throw new \Exception('Could not obtain layer description from GeoServer.');
+            ?? throw new Exception('Could not obtain layer description from GeoServer.');
     }
 
     /**
