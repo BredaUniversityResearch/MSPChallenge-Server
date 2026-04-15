@@ -23,11 +23,11 @@ final class Version20260415081618 extends MSPMigration
 
     protected function onUp(Schema $schema): void
     {
+        // phpcs:ignoreFile Generic.Files.LineLength.TooLong
         $this->addSql(<<<'SQL'
         DELETE from game_config_version WHERE game_config_files_id IN (SELECT id from game_config_files WHERE filename='North_Sea_Digitwin_basic');
         DELETE from game_config_files WHERE filename='North_Sea_Digitwin_basic'
         SQL);
-
     }
 
     protected function onDown(Schema $schema): void
