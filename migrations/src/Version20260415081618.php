@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use App\Migration\MSPDatabaseType;
+use App\Migration\MSPMigration;
 use Doctrine\DBAL\Schema\Schema;
 
 /**
@@ -16,7 +18,7 @@ final class Version20260415081618 extends MSPMigration
         return 'Remove NS Digitwin config records from game_config_files and game_config_version tables';
     }
 
-    protected function getDatabaseType(): ?MSPDatabaseType
+    protected function getDatabaseType(): MSPDatabaseType
     {
         return new MSPDatabaseType(MSPDatabaseType::DATABASE_TYPE_SERVER_MANAGER);
     }
