@@ -63,9 +63,6 @@ services:
 
       # See https://xdebug.org/docs/all_settings#mode
       XDEBUG_MODE: "${XDEBUG_MODE:-off}"
-    extra_hosts:
-      # Ensure that host.docker.internal is correctly defined on Linux
-      - host.docker.internal:host-gateway
     tty: true
     # on dev the internal and external web server port need to match because of mitmproxy reserve proxy
     ports:
