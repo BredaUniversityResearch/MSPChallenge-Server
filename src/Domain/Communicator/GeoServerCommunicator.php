@@ -145,7 +145,6 @@ class GeoServerCommunicator extends AbstractCommunicator
         // Step 2: fetch bounding box via the appropriate OGC describe operation
         $bb = match ($owsType) {
             'WCS' => $this->getBoundingBoxFromWCS($owsURL, $typeName, $workspace, $layerName, $cacheLifetime),
-            'WFS' => $this->getBoundingBoxFromWFS($owsURL, $typeName, $workspace, $layerName, $cacheLifetime),
             default => throw new Exception(
                 "Unsupported owsType '{$owsType}' for layer {$layerName}"
             ),
@@ -186,14 +185,14 @@ class GeoServerCommunicator extends AbstractCommunicator
 
         $crawler = new Crawler($xml);
 
-        // Find a projected (non-CRS84) bounding box for native coordinates
+        // Prefer the native/projected EPSG:3035 bbox, allowing for slight CRS string variations
         $bboxNode = $crawler->filterXPath(
-            '//ows:BoundingBox[not(contains(@crs, "CRS84"))]'
-        );
+            '//ows:BoundingBox[contains(@crs, "EPSG::3035") or contains(@crs, "EPSG:3035")]'
+        )->first();
 
         if (!$bboxNode->count()) {
-            // Fall back to CRS84 (lon/lat) if no projected bbox found
-            $bboxNode = $crawler->filterXPath('//ows:BoundingBox');
+            // Fall back to any bbox if no EPSG:3035 bbox is found
+            $bboxNode = $crawler->filterXPath('//ows:BoundingBox')->first();
         }
 
         if (!$bboxNode->count()) {
@@ -202,8 +201,8 @@ class GeoServerCommunicator extends AbstractCommunicator
             );
         }
 
-        $lower = explode(' ', $bboxNode->filterXPath('//ows:LowerCorner')->text());
-        $upper = explode(' ', $bboxNode->filterXPath('//ows:UpperCorner')->text());
+        $lower = preg_split('/\s+/', trim($bboxNode->filterXPath('.//ows:LowerCorner')->text()));
+        $upper = preg_split('/\s+/', trim($bboxNode->filterXPath('.//ows:UpperCorner')->text()));
 
         if (count($lower) < 2 || count($upper) < 2) {
             throw new Exception(
@@ -212,65 +211,10 @@ class GeoServerCommunicator extends AbstractCommunicator
         }
 
         return [
-            'minx' => (float) $lower[0],
-            'miny' => (float) $lower[1],
-            'maxx' => (float) $upper[0],
-            'maxy' => (float) $upper[1],
-        ];
-    }
-
-    /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws InvalidArgumentException
-     * @throws RedirectionExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws ClientExceptionInterface
-     * @throws Exception
-     */
-    private function getBoundingBoxFromWFS(
-        string $owsURL,
-        string $typeName,
-        string $workspace,
-        string $layerName,
-        ?int $cacheLifetime
-    ): array {
-        // WFS DescribeFeatureType only gives schema, not bbox.
-        // Use WMS GetCapabilities scoped to workspace instead.
-        $capsURL = str_replace('wfs', 'wms', rtrim($owsURL, '?')).
-            "?service=WMS&version=1.1.1&request=GetCapabilities";
-
-        $xml = $this->getResource(
-            $capsURL,
-            false,
-            new CacheItemConfig("WMSCapabilities~{$workspace}", $cacheLifetime)
-        );
-
-        $crawler = new Crawler($xml);
-
-        $layers = $crawler->filterXPath(
-            "//Layer[Name='{$workspace}:{$layerName}' or Name='{$layerName}']"
-        );
-
-        if (!$layers->count()) {
-            throw new Exception(
-                "Layer {$layerName} not found in WMS GetCapabilities for workspace {$workspace}"
-            );
-        }
-
-        $bboxNode = $layers->filterXPath('BoundingBox')->first();
-
-        if (!$bboxNode->count()) {
-            throw new Exception(
-                "No BoundingBox found in WMS GetCapabilities for layer {$layerName}"
-            );
-        }
-
-        return [
-            'minx' => (float) $bboxNode->attr('minx'),
-            'miny' => (float) $bboxNode->attr('miny'),
-            'maxx' => (float) $bboxNode->attr('maxx'),
-            'maxy' => (float) $bboxNode->attr('maxy'),
+            'minx' => (float) $lower[1],
+            'miny' => (float) $lower[0],
+            'maxx' => (float) $upper[1],
+            'maxy' => (float) $upper[0],
         ];
     }
 
