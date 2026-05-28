@@ -234,6 +234,8 @@ when@dev:
                     template: 'data_collector/msp.html.twig'
                 - 'controller.service_arguments'
 
+        Symfony\Contracts\HttpClient\HttpClientInterface: '@proxied.client'
+
 when@test:
     parameters:
         app.session_raster_dir: '%kernel.logs_dir%/raster/'

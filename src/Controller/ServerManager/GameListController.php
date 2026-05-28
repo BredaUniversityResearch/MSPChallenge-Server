@@ -281,6 +281,19 @@ class GameListController extends BaseController
             $logArray = array_slice($logArray, -5);
         }
         $logArray = array_map(fn($line) => json_decode($line, true), $logArray);
+        foreach ($logArray as &$log) {
+            if (!isset($log['message']) || !isset($log['context']) || !is_array($log['context'])) {
+                continue;
+            }
+            $replacements = [];
+            foreach ($log['context'] as $key => $value) {
+                if (is_scalar($value) || $value === null) {
+                    $replacements['{' . $key . '}'] = (string) $value;
+                }
+            }
+            $log['message'] = strtr($log['message'], $replacements);
+        }
+        unset($log);
         return $this->render('manager/GameList/gamelist_log.html.twig', [
             'type' => $type,
             'logToastBody' => $logArray
