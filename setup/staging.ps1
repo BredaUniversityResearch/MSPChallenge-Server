@@ -9,15 +9,32 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearc
 if (-not $env:CADDY_MERCURE_JWT_SECRET) {
     $env:CADDY_MERCURE_JWT_SECRET = [guid]::NewGuid().ToString("N")
 }
-
 if (-not $env:APP_SECRET) {
     $env:APP_SECRET = [guid]::NewGuid().ToString("N")
+}
+if (-not $env:DATABASE_PASSWORD) {
+    $env:DATABASE_PASSWORD = [guid]::NewGuid().ToString("N")
+    $env:DATABASE_CREATOR_PASSWORD = $env:DATABASE_PASSWORD
+}
+if (-not $env:DATABASE_CREATOR_PASSWORD) {
+    $env:DATABASE_CREATOR_PASSWORD = [guid]::NewGuid().ToString("N")
+    $env:DATABASE_PASSWORD = $env:DATABASE_CREATOR_PASSWORD
+}
+if (-not $env:JWT_PASSPHRASE) {
+    $env:JWT_PASSPHRASE = [guid]::NewGuid().ToString("N")
+}
+if (-not $env:MY2_PASSWORD) {
+    $env:MY2_PASSWORD = [guid]::NewGuid().ToString("N")
 }
 
 # Append variables to .env.local
 Set-Content -Path ".env.local" -Value @"
 CADDY_MERCURE_JWT_SECRET=$env:CADDY_MERCURE_JWT_SECRET
 APP_SECRET=$env:APP_SECRET
+DATABASE_PASSWORD=$env:DATABASE_PASSWORD
+DATABASE_CREATOR_PASSWORD=$env:DATABASE_CREATOR_PASSWORD
+JWT_PASSPHRASE=$env:JWT_PASSPHRASE
+MY2_PASSWORD=$env:MY2_PASSWORD
 "@
 
 docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.staging.yml" up -d
