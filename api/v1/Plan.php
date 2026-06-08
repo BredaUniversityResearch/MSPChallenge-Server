@@ -1225,7 +1225,8 @@ class Plan extends Base
                     if (!empty($energyOutput)) {
                         $geom['energy_output'] = $energyOutput;
                     } elseif (in_array($l['layer_editing_type'], array(
-                        "cable","transformer","socket","sourcepoint","sourcepolygon","sourcepolygonpoint"
+                        "cable","transformer","socket","sourcepoint","sourcepolygon","sourcepolygonpoint",
+                        "multitypesourcepolygon"
                     ))) { //Sanity check that energy types have the required values.
                         $errors[] = "Got geometry ID ".$geom['geometry_id'].
                             " which is on an energy type layer (Layer ID: ".$l['layer_id']." type: ".
