@@ -85,7 +85,7 @@ param(
     [string]$UrlWsServerHost = "www.example.com",
     [string]$UrlWsServerScheme = "wss",
     [string]$UrlWsServerUri = "/ws/",
-    [int]$ServerPort = 443,
+    [int]$ServerPort = 80,
     [int]$WsServerPort = 45001,
     [int]$HttpsPort = 443,
     [int]$Http3Port = 443,
@@ -315,11 +315,6 @@ $parameterMetadata = @{
     ServerPort = @{
         EnvVar = "WEB_SERVER_PORT"
         Tab = "Advanced settings"
-        Presets = @{
-            Proxy = 80
-            Local = 80
-            LAN = 80
-        }
         ReadOnly = @{
             Direct = $true
             Proxy = $false

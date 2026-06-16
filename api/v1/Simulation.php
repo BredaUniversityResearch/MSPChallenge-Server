@@ -173,7 +173,7 @@ class Simulation extends Base
                 $this->logWatchdogEvent(
                     $watchdog,
                     $url != null ?
-                        sprintf('Requesting state change using url: %s', $url) :
+                        sprintf('Requesting state change %s using url: %s', $newWatchdogGameState->value, $url) :
                         new Exception('no server assigned. Watchdog will be removed')
                 );
                 $message = new GameStateChangedMessage();

@@ -281,7 +281,7 @@ class Game extends Base
             $layerDependencies = [];
             if (in_array(
                 $layer->getLayerEditingType(),
-                ['transformer', 'socket', 'sourcepoint', 'sourcepolygon']
+                ['transformer', 'socket', 'sourcepoint', 'sourcepolygon', 'multitypesourcepolygon']
             ) &&
                 // find the corresponding green or grey cable layer
                 null !== $cableLayer = $cableLayers->first(
@@ -294,7 +294,7 @@ class Game extends Base
 
             if (in_array(
                 $layer->getLayerEditingType(),
-                ['sourcepoint', 'sourcepolygon']
+                ['sourcepoint', 'sourcepolygon', 'multitypesourcepolygon']
             ) &&
                 // find the corresponding green or grey cable layer
                 null !== $socketLayer = $socketLayers->first(

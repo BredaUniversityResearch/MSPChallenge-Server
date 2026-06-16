@@ -177,7 +177,8 @@ class Database
         try {
             $query = $this->executeQuery($statement, $vars);
         } catch (Exception $e) {
-            if ($e->getCode() == 2006) { // MySQL server has gone away
+            // SQLSTATE[HY000]: General error: 2006 MySQL server has gone away
+            if (($e instanceof \PDOException) && $e->errorInfo[1] == '2006') {
                 // log warning and try to reconnect once. I know, mis-using the analytics logger for this
                 SymfonyToLegacyHelper::getInstance()->getAnalyticsLogger()->warning($e->getMessage());
                 $e = null; // reset exception such that we can try again

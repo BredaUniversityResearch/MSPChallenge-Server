@@ -24,6 +24,16 @@ framework:
     secrets:
       vault_directory: '%kernel.project_dir%/.secrets'
 
+when@dev:
+  framework:
+    http_client:
+      scoped_clients:
+        proxied.client:
+          scope: '^https?://'
+          proxy: 'http://mitmproxy_outbound:8080'
+          verify_peer: false
+          verify_host: false
+
 when@test:
     framework:
         test: true

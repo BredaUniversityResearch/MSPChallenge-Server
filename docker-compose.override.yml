@@ -37,6 +37,16 @@ services:
     logging:
       driver: "local"
 
+  mitmproxy_outbound:
+    image: mitmproxy/mitmproxy:10.3.1
+    entrypoint: "mitmweb --web-host 0.0.0.0 --listen-port 8080 --web-port 8081"
+    networks:
+      - msp_network
+    ports:
+      - "8083:8081"
+    logging:
+      driver: "local"
+
   php:
     build:
         context: .
@@ -63,9 +73,6 @@ services:
 
       # See https://xdebug.org/docs/all_settings#mode
       XDEBUG_MODE: "${XDEBUG_MODE:-off}"
-    extra_hosts:
-      # Ensure that host.docker.internal is correctly defined on Linux
-      - host.docker.internal:host-gateway
     tty: true
     # on dev the internal and external web server port need to match because of mitmproxy reserve proxy
     ports:
