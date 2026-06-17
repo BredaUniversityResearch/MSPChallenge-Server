@@ -972,17 +972,21 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             // $plan is already persisted by caller.
             $plan->addPlanLayer($planLayer);
             foreach ($layerConfig['deleted'] as $layerGeometryDeletedConfig) {
-                $planDelete = new PlanDelete();
-                // $planDelete is cascaded by $derivedLayer, so no persist needed
-                $derivedLayer->addPlanDelete($planDelete);
-                $plan->addPlanDelete($planDelete);
                 $originalPlannedDeletedGeometry = $this->findNewPersistentGeometry(
                     $layerGeometryDeletedConfig['base_geometry_info'],
                     $context
                 );
                 if (null === $originalPlannedDeletedGeometry) {
+                    $this->sessionLogHandler->warning(
+                        'Could not find geometry given: {geometry_info}.',
+                        ['geometry_info' => $layerGeometryDeletedConfig['base_geometry_info']]
+                    );
                     continue;
                 }
+                $planDelete = new PlanDelete();
+                // $planDelete is cascaded by $derivedLayer, so no persist needed
+                $derivedLayer->addPlanDelete($planDelete);
+                $plan->addPlanDelete($planDelete);
                 // $originalPlannedDeletedGeometry is cascaded by $planDelete (and vice versa), so no persist needed
                 $originalPlannedDeletedGeometry->addPlanDelete($planDelete);
             }
