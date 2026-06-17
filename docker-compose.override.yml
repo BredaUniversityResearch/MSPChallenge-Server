@@ -80,12 +80,3 @@ services:
       - target: 80
         published: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
         protocol: tcp
-
-  simulations:
-    build:
-      context: .
-      dockerfile: simulations/linux-x64/Dockerfile
-      args:
-        source_dir: simulations/linux-x64
-    volumes:
-        - ./simulations/linux-x64:/app
