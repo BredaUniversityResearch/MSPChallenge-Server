@@ -287,9 +287,7 @@ class GameListController extends BaseController
             }
             $replacements = [];
             foreach ($log['context'] as $key => $value) {
-                if (is_scalar($value) || $value === null) {
-                    $replacements['{' . $key . '}'] = (string) $value;
-                }
+                $replacements['{' . $key . '}'] = json_encode($value);
             }
             $log['message'] = strtr($log['message'], $replacements);
         }
