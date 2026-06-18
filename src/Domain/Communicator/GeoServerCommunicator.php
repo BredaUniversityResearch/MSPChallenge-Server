@@ -21,6 +21,10 @@ class GeoServerCommunicator extends AbstractCommunicator
 {
     private ?int $downloadsCacheLifetime = null;
     private ?int $resultsCacheLifetime = null;
+    /** @var array<string, string> */
+    private array $wmsCapabilitiesXmlByWorkspace = [];
+    /** @var array<string, array<string, array<string, float>>> */
+    private array $wmsBoundingBoxByWorkspaceAndLayer = [];
 
     public function __construct(
         HttpClientInterface $httpClient,
@@ -134,17 +138,17 @@ class GeoServerCommunicator extends AbstractCommunicator
             "DescribeLayer returned empty layerDescriptions for {$layerName}"
         );
 
-        $rawOwsURL = $description['owsURL'] ?? throw new \Exception(
-            "DescribeLayer returned no owsURL for {$layerName}"
-        );
+        $rawOwsURL = (string) ($description['owsURL'] ?? '');
         // Strip everything up to and including 'geoserver/' to get a relative URL
-        $owsURL = preg_replace('#^.*geoserver/#', '', $rawOwsURL);
-        $owsType = strtoupper($description['owsType'] ?? '');
+        $owsURL = $rawOwsURL !== '' ? preg_replace('#^.*geoserver/#', '', $rawOwsURL) : '';
+        $owsType = strtoupper((string) ($description['owsType'] ?? ''));
         $typeName = $description['typeName'] ?? "{$workspace}:{$layerName}";
 
         // Step 2: fetch bounding box via the appropriate OGC describe operation
         $bb = match ($owsType) {
             'WCS' => $this->getBoundingBoxFromWCS($owsURL, $typeName, $workspace, $layerName, $cacheLifetime),
+            // Some GeoServer setups return empty owsType/owsURL for raster WMS layers.
+            'WMS', '' => $this->getBoundingBoxFromWMSCapabilities($workspace, $layerName, $cacheLifetime),
             default => throw new Exception(
                 "Unsupported owsType '{$owsType}' for layer {$layerName}"
             ),
@@ -216,6 +220,110 @@ class GeoServerCommunicator extends AbstractCommunicator
             'maxx' => (float) $upper[1],
             'maxy' => (float) $upper[0],
         ];
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws RedirectionExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws Exception
+     */
+    private function getBoundingBoxFromWMSCapabilities(
+        string $workspace,
+        string $layerName,
+        ?int $cacheLifetime
+    ): array {
+        $qualifiedLayerName = "{$workspace}:{$layerName}";
+
+        // Fast path: re-use a bbox resolved earlier in this same PHP request.
+        $cachedBoundingBoxes = $this->wmsBoundingBoxByWorkspaceAndLayer[$workspace] ?? [];
+        if (isset($cachedBoundingBoxes[$qualifiedLayerName])) {
+            return $cachedBoundingBoxes[$qualifiedLayerName];
+        }
+        if (isset($cachedBoundingBoxes[$layerName])) {
+            return $cachedBoundingBoxes[$layerName];
+        }
+
+        // Re-use the (large) capabilities XML for this workspace within this request.
+        if (!isset($this->wmsCapabilitiesXmlByWorkspace[$workspace])) {
+            $this->wmsCapabilitiesXmlByWorkspace[$workspace] = $this->getResource(
+                "{$workspace}/wms?service=WMS&version=1.1.1&request=GetCapabilities",
+                false,
+                new CacheItemConfig("WMSGetCapabilities~{$workspace}", $cacheLifetime)
+            );
+        }
+
+        $xml = $this->wmsCapabilitiesXmlByWorkspace[$workspace];
+
+        $crawler = new Crawler($xml);
+        $candidateLayerNames = [$qualifiedLayerName, $layerName];
+        $layerNode = null;
+        $matchedLayerName = null;
+
+        foreach ($candidateLayerNames as $candidateLayerName) {
+            $candidateNode = $crawler->filterXPath(
+                sprintf(
+                    '//*[local-name()="Layer" and ./*[local-name()="Name" and normalize-space(text())="%s"]]',
+                    $candidateLayerName
+                )
+            )->first();
+
+            if ($candidateNode->count()) {
+                $layerNode = $candidateNode;
+                $matchedLayerName = $candidateLayerName;
+                break;
+            }
+        }
+
+        if ($layerNode === null || !$layerNode->count()) {
+            throw new Exception(
+                "WMS GetCapabilities returned no Layer entry for {$qualifiedLayerName} (or {$layerName})"
+            );
+        }
+
+        $bboxNode = $layerNode->filterXPath(
+            './/*[local-name()="BoundingBox" and (@SRS="EPSG:3035" or @CRS="EPSG:3035")]'
+        )->first();
+
+        if (!$bboxNode->count()) {
+            $bboxNode = $layerNode->filterXPath('.//*[local-name()="BoundingBox"]')->first();
+        }
+
+        if (!$bboxNode->count()) {
+            $bboxNode = $layerNode->filterXPath('.//*[local-name()="LatLonBoundingBox"]')->first();
+        }
+
+        if (!$bboxNode->count()) {
+            throw new Exception("WMS GetCapabilities returned no BoundingBox for {$qualifiedLayerName}");
+        }
+
+        $minx = $bboxNode->attr('minx');
+        $miny = $bboxNode->attr('miny');
+        $maxx = $bboxNode->attr('maxx');
+        $maxy = $bboxNode->attr('maxy');
+
+        if ($minx === null || $miny === null || $maxx === null || $maxy === null) {
+            throw new Exception("WMS BoundingBox has unexpected format for {$qualifiedLayerName}");
+        }
+
+        $bbox = [
+            'minx' => (float) $minx,
+            'miny' => (float) $miny,
+            'maxx' => (float) $maxx,
+            'maxy' => (float) $maxy,
+        ];
+
+        // Store under both aliases to maximize in-request cache hits.
+        $this->wmsBoundingBoxByWorkspaceAndLayer[$workspace][$qualifiedLayerName] = $bbox;
+        $this->wmsBoundingBoxByWorkspaceAndLayer[$workspace][$layerName] = $bbox;
+        if ($matchedLayerName !== null) {
+            $this->wmsBoundingBoxByWorkspaceAndLayer[$workspace][$matchedLayerName] = $bbox;
+        }
+
+        return $bbox;
     }
 
     /**
