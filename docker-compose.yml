@@ -73,6 +73,7 @@ services:
       - supervisor_log:/var/log/supervisor:rw
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - session_log:/app/ServerManager/log:rw
+      - simulations_data:/app/simulations/linux-x64:ro
     networks:
       - msp_network
     environment:
@@ -139,6 +140,7 @@ services:
       driver: "local"
 
   simulations:
+    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:latest
     ports:
       - "${WATCHDOG_PORT:-45000}:${WATCHDOG_PORT:-45000}"
     restart: always
@@ -151,6 +153,8 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    volumes:
+        - simulations_data:/app:rw
     networks:
       - msp_network
 
@@ -169,6 +173,7 @@ volumes:
   fluent_bit_output:
   supervisor_log:
   session_log:
+  simulations_data:
 ###> doctrine/doctrine-bundle ###
   db-data:
 ###< doctrine/doctrine-bundle ###

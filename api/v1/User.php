@@ -55,7 +55,7 @@ class User extends Base implements JWTUserInterface
                 $adminHasPassword = !empty($password_admin["admin"]["value"]);
             }
             if ($password_player["provider"] == "local") {
-                foreach ($password_player["value"] as $password) {
+                foreach ($password_player["value"] ?? [] as $password) {
                     if (!empty($password)) {
                         $playerHasPassword = true;
                         break;
