@@ -112,18 +112,25 @@ class VersionsProvider implements ProviderInterface
     {
         $root = $this->kernel->getProjectDir() . DIRECTORY_SEPARATOR;
         foreach ($this->components as $component => $folder) {
+            try {
+                $versionString = $this->getVersionTxtContents(
+                    $root . $folder
+                );
+            } catch (\RuntimeException /** $e */) {
+                // if we cannot find the version.txt, e.g. when there is no simulations volume mapping,
+                //   then fall-back to 0.0.0
+                $versionString = '0.0.0';
+            }
             $this->componentsVersions[$component] = $this->getFormattedVersion(
                 $component,
-                $this->getVersionTxtContents(
-                    $root . $folder
-                )
+                $versionString
             );
         }
     }
 
     private function getVersionTxtContents(string $path): string
     {
-        $result = file_get_contents($path . $this->versionFileName);
+        $result = @file_get_contents($path . $this->versionFileName);
         if (false === $result) {
             throw new \RuntimeException(sprintf('Reading "%s" failed', $path . $this->versionFileName));
         }
