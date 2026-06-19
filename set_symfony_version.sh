@@ -6,7 +6,7 @@ SYMFONY_VERSION_DEFAULT="7.4"
 
 setSymfonyVersion() {
   [[ ! -z "$1" ]] && SYMFONY_VERSION=$1
-  if [[ -z $SYMFONY_VERSION || "${SYMFONY_VERSION}" == "default" ]]; then
+  if [[ -z $SYMFONY_VERSION || "${SYMFONY_VERSION}" == "default" || "${SYMFONY_VERSION}" == "6.4" ]]; then
     SYMFONY_VERSION="${SYMFONY_VERSION_DEFAULT}"
   fi
   COMPOSER_ARGS="${@:2}"

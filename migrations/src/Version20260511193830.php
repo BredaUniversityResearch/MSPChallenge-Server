@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use App\Migration\MSPDatabaseType;
+use App\Migration\MSPMigration;
 use Doctrine\DBAL\Schema\Schema;
+
 
 /**
  * Auto-generated Migration: Please modify to your needs!
@@ -16,7 +19,7 @@ final class Version20260511193830 extends MSPMigration
         return 'Added enum value multitypesourcepolygon to column layer_editing_type in layer table';
     }
 
-    protected function getDatabaseType(): ?MSPDatabaseType
+    protected function getDatabaseType(): MSPDatabaseType
     {
         return new MSPDatabaseType(MSPDatabaseType::DATABASE_TYPE_GAME_SESSION);
     }
