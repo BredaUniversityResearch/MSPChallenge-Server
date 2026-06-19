@@ -2,7 +2,7 @@
 
 namespace App\Entity\SessionAPI;
 
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[\AllowDynamicProperties]
 class ImmersiveSessionStatusResponse

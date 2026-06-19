@@ -98,7 +98,6 @@ class MonitorDockerApiEventsCommand extends Command
             $browser->requestStreaming('GET', $eventsUrl)->then(
                 function (ResponseInterface $response) use ($dockerApi) {
                     $body = $response->getBody();
-                    assert($body instanceof \Psr\Http\Message\StreamInterface);
                     assert($body instanceof \React\Stream\ReadableStreamInterface);
                     $buffer = '';
                     $body->on('data', $this->createStreamDataReceivedFunction($dockerApi, $buffer));
@@ -113,13 +112,14 @@ class MonitorDockerApiEventsCommand extends Command
                         );
                     });
                 },
-                function (Exception $e) use ($dockerApi) {
+                function (\Throwable $e) use ($dockerApi) {
                     $this->outputDockerApiMessage(
                         $dockerApi->getId(),
                         'error',
                         'Failed to connect to Docker events endpoint: '.$e->getMessage()
                     );
                     $this->loop->addTimer(10, fn() => $this->createConnectionFunction($dockerApi)());
+                    return null;
                 }
             );
         };

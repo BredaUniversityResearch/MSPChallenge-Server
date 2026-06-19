@@ -42,11 +42,10 @@ Encore
      */
     .addEntry('app', './assets/app.js')
 
-
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
 
-    // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
+    // enables the Symfony UX Stimulus bridge (used in assets/stimulus_bootstrap.js)
     .enableStimulusBridge('./assets/controllers.json')
 
     // will require an extra script tag for runtime.js
@@ -75,7 +74,7 @@ Encore
     // enables and configure @babel/preset-env polyfills
     .configureBabelPresetEnv((config) => {
         config.useBuiltIns = 'usage';
-        config.corejs = '3.23';
+        config.corejs = '3.38';
     })
 
     // enables Sass/SCSS support

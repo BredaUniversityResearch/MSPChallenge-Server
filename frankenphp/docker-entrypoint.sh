@@ -33,9 +33,7 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 			echo 'The database is now ready and reachable'
 		fi
 
-		if [ "$( find ./migrations -iname '*.php' -print -quit )" ]; then
-			php bin/console doctrine:migrations:migrate --no-interaction --all-or-nothing --em msp_server_manager # -vvv for very verbose mode
-		fi
+		php bin/console doctrine:migrations:migrate --no-interaction --all-or-nothing --em msp_server_manager -vvv # -vvv for very verbose mode
 	fi
 
   chown -R "$(whoami)":www-data export raster running_session_config ServerManager/configfiles ServerManager/log ServerManager/saves ServerManager/session_archive session_archive var vendor POV

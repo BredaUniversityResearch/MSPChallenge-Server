@@ -17,9 +17,11 @@ class Setting extends EntityBase
     private ?int $id = null;
 
     #[ORM\Column(length: 50)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $value = null;
 
     public function __construct(?string $name = '', ?string $value = '')

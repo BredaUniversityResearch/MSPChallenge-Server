@@ -16,9 +16,11 @@ class GameServer extends EntityBase
     private ?int $id = null;
 
     #[ORM\Column(length: 128)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $address = null;
 
     public function getId(): ?int

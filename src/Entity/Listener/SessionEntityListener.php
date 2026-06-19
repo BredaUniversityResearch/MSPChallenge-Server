@@ -61,6 +61,7 @@ class SessionEntityListener implements PostLoadEventListenerInterface, PrePersis
     public function postLoad(PostLoadEventArgs $event): void
     {
         $entity = $event->getObject();
+        // @phpstan-ignore-next-line instanceof.alwaysTrue
         if (($event->getObjectManager() instanceof EntityManagerInterface) &&
             in_array(EntityOriginTrait::class, Util::getClassUsesRecursive($entity)) &&
             (null !== $database = $event->getObjectManager()->getConnection()->getDatabase()) &&

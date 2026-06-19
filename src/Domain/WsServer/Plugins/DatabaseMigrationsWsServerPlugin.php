@@ -40,7 +40,7 @@ class DatabaseMigrationsWsServerPlugin extends Plugin
                         });
                     $gameSessionId = $this->getGameSessionIdFilter();
                     if ($gameSessionId != null) {
-                        $gameSessionIds = $gameSessionIds->only($gameSessionId);
+                        $gameSessionIds = $gameSessionIds->only([$gameSessionId]);
                     }
                     $gameSessionIds = $gameSessionIds->all(); // to raw array
 

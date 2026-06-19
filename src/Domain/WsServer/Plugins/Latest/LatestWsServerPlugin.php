@@ -54,12 +54,9 @@ class LatestWsServerPlugin extends Plugin
                     }
                     $this->addOutput(json_encode($payloadContainer));
                 })
-                ->otherwise(function ($reason) {
-                    $context = [];
-                    if ($reason instanceof \Throwable) {
-                        $context['exception'] = $reason;
-                    }
-                    $this->getLogger()?->error($reason, $context);
+                ->catch(function (\Throwable $reason) {
+                    $context['exception'] = $reason;
+                    $this->getLogger()?->error($reason->getMessage(), $context);
                     if ($reason instanceof ClientDisconnectedException) {
                         return null;
                     }
@@ -165,7 +162,7 @@ class LatestWsServerPlugin extends Plugin
             ->getClientInfoPerSessionCollection();
         $gameSessionId = $this->getGameSessionIdFilter();
         if ($gameSessionId != null) {
-            $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($gameSessionId);
+            $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only([$gameSessionId]);
         }
         $promises = [];
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {

@@ -18,15 +18,19 @@ class EnergyOutput
     private ?Geometry $geometry;
 
     #[ORM\Column(type: Types::STRING, length: 20, options: ['default' => 0])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $energyOutputCapacity = '0';
 
     #[ORM\Column(type: Types::STRING, length: 20, options: ['default' => 0])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $energyOutputMaxcapacity = '0';
 
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 0])]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $energyOutputLastupdate = 0;
 
     #[ORM\Column(type: Types::SMALLINT, length: 4, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $energyOutputActive;
 
     public function getEnergyOutputId(): ?int

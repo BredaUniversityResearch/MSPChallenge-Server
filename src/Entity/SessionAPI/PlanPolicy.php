@@ -16,10 +16,12 @@ class PlanPolicy
 
     #[ORM\ManyToOne(inversedBy: 'planPolicies')]
     #[ORM\JoinColumn(name: 'plan_id', referencedColumnName: 'plan_id', nullable: false, onDelete: 'CASCADE')]
+    // @phpstan-ignore-next-line Plan|null but database expects
     private ?Plan $plan = null;
 
     #[ORM\ManyToOne(inversedBy: 'planPolicies')]
     #[ORM\JoinColumn(name: 'policy_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    // @phpstan-ignore-next-line Policy|null but database expects
     private ?Policy $policy = null;
 
     public function getId(): ?int

@@ -242,17 +242,17 @@ class GameLatest extends CommonBase
                         ->update('game')
                         ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                 )
-                ->done(
+                ->then(
                     function (Result $result) use (&$tick, $assureGameLatestUpdate) {
                         $tick['lastupdate'] = microtime(true);
-                        $assureGameLatestUpdate->resolve();
+                        $assureGameLatestUpdate->resolve(null);
                     },
                     function ($reason) use ($assureGameLatestUpdate) {
                         $assureGameLatestUpdate->reject($reason);
                     }
                 );
             } else {
-                $assureGameLatestUpdate->resolve();
+                $assureGameLatestUpdate->resolve(null);
             }
             return $assureGameLatestUpdate->promise()
                 ->then(function () use ($tick, $showDebug) {

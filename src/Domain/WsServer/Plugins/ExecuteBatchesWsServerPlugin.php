@@ -82,7 +82,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
                     });
                 $gameSessionId = $this->getGameSessionIdFilter();
                 if ($gameSessionId != null) {
-                    $gameSessionIds = $gameSessionIds->only($gameSessionId);
+                    $gameSessionIds = $gameSessionIds->only([$gameSessionId]);
                 }
                 $gameSessionIds = $gameSessionIds->all(); // to raw array
                 $toPromiseFunctions = [];
@@ -104,7 +104,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
             ->getClientInfoPerSessionCollection();
         $gameSessionId = $this->getGameSessionIdFilter();
         if ($gameSessionId != null) {
-            $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($gameSessionId);
+            $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only([$gameSessionId]);
         }
         $promises = [];
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {
@@ -215,7 +215,7 @@ class ExecuteBatchesWsServerPlugin extends Plugin
         // set batch as "communicated"
         $deferred = new Deferred();
         $this->getBatch($connResourceId)->setCommunicated($batchGuid)
-            ->done(
+            ->then(
                 function (/* Result $result */) use ($deferred, $value) {
                     $deferred->resolve($value);
                 },

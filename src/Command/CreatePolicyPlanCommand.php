@@ -221,7 +221,7 @@ class CreatePolicyPlanCommand extends Command
         try {
             return $em->createQueryBuilder()
                 ->select('g')
-                ->from('App:Game', 'g')
+                ->from(Game::class, 'g')
                 ->setMaxResults(1)
                 ->getQuery()
                 ->getOneOrNullResult();
@@ -684,14 +684,14 @@ class CreatePolicyPlanCommand extends Command
     private function cleanUpPreviousPlan(): void
     {
         $em = $this->getGameSessionEntityManager();
-        $em->createQueryBuilder()->delete('App:Geometry', 'g')->where('g.geometryFID LIKE :fid')
+        $em->createQueryBuilder()->delete(Geometry::class, 'g')->where('g.geometryFID LIKE :fid')
             ->setParameter('fid', self::TEST_DATA_PREFIX.'%')->getQuery()->execute();
-        $em->createQueryBuilder()->delete('App:PlanPolicy', 'pp')->getQuery()->execute();
-        $em->createQueryBuilder()->delete('App:Plan', 'p')->where('p.planName LIKE :planName')
+        $em->createQueryBuilder()->delete(PlanPolicy::class, 'pp')->getQuery()->execute();
+        $em->createQueryBuilder()->delete(Plan::class, 'p')->where('p.planName LIKE :planName')
             ->setParameter('planName', self::TEST_DATA_PREFIX.'%')->getQuery()->execute();
-        $em->createQueryBuilder()->delete('App:Layer', 'l')->where('l.layerName LIKE :layerName')
+        $em->createQueryBuilder()->delete(Layer::class, 'l')->where('l.layerName LIKE :layerName')
             ->setParameter('layerName', self::TEST_DATA_PREFIX.'%')->getQuery()->execute();
-        $em->createQueryBuilder()->delete('App:Policy', 'p')->getQuery()->execute();
+        $em->createQueryBuilder()->delete(Policy::class, 'p')->getQuery()->execute();
         $em->flush();
     }
 

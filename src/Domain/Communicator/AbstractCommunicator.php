@@ -73,7 +73,7 @@ abstract class AbstractCommunicator
 
     /**
      * @param string|null $baseURL
-     * @return static(AbstractCommunicator)
+     * @return static
      */
     public function setBaseURL(?string $baseURL): static
     {
@@ -92,7 +92,7 @@ abstract class AbstractCommunicator
 
     /**
      * @param string $username
-     * @return static(AbstractCommunicator)
+     * @return static
      */
     public function setUsername(string $username): static
     {
@@ -111,7 +111,7 @@ abstract class AbstractCommunicator
 
     /**
      * @param string $password
-     * @return static(AbstractCommunicator)
+     * @return static
      */
     public function setPassword(string $password): static
     {

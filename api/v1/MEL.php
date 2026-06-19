@@ -486,7 +486,7 @@ class MEL extends Base
             WHERE
                 rn = 1
             AND
-                enabled = 'true';            
+                enabled = 'true';
             SQL,
             ['currentMonth' => (new Game())->GetCurrentMonthAsId()]
         );
@@ -550,7 +550,7 @@ class MEL extends Base
                         geometry_with_months AS (
                             SELECT g.geometry_layer_id, jt.months
                             FROM
-                                geometry g 
+                                geometry g
                                 JOIN JSON_TABLE(JSON_UNQUOTE(JSON_EXTRACT(g.geometry_data, '$.%s')), '$.items[*]'
                                     COLUMNS (
                                         months JSON PATH '$.months'
@@ -630,7 +630,7 @@ SUBQUERY,
     public function GetFishing(int $game_month): array
     {
         $data = $this->getDatabase()->query(
-            "SELECT SUM(fishing_amount) as scalar, fishing_type as name FROM fishing 
+            "SELECT SUM(fishing_amount) as scalar, fishing_type as name FROM fishing
 									LEFT JOIN plan ON plan.plan_id=fishing.fishing_plan_id
 									WHERE fishing_active = 1 AND plan_gametime <= ?
 									GROUP BY fishing_type",
@@ -709,7 +709,7 @@ SUBQUERY,
         $qb = $conn->createQueryBuilder();
         /** @var ?\App\Entity\SessionAPI\Layer $layer */
         $layer = $qb
-            ->from('App:Layer', 'l')
+            ->from(\App\Entity\SessionAPI\Layer::class, 'l')
             ->select('l')
             ->where('l.layerName = :name')
             ->setParameter('name', $name)
@@ -722,7 +722,7 @@ SUBQUERY,
         $result = [];
         $layerGeoType = $layer->getLayerGeoType();
         if ($layerGeoType == LayerGeoType::RASTER) {
-            $result["geotype"] = $layerGeoType?->value ?? ''; // enum to string
+            $result["geotype"] = $layerGeoType->value ?? ''; // enum to string
             $result["raster"] = $layer->getLayerRaster()?->getUrl() ?? '';
             return $result;
         }
@@ -731,7 +731,7 @@ SUBQUERY,
         $qb = $conn->createQueryBuilder();
         $qb
             ->select('l, pl, ge') // p, pp, pol, pt, ptft, pft
-            ->from('App:Layer', 'l')
+            ->from(\App\Entity\SessionAPI\Layer::class, 'l')
             ->leftJoin('l.planLayer', 'pl')
             ->leftJoin('l.geometry', 'ge')
             ->where('l.layerId = :layerId OR l.originalLayer = :layerId')
@@ -763,7 +763,7 @@ SUBQUERY,
         $q = $qb->getQuery();
         /** @var \App\Entity\SessionAPI\Layer[] $layers */
         $layers = $q->getResult();
-        $result["geotype"] = $layerGeoType ?->value ?? ''; // enum to string;
+        $result["geotype"] = $layerGeoType->value ?? ''; // enum to string;
         $result["geometry"] = [];
         foreach ($layers as $l) {
             // export each geometry linked to the layer

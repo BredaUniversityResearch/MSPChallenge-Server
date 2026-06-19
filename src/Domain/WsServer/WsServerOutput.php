@@ -44,6 +44,7 @@ class WsServerOutput
         }
 
         $mSec = '0000';
+        // @phpstan-ignore-next-line notIdentical.alwaysTrue
         if ((false !== $parts = explode('.', sprintf('%.4f', microtime(true)))) && count($parts) > 1) {
             $mSec = $parts[1];
         }

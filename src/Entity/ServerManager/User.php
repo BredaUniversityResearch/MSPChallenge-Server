@@ -14,18 +14,23 @@ class User extends EntityBase implements UserInterface
 {
     #[ORM\Id]
     #[ORM\Column]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $username = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $token = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $refreshToken = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    // @phpstan-ignore-next-line DateTimeInterface|null but database expects DateTimeInterface
     private ?\DateTimeInterface $refreshTokenExpiration = null;
 
     #[ORM\Column(length: 255, nullable: true)]

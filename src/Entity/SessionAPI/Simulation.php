@@ -21,9 +21,11 @@ class Simulation
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'simulations')]
     #[ORM\JoinColumn(nullable: false)]
+    // @phpstan-ignore-next-line Watchdog|null but database expects
     private ?Watchdog $watchdog = null;
 
     #[ORM\Column(length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]

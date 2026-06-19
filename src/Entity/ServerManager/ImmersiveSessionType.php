@@ -26,6 +26,7 @@ class ImmersiveSessionType extends EntityBase
     #[AppMappings\Property\TableColumn(label: "Name")]
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "The name field should not be blank.")]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $name = null;
 
     #[ORM\Column(type: 'json_document', nullable: true)]

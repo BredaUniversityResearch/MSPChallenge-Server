@@ -110,8 +110,7 @@ FROM frankenphp_base AS frankenphp_prod
 
 ENV APP_ENV=prod
 # this line enables the Blazing-fast performance thanks to the worker mode of FrankenPHP
-#   @todo however, disable for MSP, gives request issues in ServerManager
-# ENV FRANKENPHP_CONFIG="import worker.Caddyfile"
+ENV FRANKENPHP_CONFIG="import worker.Caddyfile"
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 

@@ -1,4 +1,0 @@
-when@dev:
-  _tools:
-    resource: 'routes/tools.yaml'
-    prefix: '/_tools'

@@ -14,6 +14,7 @@ use Lcobucci\JWT\Token\Parser;
 use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Validator;
+use Symfony\Component\Clock\Clock;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -57,7 +58,8 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
     public function authenticate(Request $request): Passport
     {
         // get the token from Session or GET
-        $apiToken = $request->get('token') ?? $request->getSession()->get('token') ?? null;
+        $apiToken = $request->query->get('token') ?? $request->request->get('token') ??
+            $request->getSession()->get('token') ?? null;
         if (empty($apiToken)) {
             throw new MSPAuth2RedirectException();
         }
@@ -67,7 +69,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
             /** @var UnencryptedToken $unencryptedToken */
             $unencryptedToken = $parser->parse($apiToken);
             $validator = new Validator();
-            $validator->assert($unencryptedToken, new LooseValidAt(new FrozenClock(new \DateTimeImmutable())));
+            $validator->assert($unencryptedToken, new LooseValidAt(new Clock()));
         } catch (Exception $e) {
             $request->getSession()->remove('token');
             throw new MSPAuth2RedirectException();

@@ -21,7 +21,7 @@ use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Throwable;
 
@@ -158,7 +158,9 @@ class SettingController extends BaseController
         $user = $security->getUser();
         $auth2Communicator->setToken($user->getToken());
         try {
-            $auth2Communicator->delResource(str_replace('/api/', '', $request->get('delurl')));
+            $auth2Communicator->delResource(
+                str_replace('/api/', '', $request->request->get('delurl'))
+            );
         } catch (Throwable $e) {
             return new Response($e->getMessage(), 422);
         }

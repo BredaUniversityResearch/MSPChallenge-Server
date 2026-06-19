@@ -26,9 +26,11 @@ class PlanRestrictionArea
     private ?Country $country;
 
     #[ORM\Column(type: Types::INTEGER, length: 11)]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $planRestrictionAreaEntityType;
 
     #[ORM\Column(type: Types::FLOAT)]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $planRestrictionAreaSize;
 
     public function getPlanRestrictionAreaId(): ?int

@@ -7,7 +7,7 @@ use App\Entity\Mapping as AppMappings;
 use App\Repository\ServerManager\ImmersiveSessionDockerApiRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Form\Extension\Core\Type as SymfonyFormType;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[AppMappings\Plurals('Docker API', 'Docker APIs')]
@@ -33,6 +33,7 @@ class DockerApi extends EntityBase
             ]
         ]
     )]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $address = null;
 
     #[Groups(['read','write'])]
@@ -48,6 +49,7 @@ class DockerApi extends EntityBase
             ]
         ]
     )]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $port = null;
 
     #[Groups(['read','write'])]
@@ -63,6 +65,7 @@ class DockerApi extends EntityBase
             ]
         ]
     )]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $scheme = null;
 
     private ?\DateTime $lastDockerEventAt = null;

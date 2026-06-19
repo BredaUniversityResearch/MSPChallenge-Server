@@ -15,7 +15,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ImmersiveSessionRepository::class)]
@@ -41,6 +41,7 @@ class ImmersiveSession
     #[Groups(['read', 'write'])]
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "The name field should not be blank.")]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $name = null;
 
     #[Groups(['read', 'write'])]
@@ -90,18 +91,22 @@ class ImmersiveSession
 
     #[Groups(['read', 'write'])]
     #[ORM\Column]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $bottomLeftX = null;
 
     #[Groups(['read', 'write'])]
     #[ORM\Column]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $bottomLeftY = null;
 
     #[Groups(['read', 'write'])]
     #[ORM\Column]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $topRightX = null;
 
     #[Groups(['read', 'write'])]
     #[ORM\Column]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $topRightY = null;
 
     #[Groups(['read', 'write'])]
@@ -127,6 +132,7 @@ class ImmersiveSession
     #[Groups(['read'])]
     #[Gedmo\Timestampable(on: 'update')]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    // @phpstan-ignore-next-line DateTime|null but database expects DateTimeInterface
     protected $updatedAt;
 
     public function getId(): ?int

@@ -112,6 +112,7 @@ class ImmersiveSessionService
         /** @var int[] $busyPorts */
         $busyPorts = collect($this->listImmersiveSessionContainers($dockerApi))->map(
             /** @var array{Id: string, State: string, Ports: array{PublicPort: int, PrivatePort: int, Type: string}} $item */
+            // @phpstan-ignore-next-line nullCoalesce.offset
             fn($item) => $item['Ports']['PublicPort'] ?? null
         )
         ->filter() // removes all null values

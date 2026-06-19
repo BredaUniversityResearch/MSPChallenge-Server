@@ -20,21 +20,27 @@ class Objective
     private ?Country $country;
 
     #[ORM\Column(type: Types::STRING, length: 128)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $objectiveTitle;
 
     #[ORM\Column(type: Types::TEXT, length: 1024)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $objectiveDescription;
 
     #[ORM\Column(type: Types::INTEGER, length: 11)]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $objectiveDeadline;
 
     #[ORM\Column(type: Types::FLOAT, length: 11)]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $objectiveLastupdate;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1)]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $objectiveActive = 1;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1)]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $objectiveComplete = 0;
 
     public function getObjectiveId(): ?int
