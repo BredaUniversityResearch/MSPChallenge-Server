@@ -118,10 +118,10 @@ COPY --link frankenphp/conf.d/20-app.prod.ini $PHP_INI_DIR/app.conf.d/
 COPY --link frankenphp/worker.Caddyfile /etc/caddy/worker.Caddyfile
 
 # Replace symbolic links with COPY --link
-COPY --link config-symfony6.4 config
-COPY --link composer-symfony6.4.json composer.json
-COPY --link composer-symfony6.4.lock composer.lock
-COPY --link symfony6.4.lock symfony.lock
+COPY --link config-symfony7.4 config
+COPY --link composer-symfony7.4.json composer.json
+COPY --link composer-symfony7.4.lock composer.lock
+COPY --link symfony7.4.lock symfony.lock
 COPY --link package.json package.json
 
 RUN set -eux; \
