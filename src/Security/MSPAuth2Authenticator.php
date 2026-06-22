@@ -198,7 +198,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         throw new AccessDeniedHttpException($exception->getMessage());
     }
 
-    public function start(Request $request, AuthenticationException $authException = null): Response
+    public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
         // not returning a Response here just to keep the code cleaner
         // redirect to auth2.mspchallenge.info by means of throwing an Exception that is listened to

@@ -23,7 +23,7 @@ class DockerMessageRetryStrategy implements RetryStrategyInterface
         $this->defaultRetryStrategy = new MultiplierRetryStrategy($maxRetries, $initialDelay, $multiplier, $maxDelay);
     }
 
-    public function isRetryable(Envelope $message, \Throwable $throwable = null): bool
+    public function isRetryable(Envelope $message, ?\Throwable $throwable = null): bool
     {
         return match ($message->getMessage()::class) {
             CreateImmersiveSessionConnectionMessage::class =>
@@ -32,7 +32,7 @@ class DockerMessageRetryStrategy implements RetryStrategyInterface
         };
     }
 
-    public function getWaitingTime(Envelope $message, \Throwable $throwable = null): int
+    public function getWaitingTime(Envelope $message, ?\Throwable $throwable = null): int
     {
         // Delegate waiting time calculation to MultiplierRetryStrategy
         return $this->defaultRetryStrategy->getWaitingTime($message, $throwable);

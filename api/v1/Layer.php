@@ -349,7 +349,7 @@ class Layer extends Base
     public function UpdateRaster(
         \App\Entity\SessionAPI\Layer $layer,
         string $imageData,
-        array $raster_bounds = null,
+        ?array $raster_bounds = null,
         ?int $month = null
     ): void {
         $rasterData = $layer->getLayerRaster();
