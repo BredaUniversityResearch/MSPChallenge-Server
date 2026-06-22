@@ -7,7 +7,7 @@
         "ext-imagick": "You only require imagick for image processing, e.g. for POV config creation."
     },
     "require": {
-        "php": ">=8.3",
+        "php": ">=8.4",
         "ext-ctype": "*",
         "ext-curl": "*",
         "ext-iconv": "*",
@@ -137,12 +137,12 @@
             "cache:clear": "symfony-cmd"
         },
         "post-install-cmd": [
-            "(php bin/console doctrine:cache:clear-metadata -n || true)",
+            "(php -d memory_limit=1G bin/console doctrine:cache:clear-metadata -n || true)",
             "@auto-scripts",
             "bash tools/cghooks-fresh-install.sh"
         ],
         "post-update-cmd": [
-            "(php bin/console doctrine:cache:clear-metadata -n || true)",
+            "(php -d memory_limit=1G bin/console doctrine:cache:clear-metadata -n || true)",
             "@auto-scripts",
             "bash tools/cghooks-fresh-install.sh"
         ],
