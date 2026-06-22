@@ -17,7 +17,7 @@ class BufferZonePolicyData extends PressuredPolicyDataBase
         $this->policy_type = PolicyTypeName::BUFFER_ZONE->value;
     }
 
-    public static function import($data, Context $options = null)
+    public static function import($data, ?Context $options = null)
     {
         $data->radius ??= self::DEFAULT_VALUE_RADIUS;
         return parent::import($data, $options);

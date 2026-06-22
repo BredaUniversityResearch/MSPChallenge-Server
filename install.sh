@@ -20,9 +20,9 @@ to_native_path() {
 
 run_composer() {
   if [[ "${COMPOSER_BINARY}" == *.phar ]]; then
-    APP_ENV="${APP_ENV}" "${PHP_BINARY}" "${COMPOSER_BINARY}" "$@"
+    APP_ENV="${APP_ENV}" COMPOSER_MEMORY_LIMIT="${COMPOSER_MEMORY_LIMIT_VALUE}" "${PHP_BINARY}" -d "memory_limit=${COMPOSER_MEMORY_LIMIT_VALUE}" "${COMPOSER_BINARY}" "$@"
   else
-    APP_ENV="${APP_ENV}" "${COMPOSER_BINARY}" "$@"
+    APP_ENV="${APP_ENV}" COMPOSER_MEMORY_LIMIT="${COMPOSER_MEMORY_LIMIT_VALUE}" "${COMPOSER_BINARY}" "$@"
   fi
 }
 
@@ -57,6 +57,10 @@ fi
 if [[ "${COMPOSER_BINARY}" == *.phar ]]; then
   COMPOSER_BINARY="$(to_native_path "${COMPOSER_BINARY}")"
 fi
+
+# Composer supports COMPOSER_MEMORY_LIMIT for launcher/script installs where we
+# cannot inject PHP CLI flags directly. Keep it configurable, but default to 1G.
+COMPOSER_MEMORY_LIMIT_VALUE="${COMPOSER_MEMORY_LIMIT:-1G}"
 
 COMPOSER_ARGS=()
 if [[ "${APP_ENV}" == "prod" ]]; then

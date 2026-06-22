@@ -12,7 +12,7 @@ abstract class PressuredPolicyDataBase extends ItemsPolicyDataBase
 
     public float $pressure = self::DEFAULT_VALUE_PRESSURE;
 
-    public static function import($data, Context $options = null)
+    public static function import($data, ?Context $options = null)
     {
         $data->pressure ??= self::DEFAULT_VALUE_PRESSURE;
         return parent::import($data, $options);

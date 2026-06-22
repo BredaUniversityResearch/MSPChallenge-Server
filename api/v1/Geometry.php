@@ -40,9 +40,9 @@ class Geometry extends Base
         int $layer,
         string $geometry,
         string $FID = "",
-        int $persistent = null,
+        ?int $persistent = null,
         string $data = "",
-        int $country = null,
+        ?int $country = null,
         int $plan = -1
     ): int|PromiseInterface {
         if ($country == -1) {
@@ -135,7 +135,7 @@ class Geometry extends Base
         int $layer,
         string $geometry,
         int $subtractive,
-        int $persistent = null,
+        ?int $persistent = null,
         string $FID = ""
     ): ?PromiseInterface {
         $deferred = new Deferred();
