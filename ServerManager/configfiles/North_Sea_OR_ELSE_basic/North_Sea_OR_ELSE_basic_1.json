@@ -29330,7 +29330,7 @@
         "layer_short": "Tidal Farms",
         "layer_category": "activities",
         "layer_subcategory": "energy",
-        "layer_download_from_geoserver": 1,
+        "layer_download_from_geoserver": 0,
         "layer_width": 1024,
         "layer_height": 1024,
         "layer_raster_material": "RasterMELNew",
@@ -32425,7 +32425,7 @@
         "layer_green": 0,
         "layer_tooltip": "",
         "layer_information": "",
-        "layer_media": null,
+        "layer_media": "wiki://Spisula_subtruncata",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -40936,7 +40936,7 @@
         "layer_green": 0,
         "layer_tooltip": "Lesser Black Backed Gull Abundance",
         "layer_information": "",
-        "layer_media": "",
+        "layer_media": "wiki://(DT)Lesser_Black_Backed_Gull",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -41124,7 +41124,7 @@
         "layer_green": 0,
         "layer_tooltip": "Razorbill Abundance",
         "layer_information": "",
-        "layer_media": "",
+        "layer_media": "wiki://(DT)Razorbill",
         "layer_text_info": null,
         "layer_states": [
           {
@@ -41312,7 +41312,7 @@
         "layer_green": 0,
         "layer_tooltip": "Guillemot Abundance",
         "layer_information": "",
-        "layer_media": "",
+        "layer_media": "wiki://(DT)Guillemot",
         "layer_text_info": null,
         "layer_states": [
           {
