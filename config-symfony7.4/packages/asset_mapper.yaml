@@ -1,4 +1,4 @@
-# Disabled in Symfony 7 by default:
+# Disabled in Symfony by default:
 #framework:
 #    asset_mapper:
 #        # The paths to make available to the asset mapper.

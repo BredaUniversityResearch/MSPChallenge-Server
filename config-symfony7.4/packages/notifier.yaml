@@ -1,6 +1,6 @@
 framework:
     notifier:
-# Enabled in Symfony 7 by default:
+# Enabled in Symfony by default:
 #        chatter_transports:
         #    slack: '%env(SLACK_DSN)%'
         #    telegram: '%env(TELEGRAM_DSN)%'

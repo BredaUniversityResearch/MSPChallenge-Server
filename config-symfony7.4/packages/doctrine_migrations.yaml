@@ -2,9 +2,10 @@ doctrine_migrations:
     migrations_paths:
         # namespace is arbitrary but should be different from App\Migrations
         # as migrations classes should NOT be autoloaded
-        'DoctrineMigrations': '%kernel.project_dir%/migrations/src'
+        'DoctrineMigrations\GameSession': '%kernel.project_dir%/migrations/game_session'
+        'DoctrineMigrations\ServerManager': '%kernel.project_dir%/migrations/server_manager'
     enable_profiler: false
     # Whether to wrap migrations in a single transaction.
     transactional: true
     services:
-        Doctrine\Migrations\Version\MigrationFactory: 'App\Migration\ContainerAwareMigrationFactory'
+        Doctrine\Migrations\Version\MigrationFactory: App\Migration\ContainerAwareMigrationFactory

@@ -3,9 +3,7 @@
 namespace App\Migration;
 
 use App\Domain\Helper\Util;
-use App\Domain\Services\ConnectionManager;
 use Closure;
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\SchemaException;
@@ -13,84 +11,36 @@ use Doctrine\Migrations\AbstractMigration;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\DBAL\Schema\Table;
 use IntlException;
-use MessageFormatter;
 
 abstract class MSPMigration extends AbstractMigration
 {
-    /**
-     * @internal @deprecated Try to prevent usage of $this->connection, to enforce the use of addSql() only.
-     *
-     * Note that the usage of addSql() is required to have the migration being executed wrapped in a single transaction.
-     *
-     * Only use $connection for read queries!!!!
-     *
-     * The one provided by AbstractMigration will always be set to the default connection, which may not be correct
-     * So it is overwritten to the right connection by the ConnectionManager before executing the migration.
-     *
-     */
-    protected $connection;
-
-    private ?Connection $readConnection = null;
-    protected ConnectionManager $connectionManager;
-
     private ?MSPDatabaseType $databaseType = null;
 
-    private function validateSchema(Schema $schema): void
+    /**
+     * @throws Exception
+     */
+    private function resolveDatabaseName(): ?string
     {
-        if (null == $this->databaseType) {
-            // nothing to validate
-            return;
+        // DBAL 4 may provide an empty schema name for MySQL; prefer the active connection database name.
+        $databaseName = $this->connection->getDatabase();
+        if (is_string($databaseName) && $databaseName !== '') {
+            return $databaseName;
         }
-        switch ((string)$this->databaseType) {
-            default:
-                // nothing to validate
-                return;
-            case MSPDatabaseType::DATABASE_TYPE_GAME_SESSION:
-                $this->skipIf(
-                    !Util::hasPrefix($schema->getName(), $_ENV['DBNAME_SESSION_PREFIX'] ?? 'msp_session_'),
-                    'This migrations requires a game session database. ' .
-                    'Please use "--em" to set the game session entity manager. ' .
-                    PHP_EOL . 'E.g. --em='.($_ENV['DBNAME_SESSION_PREFIX'] ?? 'msp_session_').'1'
-                );
-                break;
-            case MSPDatabaseType::DATABASE_TYPE_SERVER_MANAGER:
-                $this->skipIf(
-                    !Util::hasPrefix($schema->getName(), $_ENV['DBNAME_SERVER_MANAGER'] ?? 'msp_server_manager'),
-                    'This migrations requires a server manager database. Please use --em='.
-                    ($_ENV['DBNAME_SERVER_MANAGER'] ?? 'msp_server_manager')
-                );
-                break;
-        }
+
+        $params = $this->connection->getParams();
+        return $params['dbname'] ?? null;
     }
 
     public function preUp(Schema $schema): void
     {
         $this->databaseType = $this->getDatabaseType();
+        $this->writeMigrationProgress('START UP');
     }
 
     public function preDown(Schema $schema): void
     {
         $this->databaseType = $this->getDatabaseType();
-    }
-
-    protected function countIndexes(Schema $schema): int
-    {
-        $numIndexes = 0;
-        $tables = $schema->getTables();
-        foreach ($tables as $table) {
-            $numIndexes += count($table->getIndexes()) + count($table->getForeignKeys());
-        }
-        return $numIndexes;
-    }
-
-    protected function countColumns(Schema $schema): int
-    {
-        $numColumns = 0;
-        $tables = $schema->getTables();
-        foreach ($tables as $table) {
-            $numColumns += count($table->getColumns());
-        }
-        return $numColumns;
+        $this->writeMigrationProgress('START DOWN');
     }
 
     public function up(Schema $schema): void
@@ -113,73 +63,41 @@ abstract class MSPMigration extends AbstractMigration
      */
     private function migrate(Schema $schema, Closure $migrationFunction): void
     {
-        $this->validateSchema($schema);
+        if (null == $this->databaseType) {
+            // nothing to validate
+            return;
+        }
 
-        $this->readConnection = $this->connectionManager->getCachedDbConnection($schema->getName());
-        $this->connection = $this->readConnection;
+        $databaseName = $this->resolveDatabaseName();
+        $this->abortIf(
+            $databaseName === null,
+            'Could not determine the active database name for migration validation. '
+            .'Please check your connection configuration.'
+        );
 
-        // collect data to detect changes after migration
-        $numTables = count($schema->getTables());
-        $numColumns = $this->countColumns($schema);
-        $numIndexes = $this->countIndexes($schema);
+        switch ((string)$this->databaseType) {
+            default:
+                // nothing to validate
+                return;
+            case MSPDatabaseType::DATABASE_TYPE_GAME_SESSION:
+                $this->skipIf(
+                    !Util::hasPrefix($databaseName, $_ENV['DBNAME_SESSION_PREFIX'] ?? 'msp_session_'),
+                    'This migrations requires a game session database. ' .
+                    'Please use "--em" to set the game session entity manager. ' .
+                    PHP_EOL . 'E.g. --em='.($_ENV['DBNAME_SESSION_PREFIX'] ?? 'msp_session_').'1'
+                );
+                break;
+            case MSPDatabaseType::DATABASE_TYPE_SERVER_MANAGER:
+                $this->skipIf(
+                    !Util::hasPrefix($databaseName, $_ENV['DBNAME_SERVER_MANAGER'] ?? 'msp_server_manager'),
+                    'This migrations requires a server manager database. Please use --em='.
+                    ($_ENV['DBNAME_SERVER_MANAGER'] ?? 'msp_server_manager')
+                );
+                break;
+        }
 
         // execute migration
         $migrationFunction();
-
-        // detect and output changes automatically
-        $this->writeDifferences(
-            count($schema->getTables()) - $numTables,
-            $this->countColumns($schema) - $numColumns,
-            $this->countIndexes($schema) - $numIndexes
-        );
-    }
-
-    protected function getReadConnection(): Connection
-    {
-        return $this->readConnection;
-    }
-
-    /**
-     * @throws IntlException
-     */
-    private function writeDifferences(int $numTablesDiff, int $numColumnsDiff, int $numIndexesDiff): void
-    {
-        // see https://www.php.net/manual/en/messageformatter.formatmessage.php#112661
-        if ($numTablesDiff != 0) {
-            $this->write(
-                $this->createMessageFormatter(
-                    'en_US',
-                    '{0, choice, ' . PHP_INT_MIN . ' #Dropped| 0 #Added} {1, plural, =1{# table} other{# tables}}'
-                )
-                ->format([$numTablesDiff, abs($numTablesDiff)])
-            );
-        }
-        if ($numColumnsDiff != 0) {
-            $this->write(
-                $this->createMessageFormatter(
-                    'en_US',
-                    '{0, choice, ' . PHP_INT_MIN . ' #Dropped| 0 #Added} {1, plural, =1{# column} other{# columns}}'
-                )
-                ->format([$numColumnsDiff, abs($numColumnsDiff)])
-            );
-        }
-        if ($numIndexesDiff != 0) {
-            $this->write(
-                $this->createMessageFormatter(
-                    'en_US',
-                    '{0, choice, ' . PHP_INT_MIN . ' #Dropped| 0 #Added} {1, plural, =1{# index} other{# indexes}}'
-                )
-                ->format([$numIndexesDiff, abs($numIndexesDiff)])
-            );
-        }
-    }
-
-    /**
-     * @throws IntlException
-     */
-    private function createMessageFormatter($locale, $pattern): MessageFormatter
-    {
-        return new MessageFormatter($locale, $pattern);
     }
 
     /**
@@ -243,8 +161,24 @@ abstract class MSPMigration extends AbstractMigration
     abstract protected function onUp(Schema $schema): void;
     abstract protected function onDown(Schema $schema): void;
 
-    public function setConnectionManager(ConnectionManager $connectionManager): void
+    /**
+     * @throws Exception
+     */
+    private function writeMigrationProgress(string $state): void
     {
-        $this->connectionManager = $connectionManager;
+        if (PHP_SAPI !== 'cli') {
+            return;
+        }
+
+        $argv = $_SERVER['argv'] ?? [];
+        if (!is_array($argv) || !in_array('doctrine:migrations:migrate', $argv, true)) {
+            return;
+        }
+
+        $databaseName = $this->resolveDatabaseName() ?? '<unknown-db>';
+        fwrite(
+            STDERR,
+            sprintf('[MIGRATION %s] %s on %s%s', $state, static::class, $databaseName, PHP_EOL)
+        );
     }
 }

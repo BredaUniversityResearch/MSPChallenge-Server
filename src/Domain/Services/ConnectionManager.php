@@ -3,6 +3,7 @@
 namespace App\Domain\Services;
 
 use App\Domain\Common\DatabaseDefaults;
+use Composer\InstalledVersions;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
@@ -100,6 +101,9 @@ class ConnectionManager extends DatabaseDefaults
 
     public function getConnectionConfig(?string $dbName = null): array
     {
+        $dbalVersion = InstalledVersions::getVersion('doctrine/dbal') ?? '0.0.0';
+        $enumDoctrineType = $this->getEnumDoctrineType($dbalVersion);
+
         $config = [
             'driver' => 'pdo_mysql',
             'host' => $_ENV['DATABASE_HOST'] ?? self::DEFAULT_DATABASE_HOST,
@@ -108,9 +112,12 @@ class ConnectionManager extends DatabaseDefaults
             'password' => $_ENV['DATABASE_PASSWORD'] ?? self::DEFAULT_DATABASE_PASSWORD,
             'server_version' => $_ENV['DATABASE_SERVER_VERSION'] ?? self::DEFAULT_DATABASE_SERVER_VERSION,
             'charset' => $_ENV['DATABASE_CHARSET'] ?? self::DEFAULT_DATABASE_CHARSET,
-            'mapping_types' => ['enum' => 'string'],
-            'use_savepoints' => true
+            'mapping_types' => ['enum' => $enumDoctrineType]
         ];
+        // DBAL 4 dropped the use_savepoints connection option.
+        if (version_compare($dbalVersion, '4.0.0', '<')) {
+            $config['use_savepoints'] = true;
+        }
         if ($dbName !== null) {
             $config['dbname'] = $dbName;
         }
@@ -124,7 +131,9 @@ class ConnectionManager extends DatabaseDefaults
 
     public function getEntityManagerConfig(string $connectionName): array
     {
-        $config['report_fields_where_declared'] = true;
+        if ($this->shouldUseReportFieldsWhereDeclared()) {
+            $config['report_fields_where_declared'] = true;
+        }
         // @note(MH): You cannot enable "auto_mapping" on more than one manager at the same time
         $config['connection'] = $connectionName;
         $key = preg_replace_callback(
@@ -171,7 +180,9 @@ class ConnectionManager extends DatabaseDefaults
 
     public function getServerEntityManagerConfig(string $connectionName): array
     {
-        $config['report_fields_where_declared'] = true;
+        if ($this->shouldUseReportFieldsWhereDeclared()) {
+            $config['report_fields_where_declared'] = true;
+        }
         // @note(MH): You cannot enable "auto_mapping" on more than one manager at the same time
         $config['connection'] = $connectionName;
         $config['mappings']['ServerManager'] = [
@@ -234,8 +245,21 @@ class ConnectionManager extends DatabaseDefaults
     {
         $connection = DriverManager::getConnection($this->getConnectionConfig($dbName));
         $platform = $connection->getDatabasePlatform();
-        $platform->registerDoctrineTypeMapping('enum', 'string');
+        $dbalVersion = InstalledVersions::getVersion('doctrine/dbal') ?? '0.0.0';
+        $platform->registerDoctrineTypeMapping('enum', $this->getEnumDoctrineType($dbalVersion));
         return $connection;
+    }
+
+    private function getEnumDoctrineType(string $dbalVersion): string
+    {
+        if (version_compare($dbalVersion, '4.0.0', '<')) {
+            return 'string';
+        }
+
+        $enumConstant = \Doctrine\DBAL\Types\Types::class . '::ENUM';
+
+        // Use dynamic constant lookup so DBAL < 4 never touches a missing Types::ENUM constant.
+        return defined($enumConstant) ? (string) constant($enumConstant) : 'enum';
     }
 
     public function createAsyncDbConnection(
@@ -351,5 +375,11 @@ class ConnectionManager extends DatabaseDefaults
             $this->getGameSessionDbName($gameSessionId),
             $this->getGameSessionConnectionOptions()
         );
+    }
+
+    private function shouldUseReportFieldsWhereDeclared(): bool
+    {
+        $ormVersion = InstalledVersions::getVersion('doctrine/orm') ?? '0.0.0';
+        return version_compare($ormVersion, '3.0.0', '<');
     }
 }
