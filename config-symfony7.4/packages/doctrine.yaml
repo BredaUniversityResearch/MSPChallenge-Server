@@ -1,7 +1,7 @@
 imports:
     - { resource: doctrine.php }
 
-# Enabled in Symfony 7 by default:
+# Enabled in Symfony by default:
 #doctrine:
 #    dbal:
 #        url: '%env(resolve:DATABASE_URL)%'
