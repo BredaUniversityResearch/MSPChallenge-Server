@@ -1,0 +1,16 @@
+twig:
+    # Enabled in Symfony by default:
+    # file_name_pattern: '*.twig'
+
+    default_path: '%kernel.project_dir%/templates'
+    paths:
+        '%kernel.project_dir%/templates/manager': ~
+
+# Enabled in Symfony by default:
+when@test:
+    twig:
+        strict_variables: true
+
+when@debug:
+    debug: true
+    auto_reload: true

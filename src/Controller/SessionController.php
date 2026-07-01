@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameList;
+use Composer\InstalledVersions;
 use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,7 +43,9 @@ class SessionController extends AbstractController
         string $query
     ): Response {
         try {
-            $connectionManager->getCachedGameSessionDbConnection($session)->connect();
+            $connection = $connectionManager->getCachedGameSessionDbConnection($session);
+            $dbalVersion = InstalledVersions::getVersion('doctrine/dbal') ?? '0.0.0';
+            call_user_func([$connection, version_compare($dbalVersion, '4.0.0', '<') ? 'connect' : 'getServerVersion']);
         } catch (ConnectionException $e) {
             if ($e->getCode() == 1049) { // MySQL Unknown database
                 throw new HttpException(410, 'Session is non-existing');

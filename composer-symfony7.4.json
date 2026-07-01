@@ -15,6 +15,7 @@
         "ext-json": "*",
         "ext-openssl": "*",
         "ext-pdo": "*",
+        "ext-pdo_mysql": "*",
         "ext-sodium": "*",
         "ext-zip": "*",
         "api-platform/doctrine-orm": "^4.3.14",
@@ -102,7 +103,8 @@
     "autoload": {
         "psr-4": {
             "App\\": [
-                "src/"
+                "src/",
+                "src-symfony7.4/"
             ],
             "App\\Domain\\API\\": "api",
             "DoctrineMigrations\\": "migrations/src/",
@@ -167,6 +169,9 @@
         "symfony": {
             "allow-contrib": false,
             "require": "7.4.*"
+        },
+        "symfony/flex": {
+            "synchronize_package_json": false
         }
     },
     "require-dev": {
