@@ -153,10 +153,10 @@ class GameListController extends BaseController
             $em = $connectionManager->getGameSessionEntityManager($sessionId);
             /** @var WatchdogRepository $watchdogRepo */
             $watchdogRepo = $em->getRepository(Watchdog::class);
-
-            $em->getFilters()->disable('softdeleteable');
-            $watchdog = $watchdogRepo->find($watchdogId);
-            $em->getFilters()->enable('softdeleteable');
+            $watchdog = $watchdogRepo->withFilterSuspended(
+                'softdeleteable',
+                fn() => $watchdogRepo->find($watchdogId)
+            );
             if (null === $watchdog) {
                 throw new NotFoundHttpException('Watchdog not found');
             }
@@ -244,9 +244,12 @@ class GameListController extends BaseController
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         try {
             $em = $connectionManager->getGameSessionEntityManager($sessionId);
-            $em->getFilters()->disable('softdeleteable');
-            $watchdogs = $em->getRepository(Watchdog::class)->findAll();
-            $em->getFilters()->enable('softdeleteable');
+            /** @var WatchdogRepository $watchdogRepo */
+            $watchdogRepo = $em->getRepository(Watchdog::class);
+            $watchdogs = $watchdogRepo->withFilterSuspended(
+                'softdeleteable',
+                fn() => $watchdogRepo->findAll()
+            );
         } catch (Exception $e) {
             $watchdogs = [];
         }
