@@ -52,6 +52,11 @@ framework:
                 middleware:
                     - App\Messenger\Middleware\ProcessNameDetectorMiddleware
 
+        buses:
+            messenger.bus.default:
+                middleware:
+                    - App\Messenger\Middleware\ProcessNameDetectorMiddleware
+
 
 # Symfony default:
 #        # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
