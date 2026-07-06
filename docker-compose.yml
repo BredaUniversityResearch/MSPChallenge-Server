@@ -46,12 +46,16 @@ services:
       '--net-buffer-length=65536',
       '--read-buffer-size=1048576',
       '--read-rnd-buffer-size=16777216',
-      '--myisam-sort-buffer-size=67108864'
+      '--myisam-sort-buffer-size=67108864',
+      '--event-scheduler=ON'
     ]
     networks:
       - msp_network
     volumes:
       - mariadb_data:/var/lib/mysql
+      - mariadb_conf:/etc/mysql/mariadb.conf.d
+      - ./docker/database/init:/docker-entrypoint-initdb.d:ro
+      - ./docker/database/init:/always-initdb.d:ro
     logging:
       driver: "local"
 
@@ -64,7 +68,7 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
-      - ./var/docker/.bash_history:/root/.bash_history
+      - ./var/docker/:/host-history
       - vendor_data:/app/vendor:rw
       - node_modules_data:/app/node_modules:rw
       - public_build_data:/app/public/build:rw
@@ -77,6 +81,7 @@ services:
     networks:
       - msp_network
     environment:
+      DB_PROCESS_NAME: ${DB_PROCESS_NAME:-web}
       SERVER_NAME: ${SERVER_NAME:-localhost}, localhost:80
       DOCKER: 1
       DATABASE_HOST: database
@@ -167,6 +172,7 @@ volumes:
   node_modules_data:
   public_build_data:
   mariadb_data:
+  mariadb_conf:
   caddy_data:
   caddy_config:
   symfony_log:

@@ -76,6 +76,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
             $this->setupSessionDatabase();
             $this->importSessionDatabase();
             $this->migrateSessionDatabase();
+            $this->refreshSessionEntityManagerAfterDatabaseReset();
             $this->importRasterStore();
             $this->finaliseSaveLoad();
             $this->sessionLogHandler->notice("Session {$this->gameSession->getName()} loaded and ready for use.");
@@ -212,6 +213,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
             '--skip-ssl',
             ($_ENV['APP_ENV'] == 'test') ? $this->database.'_test' : $this->database
         ], $this->kernel->getProjectDir(), null, "source {$tempDumpFile}", 300);
+        $process->setEnv(['DB_PROCESS_NAME' => 'mysql_import']);
         $process->mustRun(fn($type, $buffer) => $this->sessionLogHandler->info($buffer));
         // as usually nothing comes out of the buffer...
         $this->sessionLogHandler->debug('Session database dump import attempt completed.');

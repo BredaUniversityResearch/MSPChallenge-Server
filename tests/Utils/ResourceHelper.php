@@ -41,6 +41,7 @@ class ResourceHelper
             '--env='.$_ENV['APP_ENV']
         ], $projectDir);
         $process->setTimeout(null);
+        $process->setEnv(['DB_PROCESS_NAME' => 'doctrine_database_drop']);
         $process->run();
     }
 
@@ -54,6 +55,7 @@ class ResourceHelper
             '--env='.$_ENV['APP_ENV']
         ], $projectDir);
         $process->setTimeout(null);
+        $process->setEnv(['DB_PROCESS_NAME' => 'doctrine_database_create']);
         $process->run();
 
         $process = new Process([
@@ -64,7 +66,8 @@ class ResourceHelper
             '--no-interaction',
             '--env='.$_ENV['APP_ENV']
         ], $projectDir);
-        $process->setTimeout(null); // Disable the process timeout
+        $process->setTimeout(null);
+        $process->setEnv(['DB_PROCESS_NAME' => 'doctrine_migrations']);
         $process->run();
 
         $process = new Process([
@@ -76,6 +79,7 @@ class ResourceHelper
             '--env='.$_ENV['APP_ENV']
         ], $projectDir);
         $process->setTimeout(null);
+        $process->setEnv(['DB_PROCESS_NAME' => 'doctrine_fixtures_load']);
         $process->run();
     }
 }

@@ -69,7 +69,7 @@ COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-en
 COPY --link frankenphp/Caddyfile /etc/caddy/Caddyfile
 
 # write command history to a history file
-RUN echo 'export HISTFILE=/root/.bash_history' >> /root/.bashrc
+RUN echo 'export HISTFILE=/host-history/.bash_history' >> /root/.bashrc
 # to force the command history to be written out, even if the shell is not exited properly
 RUN echo "export PROMPT_COMMAND='history -a'" >> /root/.bashrc
 

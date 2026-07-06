@@ -173,6 +173,7 @@ services:
     App\MessageHandler\GameList\GameListArchiveMessageHandler:
     App\MessageHandler\GameSave\GameSaveCreationMessageHandler:
     App\MessageHandler\GameSave\GameSaveLoadMessageHandler:
+    App\Messenger\Middleware\ProcessNameDetectorMiddleware:
     App\Domain\Communicator\WatchdogCommunicator:
     App\Security\MSPAuth2Authenticator:
     App\MessageHandler\Watchdog\WatchdogCommunicationMessageHandler:
@@ -237,6 +238,11 @@ services:
             - { name: doctrine.event_subscriber, connection: default }
             - { name: doctrine.event_subscriber, connection: msp_server_manager }
             - { name: doctrine.event_subscriber, connection: msp_session_1 }
+
+    App\Doctrine\ConnectionTrackerMiddleware:
+        tags:
+            - { name: doctrine.middleware }
+
 
 when@dev:
     parameters:

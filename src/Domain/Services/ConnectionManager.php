@@ -3,6 +3,7 @@
 namespace App\Domain\Services;
 
 use App\Domain\Common\DatabaseDefaults;
+use App\Drift\Driver\Mysql\TrackingMysqlDriver;
 use Composer\InstalledVersions;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
@@ -14,7 +15,6 @@ use Drift\DBAL\ConnectionOptions;
 use Drift\DBAL\ConnectionPool;
 use Drift\DBAL\ConnectionPoolOptions;
 use Drift\DBAL\Credentials;
-use Drift\DBAL\Driver\Mysql\MysqlDriver;
 use Drift\DBAL\SingleConnection;
 use Exception;
 use React\EventLoop\LoopInterface;
@@ -91,9 +91,10 @@ class ConnectionManager extends DatabaseDefaults
      */
     public function getDbNames(): array
     {
-        $connection = $this->getCachedServerManagerDbConnection();
+        $connection = $this->createDbConnection($this->getServerManagerDbName());
         $sm = $connection->createSchemaManager();
         $dbNames = $sm->listDatabases();
+        $connection->close();
         return array_diff($dbNames, [
             'information_schema', 'test', 'phpmyadmin', 'performance_schema', 'mysql'
         ]);
@@ -114,6 +115,14 @@ class ConnectionManager extends DatabaseDefaults
             'charset' => $_ENV['DATABASE_CHARSET'] ?? self::DEFAULT_DATABASE_CHARSET,
             'mapping_types' => ['enum' => $enumDoctrineType]
         ];
+
+        // Register connection immediately on PDO connect (covers idle connections too).
+        if ($this->isConnectionTrackingEnabled()) {
+            $config['options'] = [
+                \PDO::MYSQL_ATTR_INIT_COMMAND => $this->buildConnectionTrackingInitCommand($dbName)
+            ];
+        }
+
         // DBAL 4 dropped the use_savepoints connection option.
         if (version_compare($dbalVersion, '4.0.0', '<')) {
             $config['use_savepoints'] = true;
@@ -268,7 +277,7 @@ class ConnectionManager extends DatabaseDefaults
         ?ConnectionOptions $options = null
     ): DriftConnection {
         $mysqlPlatform = new MySqlPlatform();
-        $mysqlDriver = new MysqlDriver($loop);
+        $mysqlDriver = new TrackingMysqlDriver($loop);
         $credentials = new Credentials(
             $_ENV['DATABASE_HOST'] ?? self::DEFAULT_DATABASE_HOST,
             $_ENV['DATABASE_PORT'] ?? self::DEFAULT_DATABASE_PORT,
@@ -381,5 +390,29 @@ class ConnectionManager extends DatabaseDefaults
     {
         $ormVersion = InstalledVersions::getVersion('doctrine/orm') ?? '0.0.0';
         return version_compare($ormVersion, '3.0.0', '<');
+    }
+
+    private function isConnectionTrackingEnabled(): bool
+    {
+        return filter_var(
+            $_ENV['DATABASE_CONNECTION_TRACKING_ENABLED'] ?? '1',
+            FILTER_VALIDATE_BOOLEAN,
+            FILTER_NULL_ON_FAILURE
+        ) ?? true;
+    }
+
+    private function buildConnectionTrackingInitCommand(?string $dbName = null): string
+    {
+        $database = $dbName ?? ($_ENV['DBNAME_DEFAULT'] ?? ($_ENV['DBNAME_SERVER_MANAGER'] ??
+            self::DEFAULT_DBNAME_SERVER_MANAGER));
+        $escapedDb = addslashes($database);
+
+        return <<<SQL
+        INSERT IGNORE INTO `msp_tracker`.`connection`
+        (connection_id, `user`, process_name, db_name)
+        VALUES (CONNECTION_ID(), USER(), 'connection_init', '$escapedDb')
+        ON DUPLICATE KEY UPDATE
+        `user` = USER(), db_name = '$escapedDb', last_heartbeat = NOW()
+        SQL;
     }
 }

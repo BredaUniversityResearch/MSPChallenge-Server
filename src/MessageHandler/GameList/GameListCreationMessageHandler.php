@@ -108,6 +108,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             );
             $this->setupSessionDatabase();
             $this->migrateSessionDatabase();
+            $this->refreshSessionEntityManagerAfterDatabaseReset();
             $this->resetSessionRasterStore();
             $this->entityManager->wrapInTransaction(fn() => $this->setupAllEntities());
             $this->finaliseSession();

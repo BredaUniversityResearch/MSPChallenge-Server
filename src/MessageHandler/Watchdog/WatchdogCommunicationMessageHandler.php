@@ -7,6 +7,7 @@ use App\Domain\API\v1\User;
 use App\Domain\Common\EntityEnums\EventLogSeverity;
 use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\ProcessNameDetector;
 use App\Entity\ServerManager\GameList;
 use App\Message\Watchdog\Message\GameMonthChangedMessage;
 use App\Message\Watchdog\Message\GameStateChangedMessage;
@@ -221,8 +222,8 @@ class WatchdogCommunicationMessageHandler
         ?string $stackTrace = null
     ): EventLog {
         $source = self::class;
-        if (getenv('DOCKER') !== false && // only in docker
-            false !== $processName = exec('supervisorctl status | grep '.getmypid().' | awk \'{print $1}\'')) {
+        $processName = ProcessNameDetector::getProcessName();
+        if ($processName) {
             $source .= '@'.$processName;
         }
         $eventLog = Simulation::createEventLogForWatchdog($message, $severity, $w, $stackTrace)
