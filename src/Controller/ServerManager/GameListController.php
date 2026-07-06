@@ -68,10 +68,73 @@ class GameListController extends BaseController
     ): Response {
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
+        $gameList = $this->enrichGameListWithConnectionStats($gameList);
+
+        $totalPlayersPastHour = array_sum(array_map(
+            static fn(array $session): int => (int) ($session['players_past_hour'] ?? 0),
+            $gameList
+        ));
+        $totalConnections = array_sum(array_map(
+            static fn(array $session): int => (int) ($session['session_connection_count'] ?? 0),
+            $gameList
+        ));
+
         if (is_null($request->headers->get('Turbo-Frame'))) {
             return $this->gameClientJson($provider, $request, $gameList);
         }
-        return $this->render('manager/GameList/gamelist.html.twig', ['sessionslist' => $gameList]);
+        return $this->render('manager/GameList/gamelist.html.twig', [
+            'sessionslist' => $gameList,
+            'totalPlayersPastHour' => $totalPlayersPastHour,
+            'totalConnections' => $totalConnections,
+        ]);
+    }
+
+    /**
+     * Merge current connection counts per session (from SHOW PROCESSLIST) into the session list.
+     */
+    private function enrichGameListWithConnectionStats(array $gameList): array
+    {
+        if ($gameList === []) {
+            return $gameList;
+        }
+
+        $connectionCountByDbName = [];
+        $sessionDbNames = [];
+
+        foreach ($gameList as $session) {
+            $sessionId = (int) ($session['id'] ?? 0);
+            if ($sessionId <= 0) {
+                continue;
+            }
+            $sessionDbNames[$this->connectionManager->getGameSessionDbName($sessionId)] = true;
+        }
+
+        $conn = null;
+        try {
+            $conn = $this->connectionManager->createDbConnection($this->connectionManager->getServerManagerDbName());
+            $rows = $conn->executeQuery('SHOW PROCESSLIST')->fetchAllAssociative();
+
+            foreach ($rows as $row) {
+                $dbName = (string) ($row['db'] ?? $row['Db'] ?? '');
+                if ($dbName === '' || !isset($sessionDbNames[$dbName])) {
+                    continue;
+                }
+                $connectionCountByDbName[$dbName] = ($connectionCountByDbName[$dbName] ?? 0) + 1;
+            }
+        } catch (\Throwable) {
+            // Diagnostics must never break the overview page.
+        } finally {
+            $conn?->close();
+        }
+
+        foreach ($gameList as $index => $session) {
+            $sessionId = (int) ($session['id'] ?? 0);
+            $dbName = $sessionId > 0 ? $this->connectionManager->getGameSessionDbName($sessionId) : '';
+            $session['session_connection_count'] = $dbName !== '' ? (int) ($connectionCountByDbName[$dbName] ?? 0) : 0;
+            $gameList[$index] = $session;
+        }
+
+        return $gameList;
     }
 
     /**
