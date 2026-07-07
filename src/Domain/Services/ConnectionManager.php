@@ -10,6 +10,7 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ObjectManager;
 use Drift\DBAL\Connection as DriftConnection;
 use Drift\DBAL\ConnectionOptions;
 use Drift\DBAL\ConnectionPool;
@@ -52,6 +53,23 @@ class ConnectionManager extends DatabaseDefaults
     public function getDoctrine(): ?ManagerRegistry
     {
         return $this->doctrine;
+    }
+
+    public function clearAndCloseDoctrineManagers(): void
+    {
+        if ($this->doctrine === null) {
+            return;
+        }
+
+        /** @var EntityManagerInterface $manager */
+        foreach ($this->doctrine->getManagers() as $manager) {
+            try {
+                $manager->clear();
+                $manager->getConnection()->close();
+            } catch (\Throwable) {
+                // Cleanup is best-effort for long-running workers.
+            }
+        }
     }
 
     public function setDoctrine(ManagerRegistry $doctrine): self
@@ -333,9 +351,7 @@ class ConnectionManager extends DatabaseDefaults
 
     public function getGameSessionDbName(int $gameSessionId): string
     {
-        $databaseName = ($_ENV['DBNAME_SESSION_PREFIX'] ?? self::DEFAULT_DBNAME_SESSION_PREFIX) . $gameSessionId;
-        //$databaseName .= ($_ENV['APP_ENV'] !== 'test') ? '' : '_test';
-        return $databaseName;
+        return ($_ENV['DBNAME_SESSION_PREFIX'] ?? self::DEFAULT_DBNAME_SESSION_PREFIX) . $gameSessionId;
     }
 
     /**

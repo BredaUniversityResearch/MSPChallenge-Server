@@ -50,18 +50,22 @@ class GameListArchiveMessageHandler extends CommonSessionHandler
      */
     public function __invoke(GameListArchiveMessage $gameList): void
     {
-        $this->setGameSessionAndDatabase($gameList);
-        $this->database = $this->connectionManager->getGameSessionDbName($gameList->id);
-        $this->entityManager = $this->connectionManager->getGameSessionEntityManager($gameList->id);
-        $this->gameSession = new GameList($gameList->id);
-        $this->watchdogCommunicator->changeState(
-            $this->gameSession->getId(),
-            GameStateValue::END,
-            $this->gameSession->getGameCurrentMonth()
-        );
-        $this->removeSessionRasterStore();
-        (new Filesystem())->remove($this->params->get('app.session_config_dir').
-            sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId()));
-        $this->dropSessionDatabase();
+        try {
+            $this->setGameSessionAndDatabase($gameList);
+            $this->database = $this->connectionManager->getGameSessionDbName($gameList->id);
+            $this->entityManager = $this->connectionManager->getGameSessionEntityManager($gameList->id);
+            $this->gameSession = new GameList($gameList->id);
+            $this->watchdogCommunicator->changeState(
+                $this->gameSession->getId(),
+                GameStateValue::END,
+                $this->gameSession->getGameCurrentMonth()
+            );
+            $this->removeSessionRasterStore();
+            (new Filesystem())->remove($this->params->get('app.session_config_dir').
+                sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId()));
+            $this->dropSessionDatabase();
+        } finally {
+            $this->connectionManager->clearAndCloseDoctrineManagers();
+        }
     }
 }

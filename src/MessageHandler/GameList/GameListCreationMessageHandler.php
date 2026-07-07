@@ -93,38 +93,42 @@ class GameListCreationMessageHandler extends CommonSessionHandler
      */
     public function __invoke(GameListCreationMessage $gameList): void
     {
-        $this->setGameSessionAndDatabase($gameList);
-        if (!is_null($this->gameSession->getGameSave())) {
-            $this->messageBus->dispatch(
-                new GameSaveLoadMessage($this->gameSession->getId(), $this->gameSession->getGameSave()->getId())
-            );
-            return;
-        }
         try {
-            $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
-            $this->validateGameConfig($this->createSessionRunningConfig());
-            $this->sessionLogHandler->notice(
-                "Session {$this->gameSession->getName()} creation initiated. Please wait."
-            );
-            $this->setupSessionDatabase();
-            $this->migrateSessionDatabase();
-            $this->refreshSessionEntityManagerAfterDatabaseReset();
-            $this->resetSessionRasterStore();
-            $this->entityManager->wrapInTransaction(fn() => $this->setupAllEntities());
-            $this->finaliseSession();
-            $this->sessionLogHandler->notice("Session {$this->gameSession->getName()} created and ready for use.");
-            $state = 'healthy';
-        } catch (Throwable $e) {
-            $this->sessionLogHandler->error(
-                "Session {$this->gameSession->getName()} failed to create. {problem}",
-                ['problem' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
-            );
-            $state = 'failed';
+            $this->setGameSessionAndDatabase($gameList);
+            if (!is_null($this->gameSession->getGameSave())) {
+                $this->messageBus->dispatch(
+                    new GameSaveLoadMessage($this->gameSession->getId(), $this->gameSession->getGameSave()->getId())
+                );
+                return;
+            }
+            try {
+                $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
+                $this->validateGameConfig($this->createSessionRunningConfig());
+                $this->sessionLogHandler->notice(
+                    "Session {$this->gameSession->getName()} creation initiated. Please wait."
+                );
+                $this->setupSessionDatabase();
+                $this->migrateSessionDatabase();
+                $this->refreshSessionEntityManagerAfterDatabaseReset();
+                $this->resetSessionRasterStore();
+                $this->entityManager->wrapInTransaction(fn() => $this->setupAllEntities());
+                $this->finaliseSession();
+                $this->sessionLogHandler->notice("Session {$this->gameSession->getName()} created and ready for use.");
+                $state = 'healthy';
+            } catch (Throwable $e) {
+                $this->sessionLogHandler->error(
+                    "Session {$this->gameSession->getName()} failed to create. {problem}",
+                    ['problem' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
+                );
+                $state = 'failed';
+            }
+            $this->gameSession->setSessionState(new GameSessionStateValue($state));
+            $this->gameSession->getGameConfigVersion()->setLastPlayedTime(time());
+            $this->mspServerManagerEntityManager->persist($this->gameSession);
+            $this->mspServerManagerEntityManager->flush();
+        } finally {
+            $this->connectionManager->clearAndCloseDoctrineManagers();
         }
-        $this->gameSession->setSessionState(new GameSessionStateValue($state));
-        $this->gameSession->getGameConfigVersion()->setLastPlayedTime(time());
-        $this->mspServerManagerEntityManager->persist($this->gameSession);
-        $this->mspServerManagerEntityManager->flush();
     }
 
     /**

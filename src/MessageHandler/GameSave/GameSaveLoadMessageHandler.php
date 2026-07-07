@@ -2,7 +2,6 @@
 
 namespace App\MessageHandler\GameSave;
 
-use App\Domain\API\v1\Game as GameAPI;
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
@@ -59,38 +58,42 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
      */
     public function __invoke(GameSaveLoadMessage $gameSave): void
     {
-        $this->setGameSessionAndDatabase($gameSave);
-        $this->gameSave = $this->mspServerManagerEntityManager->getRepository(GameSave::class)->find(
-            $gameSave->gameSaveId
-        ) ?? throw new Exception('Game save not found, so cannot continue.');
-        if ($this->gameSave->getSaveType() != GameSaveTypeValue::FULL) {
-            throw new Exception("Cannot reload a save of type {$this->gameSave->getSaveType()}");
-        }
         try {
-            $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
-            $this->sessionLogHandler->notice(
-                "Save reload into session {$this->gameSession->getName()} initiated. Please wait."
-            );
-            $this->openSaveZip();
-            $this->validateGameConfig($this->importSessionRunningConfig());
-            $this->setupSessionDatabase();
-            $this->importSessionDatabase();
-            $this->migrateSessionDatabase();
-            $this->refreshSessionEntityManagerAfterDatabaseReset();
-            $this->importRasterStore();
-            $this->finaliseSaveLoad();
-            $this->sessionLogHandler->notice("Session {$this->gameSession->getName()} loaded and ready for use.");
-            $state = 'healthy';
-        } catch (\Throwable $e) {
-            $this->sessionLogHandler->error(
-                "Session {$this->gameSession->getName()} failed to create. {problem}",
-                ['problem' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
-            );
-            $state = 'failed';
+            $this->setGameSessionAndDatabase($gameSave);
+            $this->gameSave = $this->mspServerManagerEntityManager->getRepository(GameSave::class)->find(
+                $gameSave->gameSaveId
+            ) ?? throw new Exception('Game save not found, so cannot continue.');
+            if ($this->gameSave->getSaveType() != GameSaveTypeValue::FULL) {
+                throw new Exception("Cannot reload a save of type {$this->gameSave->getSaveType()}");
+            }
+            try {
+                $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
+                $this->sessionLogHandler->notice(
+                    "Save reload into session {$this->gameSession->getName()} initiated. Please wait."
+                );
+                $this->openSaveZip();
+                $this->validateGameConfig($this->importSessionRunningConfig());
+                $this->setupSessionDatabase();
+                $this->importSessionDatabase();
+                $this->migrateSessionDatabase();
+                $this->refreshSessionEntityManagerAfterDatabaseReset();
+                $this->importRasterStore();
+                $this->finaliseSaveLoad();
+                $this->sessionLogHandler->notice("Session {$this->gameSession->getName()} loaded and ready for use.");
+                $state = 'healthy';
+            } catch (\Throwable $e) {
+                $this->sessionLogHandler->error(
+                    "Session {$this->gameSession->getName()} failed to create. {problem}",
+                    ['problem' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
+                );
+                $state = 'failed';
+            }
+            $this->gameSession->setSessionState(new GameSessionStateValue($state));
+            $this->mspServerManagerEntityManager->persist($this->gameSession);
+            $this->mspServerManagerEntityManager->flush();
+        } finally {
+            $this->connectionManager->clearAndCloseDoctrineManagers();
         }
-        $this->gameSession->setSessionState(new GameSessionStateValue($state));
-        $this->mspServerManagerEntityManager->persist($this->gameSession);
-        $this->mspServerManagerEntityManager->flush();
     }
 
     /**

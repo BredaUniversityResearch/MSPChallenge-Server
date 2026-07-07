@@ -21,8 +21,10 @@ const $ = require('jquery');
 // the bootstrap module doesn't export/return anything
 require('bootstrap');
 // or you can include specific pieces
-// require('bootstrap/js/dist/tooltip');
-// require('bootstrap/js/dist/popover');
+const TooltipModule = require('bootstrap/js/dist/tooltip');
+const Tooltip = TooltipModule.default || TooltipModule;
+const PopoverModule = require('bootstrap/js/dist/popover');
+const Popover = PopoverModule.default || PopoverModule;
 
 require('tata-js');
 require('./helpers/notification.js');
@@ -36,13 +38,57 @@ require('./helpers/modal.js');
  *
  */
 // this waits for Turbo Drive to load
-//document.addEventListener('turbo:load', function (e) {
-//    // this enables bootstrap tooltips globally
-//    let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-//    let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-//        return new Tooltip(tooltipTriggerEl)
-//    });
-//});
+let delegatedTooltip = null;
+let delegatedPopover = null;
+
+function enableTooltips()
+{
+    if (delegatedTooltip) {
+        return;
+    }
+    // Delegate tooltips from <body> so elements injected by Turbo Frames also work.
+    delegatedTooltip = new Tooltip(document.body, {
+        selector: '[data-bs-toggle="tooltip"]',
+        container: 'body',
+        delay: { show: 0, hide: 0 }
+    });
+}
+
+function enablePopovers()
+{
+    if (delegatedPopover) {
+        return;
+    }
+    // Delegate popovers from <body> so Turbo Frame updates work without re-binding.
+    delegatedPopover = new Popover(document.body, {
+        selector: '[data-bs-toggle="popover"]',
+        trigger: 'hover focus',
+        html: true,
+        container: 'body'
+    });
+}
+
+function closeBootstrapOverlays()
+{
+    document.querySelectorAll('[data-bs-toggle="tooltip"], [data-bs-toggle="popover"]').forEach((el) => {
+        Tooltip.getInstance(el)?.hide();
+        Popover.getInstance(el)?.hide();
+    });
+
+    document.querySelectorAll('.tooltip, .popover').forEach((overlay) => {
+        overlay.remove();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', enableTooltips);
+document.addEventListener('turbo:load', enableTooltips);
+document.addEventListener('turbo:frame-load', enableTooltips);
+document.addEventListener('DOMContentLoaded', enablePopovers);
+document.addEventListener('turbo:load', enablePopovers);
+document.addEventListener('turbo:frame-load', enablePopovers);
+document.addEventListener('turbo:before-frame-render', closeBootstrapOverlays);
+document.addEventListener('turbo:before-render', closeBootstrapOverlays);
+document.addEventListener('turbo:before-cache', closeBootstrapOverlays);
 
 /*
  * https://symfony.com/doc/current/frontend/encore/bootstrap.html#using-other-bootstrap-jquery-plugins

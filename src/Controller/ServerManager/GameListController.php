@@ -26,6 +26,7 @@ use App\Message\GameSave\GameSaveCreationMessage;
 use App\Message\Watchdog\Message\GameStateChangedMessage;
 use App\Entity\SessionAPI\Game;
 use App\Entity\SessionAPI\Watchdog;
+use App\Repository\ServerManager\GameListRepository;
 use App\Repository\SessionAPI\GameRepository;
 use App\Repository\SessionAPI\WatchdogRepository;
 use App\VersionsProvider;
@@ -67,40 +68,98 @@ class GameListController extends BaseController
         string $sessionState = 'public'
     ): Response {
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
-        $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
-        $gameList = $this->enrichGameListWithConnectionStats($gameList);
-
+        /** @var GameListRepository $repo */
+        $repo = $entityManager->getRepository(GameList::class);
+        $gameList = $repo->findBySessionState($sessionState);
+        $connectionStats = $this->getConnectionStats();
+        $this->enrichGameListWithConnectionStats($connectionStats, $gameList);
+        $sessionDbNames = $this->getSessionDbNames($gameList);
+        $sessionConnections = array_values(array_filter(
+            $connectionStats,
+            static fn(array $row): bool => array_key_exists((string) ($row['db'] ?? ''), $sessionDbNames)
+        ));
+        $otherConnections = array_values(array_filter(
+            $connectionStats,
+            static fn(array $row): bool => !array_key_exists((string) ($row['db'] ?? ''), $sessionDbNames)
+        ));
         $totalPlayersPastHour = array_sum(array_map(
             static fn(array $session): int => (int) ($session['players_past_hour'] ?? 0),
             $gameList
         ));
-        $totalConnections = array_sum(array_map(
+        $totalSessionConnections = array_sum(array_map(
             static fn(array $session): int => (int) ($session['session_connection_count'] ?? 0),
             $gameList
         ));
-
         if (is_null($request->headers->get('Turbo-Frame'))) {
             return $this->gameClientJson($provider, $request, $gameList);
         }
         return $this->render('manager/GameList/gamelist.html.twig', [
             'sessionslist' => $gameList,
             'totalPlayersPastHour' => $totalPlayersPastHour,
-            'totalConnections' => $totalConnections,
+            'totalSessionConnections' => $totalSessionConnections,
+            'sessionConnectionsPopoverHtml' => $this->buildSessionConnectionsPopoverHtml($sessionConnections),
+            'totalOtherConnections' => count($otherConnections),
+            'otherConnectionsPopoverHtml' => $this->buildOtherConnectionsPopoverHtml($otherConnections),
         ]);
+    }
+
+    private function getConnectionStats(): array
+    {
+        static $rows = null;
+        if ($rows !== null) {
+            return $rows;
+        }
+        $conn = null;
+        try {
+            $conn = $this->connectionManager->createDbConnection($this->connectionManager->getServerManagerDbName());
+            $rows = $conn->executeQuery(<<<'SQL'
+SELECT
+    IFNULL(ct.process_name, CONCAT('unknown_', pl.ID)) as process,
+    pl.db,
+    pl.TIME as duration
+FROM information_schema.PROCESSLIST pl
+LEFT JOIN msp_tracker.connection ct ON pl.ID = ct.connection_id
+WHERE pl.db IS NOT NULL
+ORDER BY ct.last_heartbeat DESC
+SQL)->fetchAllAssociative();
+        } catch (\Throwable) {
+            // Diagnostics must never break the overview page.
+        } finally {
+            $conn?->close();
+        }
+        return $rows ?? [];
     }
 
     /**
      * Merge current connection counts per session (from SHOW PROCESSLIST) into the session list.
      */
-    private function enrichGameListWithConnectionStats(array $gameList): array
+    private function enrichGameListWithConnectionStats(array $connectionStats, array &$gameList): void
     {
-        if ($gameList === []) {
-            return $gameList;
+        if (empty($gameList)) {
+            return; // nothing to enrich
         }
-
         $connectionCountByDbName = [];
-        $sessionDbNames = [];
+        $sessionDbNames = $this->getSessionDbNames($gameList);
+        foreach ($connectionStats as $row) {
+            if (empty($row['db'])) {
+                continue;
+            }
+            if (!array_key_exists($row['db'], $sessionDbNames)) {
+                continue;
+            }
+            $connectionCountByDbName[$row['db']] = ($connectionCountByDbName[$row['db']] ?? 0) + 1;
+        }
+        foreach ($gameList as $index => $session) {
+            assert($session['id'] > 0);
+            $dbName = $this->connectionManager->getGameSessionDbName($session['id'] ?? 0);
+            $session['session_connection_count'] = $connectionCountByDbName[$dbName] ?? 0;
+            $gameList[$index] = $session;
+        }
+    }
 
+    private function getSessionDbNames(array $gameList): array
+    {
+        $sessionDbNames = [];
         foreach ($gameList as $session) {
             $sessionId = (int) ($session['id'] ?? 0);
             if ($sessionId <= 0) {
@@ -108,33 +167,49 @@ class GameListController extends BaseController
             }
             $sessionDbNames[$this->connectionManager->getGameSessionDbName($sessionId)] = true;
         }
+        return $sessionDbNames;
+    }
 
-        $conn = null;
-        try {
-            $conn = $this->connectionManager->createDbConnection($this->connectionManager->getServerManagerDbName());
-            $rows = $conn->executeQuery('SHOW PROCESSLIST')->fetchAllAssociative();
-
-            foreach ($rows as $row) {
-                $dbName = (string) ($row['db'] ?? $row['Db'] ?? '');
-                if ($dbName === '' || !isset($sessionDbNames[$dbName])) {
-                    continue;
-                }
-                $connectionCountByDbName[$dbName] = ($connectionCountByDbName[$dbName] ?? 0) + 1;
-            }
-        } catch (\Throwable) {
-            // Diagnostics must never break the overview page.
-        } finally {
-            $conn?->close();
+    private function buildOtherConnectionsPopoverHtml(array $rows): string
+    {
+        if ($rows === []) {
+            return '<em>No other connections</em>';
         }
 
-        foreach ($gameList as $index => $session) {
-            $sessionId = (int) ($session['id'] ?? 0);
-            $dbName = $sessionId > 0 ? $this->connectionManager->getGameSessionDbName($sessionId) : '';
-            $session['session_connection_count'] = $dbName !== '' ? (int) ($connectionCountByDbName[$dbName] ?? 0) : 0;
-            $gameList[$index] = $session;
+        $items = [];
+        foreach ($rows as $row) {
+            $process = htmlspecialchars((string) ($row['process'] ?? 'unknown'), ENT_QUOTES, 'UTF-8');
+            $duration = htmlspecialchars((string) ($row['duration'] ?? '0'), ENT_QUOTES, 'UTF-8');
+
+            $items[] = sprintf(
+                '<li><strong>%s</strong> <span class="text-muted">(%ss)</span></li>',
+                $process,
+                $duration
+            );
         }
 
-        return $gameList;
+        return '<ul class="mb-0 ps-3">'.implode('', $items).'</ul>';
+    }
+
+    private function buildSessionConnectionsPopoverHtml(array $rows): string
+    {
+        if ($rows === []) {
+            return '<em>No session connections</em>';
+        }
+
+        $items = [];
+        foreach ($rows as $row) {
+            $process = htmlspecialchars((string) ($row['process'] ?? 'unknown'), ENT_QUOTES, 'UTF-8');
+            $duration = htmlspecialchars((string) ($row['duration'] ?? '0'), ENT_QUOTES, 'UTF-8');
+
+            $items[] = sprintf(
+                '<li><strong>%s</strong> <span class="text-muted">(%ss)</span></li>',
+                $process,
+                $duration
+            );
+        }
+
+        return '<ul class="mb-0 ps-3">'.implode('', $items).'</ul>';
     }
 
     /**

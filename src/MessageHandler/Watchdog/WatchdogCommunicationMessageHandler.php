@@ -21,6 +21,7 @@ use App\VersionsProvider;
 use DateTime;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use JsonException;
@@ -56,60 +57,64 @@ class WatchdogCommunicationMessageHandler
      * @throws JsonException
      * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws Exception
+     * @throws Exception|ORMException
      */
     public function __invoke(
         GameMonthChangedMessage|GameStateChangedMessage|WatchdogPingMessage $message
     ): void {
-        $this->sessionLogHandler->setGameSessionId($message->getGameSessionId());
-        $em = $this->connectionManager->getGameSessionEntityManager($message->getGameSessionId());
-
-        // instead of using $message->getWatchdog() directly, we need to fetch it through doctrine,
-        //   such that the entity is loaded into the the current persistence context
-        if (null === $watchdog = $em->find(Watchdog::class, $message->getWatchdogId())) {
-            $this->sessionLogHandler->warning('Watchdog not found. Id: '.$message->getWatchdogId());
-            return;
-        }
-
-        if (null === $watchdog->getGameWatchdogServer()) {
-            $em->persist($this->log(
-                'no server assigned. Watchdog was removed.',
-                EventLogSeverity::ERROR,
-                $watchdog
-            ));
-            $em->remove($watchdog);
-            $em->flush();
-            return;
-        }
-
         try {
-            switch (get_class($message)) {
-                case GameMonthChangedMessage::class:
-                    $this->requestWatchdog($em, $watchdog, '/Watchdog/SetMonth', [
-                        'game_session_token' => (string) $watchdog->getToken(),
-                        'month' => $message->getMonth()
-                    ]);
-                    break;
-                case GameStateChangedMessage::class:
-                    $this->requestWatchdogUpdateState($message, $watchdog, $em);
-                    break;
-                case WatchdogPingMessage::class:
-                    // fail-safe: no need to ping the internal watchdog
-                    if ($watchdog->getServerId() != Watchdog::getInternalServerId()) {
-                        $this->requestWatchdog($em, $watchdog, '/Watchdog/Ping', [
-                            'game_session_token' => (string)$watchdog->getToken()
-                        ]);
-                    }
-                    break;
-                default:
-                    throw new Exception('Unknown message type');
-            }
-        } catch (Exception $e) {
-            $em->flush();
-            throw $e;
-        }
+            $this->sessionLogHandler->setGameSessionId($message->getGameSessionId());
+            $em = $this->connectionManager->getGameSessionEntityManager($message->getGameSessionId());
 
-        $em->flush();
+            // instead of using $message->getWatchdog() directly, we need to fetch it through doctrine,
+            //   such that the entity is loaded into the current persistence context
+            if (null === $watchdog = $em->find(Watchdog::class, $message->getWatchdogId())) {
+                $this->sessionLogHandler->warning('Watchdog not found. Id: '.$message->getWatchdogId());
+                return;
+            }
+
+            if (null === $watchdog->getGameWatchdogServer()) {
+                $em->persist($this->log(
+                    'no server assigned. Watchdog was removed.',
+                    EventLogSeverity::ERROR,
+                    $watchdog
+                ));
+                $em->remove($watchdog);
+                $em->flush();
+                return;
+            }
+
+            try {
+                switch (get_class($message)) {
+                    case GameMonthChangedMessage::class:
+                        $this->requestWatchdog($em, $watchdog, '/Watchdog/SetMonth', [
+                            'game_session_token' => (string) $watchdog->getToken(),
+                            'month' => $message->getMonth()
+                        ]);
+                        break;
+                    case GameStateChangedMessage::class:
+                        $this->requestWatchdogUpdateState($message, $watchdog, $em);
+                        break;
+                    case WatchdogPingMessage::class:
+                        // fail-safe: no need to ping the internal watchdog
+                        if ($watchdog->getServerId() != Watchdog::getInternalServerId()) {
+                            $this->requestWatchdog($em, $watchdog, '/Watchdog/Ping', [
+                                'game_session_token' => (string)$watchdog->getToken()
+                            ]);
+                        }
+                        break;
+                    default:
+                        throw new Exception('Unknown message type');
+                }
+            } catch (Exception $e) {
+                $em->flush();
+                throw $e;
+            }
+
+            $em->flush();
+        } finally {
+            $this->connectionManager->clearAndCloseDoctrineManagers();
+        }
     }
 
     /**
