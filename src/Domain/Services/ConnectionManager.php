@@ -351,7 +351,12 @@ class ConnectionManager extends DatabaseDefaults
 
     public function getGameSessionDbName(int $gameSessionId): string
     {
-        return ($_ENV['DBNAME_SESSION_PREFIX'] ?? self::DEFAULT_DBNAME_SESSION_PREFIX) . $gameSessionId;
+        return $this->getSessionDbNamePrefix() . $gameSessionId;
+    }
+
+    public function getSessionDbNamePrefix(): string
+    {
+        return $_ENV['DBNAME_SESSION_PREFIX'] ?? self::DEFAULT_DBNAME_SESSION_PREFIX;
     }
 
     /**

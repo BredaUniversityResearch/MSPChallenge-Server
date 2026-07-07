@@ -1,4 +1,37 @@
 {% set isArchivedView = app.request.attributes.get('sessionState', 'public') == 'archived' %}
+{% macro renderConnectionsPopover(allRows, rowsByDbName = {}, sessionDbName = null, emptyLabel = 'No connections') %}
+    {% set rows = sessionDbName is null
+        ? allRows|default([])
+        : rowsByDbName[sessionDbName]|default([])
+    %}
+    {% if rows is empty %}
+        <em>{{ emptyLabel }}</em>
+    {% else %}
+        <ul class="mb-0 ps-3">
+            {% for row in rows %}
+                <li>
+                    <strong>{{ row.process }}</strong>
+                    {% if row.duration|default(0) > 0 %}
+                        <span class="text-muted">({{ row.duration }}s)</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endmacro %}
+{% import _self as popovers %}
+{% set sessionConnectionsPopoverHtml = popovers.renderConnectionsPopover(
+    sessionConnections|default([]),
+    sessionConnectionsByDbName|default({}),
+    null,
+    'No session connections'
+) %}
+{% set otherConnectionsPopoverHtml = popovers.renderConnectionsPopover(
+    otherConnections|default([]),
+    {},
+    null,
+    'No other connections'
+) %}
 <turbo-frame id="sessionsTable">
     <table class="table table-hover table-striped">
         <thead>
@@ -18,25 +51,23 @@
                     </span>
                     <span class="mx-1">|</span>
                     <span
-                        data-bs-toggle="popover"
-                        data-bs-trigger="hover focus"
-                        data-bs-html="true"
+                        class="connection-popover-trigger"
+                        tabindex="0"
                         data-bs-custom-class="connections-popover"
-                        data-bs-title="Session connections"
-                        data-bs-content="{{ sessionConnectionsPopoverHtml|default('<em>No session connections</em>')|e('html_attr') }}"
+                        data-popover-title="Session connections"
+                        data-popover-content="{{ sessionConnectionsPopoverHtml|e('html_attr') }}"
                     >
                         <i class="fa fa-database"></i>
                         {{ totalSessionConnections|default(0) }}
                     </span> +
-                    <a
-                        data-bs-toggle="popover"
-                        data-bs-trigger="hover focus"
-                        data-bs-html="true"
-                        data-bs-custom-class="connections-popover"
-                        data-bs-title="Other connections"
-                        data-bs-content="{{ otherConnectionsPopoverHtml|default('<em>No other connections</em>')|e('html_attr') }}"
-                    >{{ totalOtherConnections|default(0) }}</a>
                 </span>
+                <span
+                    class="connection-popover-trigger"
+                    tabindex="0"
+                    data-bs-custom-class="connections-popover"
+                    data-popover-title="Other connections"
+                    data-popover-content="{{ otherConnectionsPopoverHtml|e('html_attr') }}"
+                >{% if isArchivedView %}<i class="fa fa-database"></i>{% endif %} {{ otherConnections|length|default(0) }}</span>
             </th>
         </tr>
         </thead>
@@ -47,6 +78,12 @@
             </tr>
         {% endif %}
         {% for game in sessionslist %}
+            {% set sessionConnectionsForGamePopoverHtml = popovers.renderConnectionsPopover(
+                sessionConnections|default([]),
+                sessionConnectionsByDbName|default({}),
+                game.session_db_name|default(null),
+                'No session connections'
+            ) %}
             <tr>
                 <td>{{ game.id }}</td>
                 <td>{{ game.name }}</td>
@@ -143,7 +180,13 @@
                             {{ game.players_past_hour|default(0) }}
                         </span>
                         <span class="mx-1">|</span>
-                        <span data-bs-toggle="tooltip" data-bs-title="Connections in this session">
+                        <span
+                            class="connection-popover-trigger"
+                            tabindex="0"
+                            data-bs-custom-class="connections-popover"
+                            data-popover-title="Connections in this session"
+                            data-popover-content="{{ sessionConnectionsForGamePopoverHtml|e('html_attr') }}"
+                        >
                             <i class="fa fa-database"></i>
                             {{ game.session_connection_count|default(0) }}
                         </span>

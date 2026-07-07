@@ -40,37 +40,44 @@ require('./helpers/modal.js');
 // this waits for Turbo Drive to load
 let delegatedTooltip = null;
 let delegatedPopover = null;
+let delegatedRoot = null;
 
-function enableTooltips()
+function enableBootstrapOverlays()
 {
-    if (delegatedTooltip) {
-        return;
+    const root = document.body;
+    if (delegatedRoot !== root) {
+        delegatedTooltip?.dispose();
+        delegatedPopover?.dispose();
+        delegatedTooltip = null;
+        delegatedPopover = null;
+        delegatedRoot = root;
     }
-    // Delegate tooltips from <body> so elements injected by Turbo Frames also work.
-    delegatedTooltip = new Tooltip(document.body, {
-        selector: '[data-bs-toggle="tooltip"]',
-        container: 'body',
-        delay: { show: 0, hide: 0 }
-    });
-}
 
-function enablePopovers()
-{
-    if (delegatedPopover) {
-        return;
+    if (!delegatedTooltip) {
+        // Delegate tooltips from <body> so elements injected by Turbo Frames also work.
+        delegatedTooltip = new Tooltip(root, {
+            selector: '[data-bs-toggle="tooltip"]',
+            container: 'body',
+            delay: { show: 0, hide: 0 }
+        });
     }
-    // Delegate popovers from <body> so Turbo Frame updates work without re-binding.
-    delegatedPopover = new Popover(document.body, {
-        selector: '[data-bs-toggle="popover"]',
-        trigger: 'hover focus',
-        html: true,
-        container: 'body'
-    });
+
+    if (!delegatedPopover) {
+        // Delegate popovers from <body> so Turbo Frame updates work without re-binding.
+        delegatedPopover = new Popover(root, {
+            selector: '.connection-popover-trigger',
+            trigger: 'focus',
+            html: true,
+            container: 'body',
+            title: (el) => el.getAttribute('data-popover-title') || '',
+            content: (el) => el.getAttribute('data-popover-content') || ''
+        });
+    }
 }
 
 function closeBootstrapOverlays()
 {
-    document.querySelectorAll('[data-bs-toggle="tooltip"], [data-bs-toggle="popover"]').forEach((el) => {
+    document.querySelectorAll('[data-bs-toggle="tooltip"], .connection-popover-trigger').forEach((el) => {
         Tooltip.getInstance(el)?.hide();
         Popover.getInstance(el)?.hide();
     });
@@ -80,12 +87,9 @@ function closeBootstrapOverlays()
     });
 }
 
-document.addEventListener('DOMContentLoaded', enableTooltips);
-document.addEventListener('turbo:load', enableTooltips);
-document.addEventListener('turbo:frame-load', enableTooltips);
-document.addEventListener('DOMContentLoaded', enablePopovers);
-document.addEventListener('turbo:load', enablePopovers);
-document.addEventListener('turbo:frame-load', enablePopovers);
+document.addEventListener('DOMContentLoaded', enableBootstrapOverlays);
+document.addEventListener('turbo:load', enableBootstrapOverlays);
+document.addEventListener('turbo:frame-load', enableBootstrapOverlays);
 document.addEventListener('turbo:before-frame-render', closeBootstrapOverlays);
 document.addEventListener('turbo:before-render', closeBootstrapOverlays);
 document.addEventListener('turbo:before-cache', closeBootstrapOverlays);

@@ -73,14 +73,15 @@ class GameListController extends BaseController
         $gameList = $repo->findBySessionState($sessionState);
         $connectionStats = $this->getConnectionStats();
         $this->enrichGameListWithConnectionStats($connectionStats, $gameList);
-        $sessionDbNames = $this->getSessionDbNames($gameList);
+        $sessionDbRegex = $this->getSessionDbRegex();
         $sessionConnections = array_values(array_filter(
             $connectionStats,
-            static fn(array $row): bool => array_key_exists((string) ($row['db'] ?? ''), $sessionDbNames)
+            static fn(array $row): bool => preg_match($sessionDbRegex, (string) ($row['db'] ?? '')) === 1
         ));
+        $sessionConnectionsByDbName = $this->groupConnectionsByDbName($sessionConnections);
         $otherConnections = array_values(array_filter(
             $connectionStats,
-            static fn(array $row): bool => !array_key_exists((string) ($row['db'] ?? ''), $sessionDbNames)
+            static fn(array $row): bool => preg_match($sessionDbRegex, (string) ($row['db'] ?? '')) !== 1
         ));
         $totalPlayersPastHour = array_sum(array_map(
             static fn(array $session): int => (int) ($session['players_past_hour'] ?? 0),
@@ -97,10 +98,28 @@ class GameListController extends BaseController
             'sessionslist' => $gameList,
             'totalPlayersPastHour' => $totalPlayersPastHour,
             'totalSessionConnections' => $totalSessionConnections,
-            'sessionConnectionsPopoverHtml' => $this->buildSessionConnectionsPopoverHtml($sessionConnections),
-            'totalOtherConnections' => count($otherConnections),
-            'otherConnectionsPopoverHtml' => $this->buildOtherConnectionsPopoverHtml($otherConnections),
+            'sessionConnections' => $sessionConnections,
+            'sessionConnectionsByDbName' => $sessionConnectionsByDbName,
+            'otherConnections' => $otherConnections
         ]);
+    }
+
+    /**
+     * @return array<string, array<int, array<string, mixed>>>
+     */
+    private function groupConnectionsByDbName(array $connections): array
+    {
+        $grouped = [];
+        foreach ($connections as $row) {
+            $dbName = (string) ($row['db'] ?? '');
+            if ($dbName === '') {
+                continue;
+            }
+            $grouped[$dbName] ??= [];
+            $grouped[$dbName][] = $row;
+        }
+
+        return $grouped;
     }
 
     private function getConnectionStats(): array
@@ -139,77 +158,31 @@ SQL)->fetchAllAssociative();
             return; // nothing to enrich
         }
         $connectionCountByDbName = [];
-        $sessionDbNames = $this->getSessionDbNames($gameList);
+        $sessionDbRegex = $this->getSessionDbRegex();
         foreach ($connectionStats as $row) {
-            if (empty($row['db'])) {
+            $dbName = (string) ($row['db'] ?? '');
+            if ($dbName === '') {
                 continue;
             }
-            if (!array_key_exists($row['db'], $sessionDbNames)) {
+            if (preg_match($sessionDbRegex, $dbName) !== 1) {
                 continue;
             }
-            $connectionCountByDbName[$row['db']] = ($connectionCountByDbName[$row['db']] ?? 0) + 1;
+            $connectionCountByDbName[$dbName] = ($connectionCountByDbName[$dbName] ?? 0) + 1;
         }
         foreach ($gameList as $index => $session) {
             assert($session['id'] > 0);
             $dbName = $this->connectionManager->getGameSessionDbName($session['id'] ?? 0);
+            $session['session_db_name'] = $dbName;
             $session['session_connection_count'] = $connectionCountByDbName[$dbName] ?? 0;
             $gameList[$index] = $session;
         }
     }
 
-    private function getSessionDbNames(array $gameList): array
+
+    private function getSessionDbRegex(): string
     {
-        $sessionDbNames = [];
-        foreach ($gameList as $session) {
-            $sessionId = (int) ($session['id'] ?? 0);
-            if ($sessionId <= 0) {
-                continue;
-            }
-            $sessionDbNames[$this->connectionManager->getGameSessionDbName($sessionId)] = true;
-        }
-        return $sessionDbNames;
-    }
-
-    private function buildOtherConnectionsPopoverHtml(array $rows): string
-    {
-        if ($rows === []) {
-            return '<em>No other connections</em>';
-        }
-
-        $items = [];
-        foreach ($rows as $row) {
-            $process = htmlspecialchars((string) ($row['process'] ?? 'unknown'), ENT_QUOTES, 'UTF-8');
-            $duration = htmlspecialchars((string) ($row['duration'] ?? '0'), ENT_QUOTES, 'UTF-8');
-
-            $items[] = sprintf(
-                '<li><strong>%s</strong> <span class="text-muted">(%ss)</span></li>',
-                $process,
-                $duration
-            );
-        }
-
-        return '<ul class="mb-0 ps-3">'.implode('', $items).'</ul>';
-    }
-
-    private function buildSessionConnectionsPopoverHtml(array $rows): string
-    {
-        if ($rows === []) {
-            return '<em>No session connections</em>';
-        }
-
-        $items = [];
-        foreach ($rows as $row) {
-            $process = htmlspecialchars((string) ($row['process'] ?? 'unknown'), ENT_QUOTES, 'UTF-8');
-            $duration = htmlspecialchars((string) ($row['duration'] ?? '0'), ENT_QUOTES, 'UTF-8');
-
-            $items[] = sprintf(
-                '<li><strong>%s</strong> <span class="text-muted">(%ss)</span></li>',
-                $process,
-                $duration
-            );
-        }
-
-        return '<ul class="mb-0 ps-3">'.implode('', $items).'</ul>';
+        $prefix = preg_quote($this->connectionManager->getSessionDbNamePrefix(), '/');
+        return '/^'.$prefix.'\d+(?:_test)?$/';
     }
 
     /**
