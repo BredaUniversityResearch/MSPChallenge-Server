@@ -31,7 +31,8 @@
     <turbo-frame
         id="databaseConnectionsTable"
         src="{{ path('manager_database_table', {'sessionId': selectedSessionId|default(0)}) }}"
-        data-turbo-refresh-interval="5000"
+        data-controller="database"
+        data-database-interval-value="5000"
     >
         <div class="text-muted">Loading database connections...</div>
     </turbo-frame>
