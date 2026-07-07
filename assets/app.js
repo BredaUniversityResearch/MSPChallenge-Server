@@ -39,17 +39,32 @@ require('./helpers/modal.js');
  */
 // this waits for Turbo Drive to load
 let delegatedTooltip = null;
-let delegatedPopover = null;
 let delegatedRoot = null;
+
+function enableConnectionPopovers()
+{
+    document.querySelectorAll('.connection-popover-trigger').forEach((el) => {
+        if (Popover.getInstance(el)) {
+            return;
+        }
+
+        new Popover(el, {
+            trigger: 'focus',
+            html: true,
+            container: 'body',
+            customClass: el.getAttribute('data-bs-custom-class') || '',
+            title: () => el.getAttribute('data-popover-title') || '',
+            content: () => el.getAttribute('data-popover-content') || ''
+        });
+    });
+}
 
 function enableBootstrapOverlays()
 {
     const root = document.body;
     if (delegatedRoot !== root) {
         delegatedTooltip?.dispose();
-        delegatedPopover?.dispose();
         delegatedTooltip = null;
-        delegatedPopover = null;
         delegatedRoot = root;
     }
 
@@ -62,24 +77,15 @@ function enableBootstrapOverlays()
         });
     }
 
-    if (!delegatedPopover) {
-        // Delegate popovers from <body> so Turbo Frame updates work without re-binding.
-        delegatedPopover = new Popover(root, {
-            selector: '.connection-popover-trigger',
-            trigger: 'focus',
-            html: true,
-            container: 'body',
-            title: (el) => el.getAttribute('data-popover-title') || '',
-            content: (el) => el.getAttribute('data-popover-content') || ''
-        });
-    }
+    // Initialize popovers directly on triggers to avoid tooltip/popover delegation conflicts on <body>.
+    enableConnectionPopovers();
 }
 
 function closeBootstrapOverlays()
 {
     document.querySelectorAll('[data-bs-toggle="tooltip"], .connection-popover-trigger').forEach((el) => {
         Tooltip.getInstance(el)?.hide();
-        Popover.getInstance(el)?.hide();
+        Popover.getInstance(el)?.dispose();
     });
 
     document.querySelectorAll('.tooltip, .popover').forEach((overlay) => {
