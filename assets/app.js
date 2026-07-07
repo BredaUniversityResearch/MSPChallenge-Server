@@ -63,23 +63,12 @@ function closeBootstrapOverlays(root = document)
     root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
         Tooltip.getInstance(el)?.hide();
     });
-
-    if (root === document) {
-        document.querySelectorAll('.tooltip, .popover').forEach((overlay) => {
-            overlay.remove();
-        });
-    }
-}
-
-function closeBootstrapFrameOverlays(event)
-{
-    closeBootstrapOverlays(event.target);
 }
 
 document.addEventListener('DOMContentLoaded', enableBootstrapOverlays);
 document.addEventListener('turbo:load', enableBootstrapOverlays);
 document.addEventListener('turbo:frame-load', enableBootstrapOverlays);
-document.addEventListener('turbo:before-frame-render', closeBootstrapFrameOverlays);
+document.addEventListener('turbo:before-frame-render', (event) => closeBootstrapOverlays(event.target));
 document.addEventListener('turbo:before-render', closeBootstrapOverlays);
 document.addEventListener('turbo:before-cache', closeBootstrapOverlays);
 

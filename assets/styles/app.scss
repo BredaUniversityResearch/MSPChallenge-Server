@@ -314,7 +314,6 @@ textarea.form-control {
 #sessionInfoLog {
     height: 180px;
     padding: 10px;
-    overflow-y: auto;
     resize: vertical;
     display: none;
 }
@@ -346,18 +345,4 @@ textarea.form-control {
 .form-control:-moz-placeholder { color: #8b949e !important; }
 .form-control::-moz-placeholder { color: #8b949e !important; }
 .form-control:-ms-input-placeholder { color: #8b949e !important; }
-
-.connections-popover {
-    max-width: 520px;
-}
-
-.connections-popover .popover-body {
-    max-height: 260px;
-    overflow-y: auto;
-    font-size: 0.875rem;
-}
-
-.connection-popover-trigger {
-    cursor: pointer;
-}
 

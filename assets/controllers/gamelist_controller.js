@@ -18,12 +18,6 @@ export default class extends Controller {
         this.refreshInterval = null;
     }
 
-    stopSessionsTableReload()
-    {
-        clearInterval(this.refreshInterval);
-        this.refreshInterval = null;
-    }
-
 
     toggleSessionInfoLog()
     {
