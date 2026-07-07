@@ -23,8 +23,6 @@ require('bootstrap');
 // or you can include specific pieces
 const TooltipModule = require('bootstrap/js/dist/tooltip');
 const Tooltip = TooltipModule.default || TooltipModule;
-const PopoverModule = require('bootstrap/js/dist/popover');
-const Popover = PopoverModule.default || PopoverModule;
 
 require('tata-js');
 require('./helpers/notification.js');
@@ -40,24 +38,6 @@ require('./helpers/modal.js');
 // this waits for Turbo Drive to load
 let delegatedTooltip = null;
 let delegatedRoot = null;
-
-function enableConnectionPopovers()
-{
-    document.querySelectorAll('.connection-popover-trigger').forEach((el) => {
-        if (Popover.getInstance(el)) {
-            return;
-        }
-
-        new Popover(el, {
-            trigger: 'focus',
-            html: true,
-            container: 'body',
-            customClass: el.getAttribute('data-bs-custom-class') || '',
-            title: () => el.getAttribute('data-popover-title') || '',
-            content: () => el.getAttribute('data-popover-content') || ''
-        });
-    });
-}
 
 function enableBootstrapOverlays()
 {
@@ -76,27 +56,30 @@ function enableBootstrapOverlays()
             delay: { show: 0, hide: 0 }
         });
     }
-
-    // Initialize popovers directly on triggers to avoid tooltip/popover delegation conflicts on <body>.
-    enableConnectionPopovers();
 }
 
-function closeBootstrapOverlays()
+function closeBootstrapOverlays(root = document)
 {
-    document.querySelectorAll('[data-bs-toggle="tooltip"], .connection-popover-trigger').forEach((el) => {
+    root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
         Tooltip.getInstance(el)?.hide();
-        Popover.getInstance(el)?.dispose();
     });
 
-    document.querySelectorAll('.tooltip, .popover').forEach((overlay) => {
-        overlay.remove();
-    });
+    if (root === document) {
+        document.querySelectorAll('.tooltip, .popover').forEach((overlay) => {
+            overlay.remove();
+        });
+    }
+}
+
+function closeBootstrapFrameOverlays(event)
+{
+    closeBootstrapOverlays(event.target);
 }
 
 document.addEventListener('DOMContentLoaded', enableBootstrapOverlays);
 document.addEventListener('turbo:load', enableBootstrapOverlays);
 document.addEventListener('turbo:frame-load', enableBootstrapOverlays);
-document.addEventListener('turbo:before-frame-render', closeBootstrapOverlays);
+document.addEventListener('turbo:before-frame-render', closeBootstrapFrameOverlays);
 document.addEventListener('turbo:before-render', closeBootstrapOverlays);
 document.addEventListener('turbo:before-cache', closeBootstrapOverlays);
 

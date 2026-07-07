@@ -73,53 +73,12 @@ class GameListController extends BaseController
         $gameList = $repo->findBySessionState($sessionState);
         $connectionStats = $this->getConnectionStats();
         $this->enrichGameListWithConnectionStats($connectionStats, $gameList);
-        $sessionDbRegex = $this->getSessionDbRegex();
-        $sessionConnections = array_values(array_filter(
-            $connectionStats,
-            static fn(array $row): bool => preg_match($sessionDbRegex, (string) ($row['db'] ?? '')) === 1
-        ));
-        $sessionConnectionsByDbName = $this->groupConnectionsByDbName($sessionConnections);
-        $otherConnections = array_values(array_filter(
-            $connectionStats,
-            static fn(array $row): bool => preg_match($sessionDbRegex, (string) ($row['db'] ?? '')) !== 1
-        ));
-        $totalPlayersPastHour = array_sum(array_map(
-            static fn(array $session): int => (int) ($session['players_past_hour'] ?? 0),
-            $gameList
-        ));
-        $totalSessionConnections = array_sum(array_map(
-            static fn(array $session): int => (int) ($session['session_connection_count'] ?? 0),
-            $gameList
-        ));
         if (is_null($request->headers->get('Turbo-Frame'))) {
             return $this->gameClientJson($provider, $request, $gameList);
         }
         return $this->render('manager/GameList/gamelist.html.twig', [
-            'sessionslist' => $gameList,
-            'totalPlayersPastHour' => $totalPlayersPastHour,
-            'totalSessionConnections' => $totalSessionConnections,
-            'sessionConnections' => $sessionConnections,
-            'sessionConnectionsByDbName' => $sessionConnectionsByDbName,
-            'otherConnections' => $otherConnections
+            'sessionslist' => $gameList
         ]);
-    }
-
-    /**
-     * @return array<string, array<int, array<string, mixed>>>
-     */
-    private function groupConnectionsByDbName(array $connections): array
-    {
-        $grouped = [];
-        foreach ($connections as $row) {
-            $dbName = (string) ($row['db'] ?? '');
-            if ($dbName === '') {
-                continue;
-            }
-            $grouped[$dbName] ??= [];
-            $grouped[$dbName][] = $row;
-        }
-
-        return $grouped;
     }
 
     private function getConnectionStats(): array

@@ -20,12 +20,11 @@ use Symfony\Bridge\Doctrine\Types\UuidType;
 use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: WatchdogRepository::class)]
-#[ORM\Table(uniqueConstraints: [
-    new ORM\UniqueConstraint(
-        name: 'uq_server_id_archived',
-        columns: ['server_id', 'archived']
-    )
-])]
+#[ORM\Table]
+#[ORM\UniqueConstraint(
+    name: 'uq_server_id_archived',
+    columns: ['server_id', 'archived']
+)]
 // timeAware: set a date of deletion in the future and never worry about cleaning up at expiration time. default false
 // hardDelete: to enable hard delete after soft delete has already been done. default true
 #[Gedmo\SoftDeleteable(fieldName: 'deletedAt', timeAware: false, hardDelete: false)]

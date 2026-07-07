@@ -70,6 +70,17 @@ class Database
         self::$instances[$this->sessionId] = null;
     }
 
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function Close(): void
+    {
+        if ($this->isTransactionRunning) {
+            $this->DBRollbackTransaction();
+        }
+
+        $this->conn = null;
+        self::$instances[$this->sessionId] = null;
+    }
+
     /**
      * @throws Exception
      */

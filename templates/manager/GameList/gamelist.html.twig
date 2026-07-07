@@ -1,37 +1,4 @@
 {% set isArchivedView = app.request.attributes.get('sessionState', 'public') == 'archived' %}
-{% macro renderConnectionsPopover(allRows, rowsByDbName = {}, sessionDbName = null, emptyLabel = 'No connections') %}
-    {% set rows = sessionDbName is null
-        ? allRows|default([])
-        : rowsByDbName[sessionDbName]|default([])
-    %}
-    {% if rows is empty %}
-        <em>{{ emptyLabel }}</em>
-    {% else %}
-        <ul class="mb-0 ps-3">
-            {% for row in rows %}
-                <li>
-                    <strong>{{ row.process }}</strong>
-                    {% if row.duration|default(0) > 0 %}
-                        <span class="text-muted">({{ row.duration }}s)</span>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-{% endmacro %}
-{% import _self as popovers %}
-{% set sessionConnectionsPopoverHtml = popovers.renderConnectionsPopover(
-    sessionConnections|default([]),
-    sessionConnectionsByDbName|default({}),
-    null,
-    'No session connections'
-) %}
-{% set otherConnectionsPopoverHtml = popovers.renderConnectionsPopover(
-    otherConnections|default([]),
-    {},
-    null,
-    'No other connections'
-) %}
 <turbo-frame id="sessionsTable">
     <table class="table table-hover table-striped">
         <thead>
@@ -43,48 +10,17 @@
             <th>Current Month</th>
             <th>Ending Month</th>
             <th class="text-center text-nowrap" style="width: 160px;">Quick Actions</th>
-            <th class="text-start text-nowrap" style="width: 1%;">
-                <span class="{% if isArchivedView %}invisible{% endif %}">
-                    <span data-bs-toggle="tooltip" data-bs-title="Total players (past hour)">
-                        <i class="fa fa-user"></i>
-                        {{ totalPlayersPastHour|default(0) }}
-                    </span>
-                    <span class="mx-1">|</span>
-                    <span
-                        class="connection-popover-trigger"
-                        tabindex="0"
-                        data-bs-custom-class="connections-popover"
-                        data-popover-title="Session connections"
-                        data-popover-content="{{ sessionConnectionsPopoverHtml|e('html_attr') }}"
-                    >
-                        <i class="fa fa-database"></i>
-                        {{ totalSessionConnections|default(0) }}
-                    </span> +
-                </span>
-                <span
-                    class="connection-popover-trigger"
-                    tabindex="0"
-                    data-bs-custom-class="connections-popover"
-                    data-popover-title="Other connections"
-                    data-popover-content="{{ otherConnectionsPopoverHtml|e('html_attr') }}"
-                >{% if isArchivedView %}<i class="fa fa-database"></i>{% endif %} {{ otherConnections|length|default(0) }}</span>
-            </th>
+            <th style="width: 1%;"></th>
         </tr>
         </thead>
         <tbody>
-        {% if sessionslist is empty %}
-            <tr>
-                <td colspan="8">No sessions (of this type) yet.</td>
-            </tr>
-        {% endif %}
-        {% for game in sessionslist %}
-            {% set sessionConnectionsForGamePopoverHtml = popovers.renderConnectionsPopover(
-                sessionConnections|default([]),
-                sessionConnectionsByDbName|default({}),
-                game.session_db_name|default(null),
-                'No session connections'
-            ) %}
-            <tr>
+    {% if sessionslist is empty %}
+        <tr>
+            <td colspan="8">No sessions (of this type) yet.</td>
+        </tr>
+    {% endif %}
+    {% for game in sessionslist %}
+        <tr>
                 <td>{{ game.id }}</td>
                 <td>{{ game.name }}</td>
                 <td>{{ game.config_file_name }}</td>
@@ -173,27 +109,26 @@
                         </button>
                     </div>
                 </td>
-                <td class="text-start">
+                <td class="text-start text-nowrap">
                     <span class="{% if isArchivedView %}invisible{% endif %}">
                         <span data-bs-toggle="tooltip" data-bs-title="Players in this session (past hour)">
                             <i class="fa fa-user"></i>
                             {{ game.players_past_hour|default(0) }}
                         </span>
                         <span class="mx-1">|</span>
-                        <span
-                            class="connection-popover-trigger"
-                            tabindex="0"
-                            data-bs-custom-class="connections-popover"
-                            data-popover-title="Connections in this session"
-                            data-popover-content="{{ sessionConnectionsForGamePopoverHtml|e('html_attr') }}"
+                        <a
+                            href="{{ path('manager_database', {'sessionId': game.id}) }}"
+                            data-turbo-frame="_top"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="Database connections for this session"
                         >
                             <i class="fa fa-database"></i>
                             {{ game.session_connection_count|default(0) }}
-                        </span>
+                        </a>
                     </span>
                 </td>
-            </tr>
-        {% endfor %}
+        </tr>
+    {% endfor %}
         </tbody>
     </table>
 </turbo-frame>

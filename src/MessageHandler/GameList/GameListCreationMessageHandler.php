@@ -3,6 +3,7 @@
 namespace App\MessageHandler\GameList;
 
 use App\Controller\SessionAPI\SELController;
+use App\Domain\API\v1\Database;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameTransitionStateValue;
@@ -128,6 +129,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             $this->mspServerManagerEntityManager->flush();
         } finally {
             $this->connectionManager->clearAndCloseDoctrineManagers();
+            Database::GetInstance($this->gameSession->getId())->Close();
         }
     }
 
