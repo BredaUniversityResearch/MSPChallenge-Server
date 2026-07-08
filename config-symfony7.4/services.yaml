@@ -7,6 +7,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    # fallback container parameter used in messenger.yaml: %env(default:msp_server_manager:DBNAME_DEFAULT)%
+    msp_server_manager: 'msp_server_manager'
     app.version_filename: 'version.txt'
     app.version_filepath: '%kernel.project_dir%/%app.version_filename%'
     env(VERSION_FILE): '%app.version_filepath%'
@@ -239,9 +241,16 @@ services:
             - { name: doctrine.event_subscriber, connection: msp_server_manager }
             - { name: doctrine.event_subscriber, connection: msp_session_1 }
 
-    App\Doctrine\ConnectionTrackerMiddleware:
+    App\EventSubscriber\MspTrackerExtensionBootstrapSubscriber:
         tags:
-            - { name: doctrine.middleware }
+            - { name: kernel.event_subscriber }
+
+    App\MessageHandler\ConnectionTracking\LowLevelConnectionTrackedMessageHandler:
+        arguments:
+            $logger: '@monolog.logger'
+        tags:
+            - { name: messenger.message_handler, handles: App\Message\ConnectionTracking\LowLevelConnectionTrackedMessage, from_transport: connection_tracking }
+
 
 
 when@dev:

@@ -2,14 +2,14 @@ framework:
     messenger:
         transports:
             docker:
-                dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
+                dsn: 'doctrine://%env(default:msp_server_manager:DBNAME_DEFAULT)%'
                 options:
                     table_name: 'messenger_docker'
                     queue_name: 'docker'
                 retry_strategy:
                     service: App\MessageHandler\Retry\DockerMessageRetryStrategy
             watchdog:
-                dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
+                dsn: 'doctrine://%env(default:msp_server_manager:DBNAME_DEFAULT)%'
                 options:
                     table_name: 'messenger_watchdog'
                     queue_name: 'watchdog'
@@ -17,20 +17,25 @@ framework:
                     service: App\MessageHandler\Retry\WatchdogMessageRetryStrategy
             # https://symfony.com/doc/current/messenger.html#transport-configuration
             analytics:
-                dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
+                dsn: 'doctrine://%env(default:msp_server_manager:DBNAME_DEFAULT)%'
                 options:
                     table_name: 'messenger_analytics'
                     queue_name: 'analytics'
             async:
-                dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
+                dsn: 'doctrine://%env(default:msp_server_manager:DBNAME_DEFAULT)%'
                 options:
                     table_name: 'messenger_async_processes'
                     queue_name: 'async'
             failed:
-                dsn: 'doctrine://%env(DBNAME_DEFAULT)%'
+                dsn: 'doctrine://%env(default:msp_server_manager:DBNAME_DEFAULT)%'
                 options:
                     table_name: 'messenger_failed'
                     queue_name: 'failed'
+            connection_tracking:
+                dsn: 'doctrine://%env(default:msp_server_manager:DBNAME_DEFAULT)%'
+                options:
+                    table_name: 'messenger_connection_tracking'
+                    queue_name: 'connection_tracking'
 
         routing:
             'App\Message\Docker\DockerCommunicationMessageBase': docker
@@ -40,6 +45,7 @@ framework:
             'App\Message\GameSave\GameSaveCreationMessage': async
             'App\Message\GameSave\GameSaveLoadMessage': async
             'App\Message\Watchdog\Message\WatchdogMessageBase': watchdog
+            'App\Message\ConnectionTracking\LowLevelConnectionTrackedMessage': connection_tracking
 
         buses:
             messenger.bus.default:

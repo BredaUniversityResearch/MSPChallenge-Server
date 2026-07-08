@@ -1,0 +1,26 @@
+services:
+  mariadb:
+    image: mariadb:10.11
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: msp_tracker_test
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  msp-tracker-test:
+    build:
+      context: ../../..
+      dockerfile: php-ext/msp_tracker/testing/Dockerfile
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    environment:
+      TEST_DB_HOST: mariadb
+      TEST_DB_PORT: "3306"
+      TEST_DB_NAME: msp_tracker_test
+      TEST_DB_USER: root
+      TEST_DB_PASSWORD: root
+

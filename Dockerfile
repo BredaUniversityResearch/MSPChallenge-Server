@@ -64,6 +64,11 @@ RUN docker-php-ext-install mysqli pdo pdo_mysql
 ###< doctrine/doctrine-bundle ###
 ###< recipes ###
 
+# Build custom extension for low-level DB connection tracking callbacks.
+COPY --link php-ext/msp_tracker /usr/src/php/ext/msp_tracker
+RUN set -eux; \
+    docker-php-ext-install msp_tracker
+
 COPY --link frankenphp/conf.d/10-app.ini $PHP_INI_DIR/app.conf.d/
 COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 COPY --link frankenphp/Caddyfile /etc/caddy/Caddyfile

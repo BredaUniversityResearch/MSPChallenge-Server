@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS msp_tracker.`connection` (
     user VARCHAR(32) NOT NULL,
     process_name VARCHAR(128) NOT NULL,
     db_name VARCHAR(64),
+    call_stack LONGTEXT NULL,
     connected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_heartbeat TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_process_name (process_name),

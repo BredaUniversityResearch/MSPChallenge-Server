@@ -10,6 +10,11 @@ use React\Promise\PromiseInterface;
 
 use function React\Promise\resolve;
 
+/**
+ * Async Drift connections do not expose a PDO object, so the extension cannot
+ * query MySQL CONNECTION_ID() for them. Keep this thin app-side bridge for the
+ * async driver only; all PDO/DBAL tracking is extension-driven.
+ */
 class TrackingMysqlDriver extends MysqlDriver
 {
     private bool $trackingInitialized = false;
@@ -49,7 +54,7 @@ class TrackingMysqlDriver extends MysqlDriver
         ) ?? true;
         if (!$trackingEnabled) {
             $this->trackingInitialized = true;
-            return resolve(null);
+            return resolve(true)->then(static fn () => null);
         }
 
         $processName = ProcessNameDetector::getProcessName();
@@ -63,7 +68,7 @@ class TrackingMysqlDriver extends MysqlDriver
         }
         if (!$processName) {
             $this->trackingInitialized = true;
-            return resolve(null);
+            return resolve(true)->then(static fn () => null);
         }
 
         $this->trackingInProgress = true;
@@ -76,14 +81,17 @@ class TrackingMysqlDriver extends MysqlDriver
 
         $trackingSql = <<<'SQL'
 INSERT INTO `msp_tracker`.`connection`
-(connection_id, `user`, process_name, db_name)
-VALUES (CONNECTION_ID(), USER(), ?, ?)
+(connection_id, `user`, process_name, db_name, call_stack)
+VALUES (CONNECTION_ID(), USER(), ?, ?, ?)
 ON DUPLICATE KEY UPDATE
 `user` = USER(), process_name = VALUES(process_name), db_name = VALUES(db_name),
+call_stack = VALUES(call_stack),
 last_heartbeat = NOW();
 SQL;
 
-        return parent::query($trackingSql, [$processName, (string) $dbName])->then(
+        $callStackJson = $this->buildCallStackJson();
+
+        return parent::query($trackingSql, [$processName, (string) $dbName, $callStackJson])->then(
             function () {
                 $this->trackingInitialized = true;
                 $this->trackingInProgress = false;
@@ -96,5 +104,24 @@ SQL;
                 return null;
             }
         );
+    }
+
+    private function buildCallStackJson(): ?string
+    {
+        $stack = [];
+        foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 32) as $index => $frame) {
+            $class = is_string($frame['class'] ?? null) ? $frame['class'] : null;
+            $type = is_string($frame['type'] ?? null) ? $frame['type'] : null;
+            $function = $frame['function'];
+            $file = is_string($frame['file'] ?? null) ? $frame['file'] : null;
+            $line = is_int($frame['line'] ?? null) ? $frame['line'] : null;
+
+            $call = trim(($class ?? '') . ($type ?? '') . $function);
+            $location = $file !== null && $line !== null ? $file . ':' . $line : 'internal';
+            $stack[] = '#' . $index . ' ' . $location . ' ' . $call;
+        }
+
+        $encoded = json_encode($stack, JSON_UNESCAPED_SLASHES);
+        return is_string($encoded) ? $encoded : null;
     }
 }
