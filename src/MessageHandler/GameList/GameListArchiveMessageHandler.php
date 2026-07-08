@@ -2,6 +2,7 @@
 
 namespace App\MessageHandler\GameList;
 
+use App\Domain\API\v1\Database;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
@@ -66,6 +67,7 @@ class GameListArchiveMessageHandler extends CommonSessionHandler
             $this->dropSessionDatabase();
         } finally {
             $this->connectionManager->clearAndCloseDoctrineManagers();
+            Database::GetInstance($this->gameSession->getId())->Close();
         }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\MessageHandler\GameSave;
 
+use App\Domain\API\v1\Database;
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\GameListAndSaveSerializer;
@@ -79,6 +80,7 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
             $this->mspServerManagerEntityManager->flush();
         } finally {
             $this->connectionManager->clearAndCloseDoctrineManagers();
+            Database::GetInstance($this->gameSession->getId())->Close();
         }
     }
 

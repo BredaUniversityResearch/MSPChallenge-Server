@@ -2,6 +2,7 @@
 
 namespace App\MessageHandler\Watchdog;
 
+use App\Domain\API\v1\Database;
 use App\Domain\API\v1\Simulation;
 use App\Domain\API\v1\User;
 use App\Domain\Common\EntityEnums\EventLogSeverity;
@@ -62,8 +63,8 @@ class WatchdogCommunicationMessageHandler
     public function __invoke(
         GameMonthChangedMessage|GameStateChangedMessage|WatchdogPingMessage $message
     ): void {
+        $this->sessionLogHandler->setGameSessionId($message->getGameSessionId());
         try {
-            $this->sessionLogHandler->setGameSessionId($message->getGameSessionId());
             $em = $this->connectionManager->getGameSessionEntityManager($message->getGameSessionId());
 
             // instead of using $message->getWatchdog() directly, we need to fetch it through doctrine,
@@ -114,6 +115,7 @@ class WatchdogCommunicationMessageHandler
             $em->flush();
         } finally {
             $this->connectionManager->clearAndCloseDoctrineManagers();
+            Database::GetInstance($message->getGameSessionId())->Close();
         }
     }
 

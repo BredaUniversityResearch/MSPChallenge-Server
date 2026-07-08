@@ -2,6 +2,7 @@
 
 namespace App\MessageHandler\GameSave;
 
+use App\Domain\API\v1\Database;
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
@@ -93,6 +94,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
             $this->mspServerManagerEntityManager->flush();
         } finally {
             $this->connectionManager->clearAndCloseDoctrineManagers();
+            Database::GetInstance($this->gameSession->getId())->Close();
         }
     }
 
