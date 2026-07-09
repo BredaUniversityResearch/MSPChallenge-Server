@@ -74,6 +74,7 @@ SELECT
 FROM information_schema.PROCESSLIST pl
 LEFT JOIN msp_tracker.connection ct ON pl.ID = ct.connection_id
 WHERE pl.db IS NOT NULL
+  AND pl.TIME > 0
 ORDER BY pl.db ASC, pl.TIME DESC
 SQL)->fetchAllAssociative();
         } catch (\Throwable) {
