@@ -18,10 +18,10 @@ CREATE TABLE IF NOT EXISTS msp_tracker.`connection` (
 
 -- Create event to remove disconnected rows from the tracker table.
 -- A row is considered disconnected when its connection_id is no longer present in PROCESSLIST.
--- CREATE EVENT IF NOT EXISTS msp_tracker.cleanup_stale_connections
--- ON SCHEDULE EVERY 10 MINUTE
--- DO
---   DELETE ct
---   FROM msp_tracker.`connection` ct
---   LEFT JOIN information_schema.PROCESSLIST pl ON pl.ID = ct.connection_id
---   WHERE pl.ID IS NULL;
+CREATE EVENT IF NOT EXISTS msp_tracker.cleanup_stale_connections
+ON SCHEDULE EVERY 10 MINUTE
+DO
+  DELETE ct
+  FROM msp_tracker.`connection` ct
+  LEFT JOIN information_schema.PROCESSLIST pl ON pl.ID = ct.connection_id
+  WHERE pl.ID IS NULL;
