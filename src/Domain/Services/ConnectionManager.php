@@ -404,28 +404,4 @@ class ConnectionManager extends DatabaseDefaults
         $ormVersion = InstalledVersions::getVersion('doctrine/orm') ?? '0.0.0';
         return version_compare($ormVersion, '3.0.0', '<');
     }
-
-    private function isConnectionTrackingEnabled(): bool
-    {
-        return filter_var(
-            $_ENV['DATABASE_CONNECTION_TRACKING_ENABLED'] ?? '1',
-            FILTER_VALIDATE_BOOLEAN,
-            FILTER_NULL_ON_FAILURE
-        ) ?? true;
-    }
-
-    private function buildConnectionTrackingInitCommand(?string $dbName = null): string
-    {
-        $database = $dbName ?? ($_ENV['DBNAME_DEFAULT'] ?? ($_ENV['DBNAME_SERVER_MANAGER'] ??
-            self::DEFAULT_DBNAME_SERVER_MANAGER));
-        $escapedDb = addslashes($database);
-
-        return <<<SQL
-        INSERT IGNORE INTO `msp_tracker`.`connection`
-        (connection_id, `user`, process_name, db_name)
-        VALUES (CONNECTION_ID(), USER(), 'connection_init', '$escapedDb')
-        ON DUPLICATE KEY UPDATE
-        `user` = USER(), db_name = '$escapedDb', last_heartbeat = NOW()
-        SQL;
-    }
 }
