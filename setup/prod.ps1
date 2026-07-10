@@ -565,7 +565,7 @@ function Get-ParameterCategories {
     $tabOrdering = Get-Variable -Name "tabOrdering" -ErrorAction SilentlyContinue
     foreach ($tab in $tabOrdering.Value) {
         $categories[$tab] = @()
-    }  
+    }
     foreach ($param in $parameters.Keys) {
         $tab = GetParamMetadataValue -param $param -metadata "Tab" -parameterMetadata $parameterMetadata
         if ($tab) {
@@ -982,6 +982,10 @@ if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
     exit 1
 }
 Write-Host "Downloading docker-compose files for branch '$BranchName'..." -ForegroundColor Cyan
+
+New-Item -ItemType Directory -Path ".\docker\database\init" -Force | Out-Null
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker/database/init/01-create-connection-tracker.sql" -OutFile ".\docker\database\init\01-create-connection-tracker.sql"
+
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$BranchName/docker-compose.yml" -OutFile "docker-compose.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$BranchName/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
 
