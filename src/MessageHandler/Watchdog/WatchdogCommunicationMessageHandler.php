@@ -9,6 +9,7 @@ use App\Domain\Common\EntityEnums\EventLogSeverity;
 use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\ProcessNameDetector;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameList;
 use App\Message\Watchdog\Message\GameMonthChangedMessage;
 use App\Message\Watchdog\Message\GameStateChangedMessage;
@@ -47,7 +48,9 @@ class WatchdogCommunicationMessageHandler
         private readonly AuthenticationSuccessHandler $authenticationSuccessHandler,
         private readonly VersionsProvider $provider,
         private readonly LoggerInterface $watchdogLogger,
-        LoggerInterface $gameSessionLogger
+        LoggerInterface $gameSessionLogger,
+        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
     ) {
         $this->sessionLogHandler = new SessionLogHandler($gameSessionLogger);
     }
