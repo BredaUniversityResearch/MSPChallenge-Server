@@ -31,7 +31,7 @@ class Database
     private static array $PDOArgs = array(
         PDO::MYSQL_ATTR_LOCAL_INFILE => true,
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_TIMEOUT => 5,
+        PDO::ATTR_TIMEOUT => 5
     );
 
     private int $sessionId;
