@@ -138,6 +138,17 @@ for v in "${VARS[@]}"; do
   CUR[$v]=${CUR[$v]:-"?"}
 done
 
+# ---------------- 3b. Read the container's ACTUAL file-descriptor ulimit ----------------
+# mysqld runs as PID 1 in the official mariadb/mysql images (the entrypoint execs it,
+# replacing the shell), so /proc/1/limits reflects the limit mysqld itself is running
+# under -- more reliable than a fresh `docker exec ... ulimit -n`, which only reflects
+# a new exec session and doesn't tell you what the already-running mysqld process got.
+PID1_LIMITS=$(docker exec "$CONTAINER" sh -c "cat /proc/1/limits" 2>/dev/null || true)
+SOFT_NOFILE=$(echo "$PID1_LIMITS" | awk '/^Max open files/ {print $4}')
+HARD_NOFILE=$(echo "$PID1_LIMITS" | awk '/^Max open files/ {print $5}')
+SOFT_NOFILE=${SOFT_NOFILE:-"?"}
+HARD_NOFILE=${HARD_NOFILE:-"?"}
+
 # ---------------- 4. Determine available memory ----------------
 HOST_MEM_TOTAL_KB=$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)
 HOST_MEM_AVAIL_KB=$(awk '/^MemAvailable:/ {print $2}' /proc/meminfo)
@@ -197,6 +208,20 @@ REC_MAX_CONN=$(( REMAINING_MB / PER_CONN_MEM_MB ))
 REC_OPEN_FILES=$(( REC_MAX_CONN * 3 + 500 ))
 REC_TABLE_OPEN_CACHE=$(( REC_MAX_CONN * 2 ))
 
+# Compare mysqld's actual ulimit (from /proc/1/limits, section 3b) against what we'd recommend
+if [[ "$HARD_NOFILE" =~ ^[0-9]+$ ]]; then
+  if (( HARD_NOFILE >= REC_OPEN_FILES )); then
+    OPEN_FILES_NOTE="container ulimit hard=${HARD_NOFILE} already covers this, no ulimit change needed"
+    OPEN_FILES_ULIMIT_OK=1
+  else
+    OPEN_FILES_NOTE="container ulimit hard=${HARD_NOFILE} is BELOW this -- needs raising in compose + recreate"
+    OPEN_FILES_ULIMIT_OK=0
+  fi
+else
+  OPEN_FILES_NOTE="could not read container ulimit (checked /proc/1/limits)"
+  OPEN_FILES_ULIMIT_OK=0
+fi
+
 REC_INNODB_BUFFER_POOL_BYTES=$(( BUFFER_POOL_MB * 1048576 ))
 REC_SORT_BUFFER_BYTES=$(( 2 * 1048576 ))      # 2M
 REC_JOIN_BUFFER_BYTES=$(( 2 * 1048576 ))      # 2M
@@ -238,7 +263,7 @@ row "sort_buffer_size"           "${CUR[sort_buffer_size]}"           "$REC_SORT
 row "join_buffer_size"           "${CUR[join_buffer_size]}"           "$REC_JOIN_BUFFER_BYTES"          "per-connection; avoid oversizing"
 row "read_buffer_size"           "${CUR[read_buffer_size]}"           "$REC_READ_BUFFER_BYTES"          ""
 row "read_rnd_buffer_size"       "${CUR[read_rnd_buffer_size]}"       "$REC_READ_RND_BUFFER_BYTES"      ""
-row "open_files_limit"           "${CUR[open_files_limit]}"           "$REC_OPEN_FILES"                 "also check ulimit -n / container nofile limit"
+row "open_files_limit"           "${CUR[open_files_limit]}"           "$REC_OPEN_FILES"                 "$OPEN_FILES_NOTE"
 row "table_open_cache"           "${CUR[table_open_cache]}"           "$REC_TABLE_OPEN_CACHE"           ""
 row "tmp_table_size"             "${CUR[tmp_table_size]}"             "$REC_TMP_TABLE_BYTES"            "keep equal to max_heap_table_size"
 row "max_heap_table_size"        "${CUR[max_heap_table_size]}"        "$REC_TMP_TABLE_BYTES"            "keep equal to tmp_table_size"
@@ -247,6 +272,7 @@ row "key_buffer_size"            "${CUR[key_buffer_size]}"            "${CUR[key
 row "innodb_log_file_size"       "${CUR[innodb_log_file_size]}"       "${CUR[innodb_log_file_size]}"    "review manually; changing requires care/restart sequence"
 
 echo
+echo "Container file-descriptor ulimit (mysqld, PID 1): soft=${SOFT_NOFILE} hard=${HARD_NOFILE}"
 echo "Basis: ${TOTAL_MEM_MB}MB available memory, ${BUFFER_POOL_PCT}% to InnoDB buffer pool,"
 echo "       ~${PER_CONN_MEM_MB}MB budgeted per connection for max_connections sizing."
 echo
@@ -355,12 +381,18 @@ if [[ "$APPLY" -eq 1 ]]; then
   fi
 
   echo
-  echo "NOTE on open_files_limit: raising this in mysqld config only helps if the"
-  echo "container's own file-descriptor ulimit allows it. Check/raise it at the"
-  echo "docker run / compose level, e.g.:"
-  echo "  ulimits:"
-  echo "    nofile:"
-  echo "      soft: ${REC_OPEN_FILES}"
-  echo "      hard: ${REC_OPEN_FILES}"
+  if [[ "$OPEN_FILES_ULIMIT_OK" -eq 1 ]]; then
+    echo "Container ulimit check: hard=${HARD_NOFILE} already covers the recommended"
+    echo "open_files_limit (${REC_OPEN_FILES}) -- no ulimit change needed."
+  else
+    echo "NOTE on open_files_limit: the container's current file-descriptor hard limit"
+    echo "(${HARD_NOFILE}) is below the recommended open_files_limit (${REC_OPEN_FILES})."
+    echo "This can only be raised by recreating the container with an explicit ulimit,"
+    echo "e.g. in compose:"
+    echo "  ulimits:"
+    echo "    nofile:"
+    echo "      soft: ${REC_OPEN_FILES}"
+    echo "      hard: ${REC_OPEN_FILES}"
+  fi
   echo "============================================================================="
 fi
