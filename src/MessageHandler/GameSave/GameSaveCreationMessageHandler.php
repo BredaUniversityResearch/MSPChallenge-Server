@@ -2,6 +2,7 @@
 
 namespace App\MessageHandler\GameSave;
 
+use App\Domain\API\v1\Database;
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\GameListAndSaveSerializer;
@@ -59,23 +60,28 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
      */
     public function __invoke(GameSaveCreationMessage $gameSave): void
     {
-        $this->setGameSessionAndDatabase($gameSave);
-        $this->gameSave = $this->mspServerManagerEntityManager->getRepository(GameSave::class)->find(
-            $gameSave->gameSaveId
-        ) ?? throw new Exception('Game save not found, so cannot continue.');
+        try {
+            $this->setGameSessionAndDatabase($gameSave);
+            $this->gameSave = $this->mspServerManagerEntityManager->getRepository(GameSave::class)->find(
+                $gameSave->gameSaveId
+            ) ?? throw new Exception('Game save not found, so cannot continue.');
 
-        $this->createSaveZip();
-        if ($this->gameSave->getSaveType() == GameSaveTypeValue::LAYERS) {
-            $this->addLayerShapeFilesExportsToZip();
-            $this->addLayerRasterExportsToZip();
-        } else {
-            $this->addSessionDatabaseExportToZip();
-            $this->addSessionRunningConfigToZip();
-            $this->addSessionRasterStoreToZip();
-            $this->addGameListRecordToZip();
+            $this->createSaveZip();
+            if ($this->gameSave->getSaveType() == GameSaveTypeValue::LAYERS) {
+                $this->addLayerShapeFilesExportsToZip();
+                $this->addLayerRasterExportsToZip();
+            } else {
+                $this->addSessionDatabaseExportToZip();
+                $this->addSessionRunningConfigToZip();
+                $this->addSessionRasterStoreToZip();
+                $this->addGameListRecordToZip();
+            }
+            $this->closeSaveZip();
+            $this->mspServerManagerEntityManager->flush();
+        } finally {
+            $this->connectionManager->clearAndCloseDoctrineManagers();
+            Database::GetInstance($this->gameSession->getId())->Close();
         }
-        $this->closeSaveZip();
-        $this->mspServerManagerEntityManager->flush();
     }
 
     /**

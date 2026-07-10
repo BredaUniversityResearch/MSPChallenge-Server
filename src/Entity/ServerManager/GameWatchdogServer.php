@@ -17,10 +17,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[AppMappings\ReadonlyIDs([1])]
 #[AppMappings\Plurals('Watchdog server', 'Watchdog servers')]
-#[ORM\Table(name: 'game_watchdog_servers', uniqueConstraints: [
-    new ORM\UniqueConstraint(name: 'uq_server_id', columns: ['server_id']),
-    new ORM\UniqueConstraint(name: 'uq_scheme_address_port', columns: ['scheme', 'address', 'port']),
-])]
+#[ORM\Table(name: 'game_watchdog_servers')]
+#[ORM\UniqueConstraint(name: 'uq_server_id', columns: ['server_id'])]
+#[ORM\UniqueConstraint(name: 'uq_scheme_address_port', columns: ['scheme', 'address', 'port'])]
 #[ORM\Entity(repositoryClass: GameWatchdogServerRepository::class)]
 class GameWatchdogServer extends EntityBase implements WatchdogInterface
 {

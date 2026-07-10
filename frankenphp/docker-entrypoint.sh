@@ -14,7 +14,7 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 	if grep -q ^DATABASE_URL= .env; then
 		echo 'Waiting for database to be ready...'
 		ATTEMPTS_LEFT_TO_REACH_DATABASE=60
-		until [ $ATTEMPTS_LEFT_TO_REACH_DATABASE -eq 0 ] || DATABASE_ERROR=$(php bin/console dbal:run-sql -q "SELECT 1" --connection msp_server_manager 2>&1); do
+		until [ $ATTEMPTS_LEFT_TO_REACH_DATABASE -eq 0 ] || DATABASE_ERROR=$(DB_PROCESS_NAME=health_check php bin/console dbal:run-sql -q "SELECT 1" --connection msp_server_manager 2>&1); do
 			if [ $? -eq 255 ]; then
 				# If the Doctrine command exits with 255, an unrecoverable error occurred
 				ATTEMPTS_LEFT_TO_REACH_DATABASE=0
@@ -33,7 +33,7 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 			echo 'The database is now ready and reachable'
 		fi
 
-		php bin/console doctrine:migrations:migrate --no-interaction --all-or-nothing --em msp_server_manager -vvv # -vvv for very verbose mode
+		DB_PROCESS_NAME=doctrine_migrations php bin/console doctrine:migrations:migrate --no-interaction --all-or-nothing --em msp_server_manager -vvv # -vvv for very verbose mode
 	fi
 
   chown -R "$(whoami)":www-data export raster running_session_config ServerManager/configfiles ServerManager/log ServerManager/saves ServerManager/session_archive session_archive var vendor POV

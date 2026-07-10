@@ -3,6 +3,7 @@
 namespace App\MessageHandler\GameList;
 
 use App\Controller\SessionAPI\SELController;
+use App\Domain\API\v1\Database;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameTransitionStateValue;
@@ -93,37 +94,43 @@ class GameListCreationMessageHandler extends CommonSessionHandler
      */
     public function __invoke(GameListCreationMessage $gameList): void
     {
-        $this->setGameSessionAndDatabase($gameList);
-        if (!is_null($this->gameSession->getGameSave())) {
-            $this->messageBus->dispatch(
-                new GameSaveLoadMessage($this->gameSession->getId(), $this->gameSession->getGameSave()->getId())
-            );
-            return;
-        }
         try {
-            $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
-            $this->validateGameConfig($this->createSessionRunningConfig());
-            $this->sessionLogHandler->notice(
-                "Session {$this->gameSession->getName()} creation initiated. Please wait."
-            );
-            $this->setupSessionDatabase();
-            $this->migrateSessionDatabase();
-            $this->resetSessionRasterStore();
-            $this->entityManager->wrapInTransaction(fn() => $this->setupAllEntities());
-            $this->finaliseSession();
-            $this->sessionLogHandler->notice("Session {$this->gameSession->getName()} created and ready for use.");
-            $state = 'healthy';
-        } catch (Throwable $e) {
-            $this->sessionLogHandler->error(
-                "Session {$this->gameSession->getName()} failed to create. {problem}",
-                ['problem' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
-            );
-            $state = 'failed';
+            $this->setGameSessionAndDatabase($gameList);
+            if (!is_null($this->gameSession->getGameSave())) {
+                $this->messageBus->dispatch(
+                    new GameSaveLoadMessage($this->gameSession->getId(), $this->gameSession->getGameSave()->getId())
+                );
+                return;
+            }
+            try {
+                $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
+                $this->validateGameConfig($this->createSessionRunningConfig());
+                $this->sessionLogHandler->notice(
+                    "Session {$this->gameSession->getName()} creation initiated. Please wait."
+                );
+                $this->setupSessionDatabase();
+                $this->migrateSessionDatabase();
+                $this->refreshSessionEntityManagerAfterDatabaseReset();
+                $this->resetSessionRasterStore();
+                $this->entityManager->wrapInTransaction(fn() => $this->setupAllEntities());
+                $this->finaliseSession();
+                $this->sessionLogHandler->notice("Session {$this->gameSession->getName()} created and ready for use.");
+                $state = 'healthy';
+            } catch (Throwable $e) {
+                $this->sessionLogHandler->error(
+                    "Session {$this->gameSession->getName()} failed to create. {problem}",
+                    ['problem' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
+                );
+                $state = 'failed';
+            }
+            $this->gameSession->setSessionState(new GameSessionStateValue($state));
+            $this->gameSession->getGameConfigVersion()->setLastPlayedTime(time());
+            $this->mspServerManagerEntityManager->persist($this->gameSession);
+            $this->mspServerManagerEntityManager->flush();
+        } finally {
+            $this->connectionManager->clearAndCloseDoctrineManagers();
+            Database::GetInstance($this->gameSession->getId())->Close();
         }
-        $this->gameSession->setSessionState(new GameSessionStateValue($state));
-        $this->gameSession->getGameConfigVersion()->setLastPlayedTime(time());
-        $this->mspServerManagerEntityManager->persist($this->gameSession);
-        $this->mspServerManagerEntityManager->flush();
     }
 
     /**
@@ -574,7 +581,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         foreach ($geometries as $mspId => $geometryList) {
             $counted = count($geometryList);
             $contextVars = [];
-            if ($_ENV['APP_ENV'] == 'dev') {
+            if (($_ENV['APP_ENV'] ?? 'prod') !== 'prod') {
                 $contextVars = [
                     // phpcs:ignoreFile Generic.Files.LineLength.TooLong
                     'href' => 'http://localhost:8082/?username=&db='.$this->database.'&sql=select l.layer_name%2C g.geometry_data from geometry g inner join layer l on g.geometry_layer_id %3D l.layer_id where geometry_mspid%3D\''.$mspId.'\''

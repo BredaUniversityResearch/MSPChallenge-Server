@@ -21,8 +21,8 @@ const $ = require('jquery');
 // the bootstrap module doesn't export/return anything
 require('bootstrap');
 // or you can include specific pieces
-// require('bootstrap/js/dist/tooltip');
-// require('bootstrap/js/dist/popover');
+const TooltipModule = require('bootstrap/js/dist/tooltip');
+const Tooltip = TooltipModule.default || TooltipModule;
 
 require('tata-js');
 require('./helpers/notification.js');
@@ -36,13 +36,41 @@ require('./helpers/modal.js');
  *
  */
 // this waits for Turbo Drive to load
-//document.addEventListener('turbo:load', function (e) {
-//    // this enables bootstrap tooltips globally
-//    let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-//    let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-//        return new Tooltip(tooltipTriggerEl)
-//    });
-//});
+let delegatedTooltip = null;
+let delegatedRoot = null;
+
+function enableBootstrapOverlays()
+{
+    const root = document.body;
+    if (delegatedRoot !== root) {
+        delegatedTooltip?.dispose();
+        delegatedTooltip = null;
+        delegatedRoot = root;
+    }
+
+    if (!delegatedTooltip) {
+        // Delegate tooltips from <body> so elements injected by Turbo Frames also work.
+        delegatedTooltip = new Tooltip(root, {
+            selector: '[data-bs-toggle="tooltip"]',
+            container: 'body',
+            delay: { show: 0, hide: 0 }
+        });
+    }
+}
+
+function closeBootstrapOverlays(root = document)
+{
+    root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
+        Tooltip.getInstance(el)?.hide();
+    });
+}
+
+document.addEventListener('DOMContentLoaded', enableBootstrapOverlays);
+document.addEventListener('turbo:load', enableBootstrapOverlays);
+document.addEventListener('turbo:frame-load', enableBootstrapOverlays);
+document.addEventListener('turbo:before-frame-render', (event) => closeBootstrapOverlays(event.target));
+document.addEventListener('turbo:before-render', closeBootstrapOverlays);
+document.addEventListener('turbo:before-cache', closeBootstrapOverlays);
 
 /*
  * https://symfony.com/doc/current/frontend/encore/bootstrap.html#using-other-bootstrap-jquery-plugins

@@ -3,14 +3,22 @@ import { successNotification, errorNotification } from '../helpers/notification'
 
 export default class extends Controller {
 
+    refreshInterval = null;
+
     connect()
     {
-        let frame = document.querySelector('turbo-frame#sessionsTable');
-        setInterval(function () {
-            frame.reload();
+        this.refreshInterval = setInterval(() => {
+            document.querySelector('turbo-frame#sessionsTable')?.reload();
         }, 10000);
     }
-    
+
+    disconnect()
+    {
+        clearInterval(this.refreshInterval);
+        this.refreshInterval = null;
+    }
+
+
     toggleSessionInfoLog()
     {
         if (document.getElementById('sessionInfoLog').style.display == 'none') {

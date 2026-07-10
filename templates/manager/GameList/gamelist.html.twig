@@ -1,3 +1,4 @@
+{% set isArchivedView = app.request.attributes.get('sessionState', 'public') == 'archived' %}
 <turbo-frame id="sessionsTable">
     <table class="table table-hover table-striped">
         <thead>
@@ -5,25 +6,24 @@
             <th>ID</th>
             <th>Session Name</th>
             <th>Configuration</th>
-            <th>Players</th>
             <th style="width: 100px;">State</th>
             <th>Current Month</th>
             <th>Ending Month</th>
-            <th class="text-center" style="width: 125px;">Quick Actions</th>
+            <th class="text-center text-nowrap" style="width: 160px;">Quick Actions</th>
+            <th style="width: 1%;"></th>
         </tr>
         </thead>
         <tbody>
-        {% if sessionslist is empty %}
-            <tr>
-                <td colspan="8">No sessions (of this type) yet.</td>
-            </tr>
-        {% endif %}
-        {% for game in sessionslist %}
-            <tr>
+    {% if sessionslist is empty %}
+        <tr>
+            <td colspan="8">No sessions (of this type) yet.</td>
+        </tr>
+    {% endif %}
+    {% for game in sessionslist %}
+        <tr>
                 <td>{{ game.id }}</td>
                 <td>{{ game.name }}</td>
                 <td>{{ game.config_file_name }}</td>
-                <td>{{ game.players_past_hour|default(0) }}</td>
                 {% if game.session_state != 'healthy' %}
                     {% set state = game.session_state %}
                 {% else %}
@@ -39,9 +39,9 @@
                     {% endif %}
                     {{ state }}
                     {% if (state == 'request') %}
-                        <i class="fa fa-spinner fa-pulse" title="Your session is being created..."></i>
+                        <i class="fa fa-spinner fa-pulse" data-bs-toggle="tooltip" data-bs-title="Your session is being created..."></i>
                     {% elseif (game.game_transition_state is not null) %}
-                        <i class="fa fa-spinner fa-pulse" title="Running simulations..."></i>
+                        <i class="fa fa-spinner fa-pulse" data-bs-toggle="tooltip" data-bs-title="Running simulations..."></i>
                     {% endif %}
                 </td>
                 <td>
@@ -53,50 +53,82 @@
                     {% endif %}
                     {{ game.current_month_formatted }}
                     {% if (game.game_transition_month is not null) %}
-                        <i class="fa fa-spinner fa-pulse" title="Running simulations..."></i>
+                        <i class="fa fa-spinner fa-pulse" data-bs-toggle="tooltip" data-bs-title="Running simulations..."></i>
                     {% endif %}
                 </td>
                 <td>{{ game.end_month_formatted }}</td>
-                <td class="text-center">
-                {% if showGameButton('pause', game) %}
-                    <button class="btn btn-secondary btn-sm"
-                        data-session="{{ game.id }}"
-                        data-state="pause"
-                        data-action="gamelist#sessionState">
-                        <i class="fa fa-pause" title="Pause"></i>
-                    </button>
-                {% elseif showGameButton('play', game) %}
-                    <button class="btn btn-secondary btn-sm"
-                        data-session="{{ game.id }}"
-                        data-state="play"
-                        data-action="gamelist#sessionState">
-                        <i class="fa fa-play" title="Play"></i>
-                    </button>
-                {% else %}
-                    <button class="btn btn-secondary btn-sm" disabled>
-                        <i class="fa fa-pause" title="State change impossible at this time"></i>
-                    </button>
-                {% endif %}
-                {% if showGameButton('save', game) %}
-                    <button class="btn btn-secondary btn-sm"
-                        data-session="{{ game.id }}"
-                        data-type="full"
-                        data-action="gamelist#sessionSave">
-                        <i class="fa fa-save" title="Save"></i>
-                    </button>
-                {% else %}
-                    <button class="btn btn-secondary btn-sm" disabled>
-                        <i class="fa fa-save" title="Pause before you can save"></i>
-                    </button>
-                {% endif %}
-                    <button class="btn btn-secondary btn-sm"
-                        data-session="{{ game.id }}"
-                        data-action="modal-game#openSessionDetailsModal">
-                        <i class="fa fa-info-circle" title= "Session details"></i>
-                    </button>
+                <td class="text-center text-nowrap" style="width: 160px;">
+                    <div class="d-inline-flex flex-nowrap gap-1">
+                    {% if showGameButton('pause', game) %}
+                        <button class="btn btn-secondary btn-sm"
+                            data-session="{{ game.id }}"
+                            data-state="pause"
+                            data-action="gamelist#sessionState"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="Pause">
+                            <i class="fa fa-pause"></i>
+                        </button>
+                    {% elseif showGameButton('play', game) %}
+                        <button class="btn btn-secondary btn-sm"
+                            data-session="{{ game.id }}"
+                            data-state="play"
+                            data-action="gamelist#sessionState"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="Play">
+                            <i class="fa fa-play"></i>
+                        </button>
+                    {% else %}
+                        <span class="d-inline-block" data-bs-toggle="tooltip" data-bs-title="State change impossible at this time">
+                            <button class="btn btn-secondary btn-sm" disabled style="pointer-events: none;">
+                                <i class="fa fa-pause"></i>
+                            </button>
+                        </span>
+                    {% endif %}
+                    {% if showGameButton('save', game) %}
+                        <button class="btn btn-secondary btn-sm"
+                            data-session="{{ game.id }}"
+                            data-type="full"
+                            data-action="gamelist#sessionSave"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="Save">
+                            <i class="fa fa-save"></i>
+                        </button>
+                    {% else %}
+                        <span class="d-inline-block" data-bs-toggle="tooltip" data-bs-title="Pause before you can save">
+                            <button class="btn btn-secondary btn-sm" disabled style="pointer-events: none;">
+                                <i class="fa fa-save"></i>
+                            </button>
+                        </span>
+                    {% endif %}
+                        <button class="btn btn-secondary btn-sm"
+                            data-session="{{ game.id }}"
+                            data-action="modal-game#openSessionDetailsModal"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="Session details">
+                            <i class="fa fa-info-circle"></i>
+                        </button>
+                    </div>
                 </td>
-            </tr>
-        {% endfor %}
+                <td class="text-start text-nowrap">
+                    <span class="{% if isArchivedView %}invisible{% endif %}">
+                        <span data-bs-toggle="tooltip" data-bs-title="Players in this session (past hour)">
+                            <i class="fa fa-user"></i>
+                            {{ game.players_past_hour|default(0) }}
+                        </span>
+                        <span class="mx-1">|</span>
+                        <a
+                            href="{{ path('manager_database', {'sessionId': game.id}) }}"
+                            data-turbo-frame="_top"
+                            data-bs-toggle="tooltip"
+                            data-bs-title="Database connections for this session"
+                        >
+                            <i class="fa fa-database"></i>
+                            {{ game.session_connection_count|default(0) }}
+                        </a>
+                    </span>
+                </td>
+        </tr>
+    {% endfor %}
         </tbody>
     </table>
 </turbo-frame>

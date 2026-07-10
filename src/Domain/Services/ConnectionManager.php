@@ -3,18 +3,19 @@
 namespace App\Domain\Services;
 
 use App\Domain\Common\DatabaseDefaults;
+use App\Drift\Driver\Mysql\TrackingMysqlDriver;
 use Composer\InstalledVersions;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ObjectManager;
 use Drift\DBAL\Connection as DriftConnection;
 use Drift\DBAL\ConnectionOptions;
 use Drift\DBAL\ConnectionPool;
 use Drift\DBAL\ConnectionPoolOptions;
 use Drift\DBAL\Credentials;
-use Drift\DBAL\Driver\Mysql\MysqlDriver;
 use Drift\DBAL\SingleConnection;
 use Exception;
 use React\EventLoop\LoopInterface;
@@ -54,6 +55,23 @@ class ConnectionManager extends DatabaseDefaults
         return $this->doctrine;
     }
 
+    public function clearAndCloseDoctrineManagers(): void
+    {
+        if ($this->doctrine === null) {
+            return;
+        }
+
+        /** @var EntityManagerInterface $manager */
+        foreach ($this->doctrine->getManagers() as $manager) {
+            try {
+                $manager->clear();
+                $manager->getConnection()->close();
+            } catch (\Throwable) {
+                // Cleanup is best-effort for long-running workers.
+            }
+        }
+    }
+
     public function setDoctrine(ManagerRegistry $doctrine): self
     {
         $this->doctrine = $doctrine;
@@ -91,9 +109,10 @@ class ConnectionManager extends DatabaseDefaults
      */
     public function getDbNames(): array
     {
-        $connection = $this->getCachedServerManagerDbConnection();
+        $connection = $this->createDbConnection($this->getServerManagerDbName());
         $sm = $connection->createSchemaManager();
         $dbNames = $sm->listDatabases();
+        $connection->close();
         return array_diff($dbNames, [
             'information_schema', 'test', 'phpmyadmin', 'performance_schema', 'mysql'
         ]);
@@ -114,6 +133,8 @@ class ConnectionManager extends DatabaseDefaults
             'charset' => $_ENV['DATABASE_CHARSET'] ?? self::DEFAULT_DATABASE_CHARSET,
             'mapping_types' => ['enum' => $enumDoctrineType]
         ];
+
+
         // DBAL 4 dropped the use_savepoints connection option.
         if (version_compare($dbalVersion, '4.0.0', '<')) {
             $config['use_savepoints'] = true;
@@ -268,7 +289,7 @@ class ConnectionManager extends DatabaseDefaults
         ?ConnectionOptions $options = null
     ): DriftConnection {
         $mysqlPlatform = new MySqlPlatform();
-        $mysqlDriver = new MysqlDriver($loop);
+        $mysqlDriver = new TrackingMysqlDriver($loop);
         $credentials = new Credentials(
             $_ENV['DATABASE_HOST'] ?? self::DEFAULT_DATABASE_HOST,
             $_ENV['DATABASE_PORT'] ?? self::DEFAULT_DATABASE_PORT,
@@ -324,9 +345,12 @@ class ConnectionManager extends DatabaseDefaults
 
     public function getGameSessionDbName(int $gameSessionId): string
     {
-        $databaseName = ($_ENV['DBNAME_SESSION_PREFIX'] ?? self::DEFAULT_DBNAME_SESSION_PREFIX) . $gameSessionId;
-        //$databaseName .= ($_ENV['APP_ENV'] !== 'test') ? '' : '_test';
-        return $databaseName;
+        return $this->getSessionDbNamePrefix() . $gameSessionId;
+    }
+
+    public function getSessionDbNamePrefix(): string
+    {
+        return $_ENV['DBNAME_SESSION_PREFIX'] ?? self::DEFAULT_DBNAME_SESSION_PREFIX;
     }
 
     /**

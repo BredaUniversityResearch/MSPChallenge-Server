@@ -7,9 +7,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 #[ORM\Entity(repositoryClass: SimulationRepository::class)]
-#[ORM\Table(uniqueConstraints: [
-    new ORM\UniqueConstraint(name: 'uq_watchdog_id_name', columns: ['watchdog_id', 'name'])
-])]
+#[ORM\Table]
+#[ORM\UniqueConstraint(name: 'uq_watchdog_id_name', columns: ['watchdog_id', 'name'])]
 class Simulation
 {
     use TimestampableEntity;

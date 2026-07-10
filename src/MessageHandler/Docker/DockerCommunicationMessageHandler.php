@@ -34,15 +34,19 @@ readonly class DockerCommunicationMessageHandler
      */
     public function __invoke(DockerCommunicationMessageBase $message): void
     {
-        if ($message instanceof ImmersiveSessionConnectionMessageBase) {
-            $this->handleImmersiveSessionContainer($message);
-            return;
+        try {
+            if ($message instanceof ImmersiveSessionConnectionMessageBase) {
+                $this->handleImmersiveSessionContainer($message);
+                return;
+            }
+            if (get_class($message) == InspectDockerConnectionsMessage::class) {
+                $this->inspectDockerConnections();
+                return;
+            }
+            $this->dockerMessengerLogger->error('Unknown message type: '.get_class($message));
+        } finally {
+            $this->connectionManager->clearAndCloseDoctrineManagers();
         }
-        if (get_class($message) == InspectDockerConnectionsMessage::class) {
-            $this->inspectDockerConnections();
-            return;
-        }
-        $this->dockerMessengerLogger->error('Unknown message type: '.get_class($message));
     }
 
      /**

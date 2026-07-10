@@ -26,6 +26,7 @@ use App\Message\GameSave\GameSaveCreationMessage;
 use App\Message\Watchdog\Message\GameStateChangedMessage;
 use App\Entity\SessionAPI\Game;
 use App\Entity\SessionAPI\Watchdog;
+use App\Repository\ServerManager\GameListRepository;
 use App\Repository\SessionAPI\GameRepository;
 use App\Repository\SessionAPI\WatchdogRepository;
 use App\VersionsProvider;
@@ -67,11 +68,80 @@ class GameListController extends BaseController
         string $sessionState = 'public'
     ): Response {
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
-        $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
+        /** @var GameListRepository $repo */
+        $repo = $entityManager->getRepository(GameList::class);
+        $gameList = $repo->findBySessionState($sessionState);
+        $connectionStats = $this->getConnectionStats();
+        $this->enrichGameListWithConnectionStats($connectionStats, $gameList);
         if (is_null($request->headers->get('Turbo-Frame'))) {
             return $this->gameClientJson($provider, $request, $gameList);
         }
-        return $this->render('manager/GameList/gamelist.html.twig', ['sessionslist' => $gameList]);
+        return $this->render('manager/GameList/gamelist.html.twig', [
+            'sessionslist' => $gameList
+        ]);
+    }
+
+    private function getConnectionStats(): array
+    {
+        static $rows = null;
+        if ($rows !== null) {
+            return $rows;
+        }
+        $conn = null;
+        try {
+            $conn = $this->connectionManager->createDbConnection($this->connectionManager->getServerManagerDbName());
+            $rows = $conn->executeQuery(<<<'SQL'
+SELECT
+    IFNULL(ct.process_name, CONCAT('unknown_', pl.ID)) as process,
+    pl.db,
+    pl.TIME as duration
+FROM information_schema.PROCESSLIST pl
+LEFT JOIN msp_tracker.connection ct ON pl.ID = ct.connection_id
+WHERE pl.db IS NOT NULL
+ORDER BY ct.last_heartbeat DESC
+SQL)->fetchAllAssociative();
+        } catch (\Throwable) {
+            // Diagnostics must never break the overview page.
+        } finally {
+            $conn?->close();
+        }
+        return $rows ?? [];
+    }
+
+    /**
+     * Merge current connection counts per session (from SHOW PROCESSLIST) into the session list.
+     */
+    private function enrichGameListWithConnectionStats(array $connectionStats, array &$gameList): void
+    {
+        if (empty($gameList)) {
+            return; // nothing to enrich
+        }
+        $connectionCountByDbName = [];
+        $sessionDbRegex = $this->getSessionDbRegex();
+        foreach ($connectionStats as $row) {
+            $dbName = (string) ($row['db'] ?? '');
+            if ($dbName === '') {
+                continue;
+            }
+            if (preg_match($sessionDbRegex, $dbName) !== 1) {
+                continue;
+            }
+            $connectionCountByDbName[$dbName] = ($connectionCountByDbName[$dbName] ?? 0) + 1;
+        }
+        foreach ($gameList as $index => $session) {
+            assert($session['id'] > 0);
+            $dbName = $this->connectionManager->getGameSessionDbName($session['id'] ?? 0);
+            $session['session_db_name'] = $dbName;
+            $session['session_connection_count'] = $connectionCountByDbName[$dbName] ?? 0;
+            $gameList[$index] = $session;
+        }
+    }
+
+
+    private function getSessionDbRegex(): string
+    {
+        $prefix = preg_quote($this->connectionManager->getSessionDbNamePrefix(), '/');
+        return '/^'.$prefix.'\d+(?:_test)?$/';
     }
 
     /**
