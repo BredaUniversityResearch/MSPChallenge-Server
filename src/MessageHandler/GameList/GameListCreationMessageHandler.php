@@ -15,8 +15,10 @@ use App\Domain\Communicator\GeoServerCommunicator;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\DockerApiService;
 use App\Domain\Services\SimulationHelper;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\DockerApi;
 use App\Entity\SessionAPI\LayerRaster;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListCreationMessage;
@@ -84,7 +86,8 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         private readonly HttpClientInterface $client,
         // e.g. used by GeoServerCommunicator
         private readonly CacheInterface $downloadsCache,
-        private readonly CacheInterface $resultsCache
+        private readonly CacheInterface $resultsCache,
+        private readonly DockerApiService $dockerApiService
     ) {
         parent::__construct(...func_get_args());
     }
@@ -571,6 +574,9 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         return $geometryData['type'];
     }
 
+    /**
+     * @throws \Exception
+     */
     public function checkForDuplicateMspIds(SessionSetupContext $context): void
     {
         $geometries = $context->getGeometriesWithDuplicateMspId();
@@ -578,10 +584,21 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             $this->sessionLogHandler->info("No duplicate MSP IDs. Yay!");
             return;
         }
+
+        $localDockerApi = new DockerApi();
+        $localDockerApi
+            ->setPort(2375)
+            ->setAddress('localhost')
+            ->setScheme('http');
+        $adminerContainerId = $this->dockerApiService->dockerApiCall($localDockerApi, 'GET', '/containers/json', [
+            'query' => [
+                'filters' => '{"label": ["com.docker.compose.service=adminer"]}'
+            ],
+        ])['0']['Id'] ?? null;
         foreach ($geometries as $mspId => $geometryList) {
             $counted = count($geometryList);
             $contextVars = [];
-            if (($_ENV['APP_ENV'] ?? 'prod') !== 'prod') {
+            if ($adminerContainerId !== null) {
                 $contextVars = [
                     // phpcs:ignoreFile Generic.Files.LineLength.TooLong
                     'href' => 'http://localhost:8082/?username=&db='.$this->database.'&sql=select l.layer_name%2C g.geometry_data from geometry g inner join layer l on g.geometry_layer_id %3D l.layer_id where geometry_mspid%3D\''.$mspId.'\''

@@ -31,7 +31,12 @@ class Database
     private static array $PDOArgs = array(
         PDO::MYSQL_ATTR_LOCAL_INFILE => true,
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_TIMEOUT => 5
+        PDO::ATTR_TIMEOUT => 5,
+        PDO::MYSQL_ATTR_INIT_COMMAND => "INSERT IGNORE INTO `msp_tracker`.`connection` " .
+            "(connection_id, `user`, process_name, db_name) " .
+            "VALUES (CONNECTION_ID(), USER(), 'legacy', DATABASE()) " .
+            "ON DUPLICATE KEY UPDATE `user` = USER(), process_name = 'legacy', " .
+            "db_name = DATABASE(), last_heartbeat = NOW()"
     );
 
     private int $sessionId;

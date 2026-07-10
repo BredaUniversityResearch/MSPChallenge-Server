@@ -133,8 +133,6 @@ class ConnectionManager extends DatabaseDefaults
             'charset' => $_ENV['DATABASE_CHARSET'] ?? self::DEFAULT_DATABASE_CHARSET,
             'mapping_types' => ['enum' => $enumDoctrineType]
         ];
-
-
         // DBAL 4 dropped the use_savepoints connection option.
         if (version_compare($dbalVersion, '4.0.0', '<')) {
             $config['use_savepoints'] = true;
