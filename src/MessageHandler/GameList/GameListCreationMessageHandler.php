@@ -581,7 +581,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         foreach ($geometries as $mspId => $geometryList) {
             $counted = count($geometryList);
             $contextVars = [];
-            if ($_ENV['APP_ENV'] == 'dev') {
+            if (($_ENV['APP_ENV'] ?? 'prod') !== 'prod') {
                 $contextVars = [
                     // phpcs:ignoreFile Generic.Files.LineLength.TooLong
                     'href' => 'http://localhost:8082/?username=&db='.$this->database.'&sql=select l.layer_name%2C g.geometry_data from geometry g inner join layer l on g.geometry_layer_id %3D l.layer_id where geometry_mspid%3D\''.$mspId.'\''
