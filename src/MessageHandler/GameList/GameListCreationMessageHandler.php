@@ -310,14 +310,6 @@ class GameListCreationMessageHandler extends CommonSessionHandler
      */
     private function importLayerData(SessionSetupContext $context): void
     {
-        $username = $this->gameSession->getGameGeoServer()->getUsername();
-        $password = $this->gameSession->getGameGeoServer()->getPassword();
-        if (empty($username) || empty($password)) {
-            tc(fn() => throw new \Exception(
-                "No GeoServer credentials provided, so no GeoServer data will be imported."
-            ), $this->gameSessionLogger, ['gameSession' => $this->gameSession->getId()]);
-        }
-
         $geoServerCommunicator = new GeoServerCommunicator(
             $this->client,
             $this->provider,
@@ -325,9 +317,20 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             $this->resultsCache
         );
         $geoServerCommunicator
-            ->setBaseURL($this->gameSession->getGameGeoServer()->getAddress())
-            ->setUsername($username)
-            ->setPassword($password);
+            ->setBaseURL($this->gameSession->getGameGeoServer()->getAddress());
+
+        $username = $this->gameSession->getGameGeoServer()->getUsername();
+        $password = $this->gameSession->getGameGeoServer()->getPassword();
+        // if either username or password is set, but the other is not, then throw an exception, as both are required for authentication
+        if ((!empty($username) && empty($password)) || (empty($username) && !empty($password))) {
+            tc(fn() => throw new \Exception(
+                "Both username and password are required for GeoServer authentication."
+            ), $this->gameSessionLogger, ['gameSession' => $this->gameSession->getId()]);
+        }
+        if (!empty($username) && !empty($password)) {
+            $geoServerCommunicator->setUsername($username);
+            $geoServerCommunicator->setPassword($username);
+        }
 
         /** @var LayerRepository $layerRepo */
         $layerRepo = $this->entityManager->getRepository(Layer::class);

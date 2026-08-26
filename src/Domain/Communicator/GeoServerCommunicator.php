@@ -69,7 +69,7 @@ class GeoServerCommunicator extends AbstractCommunicator
         bool $asArray = true,
         ?CacheItemConfig $cacheItemConfig = null
     ): string|array {
-        if (is_null($this->getUsername()) || is_null($this->getPassword()) || is_null($this->getBaseURL())) {
+        if (is_null($this->getBaseURL())) {
             return [];
         }
 
