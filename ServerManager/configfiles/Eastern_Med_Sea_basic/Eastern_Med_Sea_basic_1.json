@@ -3421,7 +3421,7 @@
         },
 
         {
-          "port_id": "Toros limani",
+          "port_id": "Toros limanı",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -3987,7 +3987,7 @@
         },
         {
           "source_port_id": "Izmir",
-          "destination_port_id": "Toros limani",
+          "destination_port_id": "Toros limanı",
           "ship_type_id": 1,
           "intensity_percentage": 0.5,
           "start_time": -1
@@ -4001,7 +4001,7 @@
         },
         {
           "source_port_id": "Izmir",
-          "destination_port_id": "Toros limani",
+          "destination_port_id": "Toros limanı",
           "ship_type_id": 3,
           "intensity_percentage": 0.5,
           "start_time": -1
