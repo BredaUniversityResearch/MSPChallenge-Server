@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "date_modified": "2/3/2026",
+    "date_modified": "18/08/2026",
     "data_model_hash": "68279095ABCDC7A37AB8895A0D7F865BB7C3D2565DE4B6FEBCEA78CDDBBAB3E4",
     "errors": 0,
     "editor_version": "2.0.0",
@@ -68,14 +68,14 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Precautionary_Areas|NS_Wave_Farms": [
+      "NS_Precautionary_Areas|NS_Wave_Farms_Edit": [
         {
           "message": "Precautionary areas are reserved for shipping.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Precautionary_Areas",
           "starttype": "",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -92,14 +92,14 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Precautionary_Areas|NS_Tidal_Farms": [
+      "NS_Precautionary_Areas|NS_Tidal_Farms_Edit": [
         {
           "message": "Precautionary areas are reserved for shipping.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Precautionary_Areas",
           "starttype": "",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -290,12 +290,12 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Wave_Farms|NS_IMO_Routes": [
+      "NS_Wave_Farms_Edit|NS_IMO_Routes": [
         {
           "message": "Shipping routes physically obstruct the placement of wave farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
+          "startlayer": "NS_Wave_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "0",
@@ -305,7 +305,7 @@
           "message": "Shipping routes physically obstruct the placement of wave farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
+          "startlayer": "NS_Wave_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "1",
@@ -315,7 +315,7 @@
           "message": "Shipping routes physically obstruct the placement of wave farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
+          "startlayer": "NS_Wave_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "2",
@@ -325,19 +325,19 @@
           "message": "Shipping routes physically obstruct the placement of wave farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
+          "startlayer": "NS_Wave_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "3",
           "sort": "Inclusion"
         }
       ],
-      "NS_Tidal_Farms|NS_IMO_Routes": [
+      "NS_Tidal_Farms_Edit|NS_IMO_Routes": [
         {
           "message": "Shipping routes physically obstruct the placement of tidal farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
+          "startlayer": "NS_Tidal_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "0",
@@ -347,7 +347,7 @@
           "message": "Shipping routes physically obstruct the placement of tidal farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
+          "startlayer": "NS_Tidal_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "1",
@@ -357,7 +357,7 @@
           "message": "Shipping routes physically obstruct the placement of tidal farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
+          "startlayer": "NS_Tidal_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "2",
@@ -367,7 +367,7 @@
           "message": "Shipping routes physically obstruct the placement of tidal farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
+          "startlayer": "NS_Tidal_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "3",
@@ -416,14 +416,14 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_IMO_Routes|NS_Wave_Farms": [
+      "NS_IMO_Routes|NS_Wave_Farms_Edit": [
         {
           "message": "Wave farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "0",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         },
@@ -433,7 +433,7 @@
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "1",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         },
@@ -443,7 +443,7 @@
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "2",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         },
@@ -453,19 +453,19 @@
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "3",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
-      "NS_IMO_Routes|NS_Tidal_Farms": [
+      "NS_IMO_Routes|NS_Tidal_Farms_Edit": [
         {
           "message": "Tidal farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "0",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         },
@@ -475,7 +475,7 @@
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "1",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         },
@@ -485,7 +485,7 @@
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "2",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         },
@@ -495,7 +495,7 @@
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "3",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -582,26 +582,26 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Natura_2000_emodnet_2026|NS_Wave_Farms": [
+      "NS_Natura_2000_emodnet_2026|NS_Wave_Farms_Edit": [
         {
           "message": "Wave Farms can cause bottom disturbance.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Natura_2000_emodnet_2026",
           "starttype": "4",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
-      "NS_Natura_2000_emodnet_2026|NS_Tidal_Farms": [
+      "NS_Natura_2000_emodnet_2026|NS_Tidal_Farms_Edit": [
         {
           "message": "Tidal Farms can cause bottom disturbance.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Natura_2000_emodnet_2026",
           "starttype": "4",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -714,24 +714,24 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Wave_Farms|NS_Natura_2000_emodnet_2026": [
+      "NS_Wave_Farms_Edit|NS_Natura_2000_emodnet_2026": [
         {
           "message": "Wave Farms can cause bottom disturbance.",
           "value": 0.0,
           "type": "WARNING",
-          "startlayer": "NS_Wave_Farms",
+          "startlayer": "NS_Wave_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_Natura_2000_emodnet_2026",
           "endtype": "4",
           "sort": "Inclusion"
         }
       ],
-      "NS_Tidal_Farms|NS_Natura_2000_emodnet_2026": [
+      "NS_Tidal_Farms_Edit|NS_Natura_2000_emodnet_2026": [
         {
           "message": "Tidal Farms can cause bottom disturbance.",
           "value": 0.0,
           "type": "WARNING",
-          "startlayer": "NS_Tidal_Farms",
+          "startlayer": "NS_Tidal_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_Natura_2000_emodnet_2026",
           "endtype": "4",
@@ -964,24 +964,24 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Wave_Farms|NS_Oil_Gas_Offshore_Instalations": [
+      "NS_Wave_Farms_Edit|NS_Oil_Gas_Offshore_Instalations": [
         {
           "message": "Wave Farms cannot be placed on top of Oil & Gas Platforms",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
+          "startlayer": "NS_Wave_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_Oil_Gas_Offshore_Instalations",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
-      "NS_Tidal_Farms|NS_Oil_Gas_Offshore_Instalations": [
+      "NS_Tidal_Farms_Edit|NS_Oil_Gas_Offshore_Instalations": [
         {
           "message": "Tidal Farms cannot be placed on top of Oil & Gas Platforms",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
+          "startlayer": "NS_Tidal_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_Oil_Gas_Offshore_Instalations",
           "endtype": "",
@@ -1000,26 +1000,26 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Oil_Gas_Offshore_Instalations|NS_Wave_Farms": [
+      "NS_Oil_Gas_Offshore_Instalations|NS_Wave_Farms_Edit": [
         {
           "message": "Oil & Gas Platforms cannot be placed on top of Wave Farms",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_Oil_Gas_Offshore_Instalations",
           "starttype": "",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
-      "NS_Oil_Gas_Offshore_Instalations|NS_Tidal_Farms": [
+      "NS_Oil_Gas_Offshore_Instalations|NS_Tidal_Farms_Edit": [
         {
           "message": "Oil & Gas Platforms cannot be placed on top of Tidal Farms",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_Oil_Gas_Offshore_Instalations",
           "starttype": "",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -1048,26 +1048,26 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Fishing_Priority_Areas|NS_Tidal_Farms": [
+      "NS_Fishing_Priority_Areas|NS_Tidal_Farms_Edit": [
         {
           "message": "Be aware that certain fishing fleets cannot operate in areas with tidal farms",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Fishing_Priority_Areas",
           "starttype": "",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
-      "NS_Fishing_Priority_Areas|NS_Wave_Farms": [
+      "NS_Fishing_Priority_Areas|NS_Wave_Farms_Edit": [
         {
           "message": "Be aware that certain fishing fleets cannot operate in areas with wave farms",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Fishing_Priority_Areas",
           "starttype": "",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -7914,14 +7914,6 @@
             ]
           },
           {
-            "layer_id": 97,
-            "name": "NS_Tidal_Farms",
-            "layer_editing_type": "sourcepolygon",
-            "geometry": [],
-            "warnings": [],
-            "deleted": []
-          },
-          {
             "layer_id": 98,
             "name": "NS_Electricity_Transformers",
             "layer_editing_type": "transformer",
@@ -11214,7 +11206,7 @@
           },
           {
             "layer_id": 100,
-            "name": "NS_Wave_Farms",
+            "name": "NS_Wave_Farms_Edit",
             "layer_editing_type": "sourcepolygon",
             "geometry": [],
             "warnings": [],
@@ -17855,11 +17847,11 @@
           "port_type": "MaintenanceDestination"
         },
         {
-          "layer_name": "NS_Wave_Farms",
+          "layer_name": "NS_Wave_Farms_Edit",
           "port_type": "MaintenanceDestination"
         },
         {
-          "layer_name": "NS_Tidal_Farms",
+          "layer_name": "NS_Tidal_Farms_Edit",
           "port_type": "MaintenanceDestination"
         },
         {
@@ -22472,7 +22464,7 @@
           ]
         },
         {
-          "layer_name": "NS_Wave_Farms",
+          "layer_name": "NS_Wave_Farms_Edit",
           "layer_types": [
             "3MW"
           ],
@@ -22486,7 +22478,7 @@
           ]
         },
         {
-          "layer_name": "NS_Tidal_Farms",
+          "layer_name": "NS_Tidal_Farms_Edit",
           "layer_types": [
             "3MW"
           ],
@@ -23181,12 +23173,12 @@
               "construction": false
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 0.2,
               "construction": false
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 0.1,
               "construction": false
             },
@@ -23291,22 +23283,22 @@
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 0.5,
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 0.1,
               "construction": false
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 0.5,
               "construction": true
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 0.1,
               "construction": false
             },
@@ -23441,12 +23433,12 @@
               "construction": false
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 0.5,
               "construction": true
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 0.3,
               "construction": true
             },
@@ -23571,22 +23563,22 @@
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 0.2,
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 0.1,
               "construction": false
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 0.2,
               "construction": true
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 0.1,
               "construction": false
             },
@@ -23681,22 +23673,22 @@
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 1.0,
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 1.0,
               "construction": false
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 1.0,
               "construction": true
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 1.0,
               "construction": false
             },
@@ -23811,22 +23803,22 @@
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 1.0,
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 1.0,
               "construction": false
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 1.0,
               "construction": true
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 1.0,
               "construction": false
             },
@@ -23916,22 +23908,22 @@
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 1.0,
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 1.0,
               "construction": false
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 1.0,
               "construction": true
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 1.0,
               "construction": false
             },
@@ -28791,7 +28783,7 @@
         ]
       },
       {
-        "layer_name": "NS_Wave_Farms",
+        "layer_name": "NS_Wave_Farms_Edit",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "Wave Farms",
@@ -28811,7 +28803,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 1,
-        "layer_tooltip": "Shows the provided data about existing wave farms in the North Sea",
+        "layer_tooltip": "Wave farms in the north sea, planning purposes only",
         "layer_information": "",
         "layer_media": "wiki://Wave_Farms",
         "layer_text_info": {
@@ -28955,13 +28947,13 @@
         ]
       },
       {
-        "layer_name": "NS_Tidal_Farms",
+        "layer_name": "NS_Tidal_Farms_Edit",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "Tidal Farms",
         "layer_category": "activities",
         "layer_subcategory": "energy",
-        "layer_download_from_geoserver": 0,
+        "layer_download_from_geoserver":0,
         "layer_width": 1024,
         "layer_height": 1024,
         "layer_raster_material": "RasterMELNew",
@@ -28975,7 +28967,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 1,
-        "layer_tooltip": "Location data we received on the usage of tidal farms in the north sea, must be converted to layers with the special editing types.",
+        "layer_tooltip": "Tidal farms in the north sea, planning purposes only.",
         "layer_information": "",
         "layer_media": "wiki://Tidal_Farms",
         "layer_text_info": {

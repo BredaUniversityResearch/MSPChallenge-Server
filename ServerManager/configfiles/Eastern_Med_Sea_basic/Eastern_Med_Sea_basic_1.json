@@ -20,14 +20,14 @@
           "sort": "Inclusion"
         }
       ],
-      "emodnet_militaryareaspoly|ems_Ports": [
+      "emodnet_militaryareaspoly|EMS_Ports_EMODnet_for_model_open": [
         {
           "message": "Military Firing areas should stear away from busy areas such as ports",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "ems_militaryareaspoly_emodnet",
           "starttype": "",
-          "endlayer": "ems_Ports",
+          "endlayer": "EMS_Ports_EMODnet_for_model_open",
           "endtype": "0",
           "sort": "Inclusion"
         },
@@ -37,55 +37,55 @@
           "type": "ERROR",
           "startlayer": "ems_militaryareaspoly_emodnet",
           "starttype": "",
-          "endlayer": "ems_Ports",
+          "endlayer": "EMS_Ports_EMODnet_for_model_open",
           "endtype": "1",
           "sort": "Inclusion"
         }
       ],
-      "EMS_Wind_Farms|ems_Ports": [
+      "EMS_Wind_Farms|EMS_Ports_EMODnet_for_model_open": [
         {
           "message": "There is a port in this location obstructing the construction of a wind farm",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "ems_Wind_Farms",
           "starttype": "",
-          "endlayer": "ems_Ports",
+          "endlayer": "EMS_Ports_EMODnet_for_model_open",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
-      "ems_activelicenses_emodnet|ems_Ports": [
+      "ems_activelicenses_emodnet|EMS_Ports_EMODnet_for_model_open": [
         {
           "message": "There is a port in this location",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "ems_activelicenses_emodnet",
           "starttype": "",
-          "endlayer": "ems_Ports",
+          "endlayer": "EMS_Ports_EMODnet_for_model_open",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
-      "ems_Offshore_Oil_and_Gas_Installations|ems_Ports": [
+      "ems_Offshore_Oil_and_Gas_Installations|EMS_Ports_EMODnet_for_model_open": [
         {
           "message": "There is a port in this location",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "ems_Offshore_Oil_and_Gas_Installations",
           "starttype": "",
-          "endlayer": "ems_Ports",
+          "endlayer": "EMS_Ports_EMODnet_for_model_open",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
-      "ems_munitionspoly_emodnet|ems_Ports": [
+      "ems_munitionspoly_emodnet|EMS_Ports_EMODnet_for_model_open": [
         {
           "message": "There is a port in this location",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "ems_munitionspoly_emodnet",
           "starttype": "",
-          "endlayer": "ems_Ports",
+          "endlayer": "EMS_Ports_EMODnet_for_model_open",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -2454,7 +2454,7 @@
       "shipping_lane_implicit_distance_limit": 100000.0,
       "port_layers": [
         {
-          "layer_name": "ems_Ports",
+          "layer_name": "EMS_Ports_EMODnet_for_model_open",
           "port_type": "DefinedPort"
         },
         {
@@ -2615,41 +2615,6 @@
           ]
         },
         {
-          "port_id": "Agios Tychon",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 250
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 50
-            }
-          ]
-        },
-        {
-          "port_id": "Icmeler",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 14739
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 404
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 2829
-            }
-          ]
-        },
-        {
           "port_id": "Mersin",
           "ship_intensity_values": [
             {
@@ -2686,41 +2651,6 @@
               "start_time": -1,
               "ship_type_id": 3,
               "ship_intensity": 1794
-            }
-          ]
-        },
-        {
-          "port_id": "Iskenderun",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 3050
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 500
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 455
-            }
-          ]
-        },
-        {
-          "port_id": "Hereke",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 2605
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 50
             }
           ]
         },
@@ -2795,27 +2725,7 @@
           ]
         },
         {
-          "port_id": "Yakacik 1",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 1716
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 10
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 60
-            }
-          ]
-        },
-        {
-          "port_id": "Al Iskandariyah",
+          "port_id": "El Dekheila",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -2831,26 +2741,6 @@
               "start_time": -1,
               "ship_type_id": 3,
               "ship_intensity": 945
-            }
-          ]
-        },
-        {
-          "port_id": "Damietta",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 1555
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 25
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 78
             }
           ]
         },
@@ -2875,7 +2765,7 @@
           ]
         },
         {
-          "port_id": "Aliveri",
+          "port_id": "Aliverio",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -2915,46 +2805,6 @@
           ]
         },
         {
-          "port_id": "Port Said",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 961
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 15
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 205
-            }
-          ]
-        },
-        {
-          "port_id": "Botas",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 936
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 10
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 20
-            }
-          ]
-        },
-        {
           "port_id": "Antalya",
           "ship_intensity_values": [
             {
@@ -2975,27 +2825,7 @@
           ]
         },
         {
-          "port_id": "Yakuplu",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 860
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 70
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 94
-            }
-          ]
-        },
-        {
-          "port_id": "Limassol 1",
+          "port_id": "Lemesos",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -3135,27 +2965,7 @@
           ]
         },
         {
-          "port_id": "Yenisehir",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 450
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 30
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 230
-            }
-          ]
-        },
-        {
-          "port_id": "Gythion",
+          "port_id": "Gytheio",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -3205,61 +3015,6 @@
           ]
         },
         {
-          "port_id": "Nisos Naxos",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 100
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 245
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 50
-            }
-          ]
-        },
-        {
-          "port_id": "Kissamos",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 80
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 265
-            }
-          ]
-        },
-        {
-          "port_id": "Piraeus",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 250
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 656
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 125
-            }
-          ]
-        },
-        {
           "port_id": "Zakynthos",
           "ship_intensity_values": [
             {
@@ -3296,46 +3051,6 @@
               "start_time": -1,
               "ship_type_id": 3,
               "ship_intensity": 0
-            }
-          ]
-        },
-        {
-          "port_id": "Merkez",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 50
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 426
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 15
-            }
-          ]
-        },
-        {
-          "port_id": "Canakkale",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 10
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 146
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 10
             }
           ]
         },
@@ -3400,26 +3115,6 @@
           ]
         },
         {
-          "port_id": "Antalya Offshore Terminal",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 10
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 1017
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 315
-            }
-          ]
-        },
-        {
           "port_id": "Marmaris",
           "ship_intensity_values": [
             {
@@ -3440,27 +3135,7 @@
           ]
         },
         {
-          "port_id": "Uskudar",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 1037
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 975
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 70
-            }
-          ]
-        },
-        {
-          "port_id": "Graikochori",
+          "port_id": "Igoumenitsa",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -3480,27 +3155,7 @@
           ]
         },
         {
-          "port_id": "Eleusis",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 178
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 720
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 350
-            }
-          ]
-        },
-        {
-          "port_id": "Patras",
+          "port_id": "Patra",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -3540,7 +3195,7 @@
           ]
         },
         {
-          "port_id": "Iraklion",
+          "port_id": "Irakleio",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -3560,27 +3215,7 @@
           ]
         },
         {
-          "port_id": "Paphos",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 15
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 620
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 15
-            }
-          ]
-        },
-        {
-          "port_id": "Nea Stira",
+          "port_id": "Nea Styra",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -3596,26 +3231,6 @@
               "start_time": -1,
               "ship_type_id": 3,
               "ship_intensity": 15
-            }
-          ]
-        },
-        {
-          "port_id": "Triandria",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 15
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 575
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 10
             }
           ]
         },
@@ -3660,7 +3275,7 @@
           ]
         },
         {
-          "port_id": "Soda",
+          "port_id": "Souda Bay",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -3680,22 +3295,22 @@
           ]
         },
         {
-          "port_id": "Mykonos 2",
+          "port_id": "Mykonos",
           "ship_intensity_values": [
             {
               "start_time": -1,
               "ship_type_id": 1,
-              "ship_intensity": 25
+              "ship_intensity": 275
             },
             {
               "start_time": -1,
               "ship_type_id": 2,
-              "ship_intensity": 535
+              "ship_intensity": 1160
             },
             {
               "start_time": -1,
               "ship_type_id": 3,
-              "ship_intensity": 25
+              "ship_intensity": 75
             }
           ]
         },
@@ -3740,7 +3355,7 @@
           ]
         },
         {
-          "port_id": "Kalamaki",
+          "port_id": "Agioi Theodoroi",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -3755,21 +3370,6 @@
           ]
         },
         {
-          "port_id": "Bahcelievler",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 250
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 1643
-            }
-          ]
-        },
-        {
           "port_id": "Aliaga",
           "ship_intensity_values": [
             {
@@ -3780,7 +3380,7 @@
           ]
         },
         {
-          "port_id": "Ampelakia",
+          "port_id": "Paloukia Salaminas",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -3800,117 +3400,28 @@
           ]
         },
         {
-          "port_id": "Thessaloniki 1",
+          "port_id": "Thessaloniki",
           "ship_intensity_values": [
             {
               "start_time": -1,
               "ship_type_id": 1,
-              "ship_intensity": 1532
+              "ship_intensity": 2810
             },
             {
               "start_time": -1,
               "ship_type_id": 2,
-              "ship_intensity": 35
+              "ship_intensity": 100
             },
             {
               "start_time": -1,
               "ship_type_id": 3,
-              "ship_intensity": 920
+              "ship_intensity": 1552
             }
           ]
         },
+
         {
-          "port_id": "Golcuk",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 1120
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 820
-            }
-          ]
-        },
-        {
-          "port_id": "Derince",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 1195
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 665
-            }
-          ]
-        },
-        {
-          "port_id": "Gungoren Merter",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 376
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 13
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 660
-            }
-          ]
-        },
-        {
-          "port_id": "Thessaloniki 2",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 1278
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 65
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 632
-            }
-          ]
-        },
-        {
-          "port_id": "Bandirma",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 230
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 80
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 626
-            }
-          ]
-        },
-        {
-          "port_id": "Toros Gubre",
+          "port_id": "Toros limanı",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -3930,87 +3441,7 @@
           ]
         },
         {
-          "port_id": "Aspropyrgos",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 371
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 10
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 520
-            }
-          ]
-        },
-        {
-          "port_id": "Halidere",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 10
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 10
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 440
-            }
-          ]
-        },
-        {
-          "port_id": "Cesme",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 305
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 565
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 330
-            }
-          ]
-        },
-        {
-          "port_id": "Ceyhan",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 10
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 10
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 250
-            }
-          ]
-        },
-        {
-          "port_id": "Mytilene",
+          "port_id": "Mytilini",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -4070,26 +3501,6 @@
           ]
         },
         {
-          "port_id": "Nea Karvali",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 507
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 10
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 103
-            }
-          ]
-        },
-        {
           "port_id": "Paros",
           "ship_intensity_values": [
             {
@@ -4106,26 +3517,6 @@
               "start_time": -1,
               "ship_type_id": 3,
               "ship_intensity": 100
-            }
-          ]
-        },
-        {
-          "port_id": "Sidon",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 300
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 10
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 80
             }
           ]
         },
@@ -4150,46 +3541,6 @@
           ]
         },
         {
-          "port_id": "Delta Terminal",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 80
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 19
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 140
-            }
-          ]
-        },
-        {
-          "port_id": "Mesaria",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 200
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 70
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 60
-            }
-          ]
-        },
-        {
           "port_id": "Karpathos",
           "ship_intensity_values": [
             {
@@ -4210,7 +3561,7 @@
           ]
         },
         {
-          "port_id": "Vassiliko Bay",
+          "port_id": "Mari",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -4230,67 +3581,7 @@
           ]
         },
         {
-          "port_id": "Kizkalesi",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 540
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 20
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 155
-            }
-          ]
-        },
-        {
-          "port_id": "Benghazi",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 230
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 20
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 55
-            }
-          ]
-        },
-        {
-          "port_id": "Dikili 1",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 200
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 100
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 150
-            }
-          ]
-        },
-        {
-          "port_id": "Corinthos",
+          "port_id": "Corinth",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -4325,7 +3616,7 @@
           ]
         },
         {
-          "port_id": "Chalki",
+          "port_id": "Chalki Dodekanisou",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -4345,7 +3636,7 @@
           ]
         },
         {
-          "port_id": "Moshkaton",
+          "port_id": "Moschato",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -4365,7 +3656,7 @@
           ]
         },
         {
-          "port_id": "Lefkimi",
+          "port_id": "Lefkimmi",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -4405,7 +3696,7 @@
           ]
         },
         {
-          "port_id": "Kyllini",
+          "port_id": "Kylini",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -4445,27 +3736,7 @@
           ]
         },
         {
-          "port_id": "Kamariontissa",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 3
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 15
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 5
-            }
-          ]
-        },
-        {
-          "port_id": "Rhodes",
+          "port_id": "Rodos",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -4485,27 +3756,7 @@
           ]
         },
         {
-          "port_id": "Mykonos 1",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 250
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 580
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 50
-            }
-          ]
-        },
-        {
-          "port_id": "Poros",
+          "port_id": "Poros Kefallinias",
           "ship_intensity_values": [
             {
               "start_time": -1,
@@ -4516,26 +3767,6 @@
               "start_time": -1,
               "ship_type_id": 2,
               "ship_intensity": 325
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 3,
-              "ship_intensity": 0
-            }
-          ]
-        },
-        {
-          "port_id": "Kastri",
-          "ship_intensity_values": [
-            {
-              "start_time": -1,
-              "ship_type_id": 1,
-              "ship_intensity": 0
-            },
-            {
-              "start_time": -1,
-              "ship_type_id": 2,
-              "ship_intensity": 180
             },
             {
               "start_time": -1,
@@ -4601,35 +3832,35 @@
           "start_time": -1
         },
         {
-          "source_port_id": "Corinthos",
+          "source_port_id": "Corinth",
           "destination_port_id": "Gateway_Suez",
           "ship_type_id": 1,
           "intensity_percentage": 0.6,
           "start_time": -1
         },
         {
-          "source_port_id": "Thessaloniki 1",
-          "destination_port_id": "Corinthos",
+          "source_port_id": "Thessaloniki",
+          "destination_port_id": "Corinth",
           "ship_type_id": 1,
           "intensity_percentage": 0.6,
           "start_time": -1
         },
         {
           "source_port_id": "Haifa",
-          "destination_port_id": "Limassol 1",
+          "destination_port_id": "Lemesos",
           "ship_type_id": 1,
           "intensity_percentage": 0.4,
           "start_time": -1
         },
         {
           "source_port_id": "Ashdod",
-          "destination_port_id": "Limassol 1",
+          "destination_port_id": "Lemesos",
           "ship_type_id": 1,
           "intensity_percentage": 0.4,
           "start_time": -1
         },
         {
-          "source_port_id": "Limassol 1",
+          "source_port_id": "Lemesos",
           "destination_port_id": "Gateway_Suez",
           "ship_type_id": 1,
           "intensity_percentage": 0.4,
@@ -4706,42 +3937,42 @@
           "start_time": -1
         },
         {
-          "source_port_id": "Gythion",
+          "source_port_id": "Gytheio",
           "destination_port_id": "Nemrut Bay",
           "ship_type_id": 1,
           "intensity_percentage": 0.6,
           "start_time": -1
         },
         {
-          "source_port_id": "Kalamaki",
+          "source_port_id": "Agioi Theodoroi",
           "destination_port_id": "Gateway_Balkan",
           "ship_type_id": 1,
           "intensity_percentage": 0.6,
           "start_time": -1
         },
         {
-          "source_port_id": "Iraklion",
+          "source_port_id": "Irakleio",
           "destination_port_id": "Antalya",
           "ship_type_id": 1,
           "intensity_percentage": 0.6,
           "start_time": -1
         },
         {
-          "source_port_id": "Al Iskandariyah",
+          "source_port_id": "El Dekheila",
           "destination_port_id": "Gateway_Suez",
           "ship_type_id": 1,
           "intensity_percentage": 0.6,
           "start_time": -1
         },
         {
-          "source_port_id": "Al Iskandariyah",
+          "source_port_id": "El Dekheila",
           "destination_port_id": "Gateway_Gibralt",
           "ship_type_id": 1,
           "intensity_percentage": 0.6,
           "start_time": -1
         },
         {
-          "source_port_id": "Vassiliko Bay",
+          "source_port_id": "Mari",
           "destination_port_id": "Gateway_Gibralt",
           "ship_type_id": 1,
           "intensity_percentage": 0.5,
@@ -4756,36 +3987,8 @@
         },
         {
           "source_port_id": "Izmir",
-          "destination_port_id": "Toros Gubre",
+          "destination_port_id": "Toros limanı",
           "ship_type_id": 1,
-          "intensity_percentage": 0.5,
-          "start_time": -1
-        },
-        {
-          "source_port_id": "Benghazi",
-          "destination_port_id": "Gateway_Budap",
-          "ship_type_id": 1,
-          "intensity_percentage": 0.5,
-          "start_time": -1
-        },
-        {
-          "source_port_id": "Benghazi",
-          "destination_port_id": "Gateway_Gibralt",
-          "ship_type_id": 1,
-          "intensity_percentage": 0.5,
-          "start_time": -1
-        },
-        {
-          "source_port_id": "Benghazi",
-          "destination_port_id": "Gateway_Budap",
-          "ship_type_id": 3,
-          "intensity_percentage": 0.5,
-          "start_time": -1
-        },
-        {
-          "source_port_id": "Benghazi",
-          "destination_port_id": "Gateway_Gibralt",
-          "ship_type_id": 3,
           "intensity_percentage": 0.5,
           "start_time": -1
         },
@@ -4798,20 +4001,20 @@
         },
         {
           "source_port_id": "Izmir",
-          "destination_port_id": "Toros Gubre",
+          "destination_port_id": "Toros limanı",
           "ship_type_id": 3,
           "intensity_percentage": 0.5,
           "start_time": -1
         },
         {
-          "source_port_id": "Al Iskandariyah",
+          "source_port_id": "El Dekheila",
           "destination_port_id": "Gateway_Suez",
           "ship_type_id": 3,
           "intensity_percentage": 0.6,
           "start_time": -1
         },
         {
-          "source_port_id": "Al Iskandariyah",
+          "source_port_id": "El Dekheila",
           "destination_port_id": "Gateway_Gibralt",
           "ship_type_id": 3,
           "intensity_percentage": 0.6,
@@ -4888,35 +4091,35 @@
           "start_time": -1
         },
         {
-          "source_port_id": "Corinthos",
+          "source_port_id": "Corinth",
           "destination_port_id": "Gateway_Suez",
           "ship_type_id": 3,
           "intensity_percentage": 0.6,
           "start_time": -1
         },
         {
-          "source_port_id": "Thessaloniki 1",
-          "destination_port_id": "Corinthos",
+          "source_port_id": "Thessaloniki",
+          "destination_port_id": "Corinth",
           "ship_type_id": 3,
           "intensity_percentage": 0.6,
           "start_time": -1
         },
         {
           "source_port_id": "Haifa",
-          "destination_port_id": "Limassol 1",
+          "destination_port_id": "Lemesos",
           "ship_type_id": 3,
           "intensity_percentage": 0.4,
           "start_time": -1
         },
         {
           "source_port_id": "Ashdod",
-          "destination_port_id": "Limassol 1",
+          "destination_port_id": "Lemesos",
           "ship_type_id": 3,
           "intensity_percentage": 0.4,
           "start_time": -1
         },
         {
-          "source_port_id": "Limassol 1",
+          "source_port_id": "Lemesos",
           "destination_port_id": "Gateway_Suez",
           "ship_type_id": 3,
           "intensity_percentage": 0.4,
@@ -4979,35 +4182,35 @@
           "start_time": -1
         },
         {
-          "source_port_id": "Soda",
-          "destination_port_id": "Moshkaton",
+          "source_port_id": "Souda Bay",
+          "destination_port_id": "Moschato",
           "ship_type_id": 2,
           "intensity_percentage": 0.8,
           "start_time": -1
         },
         {
-          "source_port_id": "Moshkaton",
-          "destination_port_id": "Soda",
+          "source_port_id": "Moschato",
+          "destination_port_id": "Souda Bay",
           "ship_type_id": 2,
           "intensity_percentage": 0.6,
           "start_time": -1
         },
         {
-          "source_port_id": "Iraklion",
-          "destination_port_id": "Moshkaton",
+          "source_port_id": "Irakleio",
+          "destination_port_id": "Moschato",
           "ship_type_id": 2,
           "intensity_percentage": 0.8,
           "start_time": -1
         },
         {
-          "source_port_id": "Moshkaton",
-          "destination_port_id": "Iraklion",
+          "source_port_id": "Moschato",
+          "destination_port_id": "Irakleio",
           "ship_type_id": 2,
           "intensity_percentage": 0.8,
           "start_time": -1
         },
         {
-          "source_port_id": "Rhodes",
+          "source_port_id": "Rodos",
           "destination_port_id": "Kas",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
@@ -5015,20 +4218,20 @@
         },
         {
           "source_port_id": "Kas",
-          "destination_port_id": "Rhodes",
+          "destination_port_id": "Rodos",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
           "start_time": -1
         },
         {
           "source_port_id": "Fethiye",
-          "destination_port_id": "Rhodes",
+          "destination_port_id": "Rodos",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
           "start_time": -1
         },
         {
-          "source_port_id": "Rhodes",
+          "source_port_id": "Rodos",
           "destination_port_id": "Fethiye",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
@@ -5036,13 +4239,13 @@
         },
         {
           "source_port_id": "Marmaris",
-          "destination_port_id": "Rhodes",
+          "destination_port_id": "Rodos",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
           "start_time": -1
         },
         {
-          "source_port_id": "Rhodes",
+          "source_port_id": "Rodos",
           "destination_port_id": "Marmaris",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
@@ -5050,100 +4253,86 @@
         },
         {
           "source_port_id": "Datca",
-          "destination_port_id": "Rhodes",
+          "destination_port_id": "Rodos",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
           "start_time": -1
         },
         {
-          "source_port_id": "Rhodes",
+          "source_port_id": "Rodos",
           "destination_port_id": "Datca",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
           "start_time": -1
         },
         {
-          "source_port_id": "Chalki",
-          "destination_port_id": "Rhodes",
+          "source_port_id": "Chalki Dodekanisou",
+          "destination_port_id": "Rodos",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
           "start_time": -1
         },
         {
-          "source_port_id": "Rhodes",
-          "destination_port_id": "Chalki",
+          "source_port_id": "Rodos",
+          "destination_port_id": "Chalki Dodekanisou",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
           "start_time": -1
         },
         {
-          "source_port_id": "Mykonos 1",
-          "destination_port_id": "Moshkaton",
+          "source_port_id": "Mykonos",
+          "destination_port_id": "Moschato",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
           "start_time": -1
         },
         {
-          "source_port_id": "Mykonos 1",
+          "source_port_id": "Mykonos",
           "destination_port_id": "Rafina",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
           "start_time": -1
         },
         {
-          "source_port_id": "Graikochori",
-          "destination_port_id": "Lefkimi",
+          "source_port_id": "Igoumenitsa",
+          "destination_port_id": "Lefkimmi",
           "ship_type_id": 2,
           "intensity_percentage": 0.3,
           "start_time": -1
         },
         {
-          "source_port_id": "Graikochori",
+          "source_port_id": "Igoumenitsa",
           "destination_port_id": "Gateway_Balkan",
           "ship_type_id": 2,
           "intensity_percentage": 0.3,
           "start_time": -1
         },
         {
-          "source_port_id": "Graikochori",
+          "source_port_id": "Igoumenitsa",
           "destination_port_id": "Sami",
           "ship_type_id": 2,
           "intensity_percentage": 0.3,
           "start_time": -1
         },
         {
-          "source_port_id": "Poros",
-          "destination_port_id": "Kyllini",
+          "source_port_id": "Poros Kefallinias",
+          "destination_port_id": "Kylini",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
           "start_time": -1
         },
         {
           "source_port_id": "Zakynthos",
-          "destination_port_id": "Kyllini",
+          "destination_port_id": "Kylini",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
           "start_time": -1
         },
         {
-          "source_port_id": "Patras",
+          "source_port_id": "Patra",
           "destination_port_id": "Antirrio",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
-          "start_time": -1
-        },
-        {
-          "source_port_id": "Kastri",
-          "destination_port_id": "Chora Sfakion",
-          "ship_type_id": 2,
-          "intensity_percentage": 0.9,
-          "start_time": -1
-        },
-        {
-          "source_port_id": "Chora Sfakion",
-          "destination_port_id": "Kastri",
-          "ship_type_id": 2,
-          "intensity_percentage": 0.9,
           "start_time": -1
         },
         {
@@ -5203,7 +4392,7 @@
           "start_time": -1
         },
         {
-          "source_port_id": "Larnaca",
+          "source_port_id": "Larnaka",
           "destination_port_id": "Haifa",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
@@ -5211,33 +4400,19 @@
         },
         {
           "source_port_id": "Haifa",
-          "destination_port_id": "Larnaca",
+          "destination_port_id": "Larnaka",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
           "start_time": -1
         },
         {
-          "source_port_id": "Thessaloniki 1",
-          "destination_port_id": "Rhodes",
-          "ship_type_id": 2,
-          "intensity_percentage": 0.5,
-          "start_time": -1
-        },
-        {
-          "source_port_id": "Gythion",
-          "destination_port_id": "Kissamos",
-          "ship_type_id": 2,
-          "intensity_percentage": 0.5,
-          "start_time": -1
-        },
-        {
-          "source_port_id": "Alexandroupolis",
-          "destination_port_id": "Kamariontissa",
+          "source_port_id": "Thessaloniki",
+          "destination_port_id": "Rodos",
           "ship_type_id": 2,
           "intensity_percentage": 0.5,
           "start_time": -1
         }
-      ],
+	],
       "restriction_layer_exceptions": [
         {
           "layer_name": "ems_militaryareaspoly_emodnet",
@@ -5338,7 +4513,8 @@
       "risk_heatmap_settings": {
         "restriction_layer_exceptions": [
           "ems_ems_countries_2024_01_31",
-          "ems_ems_bath_20"
+          "ems_ems_bath_20",
+          "ems_No_shipping_zones"
         ],
         "shipping_intensity_risk_value": 1000
       },
@@ -6005,7 +5181,7 @@
           "name": "Noise",
           "layers": [
             {
-              "name": "ems_Ports",
+              "name": "EMS_Ports_EMODnet_for_model_open",
               "influence": 0.7,
               "construction": false
             },
@@ -6146,7 +5322,7 @@
               "construction": true
             },
             {
-              "name": "ems_Ports",
+              "name": "EMS_Ports_EMODnet_for_model_open",
               "influence": 0.8,
               "construction": false
             },
@@ -6224,7 +5400,7 @@
               "construction": false
             },
             {
-              "name": "ems_Ports",
+              "name": "EMS_Ports_EMODnet_for_model_open",
               "influence": 0.8,
               "construction": false
             }
@@ -12026,7 +11202,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "ems_Ports",
+        "layer_name": "EMS_Ports_EMODnet_for_model_open",
         "layer_geotype": "point",
         "layer_entity_value_max": null,
         "layer_short": "Ports",
