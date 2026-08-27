@@ -69,9 +69,6 @@ services:
       - caddy_data:/data
       - caddy_config:/config
       - ./var/docker/:/host-history
-      - vendor_data:/app/vendor:rw
-      - node_modules_data:/app/node_modules:rw
-      - public_build_data:/app/public/build:rw
       - symfony_log:/app/var/log:rw
       - /var/run/docker.sock:/var/run/docker.sock # to communicate with the Docker daemon
       - supervisor_log:/var/log/supervisor:rw
@@ -168,9 +165,6 @@ services:
 ###< symfony/mercure-bundle ###
 
 volumes:
-  vendor_data:
-  node_modules_data:
-  public_build_data:
   mariadb_data:
   mariadb_conf:
   caddy_data:
