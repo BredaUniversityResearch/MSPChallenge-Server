@@ -53,6 +53,9 @@ services:
         target: frankenphp_dev
     volumes:
       - ./:/app
+      - vendor_data:/app/vendor:rw
+      - node_modules_data:/app/node_modules:rw
+      - public_build_data:/app/public/build:rw
       - ./frankenphp/Caddyfile:/etc/caddy/Caddyfile:ro
       - ./frankenphp/conf.d/20-app.dev.ini:/usr/local/etc/php/app.conf.d/20-app.dev.ini:ro
     environment:
@@ -83,3 +86,9 @@ services:
 
   simulations:
     image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:dev
+
+volumes:
+  vendor_data:
+  node_modules_data:
+  public_build_data:
+
