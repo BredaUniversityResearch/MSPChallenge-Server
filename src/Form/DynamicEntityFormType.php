@@ -15,13 +15,11 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Serializer\Attribute\Groups;
 
 class DynamicEntityFormType extends AbstractType
 {
-    public function __construct(private readonly AbstractVault $vault)
+    public function __construct(private readonly ?AbstractVault $vault = null)
     {
     }
 
@@ -32,6 +30,7 @@ class DynamicEntityFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $entity = $options['data_class'];
+        $formData = $builder->getData();
         $reflectionClass = new ReflectionClass($entity);
 
         $isUsingGroups = collect($reflectionClass->getProperties())->reduce(
@@ -86,7 +85,8 @@ class DynamicEntityFormType extends AbstractType
                     // Setup choice form type to refer to secrets
                     } elseif (is_a($formFieldType, AppMappings\Property\SecretsChoiceType::class, true)) {
                         $formFieldTypeOptions['label'] ??= 'Secret to use for '.$propertyName;
-                        $formFieldTypeOptions['choices'] ??= array_keys($this->vault->list());
+                        $formFieldTypeOptions['choices'] ??= $this->vault !== null ?
+                            array_keys($this->vault->list()) : [];
                         $formFieldTypeOptions['choice_label'] ??= fn($value) => $value; // Use the value
                     }
                 }
@@ -96,8 +96,9 @@ class DynamicEntityFormType extends AbstractType
             if (null === $formFieldType) {
                 continue;
             }
+            $this->applyStoredSecretPlaceholder($formData, $propertyName, $formFieldTypeOptions);
             if (null !== ($formFieldTypeOptions['attr']['placeholder'] ?? null)) {
-                $formFieldTypeOptions['attr']['title'] = "example:\n".$formFieldTypeOptions['attr']['placeholder'];
+                $formFieldTypeOptions['attr']['title'] ??= "example:\n".$formFieldTypeOptions['attr']['placeholder'];
             }
             // json_document type handling
             if ((null !== $attribute = Util::getPropertyAttribute($property, ORM\Column::class)) &&
@@ -139,6 +140,29 @@ class DynamicEntityFormType extends AbstractType
             'bool' => SymfonyFormType\CheckboxType::class,
             default => null, // Skip unsupported types
         };
+    }
+
+    /**
+     * If an entity already has a stored sensitive value (e.g. encrypted credentials),
+     * show a masked placeholder and a small hint instead of pre-filling the form field.
+     */
+    private function applyStoredSecretPlaceholder(
+        mixed $formData,
+        string $propertyName,
+        array &$formFieldTypeOptions
+    ): void {
+        if (!is_object($formData)) {
+            return;
+        }
+
+        $hasStoredValueMethod = 'hasStored'.ucfirst($propertyName);
+        if (!method_exists($formData, $hasStoredValueMethod) || !$formData->$hasStoredValueMethod()) {
+            return;
+        }
+
+        $formFieldTypeOptions['attr']['placeholder'] ??= '********';
+        $formFieldTypeOptions['attr']['title'] ??= 'Stored value present. Leave blank to keep the existing value.';
+        $formFieldTypeOptions['help'] ??= 'Leave blank to keep the stored value.';
     }
 
     /**

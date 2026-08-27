@@ -2,21 +2,23 @@
 
 namespace App\Entity\ServerManager;
 
+use App\Domain\Common\EntityEnums\GeoServerAccessType;
 use App\Entity\EntityBase;
 use App\Entity\Mapping as AppMappings;
-use App\Entity\Mapping\Property\SecretsChoiceType;
 use App\Repository\ServerManager\GameGeoServerRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Bundle\FrameworkBundle\Secrets\AbstractVault;
+use Symfony\Component\Form\Extension\Core\Type as SymfonyFormType;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[AppMappings\Plurals('GeoServer', 'GeoServers')]
-#[AppMappings\ReadonlyIDs([1])]
 #[ORM\Table(name: 'game_geoservers')]
 #[ORM\Entity(repositoryClass: GameGeoServerRepository::class)]
 #[UniqueEntity('address')]
+#[Assert\Callback([self::class, 'validateCredentials'])]
 class GameGeoServer extends EntityBase
 {
     #[ORM\Id]
@@ -24,12 +26,14 @@ class GameGeoServer extends EntityBase
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['write'])]
     #[AppMappings\Property\TableColumn(label: "Name")]
     #[Assert\NotBlank]
     #[ORM\Column(length: 128)]
     // @phpstan-ignore-next-line string|null but database expects string
     private ?string $name = null;
 
+    #[Groups(['write'])]
     #[AppMappings\Property\TableColumn(label: "Fully-qualified URL")]
     #[Assert\NotBlank]
     #[Assert\Url]
@@ -37,24 +41,74 @@ class GameGeoServer extends EntityBase
     // @phpstan-ignore-next-line string|null but database expects string
     private ?string $address = null;
 
-    #[AppMappings\Property\FormFieldType(type: SecretsChoiceType::class)]
-    #[Assert\NotBlank]
-    #[ORM\Column(name: 'username', length: 255)]
-    // @phpstan-ignore-next-line string|null but database expects string
-    private ?string $usernameSecret = null;
+    #[Groups(['write'])]
+    #[AppMappings\Property\TableColumn(label: "Access type")]
+    #[AppMappings\Property\FormFieldType(type: SymfonyFormType\ChoiceType::class, options: [
+        'attr' => [
+            'data-conditional-controller' => 'true',
+        ],
+    ])]
+    #[ORM\Column(
+        type: Types::STRING,
+        length: 20,
+        enumType: GeoServerAccessType::class,
+        options: ['default' => 'credentials']
+    )]
+    private GeoServerAccessType $accessType = GeoServerAccessType::CREDENTIALS;
 
-    #[AppMappings\Property\FormFieldType(type: SecretsChoiceType::class)]
-    #[Assert\NotBlank]
-    #[ORM\Column(name: 'password', length: 255)]
-    // @phpstan-ignore-next-line string|null but database expects string
-    private ?string $passwordSecret = null;
+    // ---------------------------------------------------------------------------
+    // Encrypted backing columns (stored in DB as ciphertext, excluded from forms).
+    // Access via getEncryptedUsername() / setEncryptedUsername() — listener use only.
+    // ---------------------------------------------------------------------------
 
+    /** @internal — managed by GameGeoServerListener */
+    #[Groups(['db'])]
+    #[ORM\Column(name: 'username', length: 512, nullable: true)]
+    private ?string $usernameEncrypted = null;
+
+    /** @internal — managed by GameGeoServerListener */
+    #[Groups(['db'])]
+    #[ORM\Column(name: 'password', length: 512, nullable: true)]
+    private ?string $passwordEncrypted = null;
+
+    // ---------------------------------------------------------------------------
+    // Plain-text runtime properties (NOT ORM-mapped, populated by GameGeoServerListener
+    // on postLoad and read/written by the form / application code).
+    // ---------------------------------------------------------------------------
+
+    #[Groups(['write'])]
+    #[AppMappings\Property\FormFieldType(type: SymfonyFormType\TextType::class, options: [
+        'label' => 'Username',
+        'required' => false,
+        'help' => '',
+        'attr' => [
+            'data-conditional-show-when' => 'accessType=credentials',
+            'autocomplete' => 'username',
+        ],
+    ])]
+    private ?string $username = null;
+
+    #[Groups(['write'])]
+    #[AppMappings\Property\FormFieldType(type: SymfonyFormType\PasswordType::class, options: [
+        'label' => 'Password',
+        'required' => false,
+        'always_empty' => false,
+        'attr' => [
+            'data-conditional-show-when' => 'accessType=credentials',
+            'autocomplete' => 'new-password'
+        ],
+    ])]
+    private ?string $password = null;
+
+    #[Groups(['write'])]
     #[AppMappings\Property\TableColumn(action: true, toggleable: true, availability: true)]
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => 1])]
     // @phpstan-ignore-next-line bool|null but database expects bool
     private ?bool $available = true;
 
-    private ?AbstractVault $vault;
+    // ---------------------------------------------------------------------------
+    // Public API
+    // ---------------------------------------------------------------------------
 
     public function getId(): ?int
     {
@@ -69,7 +123,6 @@ class GameGeoServer extends EntityBase
     public function setName(string $name): self
     {
         $this->name = $name;
-
         return $this;
     }
 
@@ -81,47 +134,43 @@ class GameGeoServer extends EntityBase
     public function setAddress(string $address): self
     {
         $this->address = $address;
-
         return $this;
     }
 
+    public function getAccessType(): GeoServerAccessType
+    {
+        return $this->accessType;
+    }
+
+    public function setAccessType(GeoServerAccessType $accessType): self
+    {
+        $this->accessType = $accessType;
+        return $this;
+    }
+
+    /** Plain-text username, populated by the listener after loading from DB. */
     public function getUsername(): ?string
     {
-        if ($this->vault === null) {
-            return null;
-        }
-        return $this->vault->reveal($this->usernameSecret);
+        return $this->username;
     }
 
-    public function getUsernameSecret(): ?string
+    /** Set the plain-text username; the listener encrypts it before writing to DB. */
+    public function setUsername(?string $username): self
     {
-        return $this->usernameSecret;
-    }
-
-    public function setUsernameSecret(?string $usernameSecret): self
-    {
-        $this->usernameSecret = $usernameSecret;
-
+        $this->username = $username;
         return $this;
     }
 
+    /** Plain-text password, populated by the listener after loading from DB. */
     public function getPassword(): ?string
     {
-        if ($this->vault === null) {
-            return null;
-        }
-        return $this->vault->reveal($this->passwordSecret);
+        return $this->password;
     }
 
-    public function getPasswordSecret(): ?string
+    /** Set the plain-text password; the listener encrypts it before writing to DB. */
+    public function setPassword(?string $password): self
     {
-        return $this->passwordSecret;
-    }
-
-    public function setPasswordSecret(?string $passwordSecret): self
-    {
-        $this->passwordSecret = $passwordSecret;
-
+        $this->password = $password;
         return $this;
     }
 
@@ -133,17 +182,64 @@ class GameGeoServer extends EntityBase
     public function setAvailable(?bool $available): self
     {
         $this->available = $available;
-
         return $this;
     }
 
-    public function getVault(): ?AbstractVault
+    public static function validateCredentials(self $entity, ExecutionContextInterface $context): void
     {
-        return $this->vault;
+        if ($entity->getAccessType() !== GeoServerAccessType::CREDENTIALS) {
+            return;
+        }
+        // Accept the field if either the plain-text runtime value (typed in the form)
+        // OR the encrypted backing column (already saved) is non-empty.
+        // This prevents validation errors when editing an entity without changing credentials.
+        if (empty($entity->getUsername()) && empty($entity->getEncryptedUsername())) {
+            $context->buildViolation('Username is required when using credentials.')
+                ->atPath('username')
+                ->addViolation();
+        }
+        if (empty($entity->getPassword()) && empty($entity->getEncryptedPassword())) {
+            $context->buildViolation('Password is required when using credentials.')
+                ->atPath('password')
+                ->addViolation();
+        }
     }
 
-    public function setVault(?AbstractVault $vault): void
+    public function hasStoredUsername(): bool
     {
-        $this->vault = $vault;
+        return !empty($this->usernameEncrypted);
+    }
+
+    public function hasStoredPassword(): bool
+    {
+        return !empty($this->passwordEncrypted);
+    }
+
+    // ---------------------------------------------------------------------------
+    // Internal accessors for GameGeoServerListener — do not call from application code.
+    // ---------------------------------------------------------------------------
+
+    /** @internal */
+    public function getEncryptedUsername(): ?string
+    {
+        return $this->usernameEncrypted;
+    }
+
+    /** @internal */
+    public function setEncryptedUsername(?string $encrypted): void
+    {
+        $this->usernameEncrypted = $encrypted;
+    }
+
+    /** @internal */
+    public function getEncryptedPassword(): ?string
+    {
+        return $this->passwordEncrypted;
+    }
+
+    /** @internal */
+    public function setEncryptedPassword(?string $encrypted): void
+    {
+        $this->passwordEncrypted = $encrypted;
     }
 }
