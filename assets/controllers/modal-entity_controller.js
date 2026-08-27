@@ -173,6 +173,13 @@ export default class extends Controller {
                 ? 'Connection successful.'
                 : 'Connection test failed.');
 
+            const advertisedLayerCount = result.payload && typeof result.payload.advertisedLayerCount === 'number'
+                ? result.payload.advertisedLayerCount
+                : null;
+            if (advertisedLayerCount !== null) {
+                console.log(`GeoServer test: ${advertisedLayerCount} advertised WMS layer(s) reported by GetCapabilities.`);
+            }
+
             // Use HTTP status as primary signal: success only on 2xx with explicit success flag.
             if (response.ok && result.success === true) {
                 successNotification(message);

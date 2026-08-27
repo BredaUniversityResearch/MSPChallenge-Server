@@ -298,9 +298,8 @@ class EntityController extends BaseController
                 }
 
                 return new MessageJsonResponse(
-                    message: $layerCount !== null
-                        ? "Connection successful — {$layerCount} layer(s) accessible."
-                        : "Connection successful (HTTP {$statusCode})."
+                    data: $layerCount !== null ? ['advertisedLayerCount' => $layerCount] : null,
+                    message: 'Connection successful.'
                 );
             }
 
