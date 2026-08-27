@@ -7,6 +7,7 @@ use App\Domain\API\v1\Database;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameTransitionStateValue;
+use App\Domain\Common\EntityEnums\GeoServerAccessType;
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityEnums\PlanState;
 use App\Domain\Common\EntityEnums\RestrictionSort;
@@ -319,17 +320,17 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         $geoServerCommunicator
             ->setBaseURL($this->gameSession->getGameGeoServer()->getAddress());
 
-        $username = $this->gameSession->getGameGeoServer()->getUsername();
-        $password = $this->gameSession->getGameGeoServer()->getPassword();
-        // if either username or password is set, but the other is not, then throw an exception, as both are required for authentication
-        if ((!empty($username) && empty($password)) || (empty($username) && !empty($password))) {
-            tc(fn() => throw new \Exception(
-                "Both username and password are required for GeoServer authentication."
-            ), $this->gameSessionLogger, ['gameSession' => $this->gameSession->getId()]);
-        }
-        if (!empty($username) && !empty($password)) {
+        $geoServer = $this->gameSession->getGameGeoServer();
+        if ($geoServer->getAccessType() === GeoServerAccessType::CREDENTIALS) {
+            $username = $geoServer->getUsername();
+            $password = $geoServer->getPassword();
+            if (empty($username) || empty($password)) {
+                tc(fn() => throw new \Exception(
+                    "Both username and password are required when GeoServer access type is 'credentials'."
+                ), $this->gameSessionLogger, ['gameSession' => $this->gameSession->getId()]);
+            }
             $geoServerCommunicator->setUsername($username);
-            $geoServerCommunicator->setPassword($username);
+            $geoServerCommunicator->setPassword($password);
         }
 
         /** @var LayerRepository $layerRepo */
