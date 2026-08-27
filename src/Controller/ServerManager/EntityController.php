@@ -199,7 +199,10 @@ class EntityController extends BaseController
         HttpClientInterface $httpClient
     ): MessageJsonResponse {
         if ($entityName !== 'GameGeoServer') {
-            return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: 'Test connection is not supported for this entity.');
+            return new MessageJsonResponse(
+                status: Response::HTTP_BAD_REQUEST,
+                message: 'Test connection is not supported for this entity.'
+            );
         }
 
         $formData = $request->request->all('dynamic_entity_form');

@@ -44,7 +44,12 @@ class GameGeoServer extends EntityBase
     #[Groups(['write'])]
     #[AppMappings\Property\TableColumn(label: "Access type")]
     #[AppMappings\Property\FormFieldType(type: SymfonyFormType\ChoiceType::class)]
-    #[ORM\Column(type: Types::STRING, length: 20, enumType: GeoServerAccessType::class, options: ['default' => 'credentials'])]
+    #[ORM\Column(
+        type: Types::STRING,
+        length: 20,
+        enumType: GeoServerAccessType::class,
+        options: ['default' => 'credentials']
+    )]
     private GeoServerAccessType $accessType = GeoServerAccessType::CREDENTIALS;
 
     // ---------------------------------------------------------------------------

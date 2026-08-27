@@ -75,4 +75,3 @@ final class FieldEncryptor
         return $plaintext === false ? null : $plaintext;
     }
 }
-

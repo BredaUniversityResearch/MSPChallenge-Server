@@ -15,4 +15,3 @@ enum GeoServerAccessType: string
     #[Description('Use credentials')]
     case CREDENTIALS = 'credentials';
 }
-
