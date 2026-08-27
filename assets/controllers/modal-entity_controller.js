@@ -30,10 +30,22 @@ export default class extends Controller {
         }
     }
 
-    updateConditionalFields()
+    updateConditionalFields(event = null)
     {
         if (!this.hasModalEntityFormTarget) {
             return;
+        }
+
+        // Only react to relevant field interactions when called as an event handler.
+        // Keep full recalculation for connect()/frame-load calls where no event is passed.
+        if (event && event.target) {
+            const target = event.target;
+            const isRelevant =
+                target.dataset?.conditionalController === 'true' ||
+                typeof target.dataset?.conditionalShowWhen !== 'undefined';
+            if (!isRelevant) {
+                return;
+            }
         }
 
         const root = this.modalEntityFormTarget;

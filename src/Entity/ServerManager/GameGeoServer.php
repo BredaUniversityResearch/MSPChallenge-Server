@@ -43,7 +43,11 @@ class GameGeoServer extends EntityBase
 
     #[Groups(['write'])]
     #[AppMappings\Property\TableColumn(label: "Access type")]
-    #[AppMappings\Property\FormFieldType(type: SymfonyFormType\ChoiceType::class)]
+    #[AppMappings\Property\FormFieldType(type: SymfonyFormType\ChoiceType::class, options: [
+        'attr' => [
+            'data-conditional-controller' => 'true',
+        ],
+    ])]
     #[ORM\Column(
         type: Types::STRING,
         length: 20,
