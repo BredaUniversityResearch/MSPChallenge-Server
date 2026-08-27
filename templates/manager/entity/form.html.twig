@@ -1,11 +1,12 @@
 <turbo-frame id="settingForm">
-    <div data-modal-entity-target="modalEntityForm">
+    <div data-modal-entity-target="modalEntityForm" data-action="change->modal-entity#updateConditionalFields input->modal-entity#updateConditionalFields">
         {{ form_start(entityForm) }}
         <div class="modal-body">
             <h1>Add or edit {{ entityPlurals.value(1) }}</h1>
             {% for name, field in entityForm %}
                 {% if name != '_token' %}
-                <div class="form-group">
+                {% set conditionalShowWhen = field.vars.attr['data-conditional-show-when'] ?? null %}
+                <div class="form-group" {% if conditionalShowWhen %}data-conditional-show-when="{{ conditionalShowWhen }}"{% endif %}>
                     {{ form_label(field, null, {'label_attr': {'class': 'form-label'}}) }}
                     <div class="text-danger">{{ form_errors(field) }}</div>
                     {{ form_widget(field, {'attr': {'class': 'form-control'}}) }}
@@ -16,6 +17,14 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
+            {% if entityName == 'GameGeoServer' %}
+            <button type="button" class="btn btn-secondary"
+                    data-action="modal-entity#testConnection"
+                    data-modal-entity-entity-name-param="{{ entityName }}"
+                    data-modal-entity-entity-id-param="{{ entityId ?? 0 }}">
+                <i class="fa fa-plug"></i> Test Connection
+            </button>
+            {% endif %}
             <button type="submit" class="btn btn-primary" data-action="modal-entity#submitEntityModalForm" data-modal-entity-entity-name-param="{{ entityName }}" data-modal-entity-entity-desc-param="{{ entityPlurals.value(1) }}">Save</button>
         </div>
         {{ form_end(entityForm) }}
