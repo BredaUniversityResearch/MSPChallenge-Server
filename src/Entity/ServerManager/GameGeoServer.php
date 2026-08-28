@@ -8,7 +8,6 @@ use App\Entity\Mapping as AppMappings;
 use App\Repository\ServerManager\GameGeoServerRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Form\Extension\Core\Type as SymfonyFormType;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -17,7 +16,6 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 #[AppMappings\Plurals('GeoServer', 'GeoServers')]
 #[ORM\Table(name: 'game_geoservers')]
 #[ORM\Entity(repositoryClass: GameGeoServerRepository::class)]
-#[UniqueEntity('address')]
 #[Assert\Callback([self::class, 'validateCredentials'])]
 class GameGeoServer extends EntityBase
 {
@@ -37,7 +35,7 @@ class GameGeoServer extends EntityBase
     #[AppMappings\Property\TableColumn(label: "Fully-qualified URL")]
     #[Assert\NotBlank]
     #[Assert\Url]
-    #[ORM\Column(length: 255, unique: true)]
+    #[ORM\Column(length: 255)]
     // @phpstan-ignore-next-line string|null but database expects string
     private ?string $address = null;
 
