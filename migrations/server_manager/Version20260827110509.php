@@ -30,7 +30,7 @@ final class Version20260827110509 extends MSPMigration implements ContainerAware
 
     public function getDescription(): string
     {
-        return 'Add "access_type" to game_geoservers, make "username"/"password" nullable and encrypted';
+        return 'Add access_type, remove unique address constraint, and encrypt nullable GeoServer credentials';
     }
 
     protected function getDatabaseType(): MSPDatabaseType
@@ -44,6 +44,7 @@ final class Version20260827110509 extends MSPMigration implements ContainerAware
         $this->addSql(
             'ALTER TABLE `game_geoservers`
               ADD COLUMN `access_type` VARCHAR(20) NOT NULL DEFAULT \'credentials\' AFTER `address`,
+              DROP INDEX `UNIQ_F3B4ECE7D4E6F81`,
               MODIFY COLUMN `username` VARCHAR(512) NULL,
               MODIFY COLUMN `password` VARCHAR(512) NULL'
         );
@@ -84,6 +85,7 @@ final class Version20260827110509 extends MSPMigration implements ContainerAware
         $this->addSql(
             'ALTER TABLE `game_geoservers`
               DROP COLUMN `access_type`,
+              ADD UNIQUE INDEX `UNIQ_F3B4ECE7D4E6F81` (`address`),
               MODIFY COLUMN `username` VARCHAR(255) NOT NULL,
               MODIFY COLUMN `password` VARCHAR(255) NOT NULL'
         );
