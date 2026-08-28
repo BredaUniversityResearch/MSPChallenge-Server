@@ -102,6 +102,24 @@ param(
     [string]$JwtPassphrase = ([guid]::NewGuid().ToString("N"))
 )
 
+# Best-effort: ensure an interrupted run (Ctrl+C) reports a non-zero exit code,
+# so callers chaining commands after this script can detect an aborted setup.
+# This can't always be registered -- e.g. when run-ps1.sh runs this script as a
+# background job so that IT can reliably trap the signal instead, pwsh's console
+# isn't fully attached and this throws. That's fine: run-ps1.sh's own trap is
+# the reliable mechanism in that case, so we just skip this quietly rather than
+# show a confusing error for a safeguard that can't function in this context.
+try {
+    [Console]::CancelKeyPress.Add({
+        param($senderObj, $e)
+        Write-Host "`nSetup interrupted by user (Ctrl+C)." -ForegroundColor Red
+        $e.Cancel = $false
+        exit 130
+    })
+} catch {
+    # Not fatal -- see comment above.
+}
+
 $presetsConfiguration = @{
     Direct = @{
         Text = "Directly exposed"
@@ -460,10 +478,20 @@ function Read-InputWithDefault {
     )
     while ($true) {
         $retry = $false
-        if ($defaultValue -eq "") {
-            $inputValue = Read-Prompt "${prompt}:"
+
+        # If this parameter has a ValidateSet (i.e. it's an "enum"), show the allowed
+        # values right in the prompt, not just after a bad attempt.
+        $validateSetAttr = $paramDef.Attributes | Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] } | Select-Object -First 1
+        if ($validateSetAttr) {
+            $optionsText = " [$($validateSetAttr.ValidValues -join ', ')]"
         } else {
-            $inputValue = Read-Prompt "$prompt ($defaultValue): "
+            $optionsText = ""
+        }
+
+        if ($defaultValue -eq "") {
+            $inputValue = Read-Prompt "${prompt}${optionsText}:"
+        } else {
+            $inputValue = Read-Prompt "$prompt${optionsText} ($defaultValue): "
         }
 
         if ($inputValue -eq "") {
@@ -947,54 +975,76 @@ foreach ($key in $PSBoundParameters.Keys) {
     $resolvedParameters[$key] = $PSBoundParameters[$key]
 }
 
-if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
-    Write-Host "Running in GUI mode..."
-    Initialize-Parameters $MyInvocation.MyCommand.Parameters $resolvedParameters $parameterMetadata
-    Show-GuiParameterForm $MyInvocation.MyCommand.Parameters $resolvedParameters $parameterMetadata
-} else {
-    Invoke-NonGuiMode $MyInvocation.MyCommand.Parameters $parameterMetadata $resolvedParameters $PSBoundParameters
-}
-
-# Remove from $resolvedParameters those params that do not have an EnvVar metadata
-# Build all lines first, then write at once with Set-Content (avoids BOM issues in PowerShell Core and always writes the file)
-$envLines = @("APP_ENV=prod")
-foreach ($param in $resolvedParameters.Keys.Clone()) {
-    $envVar = GetParamMetadataValue -param $param -metadata "EnvVar" -parameterMetadata $parameterMetadata
-    if (-not $envVar) {
-        $resolvedParameters.Remove($param)
-        continue
+# The main setup flow is wrapped in try/catch with an explicit success flag.
+# This matters specifically for Ctrl+C during an interactive prompt: PSReadLine
+# (which backs Read-Host) can intercept Ctrl+C itself as a raw keystroke rather
+# than letting the terminal driver raise a real SIGINT -- meaning a wrapping
+# shell (e.g. run-ps1.sh) never sees any signal to trap, and this script can
+# otherwise unwind and exit 0 as if it had completed normally. Explicitly
+# defaulting to a non-zero exit unless we reach the very end closes that gap.
+$script:setupSucceeded = $false
+try {
+    if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
+        Write-Host "Running in GUI mode..."
+        Initialize-Parameters $MyInvocation.MyCommand.Parameters $resolvedParameters $parameterMetadata
+        Show-GuiParameterForm $MyInvocation.MyCommand.Parameters $resolvedParameters $parameterMetadata
+    } else {
+        Invoke-NonGuiMode $MyInvocation.MyCommand.Parameters $parameterMetadata $resolvedParameters $PSBoundParameters
     }
-    $envLines += "$envVar=$($resolvedParameters[$param])"
-}
-Set-Content -Path ".env.local" -Value $envLines -Encoding UTF8
 
-Write-Host "Written .env.local:" -ForegroundColor Green
-Get-Content ".env.local" | ForEach-Object { Write-Host $_ -ForegroundColor Cyan }
-Write-Host "Do you want to continue with the installation? (Y/N)" -ForegroundColor Yellow
-$continue = Read-Host
-if ($continue -ne "Y" -and $continue -ne "y") {
-    Write-Host "Installation aborted." -ForegroundColor Red
+    # Remove from $resolvedParameters those params that do not have an EnvVar metadata
+    # Build all lines first, then write at once with Set-Content (avoids BOM issues in PowerShell Core and always writes the file)
+    $envLines = @("APP_ENV=prod")
+    foreach ($param in $resolvedParameters.Keys.Clone()) {
+        $envVar = GetParamMetadataValue -param $param -metadata "EnvVar" -parameterMetadata $parameterMetadata
+        if (-not $envVar) {
+            $resolvedParameters.Remove($param)
+            continue
+        }
+        $envLines += "$envVar=$($resolvedParameters[$param])"
+    }
+    Set-Content -Path ".env.local" -Value $envLines -Encoding UTF8
+
+    Write-Host "Written .env.local:" -ForegroundColor Green
+    Get-Content ".env.local" | ForEach-Object { Write-Host $_ -ForegroundColor Cyan }
+    Write-Host "Do you want to continue with the installation? (Y/N)" -ForegroundColor Yellow
+    $continue = Read-Host
+    if ($continue -ne "Y" -and $continue -ne "y") {
+        Write-Host "Installation aborted." -ForegroundColor Red
+        exit 1
+    }
+    # Check if Docker is installed
+    if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+        Write-Host "Docker is not installed. Please install Docker and try again." -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "Downloading docker-compose files for branch '$BranchName'..." -ForegroundColor Cyan
+
+    New-Item -ItemType Directory -Path ".\docker\database\init" -Force | Out-Null
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker/database/init/01-create-connection-tracker.sql" -OutFile ".\docker\database\init\01-create-connection-tracker.sql"
+
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$BranchName/docker-compose.yml" -OutFile "docker-compose.yml"
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$BranchName/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
+
+    # Check if docker-compose.yml and docker-compose.prod.yml exist
+    if (-not (Test-Path "docker-compose.yml") -or -not (Test-Path "docker-compose.prod.yml")) {
+        Write-Host "Error: docker-compose files not found. Please check the branch name." -ForegroundColor Red
+        exit 1
+    }
+    Write-Host "Starting Docker containers..." -ForegroundColor Cyan
+
+    docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.prod.yml" up -d
+    $script:setupSucceeded = $true
+} catch {
+    Write-Host "Setup did not complete: $_" -ForegroundColor Red
     exit 1
+} finally {
+    if (-not $script:setupSucceeded) {
+        # Covers Ctrl+C during a prompt (PSReadLine-level cancellation, which
+        # unwinds without throwing a catchable exception here) and any other
+        # path that exits this block before the flag above gets set.
+        exit 1
+    }
 }
-# Check if Docker is installed
-if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-    Write-Host "Docker is not installed. Please install Docker and try again." -ForegroundColor Red
-    exit 1
-}
-Write-Host "Downloading docker-compose files for branch '$BranchName'..." -ForegroundColor Cyan
 
-New-Item -ItemType Directory -Path ".\docker\database\init" -Force | Out-Null
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker/database/init/01-create-connection-tracker.sql" -OutFile ".\docker\database\init\01-create-connection-tracker.sql"
-
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$BranchName/docker-compose.yml" -OutFile "docker-compose.yml"
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$BranchName/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
-
-# Check if docker-compose.yml and docker-compose.prod.yml exist
-if (-not (Test-Path "docker-compose.yml") -or -not (Test-Path "docker-compose.prod.yml")) {
-    Write-Host "Error: docker-compose files not found. Please check the branch name." -ForegroundColor Red
-    exit 1
-}
-Write-Host "Starting Docker containers..." -ForegroundColor Cyan
-
-docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.prod.yml" up -d
 exit 0
