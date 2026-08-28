@@ -5,10 +5,24 @@ export default class extends Controller {
 
     refreshInterval = null;
 
+    isDefaultModalOpen()
+    {
+        return document.querySelector('[data-modal-default-target="modalDefault"].show') !== null;
+    }
+
+    reloadSessionsTable()
+    {
+        if (this.isDefaultModalOpen()) {
+            return;
+        }
+
+        document.querySelector('turbo-frame#sessionsTable')?.reload();
+    }
+
     connect()
     {
         this.refreshInterval = setInterval(() => {
-            document.querySelector('turbo-frame#sessionsTable')?.reload();
+            this.reloadSessionsTable();
         }, 10000);
     }
 
