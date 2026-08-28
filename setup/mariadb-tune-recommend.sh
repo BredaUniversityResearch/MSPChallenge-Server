@@ -13,6 +13,12 @@
 
 set -euo pipefail
 
+# Make Ctrl+C during the (potentially long) --await-docker-startup polling
+# loops behave predictably: print a clear message and exit with the standard
+# "terminated by SIGINT" code, rather than relying on unstated default shell
+# behavior that gives no feedback either way.
+trap 'echo; echo "Interrupted." >&2; exit 130' INT TERM
+
 # ---------------- Defaults (override via flags) ----------------
 CONTAINER=""
 MYSQL_USER="root"

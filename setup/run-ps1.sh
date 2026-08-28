@@ -49,9 +49,11 @@ if [ ! -f "$script_path" ]; then
 fi
 shift 1
 pwsh -f "$script_path" "$@"
-if [ $? -ne 0 ]; then
-    echo "PowerShell script execution failed."
-    exit 1
+status=$?
+
+if [ "$status" -ne 0 ]; then
+    echo "PowerShell script execution failed (exit code $status)."
+    exit "$status"
 fi
 echo "PowerShell script executed successfully."
 # Exit the script successfully
