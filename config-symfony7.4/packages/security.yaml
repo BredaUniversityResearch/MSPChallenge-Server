@@ -33,7 +33,7 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/\/*\d+/\/*api/\/*(GameSession/\w+|Plan/ExportPlansToJson|[s|S]imulation/GetWatchdogTokenForServer|User/getProviders|User/checkExists|[g|G]ame/StartWatchdog|[g|G]ame/Config|Layer/MetaByName), roles: PUBLIC_ACCESS }
+        - { path: ^/\/*\d+/\/*api/\/*(GameSession/\w+|Plan/ExportPlansToJson|[s|S]imulation/GetWatchdogTokenForServer|User/getProviders|User/checkExists|[g|G]ame/StartWatchdog|[g|G]ame/Config|[g|G]ame/IsOnline|Layer/MetaByName), roles: PUBLIC_ACCESS }
         - { path: '%app.firewall_api_pattern%', roles: IS_AUTHENTICATED_FULLY }
 
 # Symfony default:
