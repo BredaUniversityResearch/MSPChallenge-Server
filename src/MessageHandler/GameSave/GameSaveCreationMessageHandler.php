@@ -17,6 +17,7 @@ use App\MessageHandler\GameList\CommonSessionHandler;
 use App\Entity\SessionAPI\Layer;
 use App\Repository\SessionAPI\LayerRepository;
 use App\VersionsProvider;
+use Doctrine\DBAL\Exception\ConnectionException;
 use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -30,6 +31,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use ZipArchive;
 
 #[AsMessageHandler]
@@ -78,6 +80,11 @@ class GameSaveCreationMessageHandler extends CommonSessionHandler
             }
             $this->closeSaveZip();
             $this->mspServerManagerEntityManager->flush();
+        } catch (ConnectionException $e) {
+            if ((int) $e->getCode() === 1049) { // MySQL "Unknown database"
+                throw new UnrecoverableMessageHandlingException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw $e;
         } finally {
             $this->connectionManager->clearAndCloseDoctrineManagers();
             Database::GetInstance($this->gameSession->getId())->Close();

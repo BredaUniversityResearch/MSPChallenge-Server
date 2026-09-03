@@ -16,6 +16,7 @@ use App\Logger\GameSessionLogger;
 use App\Message\GameSave\GameSaveLoadMessage;
 use App\MessageHandler\GameList\CommonSessionHandler;
 use App\VersionsProvider;
+use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
@@ -26,6 +27,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -92,6 +94,11 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
             $this->gameSession->setSessionState(new GameSessionStateValue($state));
             $this->mspServerManagerEntityManager->persist($this->gameSession);
             $this->mspServerManagerEntityManager->flush();
+        } catch (ConnectionException $e) {
+            if ((int) $e->getCode() === 1049) { // MySQL "Unknown database"
+                throw new UnrecoverableMessageHandlingException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw $e;
         } finally {
             $this->connectionManager->clearAndCloseDoctrineManagers();
             Database::GetInstance($this->gameSession->getId())->Close();
