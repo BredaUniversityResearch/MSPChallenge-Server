@@ -44,6 +44,7 @@ use App\Repository\SessionAPI\GameRepository;
 use App\Repository\SessionAPI\LayerRepository;
 use App\VersionsProvider;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Psr\Cache\InvalidArgumentException;
@@ -54,6 +55,7 @@ use ReflectionException;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -131,6 +133,11 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             $this->gameSession->getGameConfigVersion()->setLastPlayedTime(time());
             $this->mspServerManagerEntityManager->persist($this->gameSession);
             $this->mspServerManagerEntityManager->flush();
+        } catch (ConnectionException $e) {
+            if ((int) $e->getCode() === 1049) { // MySQL "Unknown database"
+                throw new UnrecoverableMessageHandlingException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw $e;
         } finally {
             $this->connectionManager->clearAndCloseDoctrineManagers();
             Database::GetInstance($this->gameSession->getId())->Close();
