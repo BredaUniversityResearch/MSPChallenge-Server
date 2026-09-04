@@ -1,6 +1,10 @@
 {
 	skip_install_trust
 
+	servers {
+		metrics
+	}
+
 	{$CADDY_GLOBAL_OPTIONS}
 
 	frankenphp {
