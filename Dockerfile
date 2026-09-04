@@ -115,7 +115,8 @@ FROM frankenphp_base AS frankenphp_prod
 
 ENV APP_ENV=prod
 # this line enables the Blazing-fast performance thanks to the worker mode of FrankenPHP
-ENV FRANKENPHP_CONFIG="import worker.Caddyfile"
+#   @todo: does work now, but DB connections are piling up under worker mode, so we need to investigate and fix that before enabling it
+# ENV FRANKENPHP_CONFIG="import worker.Caddyfile"
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
