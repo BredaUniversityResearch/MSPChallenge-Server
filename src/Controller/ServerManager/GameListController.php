@@ -28,6 +28,8 @@ use App\Entity\SessionAPI\Game;
 use App\Entity\SessionAPI\Watchdog;
 use App\Repository\ServerManager\GameListRepository;
 use App\Repository\SessionAPI\GameRepository;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use App\Repository\SessionAPI\WatchdogRepository;
 use App\VersionsProvider;
 use Exception;
@@ -65,13 +67,14 @@ class GameListController extends BaseController
     public function gameList(
         VersionsProvider $provider,
         Request $request,
+        CacheInterface $resultsCache,
         string $sessionState = 'public'
     ): Response {
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
         /** @var GameListRepository $repo */
         $repo = $entityManager->getRepository(GameList::class);
         $gameList = $repo->findBySessionState($sessionState);
-        $connectionStats = $this->getConnectionStats();
+        $connectionStats = $this->getConnectionStats($resultsCache);
         $this->enrichGameListWithConnectionStats($connectionStats, $gameList);
         if (is_null($request->headers->get('Turbo-Frame'))) {
             return $this->gameClientJson($provider, $request, $gameList);
@@ -81,16 +84,18 @@ class GameListController extends BaseController
         ]);
     }
 
-    private function getConnectionStats(): array
+    private function getConnectionStats(CacheInterface $resultsCache): array
     {
-        static $rows = null;
-        if ($rows !== null) {
-            return $rows;
-        }
-        $conn = null;
         try {
-            $conn = $this->connectionManager->createDbConnection($this->connectionManager->getServerManagerDbName());
-            $rows = $conn->executeQuery(<<<'SQL'
+            return $resultsCache->get('gamelist.connection_stats', function (ItemInterface $item): array {
+                $item->expiresAfter(10);
+
+                $conn = null;
+                try {
+                    $conn = $this->connectionManager->createDbConnection(
+                        $this->connectionManager->getServerManagerDbName()
+                    );
+                    return $conn->executeQuery(<<<'SQL'
 SELECT
     IFNULL(ct.process_name, CONCAT('unknown_', pl.ID)) as process,
     pl.db,
@@ -100,12 +105,15 @@ LEFT JOIN msp_tracker.connection ct ON pl.ID = ct.connection_id
 WHERE pl.db IS NOT NULL
 ORDER BY ct.last_heartbeat DESC
 SQL)->fetchAllAssociative();
+                } finally {
+                    $conn?->close();
+                }
+            });
         } catch (\Throwable) {
-            // Diagnostics must never break the overview page.
-        } finally {
-            $conn?->close();
+            // Diagnostics must never break the overview page, and a thrown
+            // callback means the cache pool does not store anything for this key.
+            return [];
         }
-        return $rows ?? [];
     }
 
     /**
