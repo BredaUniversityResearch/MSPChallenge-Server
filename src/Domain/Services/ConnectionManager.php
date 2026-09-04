@@ -10,7 +10,6 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Platforms\MySQLPlatform;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\Persistence\ObjectManager;
 use Drift\DBAL\Connection as DriftConnection;
 use Drift\DBAL\ConnectionOptions;
 use Drift\DBAL\ConnectionPool;
@@ -53,6 +52,11 @@ class ConnectionManager extends DatabaseDefaults
     public function getDoctrine(): ?ManagerRegistry
     {
         return $this->doctrine;
+    }
+
+    public function reset(): void
+    {
+        $this->clearAndCloseDoctrineManagers();
     }
 
     public function clearAndCloseDoctrineManagers(): void
