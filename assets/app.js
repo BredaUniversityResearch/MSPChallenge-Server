@@ -60,6 +60,11 @@ function enableBootstrapOverlays()
 
 function closeBootstrapOverlays(root = document)
 {
+    // Event listeners pass an Event object by default; normalize to a queryable root.
+    if (root && typeof root.querySelectorAll !== 'function') {
+        root = root.target || document;
+    }
+
     root.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
         Tooltip.getInstance(el)?.hide();
     });
@@ -69,8 +74,8 @@ document.addEventListener('DOMContentLoaded', enableBootstrapOverlays);
 document.addEventListener('turbo:load', enableBootstrapOverlays);
 document.addEventListener('turbo:frame-load', enableBootstrapOverlays);
 document.addEventListener('turbo:before-frame-render', (event) => closeBootstrapOverlays(event.target));
-document.addEventListener('turbo:before-render', closeBootstrapOverlays);
-document.addEventListener('turbo:before-cache', closeBootstrapOverlays);
+document.addEventListener('turbo:before-render', () => closeBootstrapOverlays(document));
+document.addEventListener('turbo:before-cache', () => closeBootstrapOverlays(document));
 
 /*
  * https://symfony.com/doc/current/frontend/encore/bootstrap.html#using-other-bootstrap-jquery-plugins
