@@ -90,7 +90,9 @@ class GameGeoServer extends EntityBase
     #[AppMappings\Property\FormFieldType(type: SymfonyFormType\PasswordType::class, options: [
         'label' => 'Password',
         'required' => false,
-        'always_empty' => false,
+        // Keep password render-empty even when a stored value exists.
+        // This prevents copying the real value from a masked prefilled field.
+        'always_empty' => true,
         'attr' => [
             'data-conditional-show-when' => 'accessType=credentials',
             'autocomplete' => 'new-password'
