@@ -125,6 +125,10 @@ services:
 
     App\Logger\GameSessionLogger:
 
+    App\Domain\Services\ConnectionManager:
+        tags:
+            - { name: kernel.reset, method: reset }
+
     App\Entity\ServerManager\Listener\GameListListener:
         calls:
             - setConnectionManager: ['@App\Domain\Services\ConnectionManager']
