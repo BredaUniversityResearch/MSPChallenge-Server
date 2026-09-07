@@ -313,12 +313,25 @@ class WatchdogCommunicationMessageHandler
             ClientExceptionInterface $e // 4xx errors
         ) {
             if ($e->getCode() == Response::HTTP_METHOD_NOT_ALLOWED) {
-                // the watchdog does not want to join this session
+                // the watchdog does not want to join this session, remove it
                 $em->persist($this->log(
-                    'Watchdog does not want to join this session.',
+                    'Watchdog does not want to join this session, remove it',
                     EventLogSeverity::WARNING,
                     $watchdog
                 ));
+
+                // Watchdog is configured with Gedmo\SoftDeleteable(hardDelete: false), so a normal
+                // $em->remove() would always be intercepted by SoftDeleteableListener::onFlush() and
+                // converted into an UPDATE (setting deletedAt) instead of an actual DELETE.
+                // A DQL bulk DELETE bypasses the ORM lifecycle/onFlush listeners entirely, giving us
+                // a genuine hard delete here regardless of the entity's soft-delete configuration.
+                $em->createQuery(
+                    'DELETE FROM '.Watchdog::class.' w WHERE w.id = :id'
+                )->setParameter('id', $watchdog->getId())->execute();
+                $em->detach($watchdog);
+
+                $em->flush();
+                throw new UnrecoverableMessageHandlingException($e->getMessage(), $e->getCode(), $e);
             }
             if ($e->getCode() == Response::HTTP_BAD_GATEWAY) {
                 $em->persist($watchdog->setStatus(WatchdogStatus::UNRESPONSIVE));
