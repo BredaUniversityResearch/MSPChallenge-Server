@@ -51,12 +51,25 @@ readonly class FailedMessageListener implements EventSubscriberInterface
         /** @var WatchdogRepository $repo */
         $repo = $em->getRepository(Watchdog::class);
         $repo->removeUnresponsiveWatchdogs();
-        if ($event->getThrowable()->getCode() != Response::HTTP_METHOD_NOT_ALLOWED) {
-            return;
+
+        // Below if sail-safe but should actually already been handled directly in the WatchdogMessageHandler,
+        //   but just in case, we will handle it here as well.
+        if ($event->getThrowable()->getCode() == Response::HTTP_METHOD_NOT_ALLOWED) {
+            // the watchdog does not want to join this session, remove it
+
+            // Watchdog is configured with Gedmo\SoftDeleteable(hardDelete: false), so a normal
+            // $em->remove() would always be intercepted by SoftDeleteableListener::onFlush() and
+            // converted into an UPDATE (setting deletedAt) instead of an actual DELETE.
+            // A DQL bulk DELETE bypasses the ORM lifecycle/onFlush listeners entirely, giving us
+            // a genuine hard delete here regardless of the entity's soft-delete configuration.
+            $watchdog = $repo->find($message->getWatchdogId());
+            $em->createQuery(
+                'DELETE FROM '.Watchdog::class.' w WHERE w.id = :id'
+            )->setParameter('id', $watchdog->getId())->execute();
+            $em->detach($watchdog);
+
+            $em->flush();
         }
-        // the watchdog does not want to join this session, remove it
-        $em->remove($repo->find($message->getWatchdogId()));
-        $em->flush();
     }
 
     /**
