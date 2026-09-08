@@ -8,6 +8,7 @@ use App\Domain\Security\FieldEncryptor;
 use App\Migration\ContainerAwareMigrationInterface;
 use App\Migration\MSPDatabaseType;
 use App\Migration\MSPMigration;
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -58,6 +59,9 @@ final class Version20260827110509 extends MSPMigration implements ContainerAware
         );
     }
 
+    /**
+     * @throws Exception
+     */
     protected function onDown(Schema $schema): void
     {
         $encryptor = new FieldEncryptor($this->container->getParameter('kernel.secret'));
