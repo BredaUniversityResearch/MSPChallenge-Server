@@ -1,7 +1,10 @@
 #syntax=docker/dockerfile:1
 
 # build a local image using the following command:
-#   git clean -d -x -f; docker build --no-cache -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:5.2.1 -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
+# * Releasing x.x.x version:
+#   git clean -d -x -f; docker build --no-cache -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:x.x.x -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
+# * Building a staging image:
+#   git clean -d -x -f; docker build --no-cache -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:staging -f Dockerfile --target frankenphp_prod .
 # how to run it:
 #  (replace [branch_name] with the branch you want to run, e.g. `main` or `dev`)
 #  * from Linux:
