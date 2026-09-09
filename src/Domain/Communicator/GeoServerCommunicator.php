@@ -19,12 +19,25 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class GeoServerCommunicator extends AbstractCommunicator
 {
+    /**
+     * CRS codes (normalized to "EPSG:xxxx") known to declare their axis order as
+     * (Northing, Easting) rather than the usual (Easting, Northing) — this affects how
+     * an ows:LowerCorner/UpperCorner pair from a WCS DescribeCoverage response must be
+     * read. EPSG:3035 (ETRS89-LAEA Europe) is a documented case of this. Only add a code
+     * here once its axis order has actually been confirmed against real DescribeCoverage
+     * output — the default for anything not listed is natural (Easting, Northing) order,
+     * which is what most regional/projected CRSes (e.g. EPSG:5629) use.
+     */
+    private const NORTHING_FIRST_CRS = ['EPSG:3035'];
+
     private ?int $downloadsCacheLifetime = null;
     private ?int $resultsCacheLifetime = null;
     /** @var array<string, string> */
     private array $wmsCapabilitiesXmlByWorkspace = [];
     /** @var array<string, array<string, array<string, float>>> */
     private array $wmsBoundingBoxByWorkspaceAndLayer = [];
+    private string $exchangeLogDir;
+    private bool $exchangeLoggingEnabled;
 
     public function __construct(
         HttpClientInterface $httpClient,
@@ -34,6 +47,123 @@ class GeoServerCommunicator extends AbstractCommunicator
     ) {
         parent::__construct($httpClient);
         $this->setCacheLifeTimeDefaults();
+        $this->exchangeLogDir = rtrim($_ENV['GEO_SERVER_LOG_DIR'] ?? 'var/geoserver_logs', '/');
+        // Off unless explicitly enabled — undefined/empty/"0"/"false" all mean disabled.
+        $this->exchangeLoggingEnabled = filter_var(
+            $_ENV['GEO_SERVER_LOG_ENABLED'] ?? false,
+            FILTER_VALIDATE_BOOLEAN
+        );
+    }
+
+    /**
+     * Writes the request and response of a GeoServer call to a local log file whose name is
+     * derived from the endpoint, so exchanges are easy to find by the resource they hit.
+     * Binary responses (images, etc.) are saved as a separate file with a detected extension,
+     * sitting alongside the log file (same base name), rather than being inlined as text.
+     * No-op unless the GEO_SERVER_LOG_ENABLED env var is set to a truthy value.
+     *
+     * @param string $method
+     * @param string $endPoint
+     * @param array $requestHeaders
+     * @param string|array $response
+     */
+    private function logExchange(string $method, string $endPoint, array $requestHeaders, string|array $response): void
+    {
+        if (!$this->exchangeLoggingEnabled) {
+            return;
+        }
+
+        try {
+            if (!is_dir($this->exchangeLogDir) && !mkdir($this->exchangeLogDir, 0775, true) &&
+                !is_dir($this->exchangeLogDir)) {
+                return;
+            }
+
+            // Turn the endpoint into a filesystem-safe, still-recognizable slug.
+            $slug = preg_replace('/[^A-Za-z0-9]+/', '_', $endPoint);
+            $slug = trim($slug, '_');
+            $slug = substr($slug, 0, 150) ?: 'root';
+
+            $timestamp = (new \DateTimeImmutable())->format('Ymd_His_u');
+            $baseName = "{$timestamp}__{$slug}";
+            $filePath = "{$this->exchangeLogDir}/{$baseName}.log";
+
+            $responseSection = '';
+            if (is_array($response)) {
+                $responseSection = json_encode($response, JSON_PRETTY_PRINT);
+            } elseif ($this->looksBinary($response)) {
+                $extension = $this->detectExtension($response);
+                $binaryFileName = "{$baseName}.{$extension}";
+                file_put_contents("{$this->exchangeLogDir}/{$binaryFileName}", $response);
+                $responseSection = "[binary response, " . strlen($response) . " bytes, saved to {$binaryFileName}]";
+            } else {
+                $responseSection = $response;
+            }
+
+            $contents = "=== REQUEST ===\n"
+                . "Method: {$method}\n"
+                . "Endpoint: {$endPoint}\n"
+                . "Headers: " . json_encode($requestHeaders, JSON_PRETTY_PRINT) . "\n"
+                . "\n=== RESPONSE ===\n"
+                . $responseSection . "\n";
+
+            file_put_contents($filePath, $contents);
+        } catch (\Throwable $e) {
+            // Logging must never break the actual GeoServer call.
+        }
+    }
+
+    /**
+     * Heuristic check for whether a string response is binary data rather than plain text.
+     *
+     * @param string $data
+     * @return bool
+     */
+    private function looksBinary(string $data): bool
+    {
+        if ($data === '') {
+            return false;
+        }
+        // A NUL byte, or a high proportion of non-printable characters, indicates binary content.
+        if (str_contains($data, "\0")) {
+            return true;
+        }
+        $sample = substr($data, 0, 1000);
+        $nonPrintable = preg_match_all('/[^\x20-\x7E\t\r\n]/', $sample);
+        return $nonPrintable > (strlen($sample) * 0.3);
+    }
+
+    /**
+     * Detects a file extension for binary response data using its MIME type, falling back
+     * to "bin" if it cannot be determined.
+     *
+     * @param string $data
+     * @return string
+     */
+    private function detectExtension(string $data): string
+    {
+        $mimeToExtension = [
+            'image/png' => 'png',
+            'image/jpeg' => 'jpg',
+            'image/gif' => 'gif',
+            'image/tiff' => 'tiff',
+            'image/bmp' => 'bmp',
+            'image/webp' => 'webp',
+            'application/pdf' => 'pdf',
+            'application/zip' => 'zip',
+            'application/gzip' => 'gz',
+        ];
+
+        $mimeType = null;
+        if (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            if ($finfo !== false) {
+                $mimeType = finfo_buffer($finfo, $data) ?: null;
+                finfo_close($finfo);
+            }
+        }
+
+        return $mimeToExtension[$mimeType] ?? 'bin';
     }
 
     /**
@@ -78,13 +208,10 @@ class GeoServerCommunicator extends AbstractCommunicator
         if ($this->resultsCache === null || // there is no cache pool
             $cacheItemConfig === null || // no cache item config, so no cache
             $cacheLifetime === null) { // cache lifetime is null, so disabled.
-            return $this->call(
-                'GET',
-                $endPoint,
-                [],
-                ['Msp-Server-Version' => $this->versionsProvider->getVersion()],
-                $asArray
-            );
+            $headers = ['Msp-Server-Version' => $this->versionsProvider->getVersion()];
+            $response = $this->call('GET', $endPoint, [], $headers, $asArray);
+            $this->logExchange('GET', $endPoint, $headers, $response);
+            return $response;
         }
 
         // Try to use cache
@@ -95,13 +222,10 @@ class GeoServerCommunicator extends AbstractCommunicator
                 if ($cacheLifetime > 0) {
                     $item->expiresAfter($cacheLifetime);
                 }
-                return $this->call(
-                    'GET',
-                    $endPoint,
-                    [],
-                    ['Msp-Server-Version' => $this->versionsProvider->getVersion()],
-                    $asArray
-                );
+                $headers = ['Msp-Server-Version' => $this->versionsProvider->getVersion()];
+                $response = $this->call('GET', $endPoint, [], $headers, $asArray);
+                $this->logExchange('GET', $endPoint, $headers, $response);
+                return $response;
             },
             0
         );
@@ -159,8 +283,51 @@ class GeoServerCommunicator extends AbstractCommunicator
             "boundingbox" => [
                 [$bb['minx'], $bb['miny']],
                 [$bb['maxx'], $bb['maxy']]
-            ]
+            ],
+            "srs" => $bb['srs'] ?? null,
         ];
+    }
+
+    /**
+     * Normalizes a CRS/SRS identifier (which may come as a bare code like "EPSG:3035" or a
+     * URN form like "urn:ogc:def:crs:EPSG::3035") into the plain "EPSG:xxxx" form expected by
+     * WMS GetMap/reflect requests.
+     *
+     * @param string|null $crs
+     * @return string|null
+     */
+    private function normalizeCrsIdentifier(?string $crs): ?string
+    {
+        if ($crs === null) {
+            return null;
+        }
+        if (preg_match('/EPSG[:]{1,2}(\d+)/i', $crs, $matches)) {
+            return 'EPSG:' . $matches[1];
+        }
+        if (preg_match('/CRS[:]{1,2}84/i', $crs) || stripos($crs, 'CRS84') !== false) {
+            return 'CRS:84';
+        }
+        return $crs;
+    }
+
+    /**
+     * Whether a CRS/SRS identifier refers to a geographic (degree-based) CRS such as
+     * EPSG:4326 or CRS:84/CRS84 — including their URN forms, e.g.
+     * "urn:ogc:def:crs:EPSG::4326" or "urn:ogc:def:crs:OGC:1.3:CRS84". A short-form exact
+     * match isn't enough: GeoServer can advertise the very same geographic CRS as either a
+     * bare code or a full URN depending on the layer/version, and both must be rejected as
+     * "native" bounding boxes since their values are in degrees, not the layer's projected
+     * units.
+     *
+     * @param string|null $crs
+     * @return bool
+     */
+    private function isGeographicCrs(?string $crs): bool
+    {
+        if ($crs === null) {
+            return true;
+        }
+        return (bool) preg_match('/(EPSG[:]{1,2}4326|CRS[:]{1,2}84|CRS84)/i', $crs);
     }
 
     /**
@@ -189,19 +356,20 @@ class GeoServerCommunicator extends AbstractCommunicator
 
         $crawler = new Crawler($xml);
 
-        // Prefer the native/projected EPSG:3035 bbox, allowing for slight CRS string variations
-        $bboxNode = $crawler->filterXPath(
-            '//ows:BoundingBox[contains(@crs, "EPSG::3035") or contains(@crs, "EPSG:3035")]'
-        )->first();
-
-        if (!$bboxNode->count()) {
-            // Fall back to any bbox if no EPSG:3035 bbox is found
-            $bboxNode = $crawler->filterXPath('//ows:BoundingBox')->first();
-        }
+        // Reject geographic (degree-based) bounding boxes. DescribeCoverage responses list
+        // a CRS84 bbox alongside the layer's actual projected/native one — often the CRS84
+        // one first — and a WMS reflect bbox= needs the projected values, not degrees. Do
+        // not assume any particular projected EPSG code (different regions/layers use
+        // different native CRSes).
+        $bboxNode = $crawler->filterXPath('//ows:BoundingBox')
+            ->reduce(function (Crawler $node) {
+                return !$this->isGeographicCrs($node->attr('crs'));
+            })
+            ->first();
 
         if (!$bboxNode->count()) {
             throw new Exception(
-                "WCS DescribeCoverage returned no BoundingBox for {$layerName}"
+                "WCS DescribeCoverage returned no projected (non-geographic) BoundingBox for {$layerName}"
             );
         }
 
@@ -214,11 +382,19 @@ class GeoServerCommunicator extends AbstractCommunicator
             );
         }
 
+        $srs = $this->normalizeCrsIdentifier($bboxNode->attr('crs'));
+
+        // Per the OGC URN CRS convention, some CRSes (e.g. EPSG:3035) declare their axis
+        // order as (Northing, Easting) rather than the usual (Easting, Northing), so the
+        // corner components must be swapped for those specific, known cases only.
+        $isNorthingFirst = $srs !== null && in_array($srs, self::NORTHING_FIRST_CRS, true);
+
         return [
-            'minx' => (float) $lower[1],
-            'miny' => (float) $lower[0],
-            'maxx' => (float) $upper[1],
-            'maxy' => (float) $upper[0],
+            'minx' => (float) ($isNorthingFirst ? $lower[1] : $lower[0]),
+            'miny' => (float) ($isNorthingFirst ? $lower[0] : $lower[1]),
+            'maxx' => (float) ($isNorthingFirst ? $upper[1] : $upper[0]),
+            'maxy' => (float) ($isNorthingFirst ? $upper[0] : $upper[1]),
+            'srs' => $srs,
         ];
     }
 
@@ -284,21 +460,29 @@ class GeoServerCommunicator extends AbstractCommunicator
             );
         }
 
-        $bboxNode = $layerNode->filterXPath(
-            './/*[local-name()="BoundingBox" and (@SRS="EPSG:3035" or @CRS="EPSG:3035")]'
-        )->first();
+        // Geographic CRSes describe the bbox in degrees, not the layer's projected units.
+        // Passing degree values straight into a WMS reflect bbox= (which expects the layer's
+        // native units) distorts/misplaces the image, so a geographic BoundingBox must never
+        // be accepted here as if it were the native one — regardless of which one happens to
+        // appear first in the capabilities document, and regardless of whether GeoServer wrote
+        // it as a bare code ("CRS:84") or a full URN ("urn:ogc:def:crs:OGC:1.3:CRS84").
+        $bboxNode = $layerNode->filterXPath('.//*[local-name()="BoundingBox"]')
+            ->reduce(function (Crawler $node) {
+                $srs = $node->attr('SRS') ?? $node->attr('CRS');
+                return !$this->isGeographicCrs($srs);
+            })
+            ->first();
 
         if (!$bboxNode->count()) {
-            $bboxNode = $layerNode->filterXPath('.//*[local-name()="BoundingBox"]')->first();
+            // Every BoundingBox for this layer (including LatLonBoundingBox, which per the
+            // WMS spec is always EPSG:4326) is geographic — there is no projected box to use.
+            throw new Exception(
+                "WMS GetCapabilities returned no projected (non-geographic) BoundingBox for " .
+                "{$qualifiedLayerName}; only geographic (lat/long) bounding boxes were found"
+            );
         }
 
-        if (!$bboxNode->count()) {
-            $bboxNode = $layerNode->filterXPath('.//*[local-name()="LatLonBoundingBox"]')->first();
-        }
-
-        if (!$bboxNode->count()) {
-            throw new Exception("WMS GetCapabilities returned no BoundingBox for {$qualifiedLayerName}");
-        }
+        $srs = $this->normalizeCrsIdentifier($bboxNode->attr('SRS') ?? $bboxNode->attr('CRS'));
 
         $minx = $bboxNode->attr('minx');
         $miny = $bboxNode->attr('miny');
@@ -314,6 +498,7 @@ class GeoServerCommunicator extends AbstractCommunicator
             'miny' => (float) $miny,
             'maxx' => (float) $maxx,
             'maxy' => (float) $maxy,
+            'srs' => $srs,
         ];
 
         // Store under both aliases to maximize in-request cache hits.
@@ -360,6 +545,12 @@ class GeoServerCommunicator extends AbstractCommunicator
 
         $endPoint = "${workspace}/wms/reflect?layers=${workspace}:{$layer->getLayerName()}&format=image/png".
             "&transparent=FALSE&width=${width}&height={$layer->getLayerHeight()}&bbox=${bounds}";
+        // Always state the CRS the bbox values are in explicitly — relying on GeoServer's
+        // implicit default (rather than a stated srs=) is what let a degree-based bbox get
+        // misinterpreted as the layer's native units in the first place.
+        if (!empty($rasterMetaData['srs'])) {
+            $endPoint .= "&srs=" . urlencode($rasterMetaData['srs']);
+        }
         // Do not use cache at all
         $cacheLifetime ??= $this->downloadsCacheLifetime;
         if ($this->downloadsCache === null || $cacheLifetime === null) {
