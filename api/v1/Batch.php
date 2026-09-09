@@ -231,6 +231,22 @@ class Batch extends Base
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
+    private function setBatchState(string $batchGuid, string $state): PromiseInterface
+    {
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        return $this->getAsyncDatabase()->query(
+            $qb
+                ->update('api_batch')
+                ->set('api_batch_state', $qb->createPositionalParameter($state))
+                ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
+                ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
+        );
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
     public function executeQueuedBatch(string $batchGuid, string $serverId): PromiseInterface
     {
         // get batch tasks to execute
@@ -341,21 +357,24 @@ class Batch extends Base
                     });
                 }
 
-                return chain($chain)
-                    ->then(function (array $taskResultsContainer) use ($batchGuid, $pool) {
-                        /** @var SingleConnection $conn */
-                        $conn = $this->getAsyncDatabase();
-                        $pool->commitTransaction($conn);
-                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                        return $this->getAsyncDatabase()->query(
-                            $qb
-                                ->update('api_batch')
-                                ->set('api_batch_state', $qb->createPositionalParameter('Success'))
-                                ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
-                                ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
-                        )
-                            ->then(
-                                function (/* Result $result */) use ($taskResultsContainer, $batchGuid) {
+                // Use a SAVEPOINT so that, on task failure, we can undo just the batch task
+                // changes while keeping the transaction open. This lets us persist the
+                // resulting api_batch state (Success or Failed) as part of the very same
+                // transaction, in both outcomes, instead of running a separate query on the
+                // connection after it has already been committed/rolled back and potentially
+                // handed back out to a different, concurrent batch by the pool.
+                // Note: savepoints are scoped per-connection/session, and each batch already
+                // owns its own exclusively leased connection for the duration of its
+                // transaction, so a collision between concurrently executing batches is not
+                // possible. The name is still derived from the batch guid, purely to make it
+                // self-documenting when inspecting logs.
+                $savepoint = 'sp_' . str_replace('-', '', $batchGuid);
+                return $this->getAsyncDatabase()->queryBySQL("SAVEPOINT $savepoint")
+                    ->then(fn () => chain($chain))
+                    ->then(
+                        function (array $taskResultsContainer) use ($batchGuid) {
+                            return $this->setBatchState($batchGuid, 'Success')
+                                ->then(function (/* Result $result */) use ($taskResultsContainer, $batchGuid) {
                                     $batchResult = [];
                                     foreach ($taskResultsContainer as $taskResults) {
                                         foreach ($taskResults as $taskId => $taskResult) {
@@ -365,26 +384,44 @@ class Batch extends Base
                                             ];
                                         }
                                     }
-                                    return $batchResult;
-                                }
+                                    return ['result' => $batchResult, 'reason' => null];
+                                });
+                        },
+                        function ($reason) use ($batchGuid, $savepoint) {
+                            // undo only the batch task changes, the transaction itself stays open
+                            return $this->getAsyncDatabase()
+                                ->queryBySQL("ROLLBACK TO SAVEPOINT $savepoint")
+                                ->then(fn () => $this->setBatchState($batchGuid, 'Failed'))
+                                ->then(fn () => ['result' => null, 'reason' => $reason]);
+                            // note: if this recovery itself fails (e.g. the savepoint rollback or
+                            // the state update query fails), the returned promise rejects, which
+                            // is handled below by falling back to a hard rollback of the whole
+                            // transaction.
+                        }
+                    )
+                    ->then(
+                        function (array $outcome) use ($pool) {
+                            /** @var SingleConnection $conn */
+                            $conn = $this->getAsyncDatabase();
+                            // safe to switch back to the pool now: nothing below issues any
+                            // further query on $conn, it's just a synchronous reference swap.
+                            $this->setAsyncDatabase($pool);
+                            return $pool->commitTransaction($conn)->then(function () use ($outcome) {
+                                return $outcome['reason'] !== null ? reject($outcome['reason']) : $outcome['result'];
+                            });
+                        },
+                        function ($reason) use ($pool) {
+                            // something went wrong even recording the outcome; fall back to a hard
+                            // rollback so the connection isn't left in an inconsistent state.
+                            /** @var SingleConnection $conn */
+                            $conn = $this->getAsyncDatabase();
+                            $this->setAsyncDatabase($pool);
+                            return $pool->rollbackTransaction($conn)->then(
+                                fn () => reject($reason),
+                                fn () => reject($reason)
                             );
-                    })
-                    ->catch(function ($reason) use ($batchGuid, $pool) {
-                        /** @var SingleConnection $conn */
-                        $conn = $this->getAsyncDatabase();
-                        $pool->rollbackTransaction($conn);
-                        // run async query to set batches to failed, no need to wait for the result.
-                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                        $this->getAsyncDatabase()->query(
-                            $qb
-                                ->update('api_batch')
-                                ->set('api_batch_state', $qb->createPositionalParameter('Failed'))
-                                ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
-                                ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
-                        );
-                        // Propagate by returning rejection
-                        return reject($reason);
-                    })
+                        }
+                    )
                     ->finally(function () use ($batchGuid) {
                         // clean up batch cache results
                         unset($this->cachedBatchResults[$batchGuid]);

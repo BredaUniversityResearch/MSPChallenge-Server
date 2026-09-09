@@ -393,6 +393,7 @@ class User extends Base implements JWTUserInterface
         return null;
     }
 
+    #[\Deprecated]
     public function eraseCredentials(): void
     {
         // irrelevant, but required function

@@ -365,7 +365,8 @@ class Game extends Base
         $repo = $em->getRepository(GameEntity::class);
         $game = $repo->retrieve();
         $currentState = $game->getGameState();
-        if ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION) {
+        if (($currentState != $state) && // no need to throw error the current state is the same as the requested state
+            ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION)) {
             throw new Exception("Invalid current state of ".$currentState->value);
         }
         if ($currentState == GameStateValue::SETUP) {

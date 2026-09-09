@@ -1,9 +1,7 @@
 {
 	skip_install_trust
 
-	servers {
-		metrics
-	}
+	metrics
 
 	{$CADDY_GLOBAL_OPTIONS}
 

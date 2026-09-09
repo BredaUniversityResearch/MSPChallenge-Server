@@ -1,8 +1,11 @@
 <?php
 
-use Symfony\Config\FrameworkConfig;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
-return static function (FrameworkConfig $frameworkConfig): void {
-    $frameworkConfig->cache()
-        ->app($_ENV['FRAMEWORK_CACHE_APP'] ?? 'cache.adapter.filesystem');
+return static function (ContainerConfigurator $container): void {
+    $container->extension('framework', [
+        'cache' => [
+            'app' => $_ENV['FRAMEWORK_CACHE_APP'] ?? 'cache.adapter.filesystem',
+        ],
+    ]);
 };
