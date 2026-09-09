@@ -15,6 +15,9 @@ class ValidJsonValidator extends ConstraintValidator
         if (!$constraint instanceof ValidJson) {
             throw new UnexpectedTypeException($constraint, ValidJson::class);
         }
+        if (null === $value) {
+            return;
+        }
         if (!$value instanceof FileObject) {
             throw new UnexpectedTypeException($value, FileObject::class);
         }
