@@ -4,6 +4,17 @@
 # Use a minimal Debian-based image for the runtime
 FROM debian:11-slim
 
+# Debian 11 (bullseye) is EOL: its live repos no longer refresh, causing
+# "Release file ... is expired" errors, and archive.debian.org does not mirror
+# the debian-security suite at all (404). So drop debian-security/updates and
+# point the main repo at the archive instead.
+RUN sed -i \
+        -e '/debian-security/d' \
+        -e '/bullseye-updates/d' \
+        -e 's|deb.debian.org/debian|archive.debian.org/debian|g' \
+        /etc/apt/sources.list \
+    && echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
+
 # Install necessary dependencies for running .NET
 RUN apt-get update && apt-get install -y --no-install-recommends \
 		libicu67 \

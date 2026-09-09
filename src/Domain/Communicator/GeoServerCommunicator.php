@@ -19,6 +19,7 @@ class GeoServerCommunicator extends AbstractCommunicator
 {
     private ?int $downloadsCacheLifetime = null;
     private ?int $resultsCacheLifetime = null;
+    private string $exchangeLogDir;
 
     public function __construct(
         HttpClientInterface $httpClient,
@@ -28,6 +29,113 @@ class GeoServerCommunicator extends AbstractCommunicator
     ) {
         parent::__construct($httpClient);
         $this->setCacheLifeTimeDefaults();
+        $this->exchangeLogDir = rtrim($_ENV['GEO_SERVER_LOG_DIR'] ?? 'var/geoserver_logs', '/');
+    }
+
+    /**
+     * Writes the request and response of a GeoServer call to a local log file whose name is
+     * derived from the endpoint, so exchanges are easy to find by the resource they hit.
+     * Binary responses (images, etc.) are saved as a separate file with a detected extension,
+     * sitting alongside the log file (same base name), rather than being inlined as text.
+     *
+     * @param string $method
+     * @param string $endPoint
+     * @param array $requestHeaders
+     * @param string|array $response
+     */
+    private function logExchange(string $method, string $endPoint, array $requestHeaders, string|array $response): void
+    {
+        try {
+            if (!is_dir($this->exchangeLogDir) && !mkdir($this->exchangeLogDir, 0775, true) &&
+                !is_dir($this->exchangeLogDir)) {
+                return;
+            }
+
+            // Turn the endpoint into a filesystem-safe, still-recognizable slug.
+            $slug = preg_replace('/[^A-Za-z0-9]+/', '_', $endPoint);
+            $slug = trim($slug, '_');
+            $slug = substr($slug, 0, 150) ?: 'root';
+
+            $timestamp = (new \DateTimeImmutable())->format('Ymd_His_u');
+            $baseName = "{$timestamp}__{$slug}";
+            $filePath = "{$this->exchangeLogDir}/{$baseName}.log";
+
+            $responseSection = '';
+            if (is_array($response)) {
+                $responseSection = json_encode($response, JSON_PRETTY_PRINT);
+            } elseif ($this->looksBinary($response)) {
+                $extension = $this->detectExtension($response);
+                $binaryFileName = "{$baseName}.{$extension}";
+                file_put_contents("{$this->exchangeLogDir}/{$binaryFileName}", $response);
+                $responseSection = "[binary response, " . strlen($response) . " bytes, saved to {$binaryFileName}]";
+            } else {
+                $responseSection = $response;
+            }
+
+            $contents = "=== REQUEST ===\n"
+                . "Method: {$method}\n"
+                . "Endpoint: {$endPoint}\n"
+                . "Headers: " . json_encode($requestHeaders, JSON_PRETTY_PRINT) . "\n"
+                . "\n=== RESPONSE ===\n"
+                . $responseSection . "\n";
+
+            file_put_contents($filePath, $contents);
+        } catch (\Throwable $e) {
+            // Logging must never break the actual GeoServer call.
+        }
+    }
+
+    /**
+     * Heuristic check for whether a string response is binary data rather than plain text.
+     *
+     * @param string $data
+     * @return bool
+     */
+    private function looksBinary(string $data): bool
+    {
+        if ($data === '') {
+            return false;
+        }
+        // A NUL byte, or a high proportion of non-printable characters, indicates binary content.
+        if (str_contains($data, "\0")) {
+            return true;
+        }
+        $sample = substr($data, 0, 1000);
+        $nonPrintable = preg_match_all('/[^\x20-\x7E\t\r\n]/', $sample);
+        return $nonPrintable > (strlen($sample) * 0.3);
+    }
+
+    /**
+     * Detects a file extension for binary response data using its MIME type, falling back
+     * to "bin" if it cannot be determined.
+     *
+     * @param string $data
+     * @return string
+     */
+    private function detectExtension(string $data): string
+    {
+        $mimeToExtension = [
+            'image/png' => 'png',
+            'image/jpeg' => 'jpg',
+            'image/gif' => 'gif',
+            'image/tiff' => 'tiff',
+            'image/bmp' => 'bmp',
+            'image/webp' => 'webp',
+            'application/pdf' => 'pdf',
+            'application/zip' => 'zip',
+            'application/gzip' => 'gz',
+        ];
+
+        $mimeType = null;
+        if (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            if ($finfo !== false) {
+                $mimeType = finfo_buffer($finfo, $data) ?: null;
+                finfo_close($finfo);
+            }
+        }
+
+        return $mimeToExtension[$mimeType] ?? 'bin';
     }
 
     /**
@@ -72,13 +180,10 @@ class GeoServerCommunicator extends AbstractCommunicator
         if ($this->resultsCache === null || // there is no cache pool
             $cacheItemConfig === null || // no cache item config, so no cache
             $cacheLifetime === null) { // cache lifetime is null, so disabled.
-            return $this->call(
-                'GET',
-                $endPoint,
-                [],
-                ['Msp-Server-Version' => $this->versionsProvider->getVersion()],
-                $asArray
-            );
+            $headers = ['Msp-Server-Version' => $this->versionsProvider->getVersion()];
+            $response = $this->call('GET', $endPoint, [], $headers, $asArray);
+            $this->logExchange('GET', $endPoint, $headers, $response);
+            return $response;
         }
 
         // Try to use cache
@@ -89,13 +194,10 @@ class GeoServerCommunicator extends AbstractCommunicator
                 if ($cacheLifetime > 0) {
                     $item->expiresAfter($cacheLifetime);
                 }
-                return $this->call(
-                    'GET',
-                    $endPoint,
-                    [],
-                    ['Msp-Server-Version' => $this->versionsProvider->getVersion()],
-                    $asArray
-                );
+                $headers = ['Msp-Server-Version' => $this->versionsProvider->getVersion()];
+                $response = $this->call('GET', $endPoint, [], $headers, $asArray);
+                $this->logExchange('GET', $endPoint, $headers, $response);
+                return $response;
             },
             0
         );
