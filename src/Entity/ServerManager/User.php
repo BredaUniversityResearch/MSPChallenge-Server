@@ -141,6 +141,7 @@ class User extends EntityBase implements UserInterface
         return null;
     }
 
+    #[\Deprecated]
     public function eraseCredentials(): void
     {
         // irrelevant
