@@ -207,7 +207,9 @@ class WatchdogCommunicationMessageHandler
         array $context,
         array $decodedResponse
     ): void {
-        if (($decodedResponse["success"] ?? 0) == 1) {
+        if (($decodedResponse["success"] ?? 0) == 1 &&
+            // let's not log the ping success, as it is too frequent and not useful to log
+            $uri != 'Watchdog/Ping') {
             $this->sessionLogHandler->info(
                 sprintf(
                     'Watchdog %s: responded with success on requesting %s.',
