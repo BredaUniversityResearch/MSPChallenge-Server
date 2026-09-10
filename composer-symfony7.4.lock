@@ -3062,12 +3062,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/BredaUniversityResearch/reactphp-dbal.git",
-                "reference": "2932dff2433378dc55f2a7e6a67cbbe2b57cfdc5"
+                "reference": "6e18ee21ed94e139a1634a72d8146a66704fe836"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BredaUniversityResearch/reactphp-dbal/zipball/2932dff2433378dc55f2a7e6a67cbbe2b57cfdc5",
-                "reference": "2932dff2433378dc55f2a7e6a67cbbe2b57cfdc5",
+                "url": "https://api.github.com/repos/BredaUniversityResearch/reactphp-dbal/zipball/6e18ee21ed94e139a1634a72d8146a66704fe836",
+                "reference": "6e18ee21ed94e139a1634a72d8146a66704fe836",
                 "shasum": ""
             },
             "require": {
@@ -3079,7 +3079,7 @@
                 "clue/block-react": "^1",
                 "clue/reactphp-sqlite": "^1",
                 "phpunit/phpunit": "^9",
-                "react/mysql": "^0.5",
+                "react/mysql": "^0.6",
                 "voryx/pgasync": "^2"
             },
             "suggest": {
@@ -3112,7 +3112,7 @@
             "support": {
                 "source": "https://github.com/BredaUniversityResearch/reactphp-dbal/tree/master"
             },
-            "time": "2026-09-10T09:50:15+00:00"
+            "time": "2026-09-10T12:29:44+00:00"
         },
         {
             "name": "dunglas/doctrine-json-odm",
