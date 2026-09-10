@@ -255,7 +255,11 @@ services:
         tags:
             - { name: messenger.message_handler, handles: App\Message\ConnectionTracking\LowLevelConnectionTrackedMessage, from_transport: connection_tracking }
 
+    App\Domain\Services\TosDocumentService:
 
+    App\EventListener\TermsAcceptanceListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 0 }
 
 when@dev:
     parameters:

@@ -346,3 +346,62 @@ textarea.form-control {
 .form-control::-moz-placeholder { color: #8b949e !important; }
 .form-control:-ms-input-placeholder { color: #8b949e !important; }
 
+.tos-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 200px);
+}
+
+.tos-tabbar {
+    position: sticky;
+    top: 0;
+    background: #f5f5f5;
+    border-bottom: 1px solid #ccc;
+    z-index: 2;
+}
+
+.tos-tab {
+    padding: 0.5em 1em;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.tos-tab.active {
+    border-bottom: 2px solid #037c7c;
+    font-weight: bold;
+}
+
+.tos-content {
+    overflow-y: auto;
+    flex: 1;
+    padding: 1em;
+}
+
+.tos-footer {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    border-top: 1px solid #ccc;
+    padding: 1em;
+    z-index: 2;
+}
+
+.tos-content table,
+.tos-footer table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+
+    th, td {
+        border: 1px solid #ccc;
+        padding: 0.5em;
+        text-align: left;
+        vertical-align: top;
+    }
+
+    th {
+        background: #f5f5f5;
+    }
+}
+
