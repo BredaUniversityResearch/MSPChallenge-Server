@@ -21,7 +21,8 @@ class ScriptHandler
 {
     /**
      * Cross-platform equivalent of the previous composer.json script:
-     *   (DB_PROCESS_NAME='doctrine_clear_metadata' php -d memory_limit=1G bin/console doctrine:cache:clear-metadata -n || true)
+     *   (DB_PROCESS_NAME='doctrine_clear_metadata' php -d memory_limit=1G bin/console doctrine:cache:clear-metadata -n
+     *   || true)
      */
     public static function clearDoctrineMetadataCache(): void
     {
@@ -45,4 +46,3 @@ class ScriptHandler
         }
     }
 }
-
