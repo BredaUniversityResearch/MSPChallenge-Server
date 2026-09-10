@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block subtitle %}Terms of Service{% endblock %}
+{% block menuUser %}{% endblock %}
+
+{% block body %}
+<div {{ stimulus_controller('terms-tabs', { currentPath: terms.filePath }) }} class="tos-wrapper">
+    <div class="tos-tabbar" data-terms-tabs-target="tabbar">
+        <button class="tos-tab active">Terms of Service</button>
+    </div>
+
+    <div class="tos-content" data-terms-tabs-target="content">
+        {{ documentHtml|raw }}
+    </div>
+
+    <div class="tos-footer">
+        {% if acknowledgmentHtml %}
+            <div class="tos-acknowledgment">{{ acknowledgmentHtml|raw }}</div>
+        {% endif %}
+        <form method="post" action="{{ path('manager_terms_accept') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('terms_accept') }}">
+            <button type="submit" class="btn btn-primary">I accept</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
