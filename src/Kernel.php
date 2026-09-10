@@ -43,4 +43,12 @@ class Kernel extends BaseKernel
             );
         }
     }
+
+    // Hardcoded to avoid Symfony's default composer.json lookup, which can
+    // race with the docker entrypoint's symlinking of composer-symfonyXX.json
+    // -> composer.json and resolve to the wrong (or missing) project root.
+    public function getProjectDir(): string
+    {
+        return \dirname(__DIR__);
+    }
 }
