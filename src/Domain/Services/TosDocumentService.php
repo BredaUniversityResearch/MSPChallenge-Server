@@ -47,11 +47,6 @@ class TosDocumentService
         return $this->rewriteRelativeLinks($html, $relativePath);
     }
 
-    private function addTableClasses(string $html): string
-    {
-        return str_replace('<table>', '<table class="table table-bordered">', $html);
-    }
-
     /**
      * Extracts the HTML of the section under a heading matching $headingPattern (a full
      * preg pattern, including delimiters), up to (not including) the next heading of the

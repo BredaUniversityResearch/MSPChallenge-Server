@@ -19,10 +19,12 @@ class TermsAcceptance extends EntityBase
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
+    // @phpstan-ignore-next-line User|null but database expects User
     private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: TermsVersion::class)]
     #[ORM\JoinColumn(nullable: false)]
+    // @phpstan-ignore-next-line TermsVersion|null but database expects TermsVersion
     private ?TermsVersion $termsVersion = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
