@@ -9,6 +9,10 @@ use App\Domain\Services\TosDocumentService;
 use App\Entity\ServerManager\TermsAcceptance;
 use App\Entity\ServerManager\TermsVersion;
 use App\Entity\ServerManager\User;
+use App\Repository\ServerManager\TermsAcceptanceRepository;
+use App\Repository\ServerManager\TermsVersionRepository;
+use Exception;
+use League\CommonMark\Exception\CommonMarkException;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,6 +39,10 @@ class TermsController extends BaseController
         parent::__construct($projectDir, $connectionManager, $symfonyToLegacyHelper);
     }
 
+    /**
+     * @throws CommonMarkException
+     * @throws Exception
+     */
     #[Route(name: 'manager_terms')]
     public function index(): Response
     {
@@ -50,6 +58,9 @@ class TermsController extends BaseController
         ]);
     }
 
+    /**
+     * @throws CommonMarkException
+     */
     #[Route('/document', name: 'manager_terms_document')]
     public function document(Request $request): Response
     {
@@ -58,6 +69,9 @@ class TermsController extends BaseController
         return new Response($this->tosDocumentService->renderDocument($path));
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route('/accept', name: 'manager_terms_accept', methods: ['POST'])]
     public function accept(Request $request, Security $security): Response
     {
@@ -73,6 +87,7 @@ class TermsController extends BaseController
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $acceptanceRepository = $entityManager->getRepository(TermsAcceptance::class);
 
+        /** @var TermsAcceptanceRepository $acceptanceRepository */
         if (!$acceptanceRepository->hasAccepted($user, $currentTerms)) {
             $acceptance = new TermsAcceptance();
             $acceptance->setUser($user);
@@ -112,10 +127,14 @@ class TermsController extends BaseController
         }
     }
 
+    /**
+     * @throws Exception
+     */
     private function getCurrentTerms(): TermsVersion
     {
-        $currentTerms = $this->connectionManager->getServerManagerEntityManager()
-            ->getRepository(TermsVersion::class)->getCurrent();
+        /** @var TermsVersionRepository $repo */
+        $repo = $this->connectionManager->getServerManagerEntityManager()->getRepository(TermsVersion::class);
+        $currentTerms = $repo->getCurrent();
         if (null === $currentTerms) {
             throw new NotFoundHttpException('No terms of service configured.');
         }
