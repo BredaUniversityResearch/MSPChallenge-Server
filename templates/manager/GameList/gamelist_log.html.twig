@@ -1,5 +1,6 @@
 <turbo-frame id="gameLog{{ type }}">
-    <ul class="list-group">
+    <ul class="list-group log-entry-list">
+    {% set lastDay = null %}
     {% for logLine in logToastBody %}
         {% set levelClass =
             (logLine.level_name == 'NOTICE' ? 'list-group-item-success' :
@@ -10,7 +11,21 @@
                 )
             )
         %}
-        <li class="text-break list-group-item {{ levelClass }}">{% if logLine.context.href is defined %}<A href="{{  logLine.context.href|raw }}" target="_blank">{{ logLine.message }}</A>{% else %}{{ logLine.message }}{% endif %}</li>
+        {% set currentDay = logLine.datetime is defined ? (logLine.datetime|date('Y-m-d')) : null %}
+        {% if currentDay is not null and currentDay != lastDay %}
+        <li class="list-group-item list-group-item-secondary text-center fw-bold log-day-header"
+            data-datetime="{{ logLine.datetime }}">
+            {{ logLine.datetime|date('l, d F Y') }}
+        </li>
+        {% set lastDay = currentDay %}
+        {% endif %}
+        <li class="text-break list-group-item log-entry {{ levelClass }}"
+            {% if logLine.datetime is defined %}data-datetime="{{ logLine.datetime }}"{% endif %}>
+            {% if logLine.datetime is defined %}
+            <span class="badge bg-dark font-monospace me-2 log-time">{{ logLine.datetime|date('H:i:s') }}</span>
+            {% endif %}
+            {% if logLine.context.href is defined %}<A href="{{  logLine.context.href|raw }}" target="_blank">{{ logLine.message }}</A>{% else %}{{ logLine.message }}{% endif %}
+        </li>
     {% endfor %}
     </ul>
 </turbo-frame>

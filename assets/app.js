@@ -28,6 +28,7 @@ require('tata-js');
 require('./helpers/notification.js');
 require('./helpers/form.js');
 require('./helpers/modal.js');
+require('./helpers/log-time.js');
 
 /*
  * https://symfony.com/doc/current/frontend/encore/bootstrap.html#using-bootstrap-with-turbo
