@@ -52,6 +52,15 @@ class WsServer extends EventDispatcher implements
     private array $clientHeaders = [];
 
     /**
+     * Maps a connection resource id to a never-reused sequence number, unique for the lifetime of that specific
+     * connection. Needed because the underlying resource id itself (see WsServerConnection::$resourceId) can be
+     * recycled by PHP for a brand-new connection once a previous one is closed, which would otherwise let async
+     * work started for an old, now-disconnected client be mistaken for still belonging to it.
+     */
+    private array $connectionSequences = [];
+    private int $nextConnectionSequence = 1;
+
+    /**
      * @var PluginInterface[]
      */
     private array $plugins = [];
@@ -127,6 +136,11 @@ class WsServer extends EventDispatcher implements
         return $this->clientInfoContainer[$connResourceId];
     }
 
+    public function getClientConnectionSequence(int $connResourceId): ?int
+    {
+        return $this->connectionSequences[$connResourceId] ?? null;
+    }
+
     public function onOpen(ConnectionInterface $conn): void
     {
         $conn = new WsServerConnection($conn);
@@ -168,6 +182,7 @@ class WsServer extends EventDispatcher implements
         }
 
         $this->clients[$conn->resourceId] = $conn;
+        $this->connectionSequences[$conn->resourceId] = $this->nextConnectionSequence++;
         $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_CONNECTED, $conn->resourceId, $headers));
     }
 
@@ -190,6 +205,7 @@ class WsServer extends EventDispatcher implements
         unset($this->clients[$conn->resourceId]);
         unset($this->clientInfoContainer[$conn->resourceId]);
         unset($this->clientHeaders[$conn->resourceId]);
+        unset($this->connectionSequences[$conn->resourceId]);
 
         $this->dispatch(new NameAwareEvent(self::EVENT_ON_CLIENT_DISCONNECTED, $conn->resourceId));
     }
