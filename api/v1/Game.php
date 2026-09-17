@@ -247,6 +247,7 @@ class Game extends Base
         }
         /** @var LayerEntity[] $layers */
         $layers = $qb->getQuery()->getResult();
+        LayerEntity::preloadEcologyKpiValues($layers);
         $this->addLayerDependencies($layers);
         return collect($layers)->map(fn(LayerEntity $l) => $repo->normalise($l))->all();
     }
