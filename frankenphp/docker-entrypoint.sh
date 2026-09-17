@@ -36,8 +36,8 @@ if [ "$1" = 'frankenphp' ] || [ "$1" = 'php' ] || [ "$1" = 'bin/console' ]; then
 		DB_PROCESS_NAME=doctrine_migrations php bin/console doctrine:migrations:migrate --no-interaction --all-or-nothing --em msp_server_manager -vvv # -vvv for very verbose mode
 	fi
 
-  chown -R "$(whoami)":www-data export raster running_session_config ServerManager/configfiles ServerManager/log ServerManager/saves ServerManager/session_archive session_archive var vendor POV
-  chmod -R u+rwX,g+rwX,o+rX export raster running_session_config ServerManager/configfiles ServerManager/log ServerManager/saves ServerManager/session_archive session_archive var vendor POV
+  chown -R "$(whoami)":www-data export raster running_session_config ServerManager/configfiles ServerManager/log ServerManager/saves var vendor POV
+  chmod -R u+rwX,g+rwX,o+rX export raster running_session_config ServerManager/configfiles ServerManager/log ServerManager/saves var vendor POV
 
   corepack yarn
   echo 'PHP app ready!'

@@ -2,12 +2,6 @@ services:
   php:
     image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:auggis
     volumes:
-      - ./running_session_config/:/app/running_session_config
-      - ./raster/:/app/raster
-      - ./session_archive/:/app/session_archive
-      - configfiles_data:/app/ServerManager/configfiles
-      - ./ServerManager/session_archive/:/app/ServerManager/session_archive
-      - ./ServerManager/saves/:/app/ServerManager/saves
       - ./public/downloads/:/app/public/downloads
       - /app/var/cache
       - ./.secrets:/app/.secrets
