@@ -350,6 +350,12 @@ Version: 5.0 --- Draft for Review
 
 Last Updated: 20 April 2026
 
+Maintained by: Breda University of Applied Sciences
+
+Project website: <https://www.mspchallenge.info/>
+
+Contact: <contact@mspchallenge.info>
+
 This document is part of the MSP Platform Suite legal framework.
 
-See also: <a href="A_Community_Charter_General_Agreement.md">Community Charter & General Agreement (Document A)</a>, <a href="B_Terms_and_Conditions.md">Terms & Conditions (Document B)</a>, and <a href="D_Session_Agreement.md">Session Agreement (Document D)</a>..
+See also: <a href="A_Community_Charter_General_Agreement.md">Community Charter & General Agreement (Document A)</a>, <a href="B_Terms_and_Conditions.md">Terms & Conditions (Document B)</a>.

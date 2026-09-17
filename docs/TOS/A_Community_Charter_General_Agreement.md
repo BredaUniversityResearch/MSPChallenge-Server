@@ -298,61 +298,7 @@ This Charter and all matters arising from the use of the MSP Platform
 Suite are governed by the laws of the Netherlands. Disputes shall be
 subject to the jurisdiction of the courts of the Netherlands.
 
-# 9. Document Hierarchy
-
-The MSP Platform Suite’s legal framework consists of four documents:
-
-<table>
-<colgroup>
-<col style="width: 16%" />
-<col style="width: 36%" />
-<col style="width: 47%" />
-</colgroup>
-<thead>
-<tr>
-<th>Document</th>
-<th>Purpose</th>
-<th>Applies To</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>A. This Charter</td>
-<td style="text-align: left;">Mission, governance, ownership model,
-foundational principles</td>
-<td>Everyone: users, contributors, partners, custodian</td>
-</tr>
-<tr>
-<td><a href="B_Terms_and_Conditions.md">B. Terms &amp; Conditions</a></td>
-<td style="text-align: left;">Specific rules for using the software and
-accessing services</td>
-<td>All users of the MSP Platform Suite (software products, workshop
-participation, and hosted instances).</td>
-</tr>
-<tr>
-<td><a href="C_Data_Sharing_Agreement.md">C. Data Sharing Agreement</a></td>
-<td>Terms for partners who contribute data to the platform</td>
-<td>Project partners and data contributors only</td>
-</tr>
-<tr>
-<td><a href="D_Session_Agreement.md">D. Session Agreement</a></td>
-<td>This is an agreement between the custodian (BUas) and the
-commissioning party</td>
-<td><p>The entity on whose behalf or at whose initiative the session is
-being organized.</p>
-<p>One example is: <strong>Commissioned workshops</strong> — an external
-entity contracts BUas to run a workshop.</p>
-<p>Another example is: <strong>Project workshops</strong> — BUas is in a
-funded R&amp;D project together with partners, and running workshops is
-part of the project deliverables. The partners <em>are</em> the
-participants. BUas organizes and runs the session.</p></td>
-</tr>
-</tbody>
-</table>
-
-In case of conflict, this Charter (Document A) takes precedence.
-
-Document Control
+# Document Control
 
 Version: 5.0 — Draft for Review
 
@@ -363,3 +309,7 @@ Maintained by: Breda University of Applied Sciences
 Project website: <https://www.mspchallenge.info/>
 
 Contact: <contact@mspchallenge.info>
+
+This document is part of the MSP Platform Suite legal framework.
+
+See also: <a href="A_Community_Charter_General_Agreement.md">Community Charter & General Agreement (Document A)</a>, <a href="B_Terms_and_Conditions.md">Terms & Conditions (Document B)</a>.
