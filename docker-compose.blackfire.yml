@@ -1,8 +1,7 @@
 services:
   blackfire:
     image: blackfire/blackfire:2
-    ports:
-      - "${BLACKFIRE_PORT:-}:8307"
+    ports: ["8307"]
     environment:
         # Define Blackfire Agent log vebosity level
         BLACKFIRE_LOG_LEVEL: 4
