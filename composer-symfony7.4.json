@@ -37,6 +37,7 @@
         "justinrainbow/json-schema": "^6.12",
         "knplabs/knp-menu-bundle": "^3.7",
         "lcobucci/jwt": "^5.6",
+        "league/commonmark": "^2.10",
         "lexik/jwt-authentication-bundle": "^3.2",
         "nelmio/api-doc-bundle": "^5.12.1",
         "nelmio/cors-bundle": "^2.6.1",
