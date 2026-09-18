@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "date_modified": "9/1/2025",
+    "date_modified": "15/9/2026",
     "data_model_hash": "19F63ADDDB27ADCE6AA817D754D4AF4C4F1B6D9471F258BC92BE243C7AAFE170",
     "errors": 0,
     "editor_version": "2.0.0",
@@ -536,7 +536,7 @@
                   "ShippingWidth": "2",
                   "ShippingDirection": "Forward"
                 },
-                "country": 11,
+                "country": 10,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12560,
@@ -563,7 +563,7 @@
                   "ShippingWidth": "2",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 11,
+                "country": 10,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12561,
@@ -591,7 +591,7 @@
                   "Shipping_Intensity": "2205",
                   "ShippingDirection": "Forward"
                 },
-                "country": 11,
+                "country": 10,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12562,
@@ -619,7 +619,7 @@
                   "Shipping_Intensity": "313203",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 11,
+                "country": 10,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12563,
@@ -647,7 +647,7 @@
                   "Shipping_Intensity": "2205",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 11,
+                "country": 10,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12564,
@@ -674,7 +674,7 @@
                   "ShippingWidth": "2",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 11,
+                "country": 10,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12565,
@@ -701,7 +701,7 @@
                   "ShippingWidth": "2",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 11,
+                "country": 10,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12566,
@@ -728,7 +728,7 @@
                   "ShippingWidth": "2",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 11,
+                "country": 10,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12567,
@@ -756,7 +756,7 @@
                   "Shipping_Intensity": "236854",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 11,
+                "country": 10,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12568,
@@ -784,7 +784,7 @@
                   "Shipping_Intensity": "607845",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 11,
+                "country": 10,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12569,
@@ -812,7 +812,7 @@
                   "Shipping_Intensity": "472504",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 11,
+                "country": 10,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12570,
@@ -839,7 +839,7 @@
                   "ShippingWidth": "2",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 11,
+                "country": 10,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12571,
@@ -867,7 +867,7 @@
                   "Shipping_Intensity": "164218",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 11,
+                "country": 10,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12572,
@@ -895,7 +895,7 @@
                   "Shipping_Intensity": "1158",
                   "ShippingDirection": "Forward"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12575,
@@ -923,7 +923,7 @@
                   "Shipping_Intensity": "61962",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12576,
@@ -951,7 +951,7 @@
                   "Shipping_Intensity": "874",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12577,
@@ -978,7 +978,7 @@
                   "ShippingWidth": "2",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12578,
@@ -1005,7 +1005,7 @@
                   "ShippingWidth": "6",
                   "ShippingDirection": "Forward"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12579,
@@ -1032,7 +1032,7 @@
                   "ShippingWidth": "2",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12580,
@@ -1060,7 +1060,7 @@
                   "Shipping_Intensity": "2536",
                   "ShippingDirection": "Forward"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12581,
@@ -1087,7 +1087,7 @@
                   "ShippingWidth": "6",
                   "ShippingDirection": "Forward"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12582,
@@ -1114,7 +1114,7 @@
                   "ShippingWidth": "2",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12583,
@@ -1141,7 +1141,7 @@
                   "ShippingWidth": "2",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12584,
@@ -1169,7 +1169,7 @@
                   "Shipping_Intensity": "1107",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12585,
@@ -1197,7 +1197,7 @@
                   "Shipping_Intensity": "24",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12586,
@@ -1224,7 +1224,7 @@
                   "ShippingWidth": "2",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12587,
@@ -1252,7 +1252,7 @@
                   "Shipping_Intensity": "112746",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12588,
@@ -1279,7 +1279,7 @@
                   "ShippingWidth": "5",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12589,
@@ -1307,7 +1307,7 @@
                   "Shipping_Intensity": "14324",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12590,
@@ -1334,7 +1334,7 @@
                   "ShippingWidth": "3",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12591,
@@ -1361,7 +1361,7 @@
                   "ShippingWidth": "5",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12592,
@@ -1388,7 +1388,7 @@
                   "ShippingWidth": "3",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12593,
@@ -1415,7 +1415,7 @@
                   "ShippingWidth": "3",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12594,
@@ -1442,7 +1442,7 @@
                   "ShippingWidth": "2",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12595,
@@ -1470,7 +1470,7 @@
                   "Shipping_Intensity": "97890",
                   "ShippingDirection": "Reverse"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12596,
@@ -1497,7 +1497,7 @@
                   "ShippingWidth": "15",
                   "Shipping_Intensity": "398285"
                 },
-                "country": 10,
+                "country": 11,
                 "type": "0,1,2,3,4",
                 "base_geometry_info": {
                   "geometry_id": 12597,
@@ -6557,7 +6557,7 @@
         "BS_Connection_Lanes",
         "40kpoints_in_sea"
       ],
-      "country_border_layer": "BS_EEZ_BSH",
+      "country_border_layer": "BS_EEZ_BSH_types_corrected_2026",
       "shipping_lane_point_merge_distance": 10000,
       "shipping_lane_subdivide_distance": 15000,
       "shipping_lane_implicit_distance_limit": 700000.0,
@@ -18015,7 +18015,7 @@
               "construction": true
             },
             {
-              "name": "BS_Military_Areas",
+              "name": "BS_Military_Areas_2026",
               "influence": 0.2,
               "construction": false
             },
@@ -18100,7 +18100,7 @@
               "construction": false
             },
             {
-              "name": "BS_Military_Areas",
+              "name": "BS_Military_Areas_2026",
               "influence": 0.2,
               "construction": false
             },
@@ -18974,7 +18974,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "BS_EEZ_BSH",
+        "layer_name": "BS_EEZ_BSH_types_corrected_2026",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "EEZ",
@@ -19214,34 +19214,6 @@
             "media": "wiki://Orange"
           },
           "7": {
-            "displayName": "Black",
-            "approval": "EEZ",
-            "value": 11,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#141214FF",
-            "polygonPatternName": "0",
-            "innerGlowEnabled": 1,
-            "innerGlowRadius": 2,
-            "innerGlowIterations": 8,
-            "innerGlowMultiplier": 3.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 0,
-            "lineColor": "#141214FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#932385FF",
-            "pointSize": 0.4,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 0,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": "wiki://Black"
-          },
-          "8": {
             "displayName": "Purple",
             "approval": "NotDependent",
             "value": 10,
@@ -19268,6 +19240,34 @@
             "investmentCost": 0.0,
             "availability": -12,
             "media": "wiki://Purple"
+          },
+          "8": {
+            "displayName": "Black",
+            "approval": "EEZ",
+            "value": 11,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#141214FF",
+            "polygonPatternName": "0",
+            "innerGlowEnabled": 1,
+            "innerGlowRadius": 2,
+            "innerGlowIterations": 8,
+            "innerGlowMultiplier": 3.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 0,
+            "lineColor": "#141214FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#932385FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": "wiki://Black"
           }
         },
         "layer_info_properties": [
@@ -22656,7 +22656,7 @@
         "layer_tags": []
       },
       {
-        "layer_name": "BS_Military_Areas",
+        "layer_name": "BS_Military_Areas_2026",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "Military Areas",
@@ -22697,24 +22697,24 @@
         "layer_editing_type": "",
         "layer_special_entity_type": "Default",
         "layer_depth": 1,
-        "layer_property_as_type": null,
+        "layer_property_as_type": "type_1",
         "layer_type": {
           "0": {
-            "displayName": "Military Area",
+            "displayName": "Air Force Exercise",
             "approval": "NotDependent",
             "value": 0,
-            "map_type": null,
+            "map_type": "Air Force Exercise",
             "displayPolygon": 1,
-            "polygonColor": "#045591FF",
-            "polygonPatternName": "5",
+            "polygonColor": "#000000EF",
+            "polygonPatternName": "9",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
             "innerGlowMultiplier": 0.0,
             "innerGlowPixelSize": 3.0,
             "displayLines": 1,
-            "lineColor": "#000000FF",
-            "lineWidth": 2.0,
+            "lineColor": "#000000E5",
+            "lineWidth": 1.0,
             "lineIcon": null,
             "linePatternType": "Solid",
             "displayPoints": 0,
@@ -22726,6 +22726,118 @@
             "investmentCost": 0.0,
             "availability": -12,
             "media": "wiki://Military_Areas"
+          },
+          "1": {
+            "displayName": "Underwater Exercise",
+            "approval": "NotDependent",
+            "value": 0,
+            "map_type": "Underwater Exercise",
+            "displayPolygon": 1,
+            "polygonColor": "#045591E9",
+            "polygonPatternName": "9",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 1,
+            "lineColor": "#045591E8",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": null
+          },
+          "2": {
+            "displayName": "Firing Area",
+            "approval": "NotDependent",
+            "value": 0,
+            "map_type": "Firing Area",
+            "displayPolygon": 1,
+            "polygonColor": "#484646E6",
+            "polygonPatternName": "9",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 1,
+            "lineColor": "#484646E9",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": null
+          },
+          "3": {
+            "displayName": "Mine Hunting Exercise",
+            "approval": "NotDependent",
+            "value": 0,
+            "map_type": "Mine Hunting Exercise",
+            "displayPolygon": 1,
+            "polygonColor": "#824C0AFF",
+            "polygonPatternName": "9",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 1,
+            "lineColor": "#824C0AFF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": null
+          },
+          "5": {
+            "displayName": "Other",
+            "approval": "NotDependent",
+            "value": 0,
+            "map_type": "Other",
+            "displayPolygon": 1,
+            "polygonColor": "#484646D7",
+            "polygonPatternName": "9",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 0.0,
+            "displayLines": 1,
+            "lineColor": "#FDFBFBCA",
+            "lineWidth": 0.7,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 0,
+            "pointColor": "#000000FF",
+            "pointSize": 0.03,
+            "pointSpriteName": "None",
+            "description": null,
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": 0,
+            "media": null
           }
         },
         "layer_info_properties": [
@@ -33175,7 +33287,7 @@
     "era_total_months": 96,
     "era_planning_months": 84,
     "era_planning_realtime": 7200,
-    "countries": "BS_EEZ_BSH",
+    "countries": "BS_EEZ_BSH_types_corrected_2026",
     "minzoom": 1,
     "maxzoom": 60,
     "user_admin_name": "Admin",
