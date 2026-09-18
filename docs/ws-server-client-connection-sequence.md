@@ -48,6 +48,38 @@ Unlike `$connResourceId` itself, the sequence number is **never reused**: it str
 for the lifetime of the whole ws-server process. So two different connection instances can never
 share the same sequence number, even if they share the same recycled `resourceId`.
 
+### Scope of the uniqueness guarantee: per-process, not global/persistent
+
+`$nextConnectionSequence` (like `$connectionSequences`, `$clients`, `$clientHeaders`, and every
+plugin's own per-connection caches, e.g. `LatestWsServerPlugin::$gameLatestInstances`) is a plain
+in-memory PHP object property. It is **not** persisted anywhere. So the "never reused" guarantee
+only holds *for the lifetime of the current ws-server process* — it is explicitly **not** a
+globally unique id across process restarts.
+
+If the ws-server process crashes (e.g. because supervisor restarts it after an unrelated fatal
+error) and a new process starts, `$nextConnectionSequence` starts again from `1`. A client
+connecting into that new process can perfectly well be assigned the same sequence number a
+different client had in the old, now-dead process. **This is fine and does not need to be guarded
+against**, because:
+
+- A crash wipes *all* in-memory state, including every pending promise/closure that had captured
+  an "old" sequence number for comparison later. There is nothing left alive in the new process
+  that could ever compare an old sequence number against a new one.
+- The new process starts completely fresh: no clients, no cached plugin state, nothing to
+  disambiguate against. The first client the new process ever sees is, from its point of view,
+  simply the first client — there's no leftover async work from a previous, now-nonexistent
+  process to accidentally match against.
+
+In other words, the invariant this mechanism actually needs is:
+
+> unique for the lifetime of one specific connection, **as observed by the single running process
+> that is tracking it** — not globally unique forever across restarts.
+
+The hazard this mechanism protects against is specifically a **single, still-running process**
+recycling a `resourceId` *while* an async task started for the old connection on that id is still
+pending — not id/sequence reuse across a process restart, which is a different, harmless
+situation because nothing survives a restart to get confused.
+
 ### How plugins use it
 
 Any plugin doing async work per client should:
