@@ -34,3 +34,13 @@ vendor/
 .env.test
 
 .idea/
+
+# docs/TOS/*.md files are rendered at runtime by TosDocumentService (see
+# src/Domain/Services/TosDocumentService.php) for the Terms of Service page, so they must be
+# included in the prod image even though **/*.md and docs/ are excluded above. Note: a directory
+# excluded via a trailing-slash pattern (like "docs/") can't have its contents re-included without
+# first re-including the directory itself, hence the extra "!docs/" + "docs/*" step below.
+!docs/
+docs/*
+!docs/TOS/
+!docs/TOS/**
