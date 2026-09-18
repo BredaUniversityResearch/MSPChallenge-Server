@@ -48,9 +48,13 @@
                 </tr>
                 <tr>
                     <th scope="col">Setup Time</th>
-                    <td class="text-right">{{ gameSession.gameCreationTimePretty }}</td>
+                    <td class="text-right">
+                        <span class="local-time" data-unix="{{ gameSession.gameCreationTime }}">{{ gameSession.gameCreationTimePretty }}</span>
+                    </td>
                     <th scope="col" >Time Until End</th>
-                    <td class="text-right">{{ gameSession.gameRunningTilTimePretty }}</td>
+                    <td class="text-right">
+                        <span class="local-time" data-unix="{{ gameSession.gameRunningTilTime }}">{{ gameSession.gameRunningTilTimePretty }}</span>
+                    </td>
                 </tr>
                 <tr>
                     <th scope="col">Config File</th>

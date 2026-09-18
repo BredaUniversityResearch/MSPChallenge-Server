@@ -42,9 +42,6 @@ ALIAS_DL_BASE="docker logs"
 # dl = docker(d) logs(l) with container php
 alias dl="[[ -n \"\${COMPOSE_PROJECT_NAME:-}\" ]] && ${ALIAS_DL_BASE} \${COMPOSE_PROJECT_NAME}-php-1"
 
-# dl + blackfire (b)
-alias dlb="[[ -n \"\${COMPOSE_PROJECT_NAME:-}\" ]] && ${ALIAS_DL_BASE} \${COMPOSE_PROJECT_NAME}-blackfire-1"
-
 # dl + database (d)
 alias dld="[[ -n \"\${COMPOSE_PROJECT_NAME:-}\" ]] && ${ALIAS_DL_BASE} \${COMPOSE_PROJECT_NAME}-database-1"
 

@@ -209,12 +209,14 @@ class WatchdogCommunicationMessageHandler
     ): void {
         if (($decodedResponse["success"] ?? 0) == 1 &&
             // let's not log the ping success, as it is too frequent and not useful to log
-            $uri != 'Watchdog/Ping') {
+            $uri != '/Watchdog/Ping') {
             $this->sessionLogHandler->info(
                 sprintf(
-                    'Watchdog %s: responded with success on requesting %s.',
+                    'Watchdog %s: responded with success on requesting %s%s.',
                     $watchdog->getServerId()->toRfc4122(),
-                    $uri
+                    $uri,
+                    (empty($decodedResponse['month']) ? '' : ' for absolute zero-indexed month: '.
+                        $decodedResponse['month'])
                 ),
                 $context
             );

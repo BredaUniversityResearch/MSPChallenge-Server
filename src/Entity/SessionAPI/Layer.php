@@ -268,6 +268,7 @@ class Layer extends EntityBase
     private ?array $scale = null;
 
     private ?float $ecologyKpiValue = null;
+    private bool $ecologyKpiValueResolved = false;
 
     public function __construct()
     {
@@ -1007,7 +1008,7 @@ class Layer extends EntityBase
      */
     public function getEcologyKpiValue(): ?float
     {
-        if (null !== $this->ecologyKpiValue) {
+        if ($this->ecologyKpiValueResolved) {
             return $this->ecologyKpiValue;
         }
         if (null == $conn = ConnectionManager::getInstance()->getCachedGameSessionDbConnection(
@@ -1046,8 +1047,58 @@ SELECT kpi_value FROM LayerEcologyKpiValue l WHERE l.layer_name = :layer_name
 SQL,
             ['layer_name' => $this->getLayerName()]
         );
-        $this->ecologyKpiValue = $result->fetchOne() ?: null;
+        $this->setResolvedEcologyKpiValue($result->fetchOne() ?: null);
         return $this->ecologyKpiValue;
+    }
+
+    private function setResolvedEcologyKpiValue(?float $value): void
+    {
+        $this->ecologyKpiValue = $value;
+        $this->ecologyKpiValueResolved = true;
+    }
+
+    /**
+     * Runs the ecology-KPI lookup ONCE for a whole batch of layers instead of once per layer.
+     * Call this right after fetching layers, before anything calls getScale()/getEcologyKpiValue().
+     *
+     * @param Layer[] $layers
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public static function preloadEcologyKpiValues(array $layers): void
+    {
+        $byGameListId = [];
+        foreach ($layers as $layer) {
+            $byGameListId[$layer->getOriginGameListId()][] = $layer;
+        }
+
+        foreach ($byGameListId as $gameListId => $gameLayers) {
+            $conn = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($gameListId);
+            $result = $conn->executeQuery(
+                <<<'SQL'
+                WITH
+                  LatestEcologyKpiStep1 AS (
+                    SELECT *, ROW_NUMBER() OVER (PARTITION BY kpi_name ORDER BY kpi_month DESC) AS rn
+                    FROM kpi WHERE kpi_type = 'ECOLOGY'
+                  ),
+                  LatestEcologyKpiFinal AS (
+                    SELECT * FROM LatestEcologyKpiStep1 WHERE rn = 1
+                  )
+                SELECT
+                    l.name_unique_when_original_id_null AS layer_name,
+                    k.kpi_value
+                FROM layer l
+                INNER JOIN LatestEcologyKpiFinal k ON (
+                    CONCAT('mel_', LOWER(REPLACE(k.kpi_name, ' ', '_'))) = l.name_unique_when_original_id_null
+                )
+                WHERE l.name_unique_when_original_id_null IS NOT NULL
+                SQL
+            );
+            // layer_name => kpi_value, one row per matching layer
+            $map = $result->fetchAllKeyValue();
+            foreach ($gameLayers as $layer) {
+                $layer->setResolvedEcologyKpiValue($map[$layer->getLayerName()] ?? null);
+            }
+        }
     }
 
     /**

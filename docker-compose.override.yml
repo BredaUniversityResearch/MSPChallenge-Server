@@ -39,11 +39,13 @@ services:
 
   mitmproxy_outbound:
     image: mitmproxy/mitmproxy:10.3.1
+    # Port 8080 here is intentionally NOT an env var: config/packages/framework.yaml's `proxied.client`
+    # (when@dev) hardcodes 'http://mitmproxy_outbound:8080' as its proxy address, so this must stay fixed.
     entrypoint: "mitmweb --web-host 0.0.0.0 --listen-port 8080 --web-port 8081"
     networks:
       - msp_network
     ports:
-      - "8083:8081"
+      - "${MITMPROXY_OUTBOUND_PORT:-8083}:8081"
     logging:
       driver: "local"
 

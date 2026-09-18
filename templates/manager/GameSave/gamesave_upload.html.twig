@@ -1,14 +1,19 @@
 <turbo-frame id="modalDefaultBody">
-    <div data-modal-gamesave-target="modalSaveUploadForm">
-        {{ form_start(gameSaveForm) }}
+    <div data-controller="gamesave-upload"
+         data-gamesave-upload-init-url-value="{{ path('manager_gamesave_upload_init') }}"
+         data-gamesave-upload-chunk-url-value="{{ path('manager_gamesave_upload_chunk') }}"
+         data-gamesave-upload-complete-url-value="{{ path('manager_gamesave_upload_complete') }}">
+        <input type="hidden" data-gamesave-upload-target="csrfToken" value="{{ csrf_token('gamesave_upload') }}">
         <div class="modal-body">
-            {{ form_errors(gameSaveForm.saveZip) }}
-            {{ form_widget(gameSaveForm.saveZip, {'attr': {'class': 'form-control'}}) }}
+            <div data-gamesave-upload-target="errors" class="text-danger mb-2"></div>
+            <input type="file" accept=".zip,application/zip" class="form-control" data-gamesave-upload-target="fileInput">
+            <div class="progress mt-3" data-gamesave-upload-target="progressWrapper" style="display:none;">
+                <div class="progress-bar" role="progressbar" data-gamesave-upload-target="progressBar" style="width:0%">0%</div>
+            </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-default" data-action="modal-default#closeModalDefault">Cancel</button>
-            <button type="submit" class="btn btn-primary" data-action="modal-gamesave#submitSaveUploadModalForm">Upload</button>
+            <button type="button" class="btn btn-primary" data-gamesave-upload-target="submitButton" data-action="gamesave-upload#upload">Upload</button>
         </div>
-        {{ form_end(gameSaveForm) }}
     </div>
 </turbo-frame>
