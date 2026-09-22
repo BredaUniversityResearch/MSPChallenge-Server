@@ -17,7 +17,6 @@ parameters:
     - docker_monitor
     - app_ws_server
     - watchdog
-    - doctrine
 
 monolog:
     channels:
