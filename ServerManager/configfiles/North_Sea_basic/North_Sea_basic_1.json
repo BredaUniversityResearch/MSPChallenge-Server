@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "date_modified": "18/08/2026",
+    "date_modified": "31/08/2026",
     "data_model_hash": "68279095ABCDC7A37AB8895A0D7F865BB7C3D2565DE4B6FEBCEA78CDDBBAB3E4",
     "errors": 0,
     "editor_version": "2.0.0",
@@ -17826,6 +17826,7 @@
       "shipping_lane_layers": [
         "NS_IMO_Routes",
         "NS_Connection_Points_25km_2",
+		"NS_Connection_Points_10km_DT",
         "NS_National_shipping_lanes",
         "NS_Shipping_Invisible_Lanes"
       ],
@@ -22606,6 +22607,22 @@
                 2,
                 3,
                 4
+              ],
+              "cost_multiplier": 1.0
+            }
+          ]
+        },
+        {  "layer_name": "NS_Countries",
+          "layer_types": [
+            "Countries"
+          ],
+          "allowed_ships": [
+            {
+              "ship_type_ids": [
+				  
+				  
+				  
+                5
               ],
               "cost_multiplier": 1.0
             }
@@ -33514,6 +33531,167 @@
           "Shipping"
         ]
       },
+      {
+        "layer_name": "NS_Connection_Points_10km_DT",
+        "layer_geotype": "point",
+        "layer_entity_value_max": null,
+        "layer_short": "C_Points_10KM_DT",
+        "layer_category": "activities",
+        "layer_subcategory": "shipping",
+        "layer_download_from_geoserver": 1,
+        "layer_width": 1024,
+        "layer_height": 1024,
+        "layer_raster_material": "RasterMELNew",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 1,
+        "layer_selectable": 0,
+        "layer_editable": 0,
+        "layer_toggleable": 0,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "",
+        "layer_information": "",
+        "layer_media": null,
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 0
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": 1,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Connection_Points",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#6CFF1C80",
+            "polygonPatternName": "5",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#7AC943FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 1,
+            "pointColor": "#7AC943FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          }
+        },
+        "layer_info_properties": [
+          {
+            "property_name": "Y",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "X",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Name",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "FID",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "area",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Shipping_Intensity",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          }
+        ],
+        "layer_tags": []
+      },      
       {
         "layer_name": "NS_Shipping_Intensity",
         "layer_geotype": "raster",
