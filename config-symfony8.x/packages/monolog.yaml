@@ -8,6 +8,7 @@ parameters:
     - '!app_ws_server'
     - '!watchdog'
     - '!deprecation' # also exclude deprecation logs from main log file
+    - '!doctrine' # exclude doctrine logs from main log file
   white_list_app_channels:
     - analytics
     - game_session
@@ -16,6 +17,7 @@ parameters:
     - docker_monitor
     - app_ws_server
     - watchdog
+    - doctrine
 
 monolog:
     channels:
@@ -27,6 +29,7 @@ monolog:
         - docker_monitor
         - app_ws_server
         - watchdog
+        - doctrine
     handlers:
         # uncomment to get logging in your browser
         # you may have to allow bigger header sizes in your Web server configuration
@@ -45,7 +48,8 @@ monolog:
               - 503 # Session cannot be used at the moment
             channels: "%black_list_app_channels%"
         main_nested:
-            type: stream
+            type: rotating_file
+            max_files: 3
             path: "%kernel.logs_dir%/%kernel.environment%.log"
             level: debug
             formatter: monolog.formatter.json
@@ -55,13 +59,15 @@ monolog:
             process_psr_3_messages: false
             channels: "%white_list_app_channels%"
         analytics:
-            type: stream
+            type: rotating_file
+            max_files: 7
             path: "%kernel.logs_dir%/analytics.log"
             level: warning
             formatter: monolog.formatter.json
             channels: [ 'analytics' ]
         docker:
-            type: stream
+            type: rotating_file
+            max_files: 7
             path: '%kernel.logs_dir%/docker.log'
             level: warning
             formatter: monolog.formatter.json
@@ -74,22 +80,31 @@ monolog:
                 enabled: true
         deprecation:
             type: rotating_file
+            max_files: 7
             channels: ["deprecation"]
             path: "%kernel.logs_dir%/deprecation.log"
-            max_files: 7
             formatter: monolog.formatter.json
         app_ws_server:
-            type: stream
+            type: rotating_file
+            max_files: 7
             path: '%kernel.logs_dir%/app-ws-server.log'
             level: warning
             formatter: monolog.formatter.json
             channels: ['app_ws_server']
         watchdog:
-            type: stream
+            type: rotating_file
+            max_files: 7
             path: '%kernel.logs_dir%/watchdog.log'
             level: warning
             formatter: monolog.formatter.json
             channels: ['watchdog']
+        doctrine:
+            type: rotating_file
+            max_files: 7
+            path: '%kernel.logs_dir%/doctrine.log'
+            level: warning
+            formatter: monolog.formatter.json
+            channels: ['doctrine']
 
 when@prod:
     monolog:

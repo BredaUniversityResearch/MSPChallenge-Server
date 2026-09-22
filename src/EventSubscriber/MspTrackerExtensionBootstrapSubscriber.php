@@ -24,6 +24,7 @@ final class MspTrackerExtensionBootstrapSubscriber implements EventSubscriberInt
      * and is the only safe way to re-arm the tracker after every RSHUTDOWN.
      */
     private ?\Closure $trackingCallback = null;
+    private bool $dispatching = false;
 
     public function __construct(
         private readonly MessageBusInterface $messageBus,
@@ -48,6 +49,13 @@ final class MspTrackerExtensionBootstrapSubscriber implements EventSubscriberInt
 
     public function onConsoleCommand(ConsoleCommandEvent $event): void
     {
+        // This worker's entire job is writing rows caused by DB connections.
+        // If it tracks its own connections, every message it processes opens
+        // a connection, which creates another message, forever.
+        if (ProcessNameDetector::getProcessName() === 'messenger-connection-tracking') {
+            return;
+        }
+
         $this->registerCallbackIfAvailable('console:' . ($event->getCommand()?->getName() ?? 'unknown'));
     }
 
@@ -59,6 +67,13 @@ final class MspTrackerExtensionBootstrapSubscriber implements EventSubscriberInt
 
         if ($this->trackingCallback === null) {
             $this->trackingCallback = function (array $payload): void {
+                if ($this->dispatching) {
+                    // A connection opened as a side effect of tracking a
+                    // previous connection — do not track this one.
+                    return;
+                }
+
+                $this->dispatching = true;
                 try {
                     $processName = ProcessNameDetector::getProcessName('php_unknown') ?? 'php_unknown';
                     $payload['process_name'] = $payload['process_name'] ?? $processName;
@@ -71,17 +86,12 @@ final class MspTrackerExtensionBootstrapSubscriber implements EventSubscriberInt
                         'error' => $e->getMessage(),
                         'payload_event' => $payload['event'] ?? 'unknown',
                     ]);
+                } finally {
+                    $this->dispatching = false;
                 }
             };
         }
-
-        $registered = msp_tracker_register_connection_callback($this->trackingCallback);
-        $this->logger->debug('msp_tracker: callback registration attempt', [
-            'context' => $context,
-            'result' => $registered ? 'ok' : 'failed',
-        ]);
     }
-
 
     /**
      * Returns a compact, transport-safe full stack trace snapshot.
