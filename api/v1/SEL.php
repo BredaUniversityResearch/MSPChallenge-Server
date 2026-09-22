@@ -130,8 +130,17 @@ class SEL extends Base
         //First gather all the layer ids that our layers intersect with.
         $restrictionLayerIds = array();
         foreach ($shippingLayers as $shippingLayer) {
+            try {
+                $restrictionLayers = $this->GetRestrictionLayersForLayer($shippingLayer);
+            } catch (Exception $e) {
+                $this->log(
+                    $e->getMessage() . ", Skipping" . PHP_EOL,
+                    self::LOG_LEVEL_ERROR
+                );
+                continue;
+            }
             $restrictionLayerIds = array_unique(
-                array_merge($restrictionLayerIds, $this->GetRestrictionLayersForLayer($shippingLayer))
+                array_merge($restrictionLayerIds, $restrictionLayers)
             );
         }
 
@@ -182,7 +191,6 @@ class SEL extends Base
                 array_push($result, $transformedData);
             }
         }
-
         return $result;
     }
 
@@ -913,7 +921,7 @@ class SEL extends Base
             //Make sure we double check this for month -1 when exiting the setup phase.
             $result["rebuild_edges"] = $this->HaveInterestedLayersChangedInMonth(-1);
         }
-
+        $result['logs'] = $this->getLogMessages();
         return $result;
     }
 
@@ -931,9 +939,25 @@ class SEL extends Base
                 "SELECT layer_id FROM layer WHERE layer_name = ?",
                 array($shippingLaneLayer)
             );
-            $interestedLayers[] = $shippingLayerData[0]['layer_id'];
+            if (empty($shippingLayerData[0]['layer_id'])) {
+                $this->log(
+                    "SEL_API: Could not find layer with name \"".$shippingLaneLayer."\", Skipping" . PHP_EOL,
+                    self::LOG_LEVEL_ERROR
+                );
+                continue;
+            }
+            try {
+                $restrictionLayers = $this->GetRestrictionLayersForLayer($shippingLaneLayer);
+            } catch (Exception $e) {
+                $this->log(
+                    "SEL_API: " . $e->getMessage() . ", Skipping" . PHP_EOL,
+                    self::LOG_LEVEL_ERROR
+                );
+                continue;
+            }
 
-            $interestedLayers = array_merge($interestedLayers, $this->GetRestrictionLayersForLayer($shippingLaneLayer));
+            $interestedLayers[] = $shippingLayerData[0]['layer_id'];
+            $interestedLayers = array_merge($interestedLayers, $restrictionLayers);
         }
         $interestedLayers = array_unique($interestedLayers);
 
