@@ -2,7 +2,7 @@
 
 ## MSP Platform Suite
 
-**Effective Date**: 20 April 2026
+**Effective Date**: 24 September 2026
 
 **Custodian**: Breda University of Applied Sciences (BUas), through
 CRADLE Lab, at Academy for AI, Games and Media
@@ -346,9 +346,9 @@ Platform Suite, you acknowledge that:
 
 # Document Control
 
-Version: 5.0 --- Draft for Review
+Version: 5.0
 
-Last Updated: 20 April 2026
+Last Updated: 24 September 2026
 
 Maintained by: Breda University of Applied Sciences
 

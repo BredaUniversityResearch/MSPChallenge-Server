@@ -127,10 +127,41 @@ h1 {
     padding-top: 7px;
 }
 
+#logo a,
+#logo a:link,
+#logo a:visited,
+#logo a:hover,
+#logo a:active {
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
 #logo img {
     width: 35px;
     height: 35px;
     margin-right: 20px;
+}
+
+#footer a,
+#footer a:link,
+#footer a:visited,
+#footer a i {
+    color: $light;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#footer a i {
+    margin-right: 5px;
+}
+
+#footer a:hover,
+#footer a:active,
+#footer a:hover i,
+#footer a:active i {
+    color: $lightAlternate2;
+    cursor: pointer;
 }
 
 @media (max-width:770px){
