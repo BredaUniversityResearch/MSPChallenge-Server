@@ -44,9 +44,16 @@ class TermsController extends BaseController
      * @throws Exception
      */
     #[Route(name: 'manager_terms')]
-    public function index(): Response
+    public function index(Security $security): Response
     {
         $currentTerms = $this->getCurrentTerms();
+
+        /** @var User $user */
+        $user = $security->getUser();
+
+        $entityManager = $this->connectionManager->getServerManagerEntityManager();
+        /** @var TermsAcceptanceRepository $acceptanceRepository */
+        $acceptanceRepository = $entityManager->getRepository(TermsAcceptance::class);
 
         return $this->render('manager/terms_page.html.twig', [
             'terms' => $currentTerms,
@@ -55,6 +62,7 @@ class TermsController extends BaseController
                 $currentTerms->getFilePath(),
                 $currentTerms->getAcknowledgmentHeadingPattern()
             ),
+            'alreadyAccepted' => $acceptanceRepository->hasAccepted($user, $currentTerms),
         ]);
     }
 

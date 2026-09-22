@@ -13,6 +13,7 @@
         {{ documentHtml|raw }}
     </div>
 
+    {% if not alreadyAccepted %}
     <div class="tos-footer">
         {% if acknowledgmentHtml %}
             <div class="tos-acknowledgment">{{ acknowledgmentHtml|raw }}</div>
@@ -22,5 +23,10 @@
             <button type="submit" class="btn btn-primary">I accept</button>
         </form>
     </div>
+    {% else %}
+    <div class="tos-footer">
+        <a href="{{ path('manager') }}" class="btn btn-primary">Back to home</a>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
