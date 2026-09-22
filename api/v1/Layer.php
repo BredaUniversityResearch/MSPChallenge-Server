@@ -398,11 +398,13 @@ class Layer extends Base
                 ->setLayerLastupdate(microtime(true))
                 ->setLayerMelupdate(1);
         }
-        $this->log(sprintf(
-            'Updated layer %s with id %d',
-            ($rasterDataUpdated ? ' incl. raster data' : ''),
-            $layer->getLayerId()
-        ));
+        if ($layer->getLayerId() != null) { // still unflushed, so no need for an *updated* log message
+            $this->log(sprintf(
+                'Updated layer %s with id %d',
+                ($rasterDataUpdated ? ' incl. raster data' : ''),
+                $layer->getLayerId()
+            ));
+        }
 
         // (Pre-)archive the raster file
         Store::EnsureFolderExists(Store::GetRasterArchiveFolder($this->getGameSessionId()));
