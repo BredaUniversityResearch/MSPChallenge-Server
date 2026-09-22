@@ -126,6 +126,7 @@ class WatchdogCommunicationMessageHandler
         } finally {
             $this->connectionManager->clearAndCloseDoctrineManagers();
             Database::GetInstance($message->getGameSessionId())->Close();
+            $this->connectionManager->closeCachedAsyncGameSessionDbConnection($message->getGameSessionId());
         }
     }
 

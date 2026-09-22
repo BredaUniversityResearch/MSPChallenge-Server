@@ -386,6 +386,31 @@ class ConnectionManager extends DatabaseDefaults
             $cacheRefresh
         );
     }
+
+    /**
+     * Closes and forgets the cached async game session connection (pool), if any exists.
+     * Use this when the caller knows it will not need the async connection anymore for now,
+     * e.g. after a one-off await() from a synchronous/worker context, to avoid piling up
+     * connection pool connections that are never closed.
+     */
+    public function closeCachedAsyncGameSessionDbConnection(int $gameSessionId): void
+    {
+        $this->closeCachedAsyncDbConnection($this->getGameSessionDbName($gameSessionId));
+    }
+
+    private function closeCachedAsyncDbConnection(string $dbName): void
+    {
+        if (!array_key_exists($dbName, $this->asyncDbConnections)) {
+            return;
+        }
+        try {
+            $this->asyncDbConnections[$dbName]->close();
+        } catch (\Throwable) {
+            // best-effort cleanup
+        }
+        unset($this->asyncDbConnections[$dbName]);
+    }
+
     /**
      * @throws \Doctrine\DBAL\Exception
      */

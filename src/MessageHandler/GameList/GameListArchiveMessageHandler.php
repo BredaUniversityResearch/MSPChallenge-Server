@@ -75,6 +75,7 @@ class GameListArchiveMessageHandler extends CommonSessionHandler
         } finally {
             $this->connectionManager->clearAndCloseDoctrineManagers();
             Database::GetInstance($this->gameSession->getId())->Close();
+            $this->connectionManager->closeCachedAsyncGameSessionDbConnection($this->gameSession->getId());
         }
     }
 }
