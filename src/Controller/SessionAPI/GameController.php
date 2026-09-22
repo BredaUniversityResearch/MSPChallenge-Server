@@ -22,7 +22,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
-use function App\await;
 
 #[Route('/api/{game}', requirements: ['game' => '[gG]ame'])]
 #[OA\Tag(

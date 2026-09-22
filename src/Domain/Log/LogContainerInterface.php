@@ -2,6 +2,8 @@
 
 namespace App\Domain\Log;
 
+use Psr\Log\LoggerInterface;
+
 interface LogContainerInterface
 {
     const LOG_FIELD_TIME = 'time';
@@ -20,4 +22,5 @@ interface LogContainerInterface
     public function getLogs(?string $levelFilter = null): array;
     public function appendFromLogContainer(self $logContainer): void;
     public function clearLogs(): void;
+    public function pushToLogger(LoggerInterface $logger, array $context): void;
 }

@@ -42,6 +42,9 @@ class GameSessionLogger extends AbstractProcessingHandler
      */
     protected function write(LogRecord $record): void
     {
+        if (!isset($record->context['gameSession'])) {
+            throw new \LogicException('Game session id not set in log context');
+        }
         $arr = $record->toArray();
         // hack to make the placeholders work (not sure why monolog fails to do this)
         foreach ($arr['context'] as $key => $val) {

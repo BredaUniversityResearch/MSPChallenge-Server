@@ -3,6 +3,7 @@
 namespace App\Controller\SessionAPI;
 
 use App\Controller\BaseController;
+use App\Domain\API\v1\SEL;
 use App\Entity\SessionAPI\Geometry;
 use App\Entity\SessionAPI\Layer;
 use App\Repository\SessionAPI\LayerRepository;
@@ -10,9 +11,68 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Attribute\Route;
+use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Domain\Common\MessageJsonResponse;
 
+#[Route('/api/SEL')]
+#[OA\Tag(
+    name: 'SEL',
+    description: 'Operations related to SEL'
+)]
 class SELController extends BaseController
 {
+    #[Route(
+        path: '/GetRestrictionGeometry',
+        name: 'session_api_sel_get_restriction_geometry',
+        methods: ['POST']
+    )]
+    public function getRestrictionGeometry(
+        Request $request,
+        LoggerInterface $gameSessionLogger
+    ): JsonResponse {
+        $sel = new SEL();
+        $gameSessionId = $this->getSessionIdFromRequest($request);
+        $sel->setGameSessionId($gameSessionId);
+        try {
+            $result = $sel->GetRestrictionGeometry();
+            $sel->pushToLogger($gameSessionLogger, ['gameSession' => $gameSessionId]);
+            return new JsonResponse($result);
+        } catch (Exception $e) {
+            return new MessageJsonResponse(
+                status: $e->getCode() ?: 500,
+                message: $e->getMessage()
+            );
+        }
+    }
+
+    #[Route(
+        path: '/GetUpdatePackage',
+        name: 'session_api_sel_get_update_package',
+        methods: ['POST']
+    )]
+    public function getUpdatePackage(
+        Request $request,
+        LoggerInterface $gameSessionLogger
+    ): JsonResponse {
+        $sel = new SEL();
+        $gameSessionId = $this->getSessionIdFromRequest($request);
+        $sel->setGameSessionId($gameSessionId);
+        try {
+            $result = $sel->GetUpdatePackage();
+            $sel->pushToLogger($gameSessionLogger, ['gameSession' => $gameSessionId]);
+            return new JsonResponse($result);
+        } catch (Exception $e) {
+            return new MessageJsonResponse(
+                status: $e->getCode() ?: 500,
+                message: $e->getMessage()
+            );
+        }
+    }
+
     /**
      * @throws NonUniqueResultException
      * @throws NoResultException
