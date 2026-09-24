@@ -40257,7 +40257,7 @@
         ],
         "selected_layers": [
           "NS_Anchorages_DT",
-          "NL_vesseldensity_all",
+          "NS_Shipping_all_2024_rendered_raster",
           "dem2008_2018",
           "NS_Ports_Point_april2023"
         ]
