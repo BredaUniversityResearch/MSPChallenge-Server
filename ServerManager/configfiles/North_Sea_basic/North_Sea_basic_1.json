@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "date_modified": "2/3/2026",
+    "date_modified": "31/08/2026",
     "data_model_hash": "68279095ABCDC7A37AB8895A0D7F865BB7C3D2565DE4B6FEBCEA78CDDBBAB3E4",
     "errors": 0,
     "editor_version": "2.0.0",
@@ -68,14 +68,14 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Precautionary_Areas|NS_Wave_Farms": [
+      "NS_Precautionary_Areas|NS_Wave_Farms_Edit": [
         {
           "message": "Precautionary areas are reserved for shipping.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Precautionary_Areas",
           "starttype": "",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -92,14 +92,14 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Precautionary_Areas|NS_Tidal_Farms": [
+      "NS_Precautionary_Areas|NS_Tidal_Farms_Edit": [
         {
           "message": "Precautionary areas are reserved for shipping.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Precautionary_Areas",
           "starttype": "",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -290,12 +290,12 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Wave_Farms|NS_IMO_Routes": [
+      "NS_Wave_Farms_Edit|NS_IMO_Routes": [
         {
           "message": "Shipping routes physically obstruct the placement of wave farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
+          "startlayer": "NS_Wave_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "0",
@@ -305,7 +305,7 @@
           "message": "Shipping routes physically obstruct the placement of wave farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
+          "startlayer": "NS_Wave_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "1",
@@ -315,7 +315,7 @@
           "message": "Shipping routes physically obstruct the placement of wave farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
+          "startlayer": "NS_Wave_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "2",
@@ -325,19 +325,19 @@
           "message": "Shipping routes physically obstruct the placement of wave farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
+          "startlayer": "NS_Wave_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "3",
           "sort": "Inclusion"
         }
       ],
-      "NS_Tidal_Farms|NS_IMO_Routes": [
+      "NS_Tidal_Farms_Edit|NS_IMO_Routes": [
         {
           "message": "Shipping routes physically obstruct the placement of tidal farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
+          "startlayer": "NS_Tidal_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "0",
@@ -347,7 +347,7 @@
           "message": "Shipping routes physically obstruct the placement of tidal farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
+          "startlayer": "NS_Tidal_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "1",
@@ -357,7 +357,7 @@
           "message": "Shipping routes physically obstruct the placement of tidal farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
+          "startlayer": "NS_Tidal_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "2",
@@ -367,7 +367,7 @@
           "message": "Shipping routes physically obstruct the placement of tidal farms.",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
+          "startlayer": "NS_Tidal_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_IMO_Routes",
           "endtype": "3",
@@ -416,14 +416,14 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_IMO_Routes|NS_Wave_Farms": [
+      "NS_IMO_Routes|NS_Wave_Farms_Edit": [
         {
           "message": "Wave farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "0",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         },
@@ -433,7 +433,7 @@
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "1",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         },
@@ -443,7 +443,7 @@
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "2",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         },
@@ -453,19 +453,19 @@
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "3",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
-      "NS_IMO_Routes|NS_Tidal_Farms": [
+      "NS_IMO_Routes|NS_Tidal_Farms_Edit": [
         {
           "message": "Tidal farms physically obstruct the placement of shipping routes.",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "0",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         },
@@ -475,7 +475,7 @@
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "1",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         },
@@ -485,7 +485,7 @@
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "2",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         },
@@ -495,7 +495,7 @@
           "type": "ERROR",
           "startlayer": "NS_IMO_Routes",
           "starttype": "3",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -582,26 +582,26 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Natura_2000_emodnet_2026|NS_Wave_Farms": [
+      "NS_Natura_2000_emodnet_2026|NS_Wave_Farms_Edit": [
         {
           "message": "Wave Farms can cause bottom disturbance.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Natura_2000_emodnet_2026",
           "starttype": "4",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
-      "NS_Natura_2000_emodnet_2026|NS_Tidal_Farms": [
+      "NS_Natura_2000_emodnet_2026|NS_Tidal_Farms_Edit": [
         {
           "message": "Tidal Farms can cause bottom disturbance.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Natura_2000_emodnet_2026",
           "starttype": "4",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -654,14 +654,14 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Natura_2000_emodnet_2026|NS_Anchorages_26": [
+      "NS_Natura_2000_emodnet_2026|NS_Anchorages_DT": [
         {
           "message": "Anchorages can cause bottom disturbance.",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Natura_2000_emodnet_2026",
           "starttype": "4",
-          "endlayer": "NS_Anchorages_26",
+          "endlayer": "NS_Anchorages_DT",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -714,24 +714,24 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Wave_Farms|NS_Natura_2000_emodnet_2026": [
+      "NS_Wave_Farms_Edit|NS_Natura_2000_emodnet_2026": [
         {
           "message": "Wave Farms can cause bottom disturbance.",
           "value": 0.0,
           "type": "WARNING",
-          "startlayer": "NS_Wave_Farms",
+          "startlayer": "NS_Wave_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_Natura_2000_emodnet_2026",
           "endtype": "4",
           "sort": "Inclusion"
         }
       ],
-      "NS_Tidal_Farms|NS_Natura_2000_emodnet_2026": [
+      "NS_Tidal_Farms_Edit|NS_Natura_2000_emodnet_2026": [
         {
           "message": "Tidal Farms can cause bottom disturbance.",
           "value": 0.0,
           "type": "WARNING",
-          "startlayer": "NS_Tidal_Farms",
+          "startlayer": "NS_Tidal_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_Natura_2000_emodnet_2026",
           "endtype": "4",
@@ -774,12 +774,12 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Anchorages_26|NS_Natura_2000_emodnet_2026": [
+      "NS_Anchorages_DT|NS_Natura_2000_emodnet_2026": [
         {
           "message": "Anchorages can cause bottom disturbance.",
           "value": 0.0,
           "type": "WARNING",
-          "startlayer": "NS_Anchorages_26",
+          "startlayer": "NS_Anchorages_DT",
           "starttype": "",
           "endlayer": "NS_Natura_2000_emodnet_2026",
           "endtype": "4",
@@ -940,6 +940,16 @@
           "endlayer": "NS_Bathymetry_Raster",
           "endtype": "7",
           "sort": "Inclusion"
+        },
+        {
+          "message": "Too deep for this type of wind farm",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "NS_Wind_Farms_Implemented",
+          "starttype": "1",
+          "endlayer": "NS_Bathymetry_Raster",
+          "endtype": "7",
+          "sort": "Inclusion"
         }
       ],
       "NS_Wind_Farms_Implemented|NS_Oil_Gas_Offshore_Instalations": [
@@ -954,24 +964,24 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Wave_Farms|NS_Oil_Gas_Offshore_Instalations": [
+      "NS_Wave_Farms_Edit|NS_Oil_Gas_Offshore_Instalations": [
         {
           "message": "Wave Farms cannot be placed on top of Oil & Gas Platforms",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Wave_Farms",
+          "startlayer": "NS_Wave_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_Oil_Gas_Offshore_Instalations",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
-      "NS_Tidal_Farms|NS_Oil_Gas_Offshore_Instalations": [
+      "NS_Tidal_Farms_Edit|NS_Oil_Gas_Offshore_Instalations": [
         {
           "message": "Tidal Farms cannot be placed on top of Oil & Gas Platforms",
           "value": 0.0,
           "type": "ERROR",
-          "startlayer": "NS_Tidal_Farms",
+          "startlayer": "NS_Tidal_Farms_Edit",
           "starttype": "",
           "endlayer": "NS_Oil_Gas_Offshore_Instalations",
           "endtype": "",
@@ -990,26 +1000,26 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Oil_Gas_Offshore_Instalations|NS_Wave_Farms": [
+      "NS_Oil_Gas_Offshore_Instalations|NS_Wave_Farms_Edit": [
         {
           "message": "Oil & Gas Platforms cannot be placed on top of Wave Farms",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_Oil_Gas_Offshore_Instalations",
           "starttype": "",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
-      "NS_Oil_Gas_Offshore_Instalations|NS_Tidal_Farms": [
+      "NS_Oil_Gas_Offshore_Instalations|NS_Tidal_Farms_Edit": [
         {
           "message": "Oil & Gas Platforms cannot be placed on top of Tidal Farms",
           "value": 0.0,
           "type": "ERROR",
           "startlayer": "NS_Oil_Gas_Offshore_Instalations",
           "starttype": "",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -1038,26 +1048,26 @@
           "sort": "Inclusion"
         }
       ],
-      "NS_Fishing_Priority_Areas|NS_Tidal_Farms": [
+      "NS_Fishing_Priority_Areas|NS_Tidal_Farms_Edit": [
         {
           "message": "Be aware that certain fishing fleets cannot operate in areas with tidal farms",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Fishing_Priority_Areas",
           "starttype": "",
-          "endlayer": "NS_Tidal_Farms",
+          "endlayer": "NS_Tidal_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
       ],
-      "NS_Fishing_Priority_Areas|NS_Wave_Farms": [
+      "NS_Fishing_Priority_Areas|NS_Wave_Farms_Edit": [
         {
           "message": "Be aware that certain fishing fleets cannot operate in areas with wave farms",
           "value": 0.0,
           "type": "WARNING",
           "startlayer": "NS_Fishing_Priority_Areas",
           "starttype": "",
-          "endlayer": "NS_Wave_Farms",
+          "endlayer": "NS_Wave_Farms_Edit",
           "endtype": "",
           "sort": "Inclusion"
         }
@@ -1131,6 +1141,183 @@
           "starttype": "",
           "endlayer": "NS_MPA_2026",
           "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],"NS_Precautionary_Areas|NS_Multi-use_Platform": [
+        {
+          "message": "Precautionary areas are reserved for shipping.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Precautionary_Areas",
+          "starttype": "",
+          "endlayer": "NS_Multi-use_Platform",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Multi-use_Platform|NS_IMO_Routes": [
+        {
+          "message": "Shipping routes physically obstruct the placement of multi-use platforms.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "NS_Multi-use_Platform",
+          "starttype": "",
+          "endlayer": "NS_IMO_Routes",
+          "endtype": "0",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Shipping routes physically obstruct the placement of multi-use platforms.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "NS_Multi-use_Platform",
+          "starttype": "",
+          "endlayer": "NS_IMO_Routes",
+          "endtype": "1",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Shipping routes physically obstruct the placement of multi-use platforms.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "NS_Multi-use_Platform",
+          "starttype": "",
+          "endlayer": "NS_IMO_Routes",
+          "endtype": "2",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Shipping routes physically obstruct the placement of multi-use platforms.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "NS_Multi-use_Platform",
+          "starttype": "",
+          "endlayer": "NS_IMO_Routes",
+          "endtype": "3",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_IMO_Routes|NS_Multi-use_Platform": [
+        {
+          "message": "Multi-use platforms physically obstruct the placement of shipping routes.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "NS_IMO_Routes",
+          "starttype": "0",
+          "endlayer": "NS_Multi-use_Platform",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Multi-use platforms physically obstruct the placement of shipping routes.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "NS_IMO_Routes",
+          "starttype": "1",
+          "endlayer": "NS_Multi-use_Platform",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Multi-use platforms physically obstruct the placement of shipping routes.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "NS_IMO_Routes",
+          "starttype": "2",
+          "endlayer": "NS_Multi-use_Platform",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Multi-use platforms physically obstruct the placement of shipping routes.",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "NS_IMO_Routes",
+          "starttype": "3",
+          "endlayer": "NS_Multi-use_Platform",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Natura_2000_emodnet_2026|NS_Multi-use_Platform": [
+        {
+          "message": "Multi-use platforms can cause bottom disturbance.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Natura_2000_emodnet_2026",
+          "starttype": "4",
+          "endlayer": "NS_Multi-use_Platform",
+          "endtype": "",
+          "sort": "Inclusion"
+        },
+        {
+          "message": "Multi-use platforms can harm bird populations.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Natura_2000_emodnet_2026",
+          "starttype": "5",
+          "endlayer": "NS_Multi-use_Platform",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Multi-use_Platform|NS_Natura_2000_emodnet_2026": [
+        {
+          "message": "Multi-use platforms can cause bottom disturbance.",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Multi-use_Platform",
+          "starttype": "",
+          "endlayer": "NS_Natura_2000_emodnet_2026",
+          "endtype": "4",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Multi-use_Platform|NS_Oil_Gas_Offshore_Instalations": [
+        {
+          "message": "Multi-use platforms cannot be placed on top of Oil & Gas Platforms",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "NS_Multi-use_Platform",
+          "starttype": "",
+          "endlayer": "NS_Oil_Gas_Offshore_Instalations",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Oil_Gas_Offshore_Instalations|NS_Multi-use_Platform": [
+        {
+          "message": "Oil & Gas Platforms cannot be placed on top of multi-use platforms",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "NS_Oil_Gas_Offshore_Instalations",
+          "starttype": "",
+          "endlayer": "NS_Multi-use_Platform",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Fishing_Priority_Areas|NS_Multi-use_Platform": [
+        {
+          "message": "Be aware that certain fishing fleets cannot operate in areas with multi-use platforms",
+          "value": 0.0,
+          "type": "WARNING",
+          "startlayer": "NS_Fishing_Priority_Areas",
+          "starttype": "",
+          "endlayer": "NS_Multi-use_Platform",
+          "endtype": "",
+          "sort": "Inclusion"
+        }
+      ],
+      "NS_Multi-use_Platform|NS_Bathymetry_Raster": [
+        {
+          "message": "Too deep for multi-use platforms",
+          "value": 0.0,
+          "type": "ERROR",
+          "startlayer": "NS_Multi-use_Platform",
+          "starttype": "",
+          "endlayer": "NS_Bathymetry_Raster",
+          "endtype": "7",
           "sort": "Inclusion"
         }
       ]
@@ -7727,14 +7914,6 @@
             ]
           },
           {
-            "layer_id": 97,
-            "name": "NS_Tidal_Farms",
-            "layer_editing_type": "sourcepolygon",
-            "geometry": [],
-            "warnings": [],
-            "deleted": []
-          },
-          {
             "layer_id": 98,
             "name": "NS_Electricity_Transformers",
             "layer_editing_type": "transformer",
@@ -11027,7 +11206,7 @@
           },
           {
             "layer_id": 100,
-            "name": "NS_Wave_Farms",
+            "name": "NS_Wave_Farms_Edit",
             "layer_editing_type": "sourcepolygon",
             "geometry": [],
             "warnings": [],
@@ -17647,6 +17826,7 @@
       "shipping_lane_layers": [
         "NS_IMO_Routes",
         "NS_Connection_Points_25km_2",
+		"NS_Connection_Points_10km_DT",
         "NS_National_shipping_lanes",
         "NS_Shipping_Invisible_Lanes"
       ],
@@ -17668,11 +17848,11 @@
           "port_type": "MaintenanceDestination"
         },
         {
-          "layer_name": "NS_Wave_Farms",
+          "layer_name": "NS_Wave_Farms_Edit",
           "port_type": "MaintenanceDestination"
         },
         {
-          "layer_name": "NS_Tidal_Farms",
+          "layer_name": "NS_Tidal_Farms_Edit",
           "port_type": "MaintenanceDestination"
         },
         {
@@ -22285,7 +22465,7 @@
           ]
         },
         {
-          "layer_name": "NS_Wave_Farms",
+          "layer_name": "NS_Wave_Farms_Edit",
           "layer_types": [
             "3MW"
           ],
@@ -22299,7 +22479,7 @@
           ]
         },
         {
-          "layer_name": "NS_Tidal_Farms",
+          "layer_name": "NS_Tidal_Farms_Edit",
           "layer_types": [
             "3MW"
           ],
@@ -22427,6 +22607,22 @@
                 2,
                 3,
                 4
+              ],
+              "cost_multiplier": 1.0
+            }
+          ]
+        },
+        {  "layer_name": "NS_Countries",
+          "layer_types": [
+            "Countries"
+          ],
+          "allowed_ships": [
+            {
+              "ship_type_ids": [
+				  
+				  
+				  
+                5
               ],
               "cost_multiplier": 1.0
             }
@@ -22991,41 +23187,26 @@
             {
               "name": "NS_Pipelines",
               "influence": 0.1,
-              "construction": true
-            },
-            {
-              "name": "NS_Pipelines",
-              "influence": 0.1,
               "construction": false
             },
             {
-              "name": "NS_Tidal_Farms",
-              "influence": 0.2,
-              "construction": true
-            },
-            {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 0.2,
               "construction": false
             },
             {
-              "name": "NS_Wave_Farms",
-              "influence": 0.1,
-              "construction": true
-            },
-            {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 0.1,
               "construction": false
             },
             {
-              "name": "NS_Wind_Farms_Implemented",
-              "influence": 0.4,
-              "construction": true
+              "name": "NS_Wind_Farms_Implemented|0",
+              "influence": 0.2,
+              "construction": false
             },
             {
-              "name": "NS_Wind_Farms_Implemented",
-              "influence": 0.4,
+              "name": "NS_Wind_Farms_Implemented|1",
+              "influence": 0.1,
               "construction": false
             },
             {
@@ -23035,7 +23216,7 @@
             },
             {
               "name": "NS_Aquaculture_Freshwater",
-              "influence": 0.1,
+              "influence": 0.3,
               "construction": false
             },
             {
@@ -23045,7 +23226,7 @@
             },
             {
               "name": "NS_Aquaculture_Finfish",
-              "influence": 0.1,
+              "influence": 0.3,
               "construction": false
             },
             {
@@ -23062,7 +23243,37 @@
               "name": "NS_Energy_Cables_Edit",
               "influence": 0.1,
               "construction": false
-            }
+            },
+            {
+              "name": "NS_Cable_Corridors",
+              "influence": 0.1,
+              "construction": false
+            },
+			{
+              "name": "NS_Multi-use_Platform|0",
+              "influence": 0.2,
+              "construction": false
+            },
+			{
+              "name": "NS_Multi-use_Platform|1",
+              "influence": 0.2,
+              "construction": false
+            },
+			{
+              "name": "NS_Multi-use_Platform|2",
+              "influence": 0.2,
+              "construction": false
+            },
+			{
+              "name": "NS_Multi-use_Platform|3",
+              "influence": 0.4,
+              "construction": false
+            },
+			{
+              "name": "NS_Multi-use_Platform|4",
+              "influence": 0.4,
+              "construction": false
+            }			
           ]
         },
         {
@@ -23078,43 +23289,63 @@
               "influence": 0.2,
               "construction": false
             },
+			{
+              "name": "NS_Oil_Gas_Offshore_Instalations",
+              "influence": 0.8,
+              "construction": true
+            },
             {
               "name": "NS_Pipelines",
               "influence": 0.5,
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 0.5,
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 0.1,
               "construction": false
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 0.5,
               "construction": true
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 0.1,
               "construction": false
             },
             {
-              "name": "NS_Wind_Farms_Implemented",
+              "name": "NS_Wind_Farms_Implemented|0",
               "influence": 0.8,
               "construction": true
             },
-            {
-              "name": "NS_Wind_Farms_Implemented",
-              "influence": 0.2,
-              "construction": false
+			{
+              "name": "NS_Wind_Farms_Implemented|1",
+              "influence": 0.1,
+              "construction": true
             },
             {
-              "name": "NS_Telecom_Cables_Emodnet_2026",
+              "name": "NS_Wind_Farms_Implemented|0",
+              "influence": 0.1,
+              "construction": false
+            },
+			{
+              "name": "NS_Energy_Cables_Edit",
+              "influence": 0.5,
+              "construction": true
+            },
+			{
+              "name": "NS_Energy_Cables_Edit",
+              "influence": 0.5,
+              "construction": true
+            },
+            {
+              "name": "NS_Cable_Corridors",
               "influence": 0.5,
               "construction": true
             },
@@ -23127,50 +23358,255 @@
               "name": "NS_Ports_Point_april2023",
               "influence": 0.8,
               "construction": false
+            },
+            {
+              "name": "NS_Aquaculture_Shellfish",
+              "influence": 0.1,
+              "construction": false
+            },
+            {
+              "name": "NS_Aquaculture_Freshwater",
+              "influence": 0.1,
+              "construction": false
+            },
+			{
+              "name": "NS_Aquaculture_Finfish",
+              "influence": 0.1,
+              "construction": false
+            },
+			{
+              "name": "NS_Aquaculture_Algae",
+              "influence": 0.1,
+              "construction": false
+            },
+			{
+              "name": "NS_Multi-use_Platform|3",
+              "influence": 0.1,
+              "construction": false
+            },
+			{
+              "name": "NS_Multi-use_Platform|4",
+              "influence": 0.1,
+              "construction": false
+            },
+			{
+              "name": "NS_Multi-use_Platform|0",
+              "influence": 0.1,
+              "construction": true
+            },
+			{
+              "name": "NS_Multi-use_Platform|1",
+              "influence": 0.1,
+              "construction": true
+            },
+			{
+              "name": "NS_Multi-use_Platform|2",
+              "influence": 0.1,
+              "construction": true
+            },
+			{
+              "name": "NS_Multi-use_Platform|3",
+              "influence": 0.2,
+              "construction": true
+            },			
+			{
+              "name": "NS_Multi-use_Platform|4",
+              "influence": 0.2,
+              "construction": true
             }
           ]
         },
         {
-          "name": "Surface Disturbance",
+          "name": "Bottom Disturbance",
           "layers": [
             {
-              "name": "NS_Anchorages_26",
+              "name": "NS_Anchorages_DT",
               "influence": 0.1,
               "construction": false
             },
+            {
+              "name": "NS_Aggregates_Extraction_Emodnet|0",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "NS_Oil_Gas_Offshore_Instalations",
+              "influence": 0.1,
+              "construction": false
+            },
+			{
+              "name": "NS_Oil_Gas_Offshore_Instalations",
+              "influence": 0.6,
+              "construction": true
+            },
+            {
+              "name": "NS_Pipelines",
+              "influence": 0.5,
+              "construction": true
+            },
+            {
+              "name": "NS_Dredging_Deposit_Areas_26",
+              "influence": 0.8,
+              "construction": false
+            },
+            {
+              "name": "NS_Tidal_Farms_Edit",
+              "influence": 0.5,
+              "construction": true
+            },
+            {
+              "name": "NS_Wave_Farms_Edit",
+              "influence": 0.3,
+              "construction": true
+            },
+            {
+              "name": "NS_Wind_Farms_Implemented|0",
+              "influence": 0.6,
+              "construction": true
+            },
+			{
+              "name": "NS_Wind_Farms_Implemented|1",
+              "influence": 0.2,
+              "construction": true
+			},
+			{
+              "name": "NS_Wind_Farms_Implemented|1",
+              "influence": 0.1,
+              "construction": false
+			},
+            {
+              "name": "NS_Telecom_Cables_Emodnet_2026",
+              "influence": 0.1,
+              "construction": true
+            },
+            {
+              "name": "NS_Energy_Cables_Edit",
+              "influence": 0.1,
+              "construction": true
+            },
+            {
+              "name": "NS_Cable_Corridors",
+              "influence": 0.2,
+              "construction": true
+            },
+			            {
+              "name": "NS_Aquaculture_Shellfish",
+              "influence": 0.1,
+              "construction": false
+            },
+            {
+              "name": "NS_Aquaculture_Freshwater",
+              "influence": 0.1,
+              "construction": false
+            },
+			{
+              "name": "NS_Aquaculture_Finfish",
+              "influence": 0.1,
+              "construction": false
+            },
+			{
+              "name": "NS_Aquaculture_Algae",
+              "influence": 0.1,
+              "construction": false
+            },
+			{
+              "name": "NS_Multi-use_Platform|0",
+              "influence": 0.1,
+              "construction": false
+            },
+			{
+              "name": "NS_Multi-use_Platform|1",
+              "influence": 0.1,
+              "construction": false
+            },
+			{
+              "name": "NS_Multi-use_Platform|2",
+              "influence": 0.1,
+              "construction": false
+            },
+			{
+              "name": "NS_Multi-use_Platform|3",
+              "influence": 0.2,
+              "construction": false
+            },
+			{
+              "name": "NS_Multi-use_Platform|4",
+              "influence": 0.2,
+              "construction": false
+            },
+			{
+              "name": "NS_Multi-use_Platform|0",
+              "influence": 0.2,
+              "construction": true
+            },
+			{
+              "name": "NS_Multi-use_Platform|1",
+              "influence": 0.2,
+              "construction": true
+            },
+			{
+              "name": "NS_Multi-use_Platform|2",
+              "influence": 0.2,
+              "construction": true
+            },
+			{
+              "name": "NS_Multi-use_Platform|3",
+              "influence": 0.3,
+              "construction": true
+            },			
+			{
+              "name": "NS_Multi-use_Platform|4",
+              "influence": 0.3,
+              "construction": true
+            }
+          ]
+        },
+		{
+          "name": "Surface Disturbance",
+          "layers": [
             {
               "name": "NS_Oil_Gas_Offshore_Instalations",
               "influence": 0.2,
               "construction": false
             },
+			{
+              "name": "NS_Oil_Gas_Offshore_Instalations",
+              "influence": 0.1,
+              "construction": true
+            },
             {
               "name": "NS_Pipelines",
-              "influence": 0.3,
+              "influence": 0.1,
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
-              "influence": 0.5,
+              "name": "NS_Tidal_Farms_Edit",
+              "influence": 0.2,
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 0.1,
               "construction": false
             },
             {
-              "name": "NS_Wave_Farms",
-              "influence": 0.5,
+              "name": "NS_Wave_Farms_Edit",
+              "influence": 0.2,
               "construction": true
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 0.1,
               "construction": false
             },
             {
-              "name": "NS_Wind_Farms_Implemented",
+              "name": "NS_Wind_Farms_Implemented|0",
               "influence": 0.5,
+              "construction": true
+            },
+            {
+              "name": "NS_Wind_Farms_Implemented|1",
+              "influence": 0.1,
               "construction": true
             },
             {
@@ -23189,17 +23625,7 @@
               "construction": false
             },
             {
-              "name": "NS_Aquaculture_Shellfish",
-              "influence": 0.1,
-              "construction": false
-            },
-            {
               "name": "NS_Aquaculture_Finfish",
-              "influence": 0.1,
-              "construction": false
-            },
-            {
-              "name": "NS_Aquaculture_Algae",
               "influence": 0.1,
               "construction": false
             },
@@ -23207,66 +23633,36 @@
               "name": "NS_Ports_Point_april2023",
               "influence": 0.8,
               "construction": false
-            }
-          ]
-        },
-        {
-          "name": "Bottom Disturbance",
-          "layers": [
+            },
             {
-              "name": "NS_Anchorages_26",
+              "name": "NS_Military_Areas_2026",
               "influence": 0.1,
               "construction": false
             },
-            {
-              "name": "NS_Aggregates_Extraction_Emodnet|0",
-              "influence": 1.0,
-              "construction": false
-            },
-            {
-              "name": "NS_Oil_Gas_Offshore_Instalations",
-              "influence": 0.1,
-              "construction": false
-            },
-            {
-              "name": "NS_Pipelines",
-              "influence": 0.5,
-              "construction": true
-            },
-            {
-              "name": "NS_Dredging_Deposit_Areas_26",
-              "influence": 0.8,
-              "construction": false
-            },
-            {
-              "name": "NS_Tidal_Farms",
-              "influence": 0.5,
-              "construction": true
-            },
-            {
-              "name": "NS_Wave_Farms",
-              "influence": 0.5,
-              "construction": true
-            },
-            {
-              "name": "NS_Wind_Farms_Implemented",
-              "influence": 0.6,
-              "construction": true
-            },
-            {
-              "name": "NS_Telecom_Cables_Emodnet_2026",
+			{
+              "name": "NS_Multi-use_Platform|0",
               "influence": 0.1,
               "construction": true
             },
-            {
-              "name": "NS_Energy_Cables_Edit",
+			{
+              "name": "NS_Multi-use_Platform|1",
               "influence": 0.1,
               "construction": true
             },
-            {
-              "name": "NS_Pipelines",
-              "influence": 0.05,
-              "construction": false
+			{
+              "name": "NS_Multi-use_Platform|2",
+              "influence": 0.1,
+              "construction": true
+            },
+			{
+              "name": "NS_Multi-use_Platform|3",
+              "influence": 0.2,
+              "construction": true
+            },			
+			{
+              "name": "NS_Multi-use_Platform|4",
+              "influence": 0.2,
+              "construction": true
             }
           ]
         },
@@ -23279,6 +23675,11 @@
               "construction": false
             },
             {
+              "name": "NS_Oil_Gas_Offshore_Instalations",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
               "name": "NS_Pipelines",
               "influence": 1.0,
               "construction": false
@@ -23289,22 +23690,22 @@
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 1.0,
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 1.0,
               "construction": false
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 1.0,
               "construction": true
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 1.0,
               "construction": false
             },
@@ -23343,6 +23744,51 @@
               "influence": 1.0,
               "construction": false
             },
+            {
+              "name": "NS_Energy_Cables_Edit",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "NS_Cable_Corridors",
+              "influence": 1.0,
+              "construction": false
+            },
+            {
+              "name": "NS_Cable_Corridors",
+              "influence": 1.0,
+              "construction": true
+            },
+            {
+              "name": "NS_Aquaculture_Shellfish",
+              "influence": 1,
+              "construction": false
+            },
+            {
+              "name": "NS_Aquaculture_Freshwater",
+              "influence": 1,
+              "construction": false
+            },
+			{
+              "name": "NS_Aquaculture_Finfish",
+              "influence": 1,
+              "construction": false
+            },
+			{
+              "name": "NS_Aquaculture_Algae",
+              "influence": 1,
+              "construction": false
+            },		
+			{
+              "name": "NS_Multi-use_Platform",
+              "influence": 1,
+              "construction": false
+            },			
+			{
+              "name": "NS_Multi-use_Platform",
+              "influence": 1,
+              "construction": true
+            },	
             {
               "name": "NS_MPA_2026",
               "influence": 1.0,
@@ -23363,28 +23809,33 @@
               "influence": 1.0,
               "construction": false
             },
+			{
+              "name": "NS_Oil_Gas_Offshore_Instalations",
+              "influence": 1.0,
+              "construction": true
+            },
             {
               "name": "NS_Pipelines",
               "influence": 1.0,
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 1.0,
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 1.0,
               "construction": false
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 1.0,
               "construction": true
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 1.0,
               "construction": false
             },
@@ -23416,6 +23867,41 @@
             {
               "name": "NS_Energy_Cables_Edit",
               "influence": 1.0,
+              "construction": true
+            },
+			{
+              "name": "NS_Cable_Corridors",
+              "influence": 1.0,
+              "construction": true
+            },
+			{
+              "name": "NS_Aquaculture_Shellfish",
+              "influence": 1,
+              "construction": false
+            },
+            {
+              "name": "NS_Aquaculture_Freshwater",
+              "influence": 1,
+              "construction": false
+            },
+			{
+              "name": "NS_Aquaculture_Finfish",
+              "influence": 1,
+              "construction": false
+            },
+			{
+              "name": "NS_Aquaculture_Algae",
+              "influence": 1,
+              "construction": false
+            },	
+			{
+              "name": "NS_Multi-use_Platform",
+              "influence": 1,
+              "construction": false
+            },			
+			{
+              "name": "NS_Multi-use_Platform",
+              "influence": 1,
               "construction": true
             },
             {
@@ -23439,22 +23925,22 @@
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 1.0,
               "construction": true
             },
             {
-              "name": "NS_Tidal_Farms",
+              "name": "NS_Tidal_Farms_Edit",
               "influence": 1.0,
               "construction": false
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 1.0,
               "construction": true
             },
             {
-              "name": "NS_Wave_Farms",
+              "name": "NS_Wave_Farms_Edit",
               "influence": 1.0,
               "construction": false
             },
@@ -23462,6 +23948,11 @@
               "name": "NS_Wind_Farms_Implemented",
               "influence": 1.0,
               "construction": true
+            },
+			{
+              "name": "NS_Wind_Farms_Implemented",
+              "influence": 1.0,
+              "construction": false
             },
             {
               "name": "NS_Telecom_Cables_Emodnet_2026",
@@ -23478,10 +23969,50 @@
               "influence": 1.0,
               "construction": false
             },
+			{
+              "name": "NS_Oil_Gas_Offshore_Instalations",
+              "influence": 1.0,
+              "construction": true
+            },
             {
               "name": "NS_Ports_Point_april2023",
               "influence": 1.0,
               "construction": false
+            },
+			{
+              "name": "NS_Cable_Corridors",
+              "influence": 1.0,
+              "construction": true
+            },
+			{
+              "name": "NS_Aquaculture_Shellfish",
+              "influence": 1,
+              "construction": false
+            },
+            {
+              "name": "NS_Aquaculture_Freshwater",
+              "influence": 1,
+              "construction": false
+            },
+			{
+              "name": "NS_Aquaculture_Finfish",
+              "influence": 1,
+              "construction": false
+            },
+			{
+              "name": "NS_Aquaculture_Algae",
+              "influence": 1,
+              "construction": false
+            },	
+			{
+              "name": "NS_Multi-use_Platform",
+              "influence": 1,
+              "construction": false
+            },			
+			{
+              "name": "NS_Multi-use_Platform",
+              "influence": 1,
+              "construction": true
             },
             {
               "name": "NS_MPA_2026",
@@ -28269,7 +28800,7 @@
         ]
       },
       {
-        "layer_name": "NS_Wave_Farms",
+        "layer_name": "NS_Wave_Farms_Edit",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "Wave Farms",
@@ -28289,7 +28820,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 1,
-        "layer_tooltip": "Shows the provided data about existing wave farms in the North Sea",
+        "layer_tooltip": "Wave farms in the north sea, planning purposes only",
         "layer_information": "",
         "layer_media": "wiki://Wave_Farms",
         "layer_text_info": {
@@ -28433,13 +28964,13 @@
         ]
       },
       {
-        "layer_name": "NS_Tidal_Farms",
+        "layer_name": "NS_Tidal_Farms_Edit",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "Tidal Farms",
         "layer_category": "activities",
         "layer_subcategory": "energy",
-        "layer_download_from_geoserver": 0,
+        "layer_download_from_geoserver":0,
         "layer_width": 1024,
         "layer_height": 1024,
         "layer_raster_material": "RasterMELNew",
@@ -28453,7 +28984,7 @@
         "layer_toggleable": 1,
         "layer_active_on_start": 0,
         "layer_green": 1,
-        "layer_tooltip": "Location data we received on the usage of tidal farms in the north sea, must be converted to layers with the special editing types.",
+        "layer_tooltip": "Tidal farms in the north sea, planning purposes only.",
         "layer_information": "",
         "layer_media": "wiki://Tidal_Farms",
         "layer_text_info": {
@@ -33001,6 +33532,167 @@
         ]
       },
       {
+        "layer_name": "NS_Connection_Points_10km_DT",
+        "layer_geotype": "point",
+        "layer_entity_value_max": null,
+        "layer_short": "C_Points_10KM_DT",
+        "layer_category": "activities",
+        "layer_subcategory": "shipping",
+        "layer_download_from_geoserver": 1,
+        "layer_width": 1024,
+        "layer_height": 1024,
+        "layer_raster_material": "RasterMELNew",
+        "layer_raster_filter_mode": 1,
+        "layer_raster_color_interpolation": 0,
+        "layer_raster_pattern": "Default",
+        "layer_raster_minimum_value_cutoff": 0.05,
+        "layer_active": 1,
+        "layer_selectable": 0,
+        "layer_editable": 0,
+        "layer_toggleable": 0,
+        "layer_active_on_start": 0,
+        "layer_green": 0,
+        "layer_tooltip": "",
+        "layer_information": "",
+        "layer_media": null,
+        "layer_text_info": null,
+        "layer_states": [
+          {
+            "state": "ASSEMBLY",
+            "time": 0
+          },
+          {
+            "state": "ACTIVE",
+            "time": 10
+          },
+          {
+            "state": "DISMANTLE",
+            "time": 2
+          }
+        ],
+        "layer_editing_type": "",
+        "layer_special_entity_type": "Default",
+        "layer_depth": 1,
+        "layer_property_as_type": null,
+        "layer_type": {
+          "0": {
+            "displayName": "Connection_Points",
+            "approval": "EEZ",
+            "value": 0,
+            "map_type": null,
+            "displayPolygon": 1,
+            "polygonColor": "#6CFF1C80",
+            "polygonPatternName": "5",
+            "innerGlowEnabled": 0,
+            "innerGlowRadius": 0,
+            "innerGlowIterations": 0,
+            "innerGlowMultiplier": 0.0,
+            "innerGlowPixelSize": 3.0,
+            "displayLines": 1,
+            "lineColor": "#7AC943FF",
+            "lineWidth": 1.0,
+            "lineIcon": null,
+            "linePatternType": "Solid",
+            "displayPoints": 1,
+            "pointColor": "#7AC943FF",
+            "pointSize": 0.4,
+            "pointSpriteName": "None",
+            "description": "",
+            "capacity": 0,
+            "investmentCost": 0.0,
+            "availability": -12,
+            "media": ""
+          }
+        },
+        "layer_info_properties": [
+          {
+            "property_name": "Y",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "X",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Name",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "FID",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "area",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          },
+          {
+            "property_name": "Shipping_Intensity",
+            "enabled": 1,
+            "editable": 0,
+            "display_name": "",
+            "sprite_name": null,
+            "update_visuals": false,
+            "update_text": false,
+            "update_calculation": false,
+            "content_type": 0,
+            "content_validation": 0,
+            "unit": null,
+            "default_value": null
+          }
+        ],
+        "layer_tags": []
+      },      
+      {
         "layer_name": "NS_Shipping_Intensity",
         "layer_geotype": "raster",
         "layer_entity_value_max": null,
@@ -35044,7 +35736,7 @@
         ]
       },
       {
-        "layer_name": "NS_Anchorages_26",
+        "layer_name": "NS_Anchorages_DT",
         "layer_geotype": "polygon",
         "layer_entity_value_max": null,
         "layer_short": "Anchorages",
@@ -42671,19 +43363,19 @@
             "time": 2
           }
         ],
-        "layer_editing_type": "sourcepolygon",
+        "layer_editing_type": "multitypesourcepolygon",
         "layer_special_entity_type": "Default",
         "layer_depth": 2,
         "layer_property_as_type": null,
         "layer_type": {
           "0": {
-            "displayName": "No Energy Production",
+            "displayName": "Solar energy",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#FFB661FF",
-            "polygonPatternName": "23",
+            "polygonPatternName": "33",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -42699,7 +43391,7 @@
             "pointSize": 0.2,
             "pointSpriteName": "None",
             "description": "",
-            "capacity": 0,
+            "capacity": 5000000,
             "investmentCost": 0.0,
             "availability": -12,
             "media": ""
@@ -42761,13 +43453,13 @@
             "media": ""
           },
           "3": {
-            "displayName": "Wind + solar energy",
+            "displayName": "Mussel Aquaculture",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#A35800FF",
-            "polygonPatternName": "12",
+            "polygonPatternName": "23",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -42783,19 +43475,19 @@
             "pointSize": 0.2,
             "pointSpriteName": "None",
             "description": "",
-            "capacity": 8000000,
+            "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
             "media": ""
           },
           "4": {
-            "displayName": "Wave + solar energy",
+            "displayName": "Oyster Aquaculture",
             "approval": "EEZ",
             "value": 0,
             "map_type": null,
             "displayPolygon": 1,
             "polygonColor": "#A35800FF",
-            "polygonPatternName": "33",
+            "polygonPatternName": "23",
             "innerGlowEnabled": 0,
             "innerGlowRadius": 0,
             "innerGlowIterations": 0,
@@ -42811,57 +43503,13 @@
             "pointSize": 0.2,
             "pointSpriteName": "None",
             "description": "",
-            "capacity": 5000000,
-            "investmentCost": 0.0,
-            "availability": -12,
-            "media": ""
-          },
-          "5": {
-            "displayName": "Wind + Wave + solar energy",
-            "approval": "EEZ",
-            "value": 0,
-            "map_type": null,
-            "displayPolygon": 1,
-            "polygonColor": "#824600FF",
-            "polygonPatternName": "12",
-            "innerGlowEnabled": 0,
-            "innerGlowRadius": 0,
-            "innerGlowIterations": 0,
-            "innerGlowMultiplier": 0.0,
-            "innerGlowPixelSize": 3.0,
-            "displayLines": 1,
-            "lineColor": "#824600FF",
-            "lineWidth": 1.0,
-            "lineIcon": null,
-            "linePatternType": "Solid",
-            "displayPoints": 0,
-            "pointColor": "#000000FF",
-            "pointSize": 0.2,
-            "pointSpriteName": "None",
-            "description": "",
-            "capacity": 11000000,
+            "capacity": 0,
             "investmentCost": 0.0,
             "availability": -12,
             "media": ""
           }
         },
-        "layer_info_properties": [
-          {
-            "property_name": "MULTI_USE_PLATFORM",
-            "policy_type": "multiuse_platform",
-            "enabled": 1,
-            "editable": 1,
-            "display_name": "Platform components",
-            "sprite_name": null,
-            "update_visuals": false,
-            "update_text": false,
-            "update_calculation": false,
-            "content_type": 0,
-            "content_validation": 0,
-            "unit": null,
-            "default_value": null
-          }
-        ],
+        "layer_info_properties": [],
         "layer_tags": [
           "Polygon",
           "Electricity",

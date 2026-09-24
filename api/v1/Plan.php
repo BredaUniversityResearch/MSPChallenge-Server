@@ -533,9 +533,9 @@ class Plan extends Base
                 //  let db handle it and see
                 return parallel($toPromiseFunctions);
             })
-            ->done(
+            ->then(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // we do not care about the result
+                    $deferred->resolve(null); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -582,7 +582,7 @@ class Plan extends Base
                 "Plan had errors upon reaching the implementation date. Plan has been archived."
             );
         }
-        
+
         //plan is implemented, set plan to IMPLEMENTED and handle energy grid
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         return $this->getAsyncDatabase()->query(
@@ -969,10 +969,10 @@ class Plan extends Base
             });
         }
         parallel($toPromiseFunctions)
-            ->done(
+            ->then(
                 /** @var Result[] $results */
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // we do not care about the result
+                    $deferred->resolve(null); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -1008,9 +1008,9 @@ class Plan extends Base
                 array($plan)
             );
         })
-        ->done(
+        ->then(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -1225,7 +1225,8 @@ class Plan extends Base
                     if (!empty($energyOutput)) {
                         $geom['energy_output'] = $energyOutput;
                     } elseif (in_array($l['layer_editing_type'], array(
-                        "cable","transformer","socket","sourcepoint","sourcepolygon","sourcepolygonpoint"
+                        "cable","transformer","socket","sourcepoint","sourcepolygon","sourcepolygonpoint",
+                        "multitypesourcepolygon"
                     ))) { //Sanity check that energy types have the required values.
                         $errors[] = "Got geometry ID ".$geom['geometry_id'].
                             " which is on an energy type layer (Layer ID: ".$l['layer_id']." type: ".
@@ -1542,9 +1543,9 @@ class Plan extends Base
                 ->set('plan_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                 ->where($qb->expr()->eq('plan_id', $qb->createPositionalParameter($id)))
         )
-        ->done(
+        ->then(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -1649,9 +1650,9 @@ class Plan extends Base
             $qb->where($where);
             return $this->getAsyncDatabase()->query($qb);
         })
-        ->done(
+        ->then(
             function (/* ?Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -1852,10 +1853,10 @@ class Plan extends Base
                 return null;
             });
         })
-        ->done(
+        ->then(
             /** @var null $dummy */
             function (/* $dummy */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -1900,12 +1901,6 @@ class Plan extends Base
         $game = new Game();
         $fullConfig = $game->GetGameConfigValues();
         $config = $fullConfig['restrictions'];
-
-        if (!is_array($config)) {
-            self::Warning("No restrictions found in the current config file.");
-            return;
-        }
-
         foreach ($config as $restrictionObj) {
             foreach ($restrictionObj as $restriction) {
                 $layerStart = $this->getDatabase()->query(

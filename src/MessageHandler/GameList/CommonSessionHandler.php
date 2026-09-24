@@ -130,6 +130,7 @@ abstract class CommonSessionHandler
             '--no-interaction',
             '--env='.$_ENV['APP_ENV']
         ], $this->kernel->getProjectDir());
+        $process->setEnv(['DB_PROCESS_NAME' => 'doctrine_database_drop']);
         $process->mustRun(fn($type, $buffer) => $this->sessionLogHandler->info($buffer));
     }
 
@@ -145,6 +146,7 @@ abstract class CommonSessionHandler
             '--skip-ssl',
             ($_ENV['APP_ENV'] == 'test') ? $this->database.'_test' : $this->database,
         ], $this->kernel->getProjectDir());
+        $process->setEnv(['DB_PROCESS_NAME' => 'mysqldump_export']);
         $process->run();
         return $process->getOutput();
     }
@@ -166,6 +168,7 @@ abstract class CommonSessionHandler
             '--no-interaction',
             '--env='.$_ENV['APP_ENV']
         ], $this->kernel->getProjectDir());
+        $process->setEnv(['DB_PROCESS_NAME' => 'doctrine_database_create']);
         $process->mustRun(fn($type, $buffer) => $this->sessionLogHandler->info($buffer));
     }
 
@@ -182,7 +185,17 @@ abstract class CommonSessionHandler
             '--env='.$_ENV['APP_ENV']
         ], $this->kernel->getProjectDir());
         $process->setTimeout(null); // Disable the process timeout
+        $process->setEnv(['DB_PROCESS_NAME' => 'doctrine_migrations']);
         $process->mustRun(fn($type, $buffer) => $this->sessionLogHandler->info($buffer));
+    }
+
+    protected function refreshSessionEntityManagerAfterDatabaseReset(): void
+    {
+        // The session database can be dropped/recreated or fully re-imported while the long-running
+        // messenger worker still holds the same EntityManager service instance. Clear Doctrine's
+        // identity map so entities from the previous database state (for example Game#1) cannot
+        // collide with rows that are inserted again into the fresh database.
+        $this->entityManager->clear();
     }
 
     /**

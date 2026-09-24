@@ -13,26 +13,31 @@ Otherwise, the container services will not be able to start.
 
 Default ports used by the containers per environment:
 
-| Container       | Service       | Port        | Prod | Staging | Dev | remarks                             | 
-|-----------------|---------------|-------------|------|---------|-----|-------------------------------------|
-| php-1           | caddy http    | 80          | *    | *       | *   | web server / api                    |
-|                 | caddy https   | 443         | *    | *       | *   |
-|                 | watchdog      | 45000       | *    | *       | *   | to run simulations                  |
-|                 | websocket     | 45001       | *    | *       | *   | direct client-server communication  |
-| database-1      | mariadb       | 3306        | *    | *       | *   | to store data                       |
-| blackfire-1     | blackfire     | random port | *    | *       | *   | to profile, disabled by default     |
-|                 |               |             |      |         |     | ! only enabled given req. env. vars |
-| redis-1         | redis         | not exposed | *    | *       | *   | to cache                            |
-| adminer-1       | adminer       | 8082        |      | *       | *   | web interface for databases         |
-| phpredisadmin-1 | redis admin   | random port |      |         | *   | web interface for redis             |
-| mitmproxy-1     | proxy         | 8080        |      |         | *   | to monitor network traffic          |
-|                 | web interface | 8081        |      |         | *   | web interface for mitmproxy         |
+| Container            | Service       | Port        | Prod | Staging | Dev | remarks                            | 
+|----------------------|---------------|-------------|------|---------|-----|------------------------------------|
+| php-1                | caddy http    | 80          | *    | *       | *   | web server / api                   |
+|                      | caddy https   | 443         | *    | *       | *   |
+|                      | watchdog      | 45000       | *    | *       | *   | to run simulations                 |
+|                      | websocket     | 45001       | *    | *       | *   | direct client-server communication |
+| database-1           | mariadb       | 3306        | *    | *       | *   | to store data                      |
+| redis-1              | redis         | not exposed | *    | *       | *   | to cache                           |
+| adminer-1            | adminer       | 8082        |      | *       | *   | web interface for databases        |
+| phpredisadmin-1      | redis admin   | random port |      |         | *   | web interface for redis            |
+| mitmproxy-1          | proxy         | 8080        |      |         | *   | reverse-proxies *incoming* client/browser traffic in front of php, so it can be inspected |
+|                      | web interface | 8081        |      |         | *   | web interface for mitmproxy (incoming)     |
+| mitmproxy_outbound-1 | proxy         | 8080        |      |         | *   | forward proxy other containers route *outgoing* requests through, so they can be inspected (container-network only, not published to the host) |
+|                      | web interface | 8083        |      |         | *   | web interface for mitmproxy (outgoing)     |
+
+Note: `mitmproxy_outbound` doesn't capture outgoing traffic automatically — it only sees requests made through Symfony's
+`proxied.client` HTTP client, configured in `config/packages/framework.yaml` (`when@dev`) to proxy through
+`http://mitmproxy_outbound:8080`. Code using the default `http_client` (unscoped) bypasses it entirely; only call
+sites explicitly wired to `proxied.client` show up in its web interface.
 
 If you want to change the ports used by the containers, you can do by defining environmental variables. Either:
 - define them in your environment, e.g. in your `.bashrc` or `.bash_profile` file
 - in the [`.env`](.env) file in the root of the project
 - or by defining them in the command line when running `docker compose up` like so, e.g.:
-  `WEB_SERVER_PORT=80 DATABASE_PORT=3306 WS_SERVER_PORT=45001 WATCHDOG_PORT=45000 ADMINER_PORT=8082 MITMPROXY_POR=8080 MITMPROXY_WEB_PORT=8081 docker compose up`
+  `WEB_SERVER_PORT=80 DATABASE_PORT=3306 WS_SERVER_PORT=45001 WATCHDOG_PORT=45000 ADMINER_PORT=8082 MITMPROXY_PORT=8080 MITMPROXY_WEB_PORT=8081 MITMPROXY_OUTBOUND_PORT=8083 docker compose up`
 - using a `.env.local` file and starting docker compose using aliases, see [Aliases for development](#aliases-for-development).
 
 ## Installation
@@ -62,10 +67,52 @@ If you want to change the ports used by the containers, you can do by defining e
 
 ## Blackfire
 
-Fill-in your Blackfire Server id+token and client id+token below and run:<br/>
-`BLACKFIRE_APM_ENABLED=1 BLACKFIRE_SERVER_ID=... BLACKFIRE_SERVER_TOKEN=... BLACKFIRE_CLIENT_ID=... BLACKFIRE_CLIENT_TOKEN=... docker compose up -d --remove-orphans`
+### Injecting Blackfire into an already-running stack
 
-Now you can simply profile from CLI using `blackfire run php script.php`
+If your stack is already up and you just want to start profiling, use the [`inject_blackfire.sh`](inject_blackfire.sh)
+script. It requires no changes to your `docker-compose` files and doesn't touch any container besides `php` (which it
+restarts once, at the end, so the newly installed probe actually loads):
+
+```bash
+./inject_blackfire.sh
+```
+
+It will:
+1. Detect your running `php` container and its `*_msp_network` Docker network.
+2. Install the Blackfire PHP probe into that container.
+3. Ask for your Blackfire Server id+token and Client id+token, for whichever of these aren't already set as
+   environment variables.
+4. Start a `blackfire/blackfire:2` agent container (via `docker run`) on the same network, named
+   `${COMPOSE_PROJECT_NAME}-blackfire-1` (tail its logs with `docker logs -f <name>`).
+5. Restart the `php` container once, so the probe loads.
+6. Print an example command to get you started, e.g.:
+   ```bash
+   # run from the agent container, targeting the php service by its network hostname
+   docker exec <blackfire_container> blackfire curl -X 'GET' \
+     'http://php/1/api/game/IsOnline' \
+     -H 'accept: application/json'
+   ```
+
+Run `./inject_blackfire.sh --help` to see the available flags (`--force` to reinstall the probe, `--container`,
+`--network`, and `--agent-name` to override auto-detection).
+
+Note: the probe is installed into the `php` container's writable layer only, so it does **not** survive that
+container being recreated (`docker compose down`, or `up` with `--force-recreate`). If that happens, just run the
+script again.
+
+Note: the script also checks whether `php`'s own `BLACKFIRE_CLIENT_ID`/`BLACKFIRE_CLIENT_TOKEN` (its environment,
+frozen at container-creation time) match what you entered. A mismatch is harmless for the `blackfire curl` profiling
+above, but matters if you want to use the Blackfire SDK directly from PHP code — e.g. the websocket server's
+`BlackfireWsServerPlugin`, an advanced, rarely-used dev-only profiling feature gated behind `BLACKFIRE_APM_ENABLED`.
+That plugin reads its credentials from `php`'s own environment, which a restart can't update — only recreating the
+container can:
+```bash
+BLACKFIRE_APM_ENABLED=1 BLACKFIRE_CLIENT_ID=... BLACKFIRE_CLIENT_TOKEN=... docker compose up -d --force-recreate php
+```
+
+Once `php` is running with `BLACKFIRE_APM_ENABLED=1` and valid credentials, use the `decpf`/`derpf` aliases from
+[Aliases for development](#aliases-for-development) to drive that plugin: `decpf` cycles to the next registered
+websocket plugin to profile, and `derpf` starts (enables) profiling on that plugin's next execution.
 
 ## Supervisor
 
@@ -101,24 +148,25 @@ Once you have created the `.bashrc` file, you need to log-out and -in, reboot th
 You can type `alias` to see a list of all defined aliases. Or check the [docker-aliases.sh](docker-aliases.sh) file.
 The most important aliases being:
 
-| Alias   | Description                                                      |
-|---------|------------------------------------------------------------------|
-| dcu     | docker(d) compose(c) up(u). This is the dev environment          |
-| dcux    | docker(d) compose(c) up(u) xdebug(x). Xdebug enabled             |
-| dcus    | docker(d) compose(c) up(u) staging(s)                            |
-| dcup    | docker(d) compose(c) up(u) production(p)                         |
-| dl      | docker(d) logs(l). Show logs of the php container                |
-| dlb     | docker(d) logs(l) blackfire(b). Logs of the blackfire container  |
-| dld     | docker(d) logs(l) database(d). Logs of the database container    |
-| desc    | docker(d) exec(e) supervisorctl (sc). Manage supervisor services |
-| detlw   | docker(d) exec(e) tail log (tl) websocket server (w)             |
-| detlm   | docker(d) exec(e) tail log (tl) msw server (m) = watchdog        |
-| det     | docker(d) exec(e) top (t). show processes running                |
-| dep     | docker(d) exec(e) phpstan (p). Run static analysis with phpstan  |
-| drg     | docker (d) run (r) grafana (g). Create a grafana container       |
-| dsa     | docker (d) stop (s) all containers (a)                           |
-| dsp     | docker (d) system (s) prune (p)                                  |
-| dclean  | dsa + dsp. Stop all containers and prune the system              | 
+| Alias   | Description                                                              |
+|---------|---------------------------------------------------------------------------|
+| dcu     | docker(d) compose(c) up(u). This is the dev environment                 |
+| dcux    | docker(d) compose(c) up(u) xdebug(x). Xdebug enabled                    |
+| dcus    | docker(d) compose(c) up(u) staging(s)                                   |
+| dcup    | docker(d) compose(c) up(u) production(p)                                |
+| dl      | docker(d) logs(l). Show logs of the php container                       |
+| dld     | docker(d) logs(l) database(d). Logs of the database container           |
+| desc    | docker(d) exec(e) supervisorctl (sc). Manage supervisor services        |
+| detlw   | docker(d) exec(e) tail log (tl) websocket server (w)                    |
+| detlm   | docker(d) exec(e) tail log (tl) msw server (m) = watchdog               |
+| det     | docker(d) exec(e) top (t). show processes running                       |
+| dep     | docker(d) exec(e) phpstan (p). Run static analysis with phpstan         |
+| decpf   | docker(d) exec(e) choose profile (cpf). Select next websocket server plugin to profile with Blackfire |
+| derpf   | docker(d) exec(e) run profile (rpf). Start Blackfire profiling of the plugin selected via `decpf` |
+| drg     | docker (d) run (r) grafana (g). Create a grafana container              |
+| dsa     | docker (d) stop (s) all containers (a)                                  |
+| dsp     | docker (d) system (s) prune (p)                                         |
+| dclean  | dsa + dsp. Stop all containers and prune the system                     |
 
 ### API documentation
 

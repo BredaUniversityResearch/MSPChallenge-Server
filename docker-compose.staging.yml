@@ -2,22 +2,28 @@ services:
   php:
     image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:staging
     volumes:
-      - ./running_session_config/:/app/running_session_config
-      - ./raster/:/app/raster
-      - ./session_archive/:/app/session_archive
+      # Only defined here (not in the shared docker-compose.yml) because the prod/staging
+      # image bakes ServerManager/configfiles into the image at build time (see Dockerfile),
+      # so a fresh named volume gets correctly seeded with those defaults on first creation.
+      # Dev has no such baked-in content - it relies entirely on the ./:/app bind mount for
+      # source, so the same volume here would just shadow the real files with an empty one.-
       - configfiles_data:/app/ServerManager/configfiles
-      - ./ServerManager/session_archive/:/app/ServerManager/session_archive
-      - ./ServerManager/saves/:/app/ServerManager/saves
       - ./public/downloads/:/app/public/downloads
       - /app/var/cache
       - ./.secrets:/app/.secrets
     environment:
+      APP_ENV: prod
       SERVER_NAME: ${SERVER_NAME:-:80}
-      APP_SECRET: ${APP_SECRET}
       MERCURE_PUBLISHER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       MERCURE_SUBSCRIBER_JWT_KEY: ${CADDY_MERCURE_JWT_SECRET}
       URL_WEB_SERVER_HOST: ${URL_WEB_SERVER_HOST:-host.docker.internal}
       URL_WS_SERVER_HOST: ${URL_WS_SERVER_HOST:-host.docker.internal}
+      # secrets
+      APP_SECRET: ${APP_SECRET}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      MY2_PASSWORD: ${MY2_PASSWORD}
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE}
+      DATABASE_CREATOR_PASSWORD: ${DATABASE_CREATOR_PASSWORD:-${DATABASE_PASSWORD}}
     ports:
       # HTTP
       - target: 80
@@ -26,6 +32,3 @@ services:
 
   simulations:
     image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:staging
-
-volumes:
-  configfiles_data:

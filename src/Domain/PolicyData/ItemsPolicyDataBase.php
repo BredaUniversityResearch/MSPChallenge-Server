@@ -71,7 +71,7 @@ abstract class ItemsPolicyDataBase extends PolicyDataBase
     /**
      * @inheritdoc
      */
-    public static function import($data, Context $options = null)
+    public static function import($data, ?Context $options = null)
     {
         $data->items ??= [];
         $result = parent::import($data, $options);

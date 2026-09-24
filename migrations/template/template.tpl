@@ -16,7 +16,7 @@ final class <className> extends MSPMigration
         return '';
     }
 
-    protected function getDatabaseType(): ?MSPDatabaseType
+    protected function getDatabaseType(): MSPDatabaseType
     {
         // E.g. To restrict to only game session dbs, use:
         //   return new MSPDatabaseType(MSPDatabaseType::DATABASE_TYPE_GAME_SESSION);

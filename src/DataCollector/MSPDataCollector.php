@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class MSPDataCollector extends AbstractDataCollector
 {
-    public function collect(Request $request, Response $response, \Throwable $exception = null): void
+    public function collect(Request $request, Response $response, ?\Throwable $exception = null): void
     {
         try {
             $serverManager = \ServerManager\ServerManager::getInstance();

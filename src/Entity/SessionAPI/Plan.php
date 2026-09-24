@@ -23,15 +23,18 @@ class Plan
     private ?Country $country = null;
 
     #[ORM\Column(type: Types::STRING, length: 75)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $planName = null;
 
     #[ORM\Column(type: Types::TEXT, length: 75)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $planDescription = "";
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTime $planTime;
 
     #[ORM\Column(type: Types::INTEGER, length: 5)]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $planGametime = null;
 
     #[ORM\Column(enumType: PlanState::class)]
@@ -40,60 +43,87 @@ class Plan
     private ?int $planLockUserId = null;
 
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 0])]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $planLastupdate = 0;
 
     #[ORM\Column(type: Types::STRING, length: 20, options: ['default' => 'NONE'])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $planPreviousstate = 'NONE';
 
     #[ORM\Column(type: Types::SMALLINT, length: 4, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $planActive = 1;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, nullable: true)]
     private ?int $planConstructionstart = null;
 
     #[ORM\Column(type: Types::INTEGER, length: 11, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $planType = 0;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $planEnergyError = 0;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $planAltersEnergyDistribution = 0;
 
+    /**
+     * @var Collection<int, PlanLayer>
+     */
     #[ORM\OneToMany(
-        mappedBy: 'plan',
         targetEntity: PlanLayer::class,
+        mappedBy: 'plan',
         cascade: ['persist', 'remove'],
         orphanRemoval: true
     )]
     private Collection $planLayer;
 
-    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanDelete::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, PlanDelete>
+     */
+    #[ORM\OneToMany(targetEntity: PlanDelete::class, mappedBy: 'plan', cascade: ['persist'])]
     private Collection $planDelete;
 
-    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: Fishing::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, Fishing>
+     */
+    #[ORM\OneToMany(targetEntity: Fishing::class, mappedBy: 'plan', cascade: ['persist'])]
     private Collection $fishing;
 
+    /**
+     * @var Collection<int, PlanMessage>
+     */
     #[ORM\OneToMany(
-        mappedBy: 'plan',
         targetEntity: PlanMessage::class,
+        mappedBy: 'plan',
         cascade: ['persist', 'remove'],
         orphanRemoval: true
     )]
     private Collection $planMessage;
 
-    #[ORM\OneToMany(mappedBy: 'plan', targetEntity: PlanRestrictionArea::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, PlanRestrictionArea>
+     */
+    #[ORM\OneToMany(targetEntity: PlanRestrictionArea::class, mappedBy: 'plan', cascade: ['persist'])]
     private Collection $planRestrictionArea;
 
+    /**
+     * @var Collection<int, Grid>
+     */
     #[ORM\JoinTable(name: 'grid_removed')]
     #[ORM\JoinColumn(name: 'grid_removed_plan_id', referencedColumnName: 'plan_id')]
     #[ORM\InverseJoinColumn(name: 'grid_removed_grid_persistent', referencedColumnName: 'grid_id')]
     #[ORM\ManyToMany(targetEntity: Grid::class, inversedBy: 'planToRemove', cascade: ['persist'])]
     private Collection $gridToRemove;
 
+    /**
+     * @var Collection<int, PlanPolicy>
+     */
     #[ORM\OneToMany(
-        mappedBy: 'plan',
         targetEntity: PlanPolicy::class,
+        mappedBy: 'plan',
         cascade: ['persist', 'remove'],
         orphanRemoval: true
     )]

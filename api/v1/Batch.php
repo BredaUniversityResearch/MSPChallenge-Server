@@ -42,7 +42,7 @@ class Batch extends Base
                 api_batch_country_id,
                 api_batch_user_id,
                 api_batch_guid
-            ) VALUES (:countryId, :userId, :batchGuid) 
+            ) VALUES (:countryId, :userId, :batchGuid)
                 ON DUPLICATE KEY UPDATE
                     api_batch_state='Setup',
                     api_batch_country_id=:countryId,
@@ -62,7 +62,9 @@ class Batch extends Base
 
     /**
      * @param int $batchId
-     * @param array{int: array{call_id: int, group: string, end_point: string, endpoint_data: string}} $requests
+     * @param array{
+     *     int: array{call_id: int, group: string, end_point: string, endpoint_data: string, endpoint: string}
+     * } $requests
      * @throws Exception
      */
     private function addToBatch(
@@ -76,10 +78,10 @@ class Batch extends Base
         foreach ($requests as $r) {
             $this->getDatabase()->query(
                 "INSERT INTO api_batch_task (
-                api_batch_task_batch_id, 
-                api_batch_task_group, 
-                api_batch_task_reference_identifier, 
-                api_batch_task_api_endpoint, 
+                api_batch_task_batch_id,
+                api_batch_task_group,
+                api_batch_task_reference_identifier,
+                api_batch_task_api_endpoint,
                 api_batch_task_api_endpoint_data)
                 VALUES (?, ?, ?, ?, ?)",
                 array(
@@ -142,12 +144,12 @@ class Batch extends Base
         }
         $this->getDatabase()->DBCommitTransaction();
 
-        $data = $this->getDatabase()->query("SELECT api_batch_task_id, 
-                api_batch_task_reference_identifier, 
-                api_batch_task_api_endpoint, 
-                api_batch_task_api_endpoint_data 
-            FROM api_batch_task 
-            WHERE api_batch_task_batch_id = ? 
+        $data = $this->getDatabase()->query("SELECT api_batch_task_id,
+                api_batch_task_reference_identifier,
+                api_batch_task_api_endpoint,
+                api_batch_task_api_endpoint_data
+            FROM api_batch_task
+            WHERE api_batch_task_batch_id = ?
             ORDER BY api_batch_task_group", array($batchId));
         if (empty($data)) {
             throw new Exception("Tried to execute an empty batch");
@@ -194,11 +196,11 @@ class Batch extends Base
             $onExecuteQueuedBatchesFunction();
             $batchGuid = $row['api_batch_guid'];
             return $this->executeQueuedBatch($batchGuid, $serverId)
-                ->otherwise(function ($reason) use ($batchGuid) {
+                ->catch(function ($reason) use ($batchGuid) {
                     return reject(new ExecuteBatchRejection($batchGuid, $reason));
                 });
         })
-        ->done(
+        ->then(
             function (array $batchResultContainer) use ($deferred) {
                 $deferred->resolve($batchResultContainer);
             },
@@ -213,7 +215,7 @@ class Batch extends Base
     /**
      * @throws Exception
      */
-    public function setCommunicated(string $batchGuid): Promise
+    public function setCommunicated(string $batchGuid): PromiseInterface
     {
         $qb = $this->getAsyncDatabase()->createQueryBuilder();
         /** @noinspection PhpIncompatibleReturnTypeInspection */
@@ -229,7 +231,23 @@ class Batch extends Base
      * @throws \Doctrine\DBAL\Exception
      * @throws Exception
      */
-    public function executeQueuedBatch(string $batchGuid, string $serverId): Promise
+    private function setBatchState(string $batchGuid, string $state): PromiseInterface
+    {
+        $qb = $this->getAsyncDatabase()->createQueryBuilder();
+        return $this->getAsyncDatabase()->query(
+            $qb
+                ->update('api_batch')
+                ->set('api_batch_state', $qb->createPositionalParameter($state))
+                ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
+                ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
+        );
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     * @throws Exception
+     */
+    public function executeQueuedBatch(string $batchGuid, string $serverId): PromiseInterface
     {
         // get batch tasks to execute
         $this->cachedBatchResults[$batchGuid] = [];
@@ -261,13 +279,15 @@ class Batch extends Base
                     ->set('api_batch_state', $qb->createPositionalParameter('Executing'))
                     ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
             )
-            ->done(
+            ->then(
                 function (Result $dummy) use ($deferred, $result) {
                     // just pass the original result.
                     $deferred->resolve($result);
                 },
                 function () use ($deferred, $batchGuid) {
-                    $deferred->reject('Could not set to status "Executing" for batch guid: ' . $batchGuid);
+                    $deferred->reject(
+                        throw new \RuntimeException('Could not set to status "Executing" for batch guid: '.$batchGuid)
+                    );
                 }
             );
             return $deferred->promise();
@@ -337,21 +357,24 @@ class Batch extends Base
                     });
                 }
 
-                return chain($chain)
-                    ->then(function (array $taskResultsContainer) use ($batchGuid, $pool) {
-                        /** @var SingleConnection $conn */
-                        $conn = $this->getAsyncDatabase();
-                        $pool->commitTransaction($conn);
-                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                        return $this->getAsyncDatabase()->query(
-                            $qb
-                                ->update('api_batch')
-                                ->set('api_batch_state', $qb->createPositionalParameter('Success'))
-                                ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
-                                ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
-                        )
-                            ->then(
-                                function (/* Result $result */) use ($taskResultsContainer, $batchGuid) {
+                // Use a SAVEPOINT so that, on task failure, we can undo just the batch task
+                // changes while keeping the transaction open. This lets us persist the
+                // resulting api_batch state (Success or Failed) as part of the very same
+                // transaction, in both outcomes, instead of running a separate query on the
+                // connection after it has already been committed/rolled back and potentially
+                // handed back out to a different, concurrent batch by the pool.
+                // Note: savepoints are scoped per-connection/session, and each batch already
+                // owns its own exclusively leased connection for the duration of its
+                // transaction, so a collision between concurrently executing batches is not
+                // possible. The name is still derived from the batch guid, purely to make it
+                // self-documenting when inspecting logs.
+                $savepoint = 'sp_' . str_replace('-', '', $batchGuid);
+                return $this->getAsyncDatabase()->queryBySQL("SAVEPOINT $savepoint")
+                    ->then(fn () => chain($chain))
+                    ->then(
+                        function (array $taskResultsContainer) use ($batchGuid) {
+                            return $this->setBatchState($batchGuid, 'Success')
+                                ->then(function (/* Result $result */) use ($taskResultsContainer, $batchGuid) {
                                     $batchResult = [];
                                     foreach ($taskResultsContainer as $taskResults) {
                                         foreach ($taskResults as $taskId => $taskResult) {
@@ -361,27 +384,45 @@ class Batch extends Base
                                             ];
                                         }
                                     }
-                                    return $batchResult;
-                                }
+                                    return ['result' => $batchResult, 'reason' => null];
+                                });
+                        },
+                        function ($reason) use ($batchGuid, $savepoint) {
+                            // undo only the batch task changes, the transaction itself stays open
+                            return $this->getAsyncDatabase()
+                                ->queryBySQL("ROLLBACK TO SAVEPOINT $savepoint")
+                                ->then(fn () => $this->setBatchState($batchGuid, 'Failed'))
+                                ->then(fn () => ['result' => null, 'reason' => $reason]);
+                            // note: if this recovery itself fails (e.g. the savepoint rollback or
+                            // the state update query fails), the returned promise rejects, which
+                            // is handled below by falling back to a hard rollback of the whole
+                            // transaction.
+                        }
+                    )
+                    ->then(
+                        function (array $outcome) use ($pool) {
+                            /** @var SingleConnection $conn */
+                            $conn = $this->getAsyncDatabase();
+                            // safe to switch back to the pool now: nothing below issues any
+                            // further query on $conn, it's just a synchronous reference swap.
+                            $this->setAsyncDatabase($pool);
+                            return $pool->commitTransaction($conn)->then(function () use ($outcome) {
+                                return $outcome['reason'] !== null ? reject($outcome['reason']) : $outcome['result'];
+                            });
+                        },
+                        function ($reason) use ($pool) {
+                            // something went wrong even recording the outcome; fall back to a hard
+                            // rollback so the connection isn't left in an inconsistent state.
+                            /** @var SingleConnection $conn */
+                            $conn = $this->getAsyncDatabase();
+                            $this->setAsyncDatabase($pool);
+                            return $pool->rollbackTransaction($conn)->then(
+                                fn () => reject($reason),
+                                fn () => reject($reason)
                             );
-                    })
-                    ->otherwise(function ($reason) use ($batchGuid, $pool) {
-                        /** @var SingleConnection $conn */
-                        $conn = $this->getAsyncDatabase();
-                        $pool->rollbackTransaction($conn);
-                        // run async query to set batches to failed, no need to wait for the result.
-                        $qb = $this->getAsyncDatabase()->createQueryBuilder();
-                        $this->getAsyncDatabase()->query(
-                            $qb
-                                ->update('api_batch')
-                                ->set('api_batch_state', $qb->createPositionalParameter('Failed'))
-                                ->set('api_batch_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
-                                ->where($qb->expr()->eq('api_batch_guid', $qb->createPositionalParameter($batchGuid)))
-                        );
-                        // Propagate by returning rejection
-                        return reject($reason);
-                    })
-                    ->always(function () use ($batchGuid) {
+                        }
+                    )
+                    ->finally(function () use ($batchGuid) {
                         // clean up batch cache results
                         unset($this->cachedBatchResults[$batchGuid]);
                     });

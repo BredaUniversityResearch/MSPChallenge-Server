@@ -7,9 +7,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 #[ORM\Entity(repositoryClass: SimulationRepository::class)]
-#[ORM\Table(uniqueConstraints: [
-    new ORM\UniqueConstraint(name: 'uq_watchdog_id_name', columns: ['watchdog_id', 'name'])
-])]
+#[ORM\Table]
+#[ORM\UniqueConstraint(name: 'uq_watchdog_id_name', columns: ['watchdog_id', 'name'])]
 class Simulation
 {
     use TimestampableEntity;
@@ -21,9 +20,11 @@ class Simulation
 
     #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'simulations')]
     #[ORM\JoinColumn(nullable: false)]
+    // @phpstan-ignore-next-line Watchdog|null but database expects
     private ?Watchdog $watchdog = null;
 
     #[ORM\Column(length: 255)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]

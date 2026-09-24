@@ -8,6 +8,7 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\DomCrawler\Crawler;
 
 abstract class AbstractCommunicator
 {
@@ -58,9 +59,52 @@ abstract class AbstractCommunicator
             return null;
         }
         if ($asArray) {
-            return $response->toArray();
+            try {
+                return $response->toArray();
+            } catch (DecodingExceptionInterface $e) {
+                $xmlServiceException = $this->extractXmlServiceExceptionMessage(
+                    $response->getContent(false),
+                    $response->getHeaders(false)['content-type'][0] ?? null
+                );
+
+                if ($xmlServiceException !== null) {
+                    throw new \RuntimeException(
+                        sprintf(
+                            'GeoServer returned an XML ServiceException for "%s": %s',
+                            $this->lastCompleteURLCalled ?? ($this->getBaseURL().$endPoint),
+                            $xmlServiceException
+                        ),
+                        0,
+                        $e
+                    );
+                }
+
+                throw $e;
+            }
         }
         return $response->getContent();
+    }
+
+    private function extractXmlServiceExceptionMessage(string $responseBody, ?string $contentType): ?string
+    {
+        $looksLikeXml = str_contains(strtolower($contentType ?? ''), 'xml')
+            || str_starts_with(ltrim($responseBody), '<');
+        if (!$looksLikeXml) {
+            return null;
+        }
+
+        try {
+            $crawler = new Crawler($responseBody);
+            $serviceExceptionNode = $crawler->filterXPath('//*[local-name()="ServiceException"]')->first();
+            if ($serviceExceptionNode->count() === 0) {
+                return null;
+            }
+
+            $serviceException = trim($serviceExceptionNode->text(''));
+            return $serviceException !== '' ? $serviceException : null;
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /**
@@ -73,7 +117,7 @@ abstract class AbstractCommunicator
 
     /**
      * @param string|null $baseURL
-     * @return static(AbstractCommunicator)
+     * @return static
      */
     public function setBaseURL(?string $baseURL): static
     {
@@ -92,7 +136,7 @@ abstract class AbstractCommunicator
 
     /**
      * @param string $username
-     * @return static(AbstractCommunicator)
+     * @return static
      */
     public function setUsername(string $username): static
     {
@@ -111,7 +155,7 @@ abstract class AbstractCommunicator
 
     /**
      * @param string $password
-     * @return static(AbstractCommunicator)
+     * @return static
      */
     public function setPassword(string $password): static
     {

@@ -31,7 +31,12 @@ class Database
     private static array $PDOArgs = array(
         PDO::MYSQL_ATTR_LOCAL_INFILE => true,
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_TIMEOUT => 5
+        PDO::ATTR_TIMEOUT => 5,
+        PDO::MYSQL_ATTR_INIT_COMMAND => "INSERT IGNORE INTO `msp_tracker`.`connection` " .
+            "(connection_id, `user`, process_name, db_name) " .
+            "VALUES (CONNECTION_ID(), USER(), 'legacy', DATABASE()) " .
+            "ON DUPLICATE KEY UPDATE `user` = USER(), process_name = 'legacy', " .
+            "db_name = DATABASE(), last_heartbeat = NOW()"
     );
 
     private int $sessionId;
@@ -62,6 +67,17 @@ class Database
             $this->DBRollbackTransaction();
             throw new Exception("DB destructed when transaction was still running. Rolling back");
         }
+        self::$instances[$this->sessionId] = null;
+    }
+
+    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    public function Close(): void
+    {
+        if ($this->isTransactionRunning) {
+            $this->DBRollbackTransaction();
+        }
+
+        $this->conn = null;
         self::$instances[$this->sessionId] = null;
     }
 
@@ -270,17 +286,7 @@ class Database
      */
     public function executePreparedQuery(PDOStatement $query, ?array $vars):  bool
     {
-        if ($vars != null) {
-            if (!is_array($vars)) {
-                throw new Exception(
-                    "Failed to execute prepared statement. Vars is not an array. Value: ".
-                    var_export($vars, true)." Query: ".$query->queryString
-                );
-            }
-            return $query->execute($vars);
-        } else {
-            return $query->execute();
-        }
+        return $query->execute($vars);
     }
 
     /**

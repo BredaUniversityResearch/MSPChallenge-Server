@@ -15,7 +15,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: LayerRepository::class)]
 #[ApiResource(
@@ -39,7 +39,10 @@ class Layer extends EntityBase
     #[ORM\Column(type: Types::INTEGER, length: 11)]
     private ?int $layerId = null;
 
-    #[ORM\OneToMany(mappedBy: 'originalLayer', targetEntity: Layer::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, Layer>
+     */
+    #[ORM\OneToMany(targetEntity: Layer::class, mappedBy: 'originalLayer', cascade: ['persist'])]
     private Collection $derivedLayer;
 
     #[ORM\ManyToOne(targetEntity: Layer::class, cascade: ['persist'], inversedBy: 'derivedLayer')]
@@ -48,26 +51,32 @@ class Layer extends EntityBase
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerActive = 1;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerSelectable = 1;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerActiveOnStart = 0;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerToggleable = 1;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerEditable = 1;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 125, options: ['default' => ''])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerName = '';
 
     #[Groups(['read'])]
@@ -76,26 +85,32 @@ class Layer extends EntityBase
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => ''])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerShort = '';
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => ''])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerGroup = '';
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 512, options: ['default' => ''])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerTooltip = '';
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => 'management'])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerCategory = 'management';
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => 'aquaculture'])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerSubcategory = 'aquaculture';
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => 'Miscellaneous'])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerKpiCategory = 'Miscellaneous';
 
     #[Groups(['read'])]
@@ -104,6 +119,7 @@ class Layer extends EntityBase
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 3, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerDepth = 1;
 
     #[Groups(['read'])]
@@ -142,10 +158,12 @@ class Layer extends EntityBase
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 100])]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $layerLastupdate = 100;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 4, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerMelupdate = 0;
 
     #[Groups(['read'])]
@@ -154,18 +172,22 @@ class Layer extends EntityBase
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::STRING, length: 512, options: ['default' => 'Default'])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $layerSpecialEntityType = 'Default';
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerGreen = 0;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $layerMelupdateConstruction = 0;
 
     #[Groups(['read'])]
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 0])]
+    // @phpstan-ignore-next-line float|null but database expects float
     private ?float $layerFilecreationtime = 0;
 
     #[Groups(['read'])]
@@ -180,31 +202,55 @@ class Layer extends EntityBase
     #[ORM\Column(type: 'json_document', nullable: true)]
     private mixed $layerTags = null;
 
-    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: Geometry::class, cascade: ['persist'], orphanRemoval: true)]
+    /**
+     * @var Collection<int, Geometry>
+     */
+    #[ORM\OneToMany(targetEntity: Geometry::class, mappedBy: 'layer', cascade: ['persist'], orphanRemoval: true)]
     private Collection $geometry;
 
-    #[ORM\OneToMany(mappedBy: 'restrictionStartLayer', targetEntity: Restriction::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, Restriction>
+     */
+    #[ORM\OneToMany(targetEntity: Restriction::class, mappedBy: 'restrictionStartLayer', cascade: ['persist'])]
     private Collection $restrictionStart;
 
-    #[ORM\OneToMany(mappedBy: 'restrictionEndLayer', targetEntity: Restriction::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, Restriction>
+     */
+    #[ORM\OneToMany(targetEntity: Restriction::class, mappedBy: 'restrictionEndLayer', cascade: ['persist'])]
     private Collection $restrictionEnd;
 
+    /**
+     * @var Collection<int, Layer>
+     */
     #[ORM\ManyToMany(targetEntity: Layer::class, mappedBy: 'pressureGeneratingLayer', cascade: ['persist'])]
     private Collection $pressure;
 
+    /**
+     * @var Collection<int, Layer>
+     */
     #[ORM\JoinTable(name: 'mel_layer')]
     #[ORM\JoinColumn(name: 'mel_layer_pressurelayer', referencedColumnName: 'layer_id')]
     #[ORM\InverseJoinColumn(name: 'mel_layer_layer_id', referencedColumnName: 'layer_id')]
     #[ORM\ManyToMany(targetEntity: Layer::class, inversedBy: 'pressure', cascade: ['persist'])]
     private Collection $pressureGeneratingLayer;
 
-    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PlanLayer::class, cascade: ['persist'], orphanRemoval: true)]
+    /**
+     * @var Collection<int, PlanLayer>
+     */
+    #[ORM\OneToMany(targetEntity: PlanLayer::class, mappedBy: 'layer', cascade: ['persist'], orphanRemoval: true)]
     private Collection $planLayer;
 
-    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PlanDelete::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, PlanDelete>
+     */
+    #[ORM\OneToMany(targetEntity: PlanDelete::class, mappedBy: 'layer', cascade: ['persist'])]
     private Collection $planDelete;
 
-    #[ORM\OneToMany(mappedBy: 'layer', targetEntity: PlanRestrictionArea::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, PlanRestrictionArea>
+     */
+    #[ORM\OneToMany(targetEntity: PlanRestrictionArea::class, mappedBy: 'layer', cascade: ['persist'])]
     private Collection $planRestrictionArea;
 
     private bool $layerGeometryWithGeneratedMspids = false;
@@ -222,6 +268,7 @@ class Layer extends EntityBase
     private ?array $scale = null;
 
     private ?float $ecologyKpiValue = null;
+    private bool $ecologyKpiValueResolved = false;
 
     public function __construct()
     {
@@ -961,7 +1008,7 @@ class Layer extends EntityBase
      */
     public function getEcologyKpiValue(): ?float
     {
-        if (null !== $this->ecologyKpiValue) {
+        if ($this->ecologyKpiValueResolved) {
             return $this->ecologyKpiValue;
         }
         if (null == $conn = ConnectionManager::getInstance()->getCachedGameSessionDbConnection(
@@ -1000,8 +1047,58 @@ SELECT kpi_value FROM LayerEcologyKpiValue l WHERE l.layer_name = :layer_name
 SQL,
             ['layer_name' => $this->getLayerName()]
         );
-        $this->ecologyKpiValue = $result->fetchOne() ?: null;
+        $this->setResolvedEcologyKpiValue($result->fetchOne() ?: null);
         return $this->ecologyKpiValue;
+    }
+
+    private function setResolvedEcologyKpiValue(?float $value): void
+    {
+        $this->ecologyKpiValue = $value;
+        $this->ecologyKpiValueResolved = true;
+    }
+
+    /**
+     * Runs the ecology-KPI lookup ONCE for a whole batch of layers instead of once per layer.
+     * Call this right after fetching layers, before anything calls getScale()/getEcologyKpiValue().
+     *
+     * @param Layer[] $layers
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public static function preloadEcologyKpiValues(array $layers): void
+    {
+        $byGameListId = [];
+        foreach ($layers as $layer) {
+            $byGameListId[$layer->getOriginGameListId()][] = $layer;
+        }
+
+        foreach ($byGameListId as $gameListId => $gameLayers) {
+            $conn = ConnectionManager::getInstance()->getCachedGameSessionDbConnection($gameListId);
+            $result = $conn->executeQuery(
+                <<<'SQL'
+                WITH
+                  LatestEcologyKpiStep1 AS (
+                    SELECT *, ROW_NUMBER() OVER (PARTITION BY kpi_name ORDER BY kpi_month DESC) AS rn
+                    FROM kpi WHERE kpi_type = 'ECOLOGY'
+                  ),
+                  LatestEcologyKpiFinal AS (
+                    SELECT * FROM LatestEcologyKpiStep1 WHERE rn = 1
+                  )
+                SELECT
+                    l.name_unique_when_original_id_null AS layer_name,
+                    k.kpi_value
+                FROM layer l
+                INNER JOIN LatestEcologyKpiFinal k ON (
+                    CONCAT('mel_', LOWER(REPLACE(k.kpi_name, ' ', '_'))) = l.name_unique_when_original_id_null
+                )
+                WHERE l.name_unique_when_original_id_null IS NOT NULL
+                SQL
+            );
+            // layer_name => kpi_value, one row per matching layer
+            $map = $result->fetchAllKeyValue();
+            foreach ($gameLayers as $layer) {
+                $layer->setResolvedEcologyKpiValue($map[$layer->getLayerName()] ?? null);
+            }
+        }
     }
 
     /**

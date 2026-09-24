@@ -3,9 +3,11 @@
 namespace App\MessageHandler\GameList;
 
 use App\Controller\SessionAPI\SELController;
+use App\Domain\API\v1\Database;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameTransitionStateValue;
+use App\Domain\Common\EntityEnums\GeoServerAccessType;
 use App\Domain\Common\EntityEnums\LayerGeoType;
 use App\Domain\Common\EntityEnums\PlanState;
 use App\Domain\Common\EntityEnums\RestrictionSort;
@@ -14,8 +16,10 @@ use App\Domain\Communicator\GeoServerCommunicator;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Helper\Util;
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\DockerApiService;
 use App\Domain\Services\SimulationHelper;
 use App\Domain\Services\SymfonyToLegacyHelper;
+use App\Entity\ServerManager\DockerApi;
 use App\Entity\SessionAPI\LayerRaster;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListCreationMessage;
@@ -40,6 +44,7 @@ use App\Repository\SessionAPI\GameRepository;
 use App\Repository\SessionAPI\LayerRepository;
 use App\VersionsProvider;
 use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Psr\Cache\InvalidArgumentException;
@@ -50,6 +55,7 @@ use ReflectionException;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
@@ -83,7 +89,8 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         private readonly HttpClientInterface $client,
         // e.g. used by GeoServerCommunicator
         private readonly CacheInterface $downloadsCache,
-        private readonly CacheInterface $resultsCache
+        private readonly CacheInterface $resultsCache,
+        private readonly DockerApiService $dockerApiService
     ) {
         parent::__construct(...func_get_args());
     }
@@ -93,37 +100,49 @@ class GameListCreationMessageHandler extends CommonSessionHandler
      */
     public function __invoke(GameListCreationMessage $gameList): void
     {
-        $this->setGameSessionAndDatabase($gameList);
-        if (!is_null($this->gameSession->getGameSave())) {
-            $this->messageBus->dispatch(
-                new GameSaveLoadMessage($this->gameSession->getId(), $this->gameSession->getGameSave()->getId())
-            );
-            return;
-        }
         try {
-            $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
-            $this->validateGameConfig($this->createSessionRunningConfig());
-            $this->sessionLogHandler->notice(
-                "Session {$this->gameSession->getName()} creation initiated. Please wait."
-            );
-            $this->setupSessionDatabase();
-            $this->migrateSessionDatabase();
-            $this->resetSessionRasterStore();
-            $this->entityManager->wrapInTransaction(fn() => $this->setupAllEntities());
-            $this->finaliseSession();
-            $this->sessionLogHandler->notice("Session {$this->gameSession->getName()} created and ready for use.");
-            $state = 'healthy';
-        } catch (Throwable $e) {
-            $this->sessionLogHandler->error(
-                "Session {$this->gameSession->getName()} failed to create. {problem}",
-                ['problem' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
-            );
-            $state = 'failed';
+            $this->setGameSessionAndDatabase($gameList);
+            if (!is_null($this->gameSession->getGameSave())) {
+                $this->messageBus->dispatch(
+                    new GameSaveLoadMessage($this->gameSession->getId(), $this->gameSession->getGameSave()->getId())
+                );
+                return;
+            }
+            try {
+                $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
+                $this->validateGameConfig($this->createSessionRunningConfig());
+                $this->sessionLogHandler->notice(
+                    "Session {$this->gameSession->getName()} creation initiated. Please wait."
+                );
+                $this->setupSessionDatabase();
+                $this->migrateSessionDatabase();
+                $this->refreshSessionEntityManagerAfterDatabaseReset();
+                $this->resetSessionRasterStore();
+                $this->entityManager->wrapInTransaction(fn() => $this->setupAllEntities());
+                $this->finaliseSession();
+                $this->sessionLogHandler->notice("Session {$this->gameSession->getName()} created and ready for use.");
+                $state = 'healthy';
+            } catch (Throwable $e) {
+                $this->sessionLogHandler->error(
+                    "Session {$this->gameSession->getName()} failed to create. {problem}",
+                    ['problem' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
+                );
+                $state = 'failed';
+            }
+            $this->gameSession->setSessionState(new GameSessionStateValue($state));
+            $this->gameSession->getGameConfigVersion()->setLastPlayedTime(time());
+            $this->mspServerManagerEntityManager->persist($this->gameSession);
+            $this->mspServerManagerEntityManager->flush();
+        } catch (ConnectionException $e) {
+            if ((int) $e->getCode() === 1049) { // MySQL "Unknown database"
+                throw new UnrecoverableMessageHandlingException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw $e;
+        } finally {
+            $this->connectionManager->clearAndCloseDoctrineManagers();
+            Database::GetInstance($this->gameSession->getId())->Close();
+            $this->connectionManager->closeCachedAsyncGameSessionDbConnection($this->gameSession->getId());
         }
-        $this->gameSession->setSessionState(new GameSessionStateValue($state));
-        $this->gameSession->getGameConfigVersion()->setLastPlayedTime(time());
-        $this->mspServerManagerEntityManager->persist($this->gameSession);
-        $this->mspServerManagerEntityManager->flush();
     }
 
     /**
@@ -300,14 +319,6 @@ class GameListCreationMessageHandler extends CommonSessionHandler
      */
     private function importLayerData(SessionSetupContext $context): void
     {
-        $username = $this->gameSession->getGameGeoServer()->getUsername();
-        $password = $this->gameSession->getGameGeoServer()->getPassword();
-        if (empty($username) || empty($password)) {
-            tc(fn() => throw new \Exception(
-                "No GeoServer credentials provided, so no GeoServer data will be imported."
-            ), $this->gameSessionLogger, ['gameSession' => $this->gameSession->getId()]);
-        }
-
         $geoServerCommunicator = new GeoServerCommunicator(
             $this->client,
             $this->provider,
@@ -315,9 +326,20 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             $this->resultsCache
         );
         $geoServerCommunicator
-            ->setBaseURL($this->gameSession->getGameGeoServer()->getAddress())
-            ->setUsername($username)
-            ->setPassword($password);
+            ->setBaseURL($this->gameSession->getGameGeoServer()->getAddress());
+
+        $geoServer = $this->gameSession->getGameGeoServer();
+        if ($geoServer->getAccessType() === GeoServerAccessType::CREDENTIALS) {
+            $username = $geoServer->getUsername();
+            $password = $geoServer->getPassword();
+            if (empty($username) || empty($password)) {
+                tc(fn() => throw new \Exception(
+                    "Both username and password are required when GeoServer access type is 'credentials'."
+                ), $this->gameSessionLogger, ['gameSession' => $this->gameSession->getId()]);
+            }
+            $geoServerCommunicator->setUsername($username);
+            $geoServerCommunicator->setPassword($password);
+        }
 
         /** @var LayerRepository $layerRepo */
         $layerRepo = $this->entityManager->getRepository(Layer::class);
@@ -401,6 +423,11 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         Layer $layer,
         GeoServerCommunicator $geoServerCommunicator
     ): void {
+        $layer->setLayerRaster(
+            ($layer->getLayerRaster() ?? new LayerRaster())
+                // no spaces allowed
+                ->setUrl(str_replace(" ", "_", $layer->getLayerName()).'.png')
+        );
         if ($layer->getLayerDownloadFromGeoserver()) {
             $this->sessionLogHandler->debug('Calling GeoServer to obtain raster metadata.');
             $rasterMetaData = $geoServerCommunicator->getRasterMetaData(
@@ -559,6 +586,9 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         return $geometryData['type'];
     }
 
+    /**
+     * @throws \Exception
+     */
     public function checkForDuplicateMspIds(SessionSetupContext $context): void
     {
         $geometries = $context->getGeometriesWithDuplicateMspId();
@@ -566,10 +596,21 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             $this->sessionLogHandler->info("No duplicate MSP IDs. Yay!");
             return;
         }
+
+        $localDockerApi = new DockerApi();
+        $localDockerApi
+            ->setPort(2375)
+            ->setAddress('localhost')
+            ->setScheme('http');
+        $adminerContainerId = $this->dockerApiService->dockerApiCall($localDockerApi, 'GET', '/containers/json', [
+            'query' => [
+                'filters' => '{"label": ["com.docker.compose.service=adminer"]}'
+            ],
+        ])['0']['Id'] ?? null;
         foreach ($geometries as $mspId => $geometryList) {
             $counted = count($geometryList);
             $contextVars = [];
-            if ($_ENV['APP_ENV'] == 'dev') {
+            if ($adminerContainerId !== null) {
                 $contextVars = [
                     // phpcs:ignoreFile Generic.Files.LineLength.TooLong
                     'href' => 'http://localhost:8082/?username=&db='.$this->database.'&sql=select l.layer_name%2C g.geometry_data from geometry g inner join layer l on g.geometry_layer_id %3D l.layer_id where geometry_mspid%3D\''.$mspId.'\''
@@ -797,8 +838,8 @@ class GameListCreationMessageHandler extends CommonSessionHandler
         foreach ($this->dataModel["SEL"]["heatmap_settings"] as $heatmap) {
             if (null === $selOutputLayer = $context->getLayer($heatmap['layer_name'] ?? '')) {
                 throw new \Exception(
-                    'The layer '.$heatmap['layer_name'].' referenced in the heatmap settings has not been 
-                    found in the database, so cannot continue. Are you sure it has been defined separately as an 
+                    'The layer '.$heatmap['layer_name'].' referenced in the heatmap settings has not been
+                    found in the database, so cannot continue. Are you sure it has been defined separately as an
                     actual layer in the configuration file?'
                 );
             }
@@ -897,7 +938,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
     {
         // final step to avoid client complaints, note that this likely confuses Doctrine a bit, hence at the end
         $qb = $this->entityManager->createQueryBuilder();
-        $qb->update('App:Geometry', 'g')
+        $qb->update(Geometry::class, 'g')
             ->set('g.originalGeometry', 'g.geometryId')
             ->where($qb->expr()->isNull('g.originalGeometry'))
             ->getQuery()
@@ -967,17 +1008,21 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             // $plan is already persisted by caller.
             $plan->addPlanLayer($planLayer);
             foreach ($layerConfig['deleted'] as $layerGeometryDeletedConfig) {
-                $planDelete = new PlanDelete();
-                // $planDelete is cascaded by $derivedLayer, so no persist needed
-                $derivedLayer->addPlanDelete($planDelete);
-                $plan->addPlanDelete($planDelete);
                 $originalPlannedDeletedGeometry = $this->findNewPersistentGeometry(
                     $layerGeometryDeletedConfig['base_geometry_info'],
                     $context
                 );
                 if (null === $originalPlannedDeletedGeometry) {
+                    $this->sessionLogHandler->warning(
+                        'Could not find geometry given: {geometry_info}.',
+                        ['geometry_info' => $layerGeometryDeletedConfig['base_geometry_info']]
+                    );
                     continue;
                 }
+                $planDelete = new PlanDelete();
+                // $planDelete is cascaded by $derivedLayer, so no persist needed
+                $derivedLayer->addPlanDelete($planDelete);
+                $plan->addPlanDelete($planDelete);
                 // $originalPlannedDeletedGeometry is cascaded by $planDelete (and vice versa), so no persist needed
                 $originalPlannedDeletedGeometry->addPlanDelete($planDelete);
             }

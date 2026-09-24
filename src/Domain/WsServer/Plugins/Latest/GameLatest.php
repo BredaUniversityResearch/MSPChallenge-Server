@@ -242,17 +242,17 @@ class GameLatest extends CommonBase
                         ->update('game')
                         ->set('game_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                 )
-                ->done(
+                ->then(
                     function (Result $result) use (&$tick, $assureGameLatestUpdate) {
                         $tick['lastupdate'] = microtime(true);
-                        $assureGameLatestUpdate->resolve();
+                        $assureGameLatestUpdate->resolve(null);
                     },
                     function ($reason) use ($assureGameLatestUpdate) {
                         $assureGameLatestUpdate->reject($reason);
                     }
                 );
             } else {
-                $assureGameLatestUpdate->resolve();
+                $assureGameLatestUpdate->resolve(null);
             }
             return $assureGameLatestUpdate->promise()
                 ->then(function () use ($tick, $showDebug) {
@@ -395,11 +395,18 @@ class GameLatest extends CommonBase
         $energy = new EnergyLatest();
         $this->asyncDataTransferTo($energy);
         $deferred = new Deferred();
-        $energy->fetchAll($this->allowEnergyKpiUpdate)->then(function (array $queryResults) use ($deferred) {
-            $energyData['connections'] = $queryResults[0]->fetchAllRows();
-            $energyData['output'] = $queryResults[1]->fetchAllRows();
-            $deferred->resolve($energyData);
-        });
+        $energy->fetchAll($this->allowEnergyKpiUpdate)->then(
+            function (array $queryResults) use ($deferred) {
+                $energyData['connections'] = $queryResults[0]->fetchAllRows();
+                $energyData['output'] = $queryResults[1]->fetchAllRows();
+                $deferred->resolve($energyData);
+            },
+            function (\Throwable $reason) use ($deferred) {
+                // without this, a rejection here would leave $deferred pending forever,
+                //   stalling the entire "latest" update for all clients
+                $deferred->reject($reason);
+            }
+        );
         return $deferred->promise()
             ->then(function (array $energyData) use ($context) {
                 if (($_ENV['DEBUG_PERF_TIMING'] ?? null) !== null) {
@@ -423,9 +430,16 @@ class GameLatest extends CommonBase
             $kpi->latest(
                 (int)$context[self::CONTEXT_PARAM_LAST_UPDATE_TIME],
                 $context[self::CONTEXT_PARAM_TEAM_ID]
-            )->then(function (array $queryResultRows) use ($deferred) {
-                $deferred->resolve($queryResultRows);
-            }) :
+            )->then(
+                function (array $queryResultRows) use ($deferred) {
+                    $deferred->resolve($queryResultRows);
+                },
+                function (\Throwable $reason) use ($deferred) {
+                    // without this, a rejection here would leave $deferred pending forever,
+                    //   stalling the entire "latest" update for all clients
+                    $deferred->reject($reason);
+                }
+            ) :
             resolveOnFutureTick($deferred, [
                 'ecology' => [],
                 'shipping' => [],

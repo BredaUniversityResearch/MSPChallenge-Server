@@ -247,6 +247,7 @@ class Game extends Base
         }
         /** @var LayerEntity[] $layers */
         $layers = $qb->getQuery()->getResult();
+        LayerEntity::preloadEcologyKpiValues($layers);
         $this->addLayerDependencies($layers);
         return collect($layers)->map(fn(LayerEntity $l) => $repo->normalise($l))->all();
     }
@@ -281,7 +282,7 @@ class Game extends Base
             $layerDependencies = [];
             if (in_array(
                 $layer->getLayerEditingType(),
-                ['transformer', 'socket', 'sourcepoint', 'sourcepolygon']
+                ['transformer', 'socket', 'sourcepoint', 'sourcepolygon', 'multitypesourcepolygon']
             ) &&
                 // find the corresponding green or grey cable layer
                 null !== $cableLayer = $cableLayers->first(
@@ -294,7 +295,7 @@ class Game extends Base
 
             if (in_array(
                 $layer->getLayerEditingType(),
-                ['sourcepoint', 'sourcepolygon']
+                ['sourcepoint', 'sourcepolygon', 'multitypesourcepolygon']
             ) &&
                 // find the corresponding green or grey cable layer
                 null !== $socketLayer = $socketLayers->first(
@@ -365,7 +366,8 @@ class Game extends Base
         $repo = $em->getRepository(GameEntity::class);
         $game = $repo->retrieve();
         $currentState = $game->getGameState();
-        if ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION) {
+        if (($currentState != $state) && // no need to throw error the current state is the same as the requested state
+            ($currentState == GameStateValue::END || $currentState == GameStateValue::SIMULATION)) {
             throw new Exception("Invalid current state of ".$currentState->value);
         }
         if ($currentState == GameStateValue::SETUP) {

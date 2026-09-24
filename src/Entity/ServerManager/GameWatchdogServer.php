@@ -17,10 +17,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[AppMappings\ReadonlyIDs([1])]
 #[AppMappings\Plurals('Watchdog server', 'Watchdog servers')]
-#[ORM\Table(name: 'game_watchdog_servers', uniqueConstraints: [
-    new ORM\UniqueConstraint(name: 'uq_server_id', columns: ['server_id']),
-    new ORM\UniqueConstraint(name: 'uq_scheme_address_port', columns: ['scheme', 'address', 'port']),
-])]
+#[ORM\Table(name: 'game_watchdog_servers')]
+#[ORM\UniqueConstraint(name: 'uq_server_id', columns: ['server_id'])]
+#[ORM\UniqueConstraint(name: 'uq_scheme_address_port', columns: ['scheme', 'address', 'port'])]
 #[ORM\Entity(repositoryClass: GameWatchdogServerRepository::class)]
 class GameWatchdogServer extends EntityBase implements WatchdogInterface
 {
@@ -38,12 +37,14 @@ class GameWatchdogServer extends EntityBase implements WatchdogInterface
     #[AppMappings\Property\TableColumn(label: "Server name")]
     #[Assert\NotBlank]
     #[ORM\Column(length: 128, unique: true)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $name = null;
 
     #[AppMappings\Property\TableColumn(label: "Fully-qualified URL")]
     #[Assert\NotBlank]
     #[AcmeAssert\Address]
     #[ORM\Column(length: 255, unique: true)]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $address = null;
 
     #[ORM\Column(options: ['default' => 80])]
@@ -88,6 +89,7 @@ class GameWatchdogServer extends EntityBase implements WatchdogInterface
 
     #[AppMappings\Property\TableColumn(action: true, toggleable: true, availability: true)]
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => 1])]
+    // @phpstan-ignore-next-line bool|null but database expects bool
     private ?bool $available = true;
 
     public function getName(): ?string

@@ -200,4 +200,20 @@ class SessionEntityRepository extends EntityRepository
         $this->serializer ??= new Serializer(normalizers: [$this->getNormalizer()]);
         return $this->serializer;
     }
+
+    public function withFilterSuspended(string $filterName, callable $callback): mixed
+    {
+        $filters = $this->getEntityManager()->getFilters();
+        $wasEnabled = $filters->isEnabled($filterName);
+        if ($wasEnabled) {
+            $filters->suspend($filterName);
+        }
+        try {
+            return $callback();
+        } finally {
+            if ($wasEnabled && $filters->isSuspended($filterName)) {
+                $filters->restore($filterName);
+            }
+        }
+    }
 }

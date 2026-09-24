@@ -5,7 +5,7 @@ services:
       - simulations
     volumes:
       - symfony_log:/var/log/symfony:ro
-      - fluent_bit_output:/fluent-bit/output:rw
+      - fluent_bit_output:/fluent-bit/output
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
       - supervisor_log:/var/log/supervisor:ro\
@@ -41,16 +41,21 @@ services:
       '--sql-mode=NO_ZERO_IN_DATE,NO_ZERO_DATE,NO_ENGINE_SUBSTITUTION',
       '--key-buffer-size=33554432',
       '--max-allowed-packet=33554432',
+      '--group-concat-max-len=33554432',
       '--sort-buffer-size=33554432',
       '--net-buffer-length=65536',
       '--read-buffer-size=1048576',
       '--read-rnd-buffer-size=16777216',
-      '--myisam-sort-buffer-size=67108864'
+      '--myisam-sort-buffer-size=67108864',
+      '--event-scheduler=ON'
     ]
     networks:
       - msp_network
     volumes:
       - mariadb_data:/var/lib/mysql
+      - mariadb_conf:/etc/mysql/mariadb.conf.d
+      - ./docker/database/init:/docker-entrypoint-initdb.d:ro
+      - ./docker/database/init:/always-initdb.d:ro
     logging:
       driver: "local"
 
@@ -63,18 +68,26 @@ services:
     volumes:
       - caddy_data:/data
       - caddy_config:/config
-      - ./var/docker/.bash_history:/root/.bash_history
-      - vendor_data:/app/vendor:rw
-      - node_modules_data:/app/node_modules:rw
-      - public_build_data:/app/public/build:rw
-      - symfony_log:/app/var/log:rw
+      - ./var/docker/:/host-history
+      - symfony_log:/app/var/log
       - /var/run/docker.sock:/var/run/docker.sock # to communicate with the Docker daemon
-      - supervisor_log:/var/log/supervisor:rw
+      - supervisor_log:/var/log/supervisor
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - session_log:/app/ServerManager/log:rw
+      - session_log:/app/ServerManager/log
+      - simulations_data:/app/simulations/linux-x64:ro
+      # No host volume mapping for speed!
+      #   To pull data OUT (e.g. to inspect or back up on host):
+      #     docker cp "$(docker compose ps -q php)":/app/raster/. ./raster/
+      #   To push existing host data IN (e.g. one-time migration onto this volume):
+      #     docker cp ./raster/. "$(docker compose ps -q php)":/app/raster/
+      #   Or, use Docker Desktop's container Files tab (right-click > Download/Upload).
+      - raster_data:/app/raster
+      - saves_data:/app/ServerManager/saves
+      - running_session_config_data:/app/running_session_config
     networks:
       - msp_network
     environment:
+      DB_PROCESS_NAME: ${DB_PROCESS_NAME:-web}
       SERVER_NAME: ${SERVER_NAME:-localhost}, localhost:80
       DOCKER: 1
       DATABASE_HOST: database
@@ -85,7 +98,7 @@ services:
       MERCURE_PUBLIC_URL: ${CADDY_MERCURE_PUBLIC_URL:-https://${SERVER_NAME:-localhost}:${HTTPS_PORT:-443}/.well-known/mercure}
       MERCURE_JWT_SECRET: ${CADDY_MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}
       # For /app/set_symfony_version.sh
-      SYMFONY_VERSION: ${SYMFONY_VERSION:-6.4}
+      SYMFONY_VERSION: ${SYMFONY_VERSION:-7.4}
       # Exposes BLACKFIRE_CLIENT_* environment variables allowing the client to communicate with Blackfire's API:
       BLACKFIRE_APM_ENABLED: ${BLACKFIRE_APM_ENABLED:-0}
       BLACKFIRE_CLIENT_ID: ${BLACKFIRE_CLIENT_ID:-}
@@ -119,6 +132,9 @@ services:
       AUTH_SERVER_SCHEME: ${AUTH_SERVER_SCHEME:-https}
       AUTH_SERVER_HOST: ${AUTH_SERVER_HOST:-auth2.mspchallenge.info}
       AUTH_SERVER_PORT: ${AUTH_SERVER_PORT:-443}
+    extra_hosts:
+      # Ensure that host.docker.internal is correctly defined on Linux
+      - host.docker.internal:host-gateway
     ports:
       # Websocket server
       - "${WS_SERVER_PORT:-45001}:${WS_SERVER_PORT:-45001}"
@@ -135,6 +151,7 @@ services:
       driver: "local"
 
   simulations:
+    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:latest
     ports:
       - "${WATCHDOG_PORT:-45000}:${WATCHDOG_PORT:-45000}"
     restart: always
@@ -147,6 +164,8 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    volumes:
+        - simulations_data:/app
     networks:
       - msp_network
 
@@ -155,16 +174,19 @@ services:
 ###< symfony/mercure-bundle ###
 
 volumes:
-  vendor_data:
-  node_modules_data:
-  public_build_data:
   mariadb_data:
+  mariadb_conf:
   caddy_data:
   caddy_config:
   symfony_log:
   fluent_bit_output:
   supervisor_log:
   session_log:
+  simulations_data:
+  raster_data:
+  saves_data:
+  configfiles_data:
+  running_session_config_data:
 ###> doctrine/doctrine-bundle ###
   db-data:
 ###< doctrine/doctrine-bundle ###

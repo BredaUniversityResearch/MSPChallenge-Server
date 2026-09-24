@@ -2,7 +2,7 @@
 
 namespace App\MessageHandler\GameSave;
 
-use App\Domain\API\v1\Game as GameAPI;
+use App\Domain\API\v1\Database;
 use App\Domain\Common\EntityEnums\GameSaveTypeValue;
 use App\Domain\Common\EntityEnums\GameSessionStateValue;
 use App\Domain\Common\EntityEnums\GameStateValue;
@@ -16,6 +16,7 @@ use App\Logger\GameSessionLogger;
 use App\Message\GameSave\GameSaveLoadMessage;
 use App\MessageHandler\GameList\CommonSessionHandler;
 use App\VersionsProvider;
+use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
@@ -26,13 +27,12 @@ use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use function App\rcopy;
-use function App\rrmdir;
 
 #[AsMessageHandler]
 class GameSaveLoadMessageHandler extends CommonSessionHandler
@@ -59,37 +59,49 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
      */
     public function __invoke(GameSaveLoadMessage $gameSave): void
     {
-        $this->setGameSessionAndDatabase($gameSave);
-        $this->gameSave = $this->mspServerManagerEntityManager->getRepository(GameSave::class)->find(
-            $gameSave->gameSaveId
-        ) ?? throw new Exception('Game save not found, so cannot continue.');
-        if ($this->gameSave->getSaveType() != GameSaveTypeValue::FULL) {
-            throw new Exception("Cannot reload a save of type {$this->gameSave->getSaveType()}");
-        }
         try {
-            $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
-            $this->sessionLogHandler->notice(
-                "Save reload into session {$this->gameSession->getName()} initiated. Please wait."
-            );
-            $this->openSaveZip();
-            $this->validateGameConfig($this->importSessionRunningConfig());
-            $this->setupSessionDatabase();
-            $this->importSessionDatabase();
-            $this->migrateSessionDatabase();
-            $this->importRasterStore();
-            $this->finaliseSaveLoad();
-            $this->sessionLogHandler->notice("Session {$this->gameSession->getName()} loaded and ready for use.");
-            $state = 'healthy';
-        } catch (\Throwable $e) {
-            $this->sessionLogHandler->error(
-                "Session {$this->gameSession->getName()} failed to create. {problem}",
-                ['problem' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
-            );
-            $state = 'failed';
+            $this->setGameSessionAndDatabase($gameSave);
+            $this->gameSave = $this->mspServerManagerEntityManager->getRepository(GameSave::class)->find(
+                $gameSave->gameSaveId
+            ) ?? throw new Exception('Game save not found, so cannot continue.');
+            if ($this->gameSave->getSaveType() != GameSaveTypeValue::FULL) {
+                throw new Exception("Cannot reload a save of type {$this->gameSave->getSaveType()}");
+            }
+            try {
+                $this->gameSessionLogFileHandler->empty($this->gameSession->getId());
+                $this->sessionLogHandler->notice(
+                    "Save reload into session {$this->gameSession->getName()} initiated. Please wait."
+                );
+                $this->openSaveZip();
+                $this->validateGameConfig($this->importSessionRunningConfig());
+                $this->setupSessionDatabase();
+                $this->importSessionDatabase();
+                $this->migrateSessionDatabase();
+                $this->refreshSessionEntityManagerAfterDatabaseReset();
+                $this->importRasterStore();
+                $this->finaliseSaveLoad();
+                $this->sessionLogHandler->notice("Session {$this->gameSession->getName()} loaded and ready for use.");
+                $state = 'healthy';
+            } catch (\Throwable $e) {
+                $this->sessionLogHandler->error(
+                    "Session {$this->gameSession->getName()} failed to create. {problem}",
+                    ['problem' => $e->getMessage(), 'trace' => $e->getTraceAsString()]
+                );
+                $state = 'failed';
+            }
+            $this->gameSession->setSessionState(new GameSessionStateValue($state));
+            $this->mspServerManagerEntityManager->persist($this->gameSession);
+            $this->mspServerManagerEntityManager->flush();
+        } catch (ConnectionException $e) {
+            if ((int) $e->getCode() === 1049) { // MySQL "Unknown database"
+                throw new UnrecoverableMessageHandlingException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw $e;
+        } finally {
+            $this->connectionManager->clearAndCloseDoctrineManagers();
+            Database::GetInstance($this->gameSession->getId())->Close();
+            $this->connectionManager->closeCachedAsyncGameSessionDbConnection($this->gameSession->getId());
         }
-        $this->gameSession->setSessionState(new GameSessionStateValue($state));
-        $this->mspServerManagerEntityManager->persist($this->gameSession);
-        $this->mspServerManagerEntityManager->flush();
     }
 
     /**
@@ -116,21 +128,83 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
      */
     private function importRasterStore(): void
     {
+        $rasterEntries = $this->getRasterEntryNames();
+        if (empty($rasterEntries)) {
+            $this->sessionLogHandler->debug('No raster entries found in save, nothing to unpack.');
+            $this->resetSessionRasterStore();
+            return;
+        }
+
+        // Recreates the destination (and its "archive" subfolder) empty, ready to receive files -
+        // no temp dir, no rename: entries are streamed straight to their final path below.
         $this->resetSessionRasterStore();
         $sessionRasterStore = $this->params->get('app.session_raster_dir').$this->gameSession->getId();
-        $sessionRasterStoreTemp = $this->params->get('app.session_raster_dir').'temp';
+
         $this->sessionLogHandler->info("Unpacking raster files...");
-        if (!$this->validator->getZipArchive()->extractTo($sessionRasterStoreTemp)) {
-            throw new Exception('ExtractTo failed.');
-        } else {
-            $this->sessionLogHandler->debug('ExtractTo succeeded.');
+        $this->extractRasterEntries($rasterEntries, $sessionRasterStore);
+        $this->sessionLogHandler->info("Raster files unpacked.");
+    }
+
+    /**
+     * ZipArchive::extractTo() always preserves each entry's full internal path, so extracting
+     * "raster/foo.tif" would land at "$destinationDir/raster/foo.tif", not "$destinationDir/foo.tif".
+     * There's no built-in option to strip that prefix, so entries are streamed individually instead.
+     *
+     * @param string[] $entries
+     * @throws Exception
+     */
+    private function extractRasterEntries(array $entries, string $destinationDir): void
+    {
+        $zipArchive = $this->validator->getZipArchive();
+        $fileSystem = new Filesystem();
+        $prefixLength = strlen('raster/');
+
+        foreach ($entries as $entryName) {
+            $relativePath = substr($entryName, $prefixLength);
+            if ($relativePath === '') {
+                continue; // the "raster/" directory entry itself - nothing to write
+            }
+            $destinationPath = $destinationDir.'/'.$relativePath;
+
+            // Directory entries in a zip end with "/" and have no content stream to read.
+            if (str_ends_with($entryName, '/')) {
+                $fileSystem->mkdir($destinationPath);
+                continue;
+            }
+
+            $fileSystem->mkdir(dirname($destinationPath));
+            $sourceStream = $zipArchive->getStream($entryName);
+            if ($sourceStream === false) {
+                throw new Exception("Could not open ZIP entry for reading: {$entryName}");
+            }
+            $destinationStream = fopen($destinationPath, 'wb');
+            if ($destinationStream === false) {
+                fclose($sourceStream);
+                throw new Exception("Could not open destination file for writing: {$destinationPath}");
+            }
+            stream_copy_to_stream($sourceStream, $destinationStream);
+            fclose($sourceStream);
+            fclose($destinationStream);
         }
-        $this->sessionLogHandler->info(
-            "Now moving all raster files to their proper place... This could take a bit longer."
-        );
-        rcopy($sessionRasterStoreTemp."/raster", $sessionRasterStore);
-        rrmdir($sessionRasterStoreTemp);
-        $this->sessionLogHandler->info("Raster files moved.");
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function getRasterEntryNames(): array
+    {
+        $zipArchive = $this->validator->getZipArchive();
+        $entries = [];
+        for ($i = 0; $i < $zipArchive->numFiles; $i++) {
+            $name = $zipArchive->getNameIndex($i);
+            if ($name === false) {
+                throw new Exception('Could not read ZIP entry name at index '.$i.'.');
+            }
+            if (str_starts_with($name, 'raster/')) {
+                $entries[] = $name;
+            }
+        }
+        return $entries;
     }
 
     /**
@@ -212,6 +286,7 @@ class GameSaveLoadMessageHandler extends CommonSessionHandler
             '--skip-ssl',
             ($_ENV['APP_ENV'] == 'test') ? $this->database.'_test' : $this->database
         ], $this->kernel->getProjectDir(), null, "source {$tempDumpFile}", 300);
+        $process->setEnv(['DB_PROCESS_NAME' => 'mysql_import']);
         $process->mustRun(fn($type, $buffer) => $this->sessionLogHandler->info($buffer));
         // as usually nothing comes out of the buffer...
         $this->sessionLogHandler->debug('Session database dump import attempt completed.');

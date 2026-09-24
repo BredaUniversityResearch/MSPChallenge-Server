@@ -34,7 +34,7 @@ class FleetFilterPolicyData extends FilterBasePolicyData
         if (!is_array($otherItem->fleets)) {
             return false; // there seems to be a setup for a filter, but the value is not an array, so do not match
         }
-        return empty(array_diff($otherItem->fleets, $this->fleets ?? []));
+        return empty(array_diff($otherItem->fleets, $this->fleets));
     }
 
     /**

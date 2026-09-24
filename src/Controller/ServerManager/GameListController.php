@@ -26,7 +26,10 @@ use App\Message\GameSave\GameSaveCreationMessage;
 use App\Message\Watchdog\Message\GameStateChangedMessage;
 use App\Entity\SessionAPI\Game;
 use App\Entity\SessionAPI\Watchdog;
+use App\Repository\ServerManager\GameListRepository;
 use App\Repository\SessionAPI\GameRepository;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use App\Repository\SessionAPI\WatchdogRepository;
 use App\VersionsProvider;
 use Exception;
@@ -38,7 +41,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -64,14 +67,89 @@ class GameListController extends BaseController
     public function gameList(
         VersionsProvider $provider,
         Request $request,
+        CacheInterface $resultsCache,
         string $sessionState = 'public'
     ): Response {
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
-        $gameList = $entityManager->getRepository(GameList::class)->findBySessionState($sessionState);
+        /** @var GameListRepository $repo */
+        $repo = $entityManager->getRepository(GameList::class);
+        $gameList = $repo->findBySessionState($sessionState);
+        $connectionStats = $this->getConnectionStats($resultsCache);
+        $this->enrichGameListWithConnectionStats($connectionStats, $gameList);
         if (is_null($request->headers->get('Turbo-Frame'))) {
             return $this->gameClientJson($provider, $request, $gameList);
         }
-        return $this->render('manager/GameList/gamelist.html.twig', ['sessionslist' => $gameList]);
+        return $this->render('manager/GameList/gamelist.html.twig', [
+            'sessionslist' => $gameList
+        ]);
+    }
+
+    private function getConnectionStats(CacheInterface $resultsCache): array
+    {
+        try {
+            return $resultsCache->get('gamelist.connection_stats', function (ItemInterface $item): array {
+                $item->expiresAfter(10);
+
+                $conn = null;
+                try {
+                    $conn = $this->connectionManager->createDbConnection(
+                        $this->connectionManager->getServerManagerDbName()
+                    );
+                    return $conn->executeQuery(<<<'SQL'
+SELECT
+    IFNULL(ct.process_name, CONCAT('unknown_', pl.ID)) as process,
+    pl.db,
+    pl.TIME as duration
+FROM information_schema.PROCESSLIST pl
+LEFT JOIN msp_tracker.connection ct ON pl.ID = ct.connection_id
+WHERE pl.db IS NOT NULL
+ORDER BY ct.last_heartbeat DESC
+SQL)->fetchAllAssociative();
+                } finally {
+                    $conn?->close();
+                }
+            });
+        } catch (\Throwable) {
+            // Diagnostics must never break the overview page, and a thrown
+            // callback means the cache pool does not store anything for this key.
+            return [];
+        }
+    }
+
+    /**
+     * Merge current connection counts per session (from SHOW PROCESSLIST) into the session list.
+     */
+    private function enrichGameListWithConnectionStats(array $connectionStats, array &$gameList): void
+    {
+        if (empty($gameList)) {
+            return; // nothing to enrich
+        }
+        $connectionCountByDbName = [];
+        $sessionDbRegex = $this->getSessionDbRegex();
+        foreach ($connectionStats as $row) {
+            $dbName = (string) ($row['db'] ?? '');
+            if ($dbName === '') {
+                continue;
+            }
+            if (preg_match($sessionDbRegex, $dbName) !== 1) {
+                continue;
+            }
+            $connectionCountByDbName[$dbName] = ($connectionCountByDbName[$dbName] ?? 0) + 1;
+        }
+        foreach ($gameList as $index => $session) {
+            assert($session['id'] > 0);
+            $dbName = $this->connectionManager->getGameSessionDbName($session['id'] ?? 0);
+            $session['session_db_name'] = $dbName;
+            $session['session_connection_count'] = $connectionCountByDbName[$dbName] ?? 0;
+            $gameList[$index] = $session;
+        }
+    }
+
+
+    private function getSessionDbRegex(): string
+    {
+        $prefix = preg_quote($this->connectionManager->getSessionDbNamePrefix(), '/');
+        return '/^'.$prefix.'\d+(?:_test)?$/';
     }
 
     /**
@@ -129,7 +207,7 @@ class GameListController extends BaseController
     ): Response {
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
-        $gameSession->setName($request->get('name'));
+        $gameSession->setName($request->request->get('name'));
         $errors = $validator->validate($gameSession);
         if (count($errors) > 0) {
             return new Response(null, 422);
@@ -153,10 +231,10 @@ class GameListController extends BaseController
             $em = $connectionManager->getGameSessionEntityManager($sessionId);
             /** @var WatchdogRepository $watchdogRepo */
             $watchdogRepo = $em->getRepository(Watchdog::class);
-
-            $em->getFilters()->disable('softdeleteable');
-            $watchdog = $watchdogRepo->find($watchdogId);
-            $em->getFilters()->enable('softdeleteable');
+            $watchdog = $watchdogRepo->withFilterSuspended(
+                'softdeleteable',
+                fn() => $watchdogRepo->find($watchdogId)
+            );
             if (null === $watchdog) {
                 throw new NotFoundHttpException('Watchdog not found');
             }
@@ -244,9 +322,12 @@ class GameListController extends BaseController
         $gameSession = $entityManager->getRepository(GameList::class)->find($sessionId);
         try {
             $em = $connectionManager->getGameSessionEntityManager($sessionId);
-            $em->getFilters()->disable('softdeleteable');
-            $watchdogs = $em->getRepository(Watchdog::class)->findAll();
-            $em->getFilters()->enable('softdeleteable');
+            /** @var WatchdogRepository $watchdogRepo */
+            $watchdogRepo = $em->getRepository(Watchdog::class);
+            $watchdogs = $watchdogRepo->withFilterSuspended(
+                'softdeleteable',
+                fn() => $watchdogRepo->findAll()
+            );
         } catch (Exception $e) {
             $watchdogs = [];
         }
@@ -281,6 +362,17 @@ class GameListController extends BaseController
             $logArray = array_slice($logArray, -5);
         }
         $logArray = array_map(fn($line) => json_decode($line, true), $logArray);
+        foreach ($logArray as &$log) {
+            if (!isset($log['message']) || !isset($log['context']) || !is_array($log['context'])) {
+                continue;
+            }
+            $replacements = [];
+            foreach ($log['context'] as $key => $value) {
+                $replacements['{' . $key . '}'] = json_encode($value);
+            }
+            $log['message'] = strtr($log['message'], $replacements);
+        }
+        unset($log);
         return $this->render('manager/GameList/gamelist_log.html.twig', [
             'type' => $type,
             'logToastBody' => $logArray

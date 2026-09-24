@@ -1,0 +1,212 @@
+{
+    "type": "project",
+    "license": "proprietary",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "suggest": {
+        "ext-imagick": "You only require imagick for image processing, e.g. for POV config creation."
+    },
+    "require": {
+        "php": ">=8.4",
+        "ext-ctype": "*",
+        "ext-curl": "*",
+        "ext-iconv": "*",
+        "ext-intl": "*",
+        "ext-json": "*",
+        "ext-openssl": "*",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*",
+        "ext-sodium": "*",
+        "ext-zip": "*",
+        "api-platform/doctrine-orm": "^4.3.18",
+        "api-platform/symfony": "^4.3.18",
+        "blackfire/php-sdk": "^2.6",
+        "cboden/ratchet": "dev-master",
+        "clue/http-proxy-react": "^1.9",
+        "doctrine/annotations": "^2.0.2",
+        "doctrine/dbal": "^3.10.6",
+        "doctrine/doctrine-bundle": "^2.19.1",
+        "doctrine/doctrine-fixtures-bundle": "^4.3.1",
+        "doctrine/doctrine-migrations-bundle": "^3.7.1",
+        "doctrine/orm": "^3.7.0",
+        "drift/dbal": "dev-master",
+        "dunglas/doctrine-json-odm": "^1.5",
+        "gasparesganga/php-shapefile": "^3.4.1",
+        "illuminate/collections": "^11.51",
+        "jfcherng/php-diff": "^6.16.2",
+        "justinrainbow/json-schema": "^6.12",
+        "knplabs/knp-menu-bundle": "^3.7",
+        "lcobucci/jwt": "^5.6",
+        "league/commonmark": "^2.10",
+        "lexik/jwt-authentication-bundle": "^3.2",
+        "nelmio/api-doc-bundle": "^5.12.1",
+        "nelmio/cors-bundle": "^2.6.1",
+        "phpdocumentor/reflection-docblock": "^5.6.7",
+        "phpstan/phpdoc-parser": "^2.3.5",
+        "phpunit/phpunit": "^9.6.36",
+        "predis/predis": "^2.4.1",
+        "react/http": "^1.11.1",
+        "react/mysql": "^0.6.0",
+        "react/promise": "^3.3",
+        "shivas/versioning-bundle": "^4.2",
+        "stof/doctrine-extensions-bundle": "^1.15.3",
+        "swaggest/json-schema": "^0.12.43",
+        "symfony/asset": ">=7.4.8",
+        "symfony/asset-mapper": ">=7.4.17",
+        "symfony/browser-kit": ">=7.4.17",
+        "symfony/console": ">=7.4.18",
+        "symfony/css-selector": ">=7.4.18",
+        "symfony/doctrine-messenger": ">=7.4.18",
+        "symfony/dotenv": ">=7.4.18",
+        "symfony/expression-language": ">=7.4.18",
+        "symfony/filesystem": ">=7.4.18",
+        "symfony/finder": ">=7.4.17",
+        "symfony/flex": "^2.11",
+        "symfony/form": ">=7.4.18",
+        "symfony/framework-bundle": ">=7.4.18",
+        "symfony/http-client": ">=7.4.18",
+        "symfony/intl": ">=7.4.17",
+        "symfony/mailer": ">=7.4.17",
+        "symfony/messenger": ">=7.4.18",
+        "symfony/mime": ">=7.4.18",
+        "symfony/monolog-bundle": "^3.11.2",
+        "symfony/notifier": ">=7.4.8",
+        "symfony/phpunit-bridge": "^7.4.8",
+        "symfony/polyfill-deepclone": "^1.42",
+        "symfony/process": ">=7.4.18",
+        "symfony/property-access": ">=7.4.16",
+        "symfony/property-info": ">=7.4.18",
+        "symfony/runtime": ">=7.4.13",
+        "symfony/security-bundle": ">=7.4.18",
+        "symfony/serializer": ">=7.4.18",
+        "symfony/stimulus-bundle": "^2.36",
+        "symfony/string": ">=7.4.15",
+        "symfony/translation": ">=7.4.17",
+        "symfony/twig-bundle": ">=7.4.15",
+        "symfony/uid": ">=7.4.17",
+        "symfony/ux-turbo": "^2.36",
+        "symfony/validator": ">=7.4.18",
+        "symfony/web-link": ">=7.4.8",
+        "symfony/webpack-encore-bundle": "^2.4",
+        "symfony/yaml": ">=7.4.18",
+        "twig/extra-bundle": "^2.12|^3.24",
+        "twig/twig": "^2.12|^3.28.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "php-http/discovery": true,
+            "symfony/flex": true,
+            "symfony/runtime": true,
+            "phpstan/extension-installer": true
+        },
+        "bump-after-update": true,
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": [
+                "src/",
+                "src-symfony7.4/"
+            ],
+            "App\\Domain\\API\\": "api",
+            "DoctrineMigrations\\": "migrations/src/",
+            "ServerManager\\": "ServerManager/classes/",
+            "App\\Tests\\": "tests/",
+            "App\\DataFixtures\\": "fixtures/"
+        },
+        "files": [
+            "src/helpers.php",
+            "src/functions.php",
+            "src/Domain/WsServer/functions.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Tests\\": "tests/",
+	        "App\\DataFixtures\\": "fixtures/"
+        }
+    },
+    "replace": {
+        "symfony/polyfill-ctype": "*",
+        "symfony/polyfill-iconv": "*",
+        "symfony/polyfill-php72": "*",
+        "symfony/polyfill-php73": "*",
+        "symfony/polyfill-php74": "*",
+        "symfony/polyfill-php80": "*",
+        "symfony/polyfill-php81": "*",
+        "symfony/polyfill-php82": "*"
+    },
+    "scripts": {
+        "auto-scripts": {
+            "cache:clear": "symfony-cmd"
+        },
+        "post-install-cmd": [
+            "App\\Composer\\ScriptHandler::clearDoctrineMetadataCache",
+            "@auto-scripts",
+            "bash tools/cghooks-fresh-install.sh"
+        ],
+        "post-update-cmd": [
+            "App\\Composer\\ScriptHandler::clearDoctrineMetadataCache",
+            "@auto-scripts",
+            "bash tools/cghooks-fresh-install.sh"
+        ],
+        "cghooks": "vendor/bin/cghooks"
+    },
+    "conflict": {
+        "symfony/symfony": "*"
+    },
+    "extra": {
+        "hooks": {
+            "config": {
+                "stop-on-failure": ["pre-push"]
+            },
+            "post-merge": [
+                "bash install.sh"
+            ],
+            "pre-push": [
+                "bash test.sh",
+                "vendor/bin/phpstan analyse --memory-limit=1G"
+            ]
+        },
+        "symfony": {
+            "allow-contrib": false,
+            "require": "7.4.*"
+        },
+        "symfony/flex": {
+            "synchronize_package_json": false
+        }
+    },
+    "require-dev": {
+        "brainmaestro/composer-git-hooks": "dev-master",
+        "doctrine/doctrine-fixtures-bundle": "^4.3.1",
+        "jetbrains/phpstorm-attributes": "^1.3",
+        "phpstan/extension-installer": "^1.4.3",
+        "phpstan/phpstan": "^2.2.13",
+        "phpstan/phpstan-deprecation-rules": "^2.0.5",
+        "phpstan/phpstan-doctrine": "^2.0.28",
+        "phpstan/phpstan-symfony": "^2.0.20",
+        "phpunit/phpunit": "^9.6.36",
+        "squizlabs/php_codesniffer": "^3.13.6",
+        "symfony/browser-kit": ">=7.4.17",
+        "symfony/css-selector": ">=7.4.18",
+        "symfony/debug-bundle": ">=7.4.8",
+        "symfony/maker-bundle": "^1.67",
+        "symfony/phpunit-bridge": "^7.4.18",
+        "symfony/stopwatch": ">=7.4.8",
+        "symfony/web-profiler-bundle": ">=7.4.17"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/BredaUniversityResearch/composer-git-hooks.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/BredaUniversityResearch/Ratchet.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/BredaUniversityResearch/reactphp-dbal.git"
+        }
+    ]
+}

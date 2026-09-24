@@ -50,12 +50,12 @@ class DoctrineMigrationsDependencyFactoryHelper
             // implement abstract methods here
             protected function getService(string $name): Connection
             {
-                return ConnectionManager::getInstance()->getCachedDbConnection($name);
+                return ConnectionManager::getInstance()->createDbConnection($name);
             }
 
-            protected function resetService(string $name): Connection
+            protected function resetService(string $name): void
             {
-                return ConnectionManager::getInstance()->getCachedDbConnection($name);
+                // no reset logic needed for this example
             }
         };
 

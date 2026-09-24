@@ -11,7 +11,7 @@ use Exception;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/api/{layer}', requirements: ['layer' => '[lL]ayer'])]
 #[OA\Tag(name: 'Layer', description: 'Operations related to layer management')]
@@ -861,6 +861,7 @@ class LayerController extends BaseController
         if (false === $imageData = base64_decode($request->request->get('image_data'), true)) {
             return new MessageJsonResponse(status: 400, message: 'Invalid image data');
         }
+        $logs = [];
         try {
             $layer = new Layer();
             $layer->setGameSessionId($this->getSessionIdFromRequest($request));
@@ -870,6 +871,7 @@ class LayerController extends BaseController
                 $rasterBounds,
                 $month
             );
+            $logs = $layer->getLogMessages();
         } catch (Exception $e) {
             return new MessageJsonResponse(status: $e->getCode() ?: 500, message: $e->getMessage());
         }

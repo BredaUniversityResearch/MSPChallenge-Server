@@ -23,7 +23,10 @@ class Geometry
     #[ORM\JoinColumn(name: 'geometry_persistent', referencedColumnName: 'geometry_id')]
     private ?Geometry $originalGeometry;
 
-    #[ORM\OneToMany(mappedBy: 'originalGeometry', targetEntity: Geometry::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, Geometry>
+     */
+    #[ORM\OneToMany(targetEntity: Geometry::class, mappedBy: 'originalGeometry', cascade: ['persist'])]
     private Collection $derivedGeometry;
 
     #[ORM\Column(type: Types::STRING, length: 75, nullable: true)]
@@ -42,9 +45,13 @@ class Geometry
     private ?Country $country;
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 1])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $geometryActive = 1;
 
-    #[ORM\OneToMany(mappedBy: 'geometryToSubtractFrom', targetEntity: Geometry::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, Geometry>
+     */
+    #[ORM\OneToMany(targetEntity: Geometry::class, mappedBy: 'geometryToSubtractFrom', cascade: ['persist'])]
     private Collection $geometrySubtractives;
 
     /** Many Categories have One Category. */
@@ -53,9 +60,11 @@ class Geometry
     private ?Geometry $geometryToSubtractFrom = null;
 
     #[ORM\Column(type: Types::STRING, length: 75, options: ['default' => '0'])]
+    // @phpstan-ignore-next-line string|null but database expects string
     private ?string $geometryType = '0';
 
     #[ORM\Column(type: Types::SMALLINT, length: 1, options: ['default' => 0])]
+    // @phpstan-ignore-next-line int|null but database expects int
     private ?int $geometryDeleted = 0;
 
     #[ORM\Column(type: Types::STRING, length: 16, nullable: true)]
@@ -65,24 +74,45 @@ class Geometry
     #[ORM\JoinColumn(name: 'geometry_layer_id', referencedColumnName: 'layer_id')]
     private ?Layer $layer;
 
-    #[ORM\OneToMany(mappedBy: 'geometry', targetEntity: PlanDelete::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, PlanDelete>
+     */
+    #[ORM\OneToMany(targetEntity: PlanDelete::class, mappedBy: 'geometry', cascade: ['persist'])]
     private Collection $planDelete;
 
-    #[ORM\OneToMany(mappedBy: 'startGeometry', targetEntity: EnergyConnection::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, EnergyConnection>
+     */
+    #[ORM\OneToMany(targetEntity: EnergyConnection::class, mappedBy: 'startGeometry', cascade: ['persist'])]
     private Collection $energyConnectionStart;
 
-    #[ORM\OneToMany(mappedBy: 'endGeometry', targetEntity: EnergyConnection::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, EnergyConnection>
+     */
+    #[ORM\OneToMany(targetEntity: EnergyConnection::class, mappedBy: 'endGeometry', cascade: ['persist'])]
     private Collection $energyConnectionEnd;
 
-    #[ORM\OneToMany(mappedBy: 'cableGeometry', targetEntity: EnergyConnection::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, EnergyConnection>
+     */
+    #[ORM\OneToMany(targetEntity: EnergyConnection::class, mappedBy: 'cableGeometry', cascade: ['persist'])]
     private Collection $energyConnectionCable;
 
-    #[ORM\OneToMany(mappedBy: 'geometry', targetEntity: EnergyOutput::class, cascade: ['persist'])]
+    /**
+     * @var Collection<int, EnergyOutput>
+     */
+    #[ORM\OneToMany(targetEntity: EnergyOutput::class, mappedBy: 'geometry', cascade: ['persist'])]
     private Collection $energyOutput;
 
+    /**
+     * @var Collection<int, Grid>
+     */
     #[ORM\ManyToMany(targetEntity: Grid::class, mappedBy: 'sourceGeometry', cascade: ['persist'])]
     private Collection $sourceForGrid;
 
+    /**
+     * @var Collection<int, Grid>
+     */
     #[ORM\ManyToMany(targetEntity: Grid::class, mappedBy: 'socketGeometry', cascade: ['persist'])]
     private Collection $socketForGrid;
 
@@ -675,7 +705,7 @@ class Geometry
                 break;
             default:
                 throw new \RuntimeException(
-                    'Encountered unexpected layer geo type: '.($layer->getLayerGeoType()?->value ?? 'empty')
+                    'Encountered unexpected layer geo type: '.($layer->getLayerGeoType()->value ?? 'empty')
                 );
         }
         return $jsonArray;

@@ -28,7 +28,7 @@ class LayerRepository extends SessionEntityRepository
             $layer = $this->getLayerCurrentAndPlannedGeometry($layer['layerId']);
             if (!is_null($layer)) {
                 $layerReturn[$layer->getLayerName()] = [
-                    'layerGeoType' => $layer->getLayerGeoType()?->value ?? '',
+                    'layerGeoType' => $layer->getLayerGeoType()->value ?? '',
                     'geometry' => $layer->exportToDecodedGeoJSON()
                 ];
             }

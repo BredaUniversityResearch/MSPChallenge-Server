@@ -14,8 +14,11 @@ use Lcobucci\JWT\Token\Parser;
 use Lcobucci\JWT\UnencryptedToken;
 use Lcobucci\JWT\Validation\Constraint\LooseValidAt;
 use Lcobucci\JWT\Validation\Validator;
+use Symfony\Component\Clock\Clock;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -48,7 +51,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
      */
     public function supports(Request $request): ?bool
     {
-        return true;
+        return $request->attributes->get('_route') !== 'manager_logout';
     }
 
     /**
@@ -57,7 +60,8 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
     public function authenticate(Request $request): Passport
     {
         // get the token from Session or GET
-        $apiToken = $request->get('token') ?? $request->getSession()->get('token') ?? null;
+        $queryToken = $request->query->get('token') ?? $request->request->get('token');
+        $apiToken = $queryToken ?? $request->getSession()->get('token') ?? null;
         if (empty($apiToken)) {
             throw new MSPAuth2RedirectException();
         }
@@ -67,7 +71,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
             /** @var UnencryptedToken $unencryptedToken */
             $unencryptedToken = $parser->parse($apiToken);
             $validator = new Validator();
-            $validator->assert($unencryptedToken, new LooseValidAt(new FrozenClock(new \DateTimeImmutable())));
+            $validator->assert($unencryptedToken, new LooseValidAt(new Clock()));
         } catch (Exception $e) {
             $request->getSession()->remove('token');
             throw new MSPAuth2RedirectException();
@@ -100,6 +104,20 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         // add token to session storage if still required
         if ($request->getSession()->get('token') !== $apiToken) {
             $request->getSession()->set('token', $apiToken);
+        }
+        // a genuine fresh SSO round-trip (token via query/POST) - detect if it switched identity
+        if ($queryToken !== null) {
+            $previousUsername = $request->getSession()->get('authenticated_username');
+            if ($previousUsername && $previousUsername !== $user->getUsername()) {
+                $session = $request->getSession();
+                if ($session instanceof FlashBagAwareSessionInterface) {
+                    $session->getFlashBag()->add(
+                        'notice',
+                        sprintf('You are now logged in as %s (previously %s).', $user->getUsername(), $previousUsername)
+                    );
+                }
+            }
+            $request->getSession()->set('authenticated_username', $user->getUsername());
         }
         // UserBadge parameters are to get Symfony to continue, second is the actual user object
         return new SelfValidatingPassport(
@@ -186,7 +204,19 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        // on success, let the request continue
+        // if the token arrived via query string, redirect to the same URL without it,
+        // so the JWT doesn't linger in the address bar / browser history
+        if ($request->query->has('token') && $request->isMethod('GET')) {
+            $cleanUrl = $request->getPathInfo();
+            $remainingQuery = $request->query->all();
+            unset($remainingQuery['token']);
+            if (!empty($remainingQuery)) {
+                $cleanUrl .= '?' . http_build_query($remainingQuery);
+            }
+
+            return new RedirectResponse($cleanUrl);
+        }
+
         return null;
     }
 
@@ -196,7 +226,7 @@ class MSPAuth2Authenticator extends AbstractAuthenticator implements Authenticat
         throw new AccessDeniedHttpException($exception->getMessage());
     }
 
-    public function start(Request $request, AuthenticationException $authException = null): Response
+    public function start(Request $request, ?AuthenticationException $authException = null): Response
     {
         // not returning a Response here just to keep the code cleaner
         // redirect to auth2.mspchallenge.info by means of throwing an Exception that is listened to

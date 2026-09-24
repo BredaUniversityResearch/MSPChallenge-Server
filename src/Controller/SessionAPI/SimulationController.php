@@ -9,6 +9,7 @@ use App\Domain\Services\SimulationHelper;
 use App\Entity\SessionAPI\Simulation;
 use App\Entity\SessionAPI\Watchdog;
 use App\Repository\SessionAPI\SimulationRepository;
+use App\Repository\SessionAPI\WatchdogRepository;
 use Doctrine\ORM\EntityNotFoundException;
 use Exception;
 use OpenApi\Attributes as OA;
@@ -707,17 +708,18 @@ class SimulationController extends BaseController
             return new MessageJsonResponse(status: Response::HTTP_BAD_REQUEST, message: $e->getMessage());
         }
         $em = ConnectionManager::getInstance()->getGameSessionEntityManager($this->getSessionIdFromRequest($request));
-        $em->getFilters()->disable('softdeleteable');
-        if (null === $watchdog =
-            $em->getRepository(Watchdog::class)->findOneBy(['serverId' => $watchdogServerId])
-        ) {
-            $em->getFilters()->enable('softdeleteable');
+        /** @var WatchdogRepository $watchdogRepo */
+        $watchdogRepo = $em->getRepository(Watchdog::class);
+        $watchdog = $watchdogRepo->withFilterSuspended(
+            'softdeleteable',
+            fn() => $watchdogRepo->findOneBy(['serverId' => $watchdogServerId])
+        );
+        if (null === $watchdog) {
             return new MessageJsonResponse(
                 status: Response::HTTP_NOT_FOUND,
                 message: 'Could not find watchdog with server id: '.$watchdogServerId->toRfc4122()
             );
         }
-        $em->getFilters()->enable('softdeleteable');
         return new JsonResponse(['watchdog_token' => $watchdog->getToken()]);
     }
 }

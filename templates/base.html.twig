@@ -17,10 +17,11 @@
             <div id="header">
                 <div id="logo-wrapper">
                     <div id="logo">
-                        <img src="{{ asset('build/images/MSP_Challenge_Icon-037c7c.png') }}"  alt="MSP Challenge logo"/>
+                        <a href="{{ path('manager') }}"><img src="{{ asset('build/images/MSP_Challenge_Icon-037c7c.png') }}" alt="MSP Challenge logo"/>
                         {% if block('title') is defined %}
                             {{ block('title') }}
                         {% endif %}
+                        </a>
                     </div>
                 </div>
                 <div id="menu">
@@ -63,6 +64,7 @@
             <div id="footer">
                 <div>MSP Challenge Server version {{ version }}</div>
                 <div>Server address: {{ address }}</div>
+                <div><a href="{{ path('manager_terms') }}"><i class="fa fa-gavel"></i> Terms of Service</a></div>
             </div>
             <div id="footer">
                 MSP Challenge is a community-based, open source and not for profit initiative, since 2011.

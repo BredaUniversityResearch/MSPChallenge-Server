@@ -149,7 +149,7 @@ class GameTick extends TickBase
                 $this->getStopwatch()?->stop($context?->getPath());
                 if ($result->fetchCount() == 0) { // all simulations are up-to-date
                     return $this->serverTickInternal($showDebug, $context)
-                        ->otherwise(function (SilentFailException $e) {
+                        ->catch(function (SilentFailException $e) {
                             // Handle the rejection, and don't propagate. This is like catch without a rethrow
                             return null;
                         });
@@ -197,7 +197,7 @@ class GameTick extends TickBase
         $connection->query(
             $qb->select('demo_session')->from('game_list')
                 ->where($qb->expr()->eq('id', $this->getGameSessionId()))
-        )->done(function (Result $result) {
+        )->then(function (Result $result) {
             $row = $result->fetchFirstRow() ?? [];
             if (!isset($row['demo_session']) || $row['demo_session'] == 0) {
                 return;
@@ -211,7 +211,7 @@ class GameTick extends TickBase
     /**
      * @throws Exception
      */
-    private function serverTickInternal(bool $showDebug, ?Context $context): Promise
+    private function serverTickInternal(bool $showDebug, ?Context $context): PromiseInterface
     {
         $context = $context?->enter('serverTickInternal');
         $this->getStopwatch()?->start($context?->getPath());
@@ -322,10 +322,9 @@ class GameTick extends TickBase
             //Entire game is done.
             return $this->getAsyncDatabase()->query(
                 $qb
-                    ->set(
-                        'game_transition_state',
-                        $qb->createPositionalParameter($tick['transition_state'] ?? $tick['state'])
-                    )
+                    // don't set the transition state or month, as the game is over
+                    ->set('game_transition_state', 'NULL')
+                    ->set('game_transition_month', 'NULL')
                     ->set('game_state', $qb->createPositionalParameter(GameStateValue::END->value))
             )
             ->then(function (/*Result $result*/) use ($currentMonth) {
@@ -359,7 +358,7 @@ class GameTick extends TickBase
             ) ||
             $monthsDone >= $tick['era_time']) {
             //simulation is done, reset everything to start a new play phase
-            $era = floor($currentMonth / $tick['era_time']);
+            $era = (int)floor($currentMonth / $tick['era_time']);
             $era_realtime = explode(',', $tick['planning_era_realtime']);
             return $this->getAsyncDatabase()->query(
                 $qb

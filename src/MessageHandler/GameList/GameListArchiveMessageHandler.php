@@ -2,6 +2,7 @@
 
 namespace App\MessageHandler\GameList;
 
+use App\Domain\API\v1\Database;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Services\ConnectionManager;
@@ -11,6 +12,7 @@ use App\Entity\ServerManager\GameList;
 use App\Logger\GameSessionLogger;
 use App\Message\GameList\GameListArchiveMessage;
 use App\VersionsProvider;
+use Doctrine\DBAL\Exception\ConnectionException;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
@@ -18,6 +20,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -50,18 +53,29 @@ class GameListArchiveMessageHandler extends CommonSessionHandler
      */
     public function __invoke(GameListArchiveMessage $gameList): void
     {
-        $this->setGameSessionAndDatabase($gameList);
-        $this->database = $this->connectionManager->getGameSessionDbName($gameList->id);
-        $this->entityManager = $this->connectionManager->getGameSessionEntityManager($gameList->id);
-        $this->gameSession = new GameList($gameList->id);
-        $this->watchdogCommunicator->changeState(
-            $this->gameSession->getId(),
-            GameStateValue::END,
-            $this->gameSession->getGameCurrentMonth()
-        );
-        $this->removeSessionRasterStore();
-        (new Filesystem())->remove($this->params->get('app.session_config_dir').
-            sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId()));
-        $this->dropSessionDatabase();
+        try {
+            $this->setGameSessionAndDatabase($gameList);
+            $this->database = $this->connectionManager->getGameSessionDbName($gameList->id);
+            $this->entityManager = $this->connectionManager->getGameSessionEntityManager($gameList->id);
+            $this->gameSession = new GameList($gameList->id);
+            $this->watchdogCommunicator->changeState(
+                $this->gameSession->getId(),
+                GameStateValue::END,
+                $this->gameSession->getGameCurrentMonth()
+            );
+            $this->removeSessionRasterStore();
+            (new Filesystem())->remove($this->params->get('app.session_config_dir').
+                sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId()));
+            $this->dropSessionDatabase();
+        } catch (ConnectionException $e) {
+            if ((int) $e->getCode() === 1049) { // MySQL "Unknown database"
+                throw new UnrecoverableMessageHandlingException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw $e;
+        } finally {
+            $this->connectionManager->clearAndCloseDoctrineManagers();
+            Database::GetInstance($this->gameSession->getId())->Close();
+            $this->connectionManager->closeCachedAsyncGameSessionDbConnection($this->gameSession->getId());
+        }
     }
 }

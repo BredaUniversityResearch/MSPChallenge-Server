@@ -2,12 +2,12 @@ services:
   php:
     image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest
     volumes:
-      - ./running_session_config/:/app/running_session_config
-      - ./raster/:/app/raster
-      - ./session_archive/:/app/session_archive
+      # Only defined here (not in the shared docker-compose.yml) because the prod/staging
+      # image bakes ServerManager/configfiles into the image at build time (see Dockerfile),
+      # so a fresh named volume gets correctly seeded with those defaults on first creation.
+      # Dev has no such baked-in content - it relies entirely on the ./:/app bind mount for
+      # source, so the same volume here would just shadow the real files with an empty one.-
       - configfiles_data:/app/ServerManager/configfiles
-      - ./ServerManager/session_archive/:/app/ServerManager/session_archive
-      - ./ServerManager/saves/:/app/ServerManager/saves
       - ./public/downloads/:/app/public/downloads
       - /app/var/cache
       - ./.secrets:/app/.secrets
@@ -28,9 +28,3 @@ services:
       - target: 80
         published: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
         protocol: tcp
-
-  simulations:
-    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-simulations:latest
-
-volumes:
-  configfiles_data:

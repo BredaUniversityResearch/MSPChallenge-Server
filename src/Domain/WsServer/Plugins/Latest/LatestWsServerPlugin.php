@@ -54,12 +54,9 @@ class LatestWsServerPlugin extends Plugin
                     }
                     $this->addOutput(json_encode($payloadContainer));
                 })
-                ->otherwise(function ($reason) {
-                    $context = [];
-                    if ($reason instanceof \Throwable) {
-                        $context['exception'] = $reason;
-                    }
-                    $this->getLogger()?->error($reason, $context);
+                ->catch(function (\Throwable $reason) {
+                    $context['exception'] = $reason;
+                    $this->getLogger()?->error($reason->getMessage(), $context);
                     if ($reason instanceof ClientDisconnectedException) {
                         return null;
                     }
@@ -74,13 +71,19 @@ class LatestWsServerPlugin extends Plugin
     private function latestForClient(int $connResourceId, array $clientInfo): PromiseInterface
     {
         $this->addOutput('Starting "latest" for: ' . $connResourceId, OutputInterface::VERBOSITY_VERY_VERBOSE);
+        // remember which specific connection instance is behind $connResourceId right now: on a long-running
+        //   server, the underlying resource id can be recycled by PHP for a brand-new connection once an old
+        //   one is closed, so a plain "is $connResourceId still connected" check is not enough to tell whether
+        //   it is still the *same* client we started this async work for.
+        $connectionSequence = $this->getClientConnectionResourceManager()
+            ->getClientConnectionSequence($connResourceId);
         return $this->getGameLatest($connResourceId)->latest(
             $clientInfo['team_id'],
             $clientInfo['last_update_time'],
             $clientInfo['user'],
             $this->isDebugOutputEnabled()
         )
-        ->then(function ($payload) use ($connResourceId, $clientInfo) {
+        ->then(function ($payload) use ($connResourceId, $clientInfo, $connectionSequence) {
             if ($payload === null) {
                 $this->addOutput('no payload', OutputInterface::VERBOSITY_VERY_VERBOSE);
                 return [];
@@ -93,9 +96,16 @@ class LatestWsServerPlugin extends Plugin
                 $this->addOutput('empty payload', OutputInterface::VERBOSITY_VERY_VERBOSE);
                 return [];
             }
-            if (null === $this->getClientConnectionResourceManager()->getClientConnection($connResourceId)) {
-                // disconnected while running this async code, nothing was sent
-                $this->addOutput('disconnected while running this async code, nothing was sent');
+            if ($connectionSequence !== $this->getClientConnectionResourceManager()
+                ->getClientConnectionSequence($connResourceId)
+            ) {
+                // either disconnected while running this async code, or the connResourceId got recycled by PHP
+                //   and now belongs to a completely different, newer client connection: either way, nothing
+                //   should be sent to it using this (stale) payload
+                $this->addOutput(
+                    'disconnected (or resource id reused by another client) while running this async code, ' .
+                        'nothing was sent'
+                );
                 $e = new ClientDisconnectedException();
                 $e->setConnResourceId($connResourceId);
                 throw $e;
@@ -165,7 +175,7 @@ class LatestWsServerPlugin extends Plugin
             ->getClientInfoPerSessionCollection();
         $gameSessionId = $this->getGameSessionIdFilter();
         if ($gameSessionId != null) {
-            $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only($gameSessionId);
+            $clientInfoPerSessionContainer = $clientInfoPerSessionContainer->only([$gameSessionId]);
         }
         $promises = [];
         foreach ($clientInfoPerSessionContainer as $clientInfoContainer) {

@@ -2,11 +2,14 @@
 
 namespace App\MessageHandler\Watchdog;
 
+use App\Domain\API\v1\Database;
 use App\Domain\API\v1\Simulation;
 use App\Domain\API\v1\User;
 use App\Domain\Common\EntityEnums\EventLogSeverity;
 use App\Domain\Common\EntityEnums\WatchdogStatus;
 use App\Domain\Services\ConnectionManager;
+use App\Domain\Services\ProcessNameDetector;
+use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameList;
 use App\Message\Watchdog\Message\GameMonthChangedMessage;
 use App\Message\Watchdog\Message\GameStateChangedMessage;
@@ -18,8 +21,10 @@ use App\Entity\SessionAPI\Simulation as SimulationEntity;
 use App\Entity\SessionAPI\Watchdog;
 use App\VersionsProvider;
 use DateTime;
+use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\NonUniqueResultException;
 use Exception;
 use JsonException;
@@ -27,6 +32,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Security\Http\Authentication\Authentica
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -44,7 +50,9 @@ class WatchdogCommunicationMessageHandler
         private readonly AuthenticationSuccessHandler $authenticationSuccessHandler,
         private readonly VersionsProvider $provider,
         private readonly LoggerInterface $watchdogLogger,
-        LoggerInterface $gameSessionLogger
+        LoggerInterface $gameSessionLogger,
+        // below is required by legacy to be auto-wire, has its own ::getInstance()
+        SymfonyToLegacyHelper $symfonyToLegacyHelper
     ) {
         $this->sessionLogHandler = new SessionLogHandler($gameSessionLogger);
     }
@@ -55,60 +63,71 @@ class WatchdogCommunicationMessageHandler
      * @throws JsonException
      * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
-     * @throws Exception
+     * @throws Exception|ORMException
      */
     public function __invoke(
         GameMonthChangedMessage|GameStateChangedMessage|WatchdogPingMessage $message
     ): void {
         $this->sessionLogHandler->setGameSessionId($message->getGameSessionId());
-        $em = $this->connectionManager->getGameSessionEntityManager($message->getGameSessionId());
-
-        // instead of using $message->getWatchdog() directly, we need to fetch it through doctrine,
-        //   such that the entity is loaded into the the current persistence context
-        if (null === $watchdog = $em->find(Watchdog::class, $message->getWatchdogId())) {
-            $this->sessionLogHandler->warning('Watchdog not found. Id: '.$message->getWatchdogId());
-            return;
-        }
-
-        if (null === $watchdog->getGameWatchdogServer()) {
-            $em->persist($this->log(
-                'no server assigned. Watchdog was removed.',
-                EventLogSeverity::ERROR,
-                $watchdog
-            ));
-            $em->remove($watchdog);
-            $em->flush();
-            return;
-        }
-
         try {
-            switch (get_class($message)) {
-                case GameMonthChangedMessage::class:
-                    $this->requestWatchdog($em, $watchdog, '/Watchdog/SetMonth', [
-                        'game_session_token' => (string) $watchdog->getToken(),
-                        'month' => $message->getMonth()
-                    ]);
-                    break;
-                case GameStateChangedMessage::class:
-                    $this->requestWatchdogUpdateState($message, $watchdog, $em);
-                    break;
-                case WatchdogPingMessage::class:
-                    // fail-safe: no need to ping the internal watchdog
-                    if ($watchdog->getServerId() != Watchdog::getInternalServerId()) {
-                        $this->requestWatchdog($em, $watchdog, '/Watchdog/Ping', [
-                            'game_session_token' => (string)$watchdog->getToken()
-                        ]);
-                    }
-                    break;
-                default:
-                    throw new Exception('Unknown message type');
-            }
-        } catch (Exception $e) {
-            $em->flush();
-            throw $e;
-        }
+            $em = $this->connectionManager->getGameSessionEntityManager($message->getGameSessionId());
 
-        $em->flush();
+            // instead of using $message->getWatchdog() directly, we need to fetch it through doctrine,
+            //   such that the entity is loaded into the current persistence context
+            if (null === $watchdog = $em->find(Watchdog::class, $message->getWatchdogId())) {
+                $this->sessionLogHandler->warning('Watchdog not found. Id: '.$message->getWatchdogId());
+                return;
+            }
+
+            if (null === $watchdog->getGameWatchdogServer()) {
+                $em->persist($this->log(
+                    'no server assigned. Watchdog was removed.',
+                    EventLogSeverity::ERROR,
+                    $watchdog
+                ));
+                $em->remove($watchdog);
+                $em->flush();
+                return;
+            }
+
+            try {
+                switch (get_class($message)) {
+                    case GameMonthChangedMessage::class:
+                        $this->requestWatchdog($em, $watchdog, '/Watchdog/SetMonth', [
+                            'game_session_token' => (string) $watchdog->getToken(),
+                            'month' => $message->getMonth()
+                        ]);
+                        break;
+                    case GameStateChangedMessage::class:
+                        $this->requestWatchdogUpdateState($message, $watchdog, $em);
+                        break;
+                    case WatchdogPingMessage::class:
+                        // fail-safe: no need to ping the internal watchdog
+                        if ($watchdog->getServerId() != Watchdog::getInternalServerId()) {
+                            $this->requestWatchdog($em, $watchdog, '/Watchdog/Ping', [
+                                'game_session_token' => (string)$watchdog->getToken()
+                            ]);
+                        }
+                        break;
+                    default:
+                        throw new Exception('Unknown message type');
+                }
+            } catch (Exception $e) {
+                $em->flush();
+                throw $e;
+            }
+
+            $em->flush();
+        } catch (ConnectionException $e) {
+            if ((int) $e->getCode() === 1049) { // MySQL "Unknown database"
+                throw new UnrecoverableMessageHandlingException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw $e;
+        } finally {
+            $this->connectionManager->clearAndCloseDoctrineManagers();
+            Database::GetInstance($message->getGameSessionId())->Close();
+            $this->connectionManager->closeCachedAsyncGameSessionDbConnection($message->getGameSessionId());
+        }
     }
 
     /**
@@ -189,12 +208,16 @@ class WatchdogCommunicationMessageHandler
         array $context,
         array $decodedResponse
     ): void {
-        if (($decodedResponse["success"] ?? 0) == 1) {
+        if (($decodedResponse["success"] ?? 0) == 1 &&
+            // let's not log the ping success, as it is too frequent and not useful to log
+            $uri != '/Watchdog/Ping') {
             $this->sessionLogHandler->info(
                 sprintf(
-                    'Watchdog %s: responded with success on requesting %s.',
+                    'Watchdog %s: responded with success on requesting %s%s.',
                     $watchdog->getServerId()->toRfc4122(),
-                    $uri
+                    $uri,
+                    (empty($decodedResponse['month']) ? '' : ' for absolute zero-indexed month: '.
+                        $decodedResponse['month'])
                 ),
                 $context
             );
@@ -221,8 +244,8 @@ class WatchdogCommunicationMessageHandler
         ?string $stackTrace = null
     ): EventLog {
         $source = self::class;
-        if (getenv('DOCKER') !== false && // only in docker
-            false !== $processName = exec('supervisorctl status | grep '.getmypid().' | awk \'{print $1}\'')) {
+        $processName = ProcessNameDetector::getProcessName();
+        if ($processName) {
             $source .= '@'.$processName;
         }
         $eventLog = Simulation::createEventLogForWatchdog($message, $severity, $w, $stackTrace)
@@ -295,12 +318,25 @@ class WatchdogCommunicationMessageHandler
             ClientExceptionInterface $e // 4xx errors
         ) {
             if ($e->getCode() == Response::HTTP_METHOD_NOT_ALLOWED) {
-                // the watchdog does not want to join this session
+                // the watchdog does not want to join this session, remove it
                 $em->persist($this->log(
-                    'Watchdog does not want to join this session.',
+                    'Watchdog does not want to join this session, remove it',
                     EventLogSeverity::WARNING,
                     $watchdog
                 ));
+
+                // Watchdog is configured with Gedmo\SoftDeleteable(hardDelete: false), so a normal
+                // $em->remove() would always be intercepted by SoftDeleteableListener::onFlush() and
+                // converted into an UPDATE (setting deletedAt) instead of an actual DELETE.
+                // A DQL bulk DELETE bypasses the ORM lifecycle/onFlush listeners entirely, giving us
+                // a genuine hard delete here regardless of the entity's soft-delete configuration.
+                $em->createQuery(
+                    'DELETE FROM '.Watchdog::class.' w WHERE w.id = :id'
+                )->setParameter('id', $watchdog->getId())->execute();
+                $em->detach($watchdog);
+
+                $em->flush();
+                throw new UnrecoverableMessageHandlingException($e->getMessage(), $e->getCode(), $e);
             }
             if ($e->getCode() == Response::HTTP_BAD_GATEWAY) {
                 $em->persist($watchdog->setStatus(WatchdogStatus::UNRESPONSIVE));

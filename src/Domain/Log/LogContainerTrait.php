@@ -2,6 +2,8 @@
 
 namespace App\Domain\Log;
 
+use Psr\Log\LoggerInterface;
+
 trait LogContainerTrait
 {
     private array $logs = [];
@@ -41,6 +43,20 @@ trait LogContainerTrait
             return array_filter($this->logs, fn($log) => $log[LogContainerInterface::LOG_FIELD_LEVEL] === $levelFilter);
         }
         return $this->logs;
+    }
+
+    public function pushToLogger(LoggerInterface $logger, array $context): void
+    {
+        foreach ($this->logs as $log) {
+            $logger->log(
+                $log[LogContainerInterface::LOG_FIELD_LEVEL],
+                $log[LogContainerInterface::LOG_FIELD_MESSAGE],
+                array_merge($context, [
+                    'time' => $log[LogContainerInterface::LOG_FIELD_TIME],
+                    'microtime' => $log[LogContainerInterface::LOG_FIELD_MICROTIME]
+                ])
+            );
+        }
     }
 
     public function appendFromLogContainer(LogContainerInterface $logContainer): void

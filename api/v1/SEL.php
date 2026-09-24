@@ -86,7 +86,7 @@ class SEL extends Base
             "
             SELECT geometry.geometry_geometry as geometry, geometry.geometry_data, geometry.geometry_type
             FROM geometry
-			LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id 
+			LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id
 		    WHERE layer.layer_name = ?
 		    ",
             array($loadedConfig["country_border_layer"])
@@ -94,7 +94,7 @@ class SEL extends Base
 
         foreach ($data as $key => $value) {
             $data[$key]["geometry"] = json_decode($value["geometry"]);
-            
+
             //Owning country is encoded in the layer type's value field.
             $geometryType = $data[$key]["geometry_type"];
             $countryId =  $layerTypes[$geometryType]["value"];
@@ -126,12 +126,21 @@ class SEL extends Base
     public function GetRestrictionGeometry(): array
     {
         $shippingLayers = $this->GetSELConfigInternal()["shipping_lane_layers"];
-        
+
         //First gather all the layer ids that our layers intersect with.
         $restrictionLayerIds = array();
         foreach ($shippingLayers as $shippingLayer) {
+            try {
+                $restrictionLayers = $this->GetRestrictionLayersForLayer($shippingLayer);
+            } catch (Exception $e) {
+                $this->log(
+                    $e->getMessage() . ", Skipping" . PHP_EOL,
+                    self::LOG_LEVEL_ERROR
+                );
+                continue;
+            }
             $restrictionLayerIds = array_unique(
-                array_merge($restrictionLayerIds, $this->GetRestrictionLayersForLayer($shippingLayer))
+                array_merge($restrictionLayerIds, $restrictionLayers)
             );
         }
 
@@ -143,7 +152,7 @@ class SEL extends Base
                 SELECT geometry.geometry_id, layer.layer_id, layer.layer_geotype, layer.layer_original_id,
                        geometry.geometry_geometry as geometry, geometry.geometry_type
                 FROM geometry
-                LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id 
+                LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id
                 LEFT JOIN plan_layer ON layer.layer_id = plan_layer.plan_layer_layer_id
                 LEFT JOIN plan ON plan_layer.plan_layer_plan_id = plan.plan_id
                 WHERE (layer.layer_id = ? OR (
@@ -152,7 +161,7 @@ class SEL extends Base
                 ",
                 array($restrictionLayerId, $restrictionLayerId)
             );
-            
+
             foreach ($restrictionData as $d) {
                 $layerId = $d["layer_original_id"];
                 if ($layerId != null) {
@@ -182,7 +191,6 @@ class SEL extends Base
                 array_push($result, $transformedData);
             }
         }
-
         return $result;
     }
 
@@ -201,8 +209,8 @@ class SEL extends Base
         $sourceLayerId = $layerId[0]["layer_id"];
         $targetLayers = $this->getDatabase()->query(
             "
-            SELECT DISTINCT(layer_id) 
-            FROM layer 
+            SELECT DISTINCT(layer_id)
+            FROM layer
             INNER JOIN restriction ON restriction.restriction_start_layer_id = layer.layer_id OR
                 restriction.restriction_end_layer_id = layer.layer_id
             WHERE layer.layer_id != ? AND (
@@ -233,17 +241,17 @@ class SEL extends Base
             "SELECT layer_id, layer_type FROM layer WHERE layer_name IN (".
             $this->ImplodeForMysqlInStatement($shippingLayers).")"
         );
-        
+
         $result = array();
 
         foreach ($layerIds as $layerId) {
             $sourceLayerType = json_decode($layerId["layer_type"], true);
-            
+
             $data = $this->getDatabase()->query(
                 "
                 SELECT geometry.geometry_id, geometry.geometry_geometry, geometry.geometry_type, geometry.geometry_data
                 FROM geometry
-                LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id 
+                LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id
                 LEFT JOIN plan_layer ON layer.layer_id = plan_layer.plan_layer_layer_id
                 LEFT JOIN plan ON plan_layer.plan_layer_plan_id = plan.plan_id
 				WHERE geometry.geometry_active = 1 AND (
@@ -252,7 +260,7 @@ class SEL extends Base
                 ",
                 array($layerId["layer_id"], $layerId["layer_id"])
             );
-            
+
             foreach ($data as $d) {
                 $mappedShipTypes = null;
                 foreach (explode(",", $d["geometry_type"]) as $layerTypeId) {
@@ -325,13 +333,13 @@ class SEL extends Base
                     json_last_error_msg()
                 );
             }
-        
+
             $data = $this->getDatabase()->query(
                 "
                 SELECT geometry.geometry_id, geometry.geometry_persistent, geometry.geometry_geometry,
                     geometry.geometry_data, geometry.geometry_mspid, plan.plan_gametime
                 FROM geometry
-				LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id 
+				LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id
 				LEFT JOIN plan_layer ON layer.layer_id = plan_layer.plan_layer_layer_id
 				LEFT JOIN plan ON plan_layer.plan_layer_plan_id = plan.plan_id
                 WHERE (layer.layer_id = ? OR layer.layer_original_id = ?) AND (
@@ -363,7 +371,7 @@ class SEL extends Base
                         $portId = $portData["name"];
                     }
                 }
-                
+
                 //Ensure that base layer plans are always impelemented and that we never send NULL back.
                 if ($d['plan_gametime'] == null) {
                     $d['plan_gametime'] = -100;
@@ -578,7 +586,7 @@ class SEL extends Base
             }
         }
         $riskMapSettings["restriction_layer_exceptions"] = $restrictionLayerExceptions;
-        
+
         $bleedConfig = $configValues["heatmap_bleed_config"];
 
         return array("riskmap_settings" => $riskMapSettings, "bleed_config" => $bleedConfig);
@@ -680,7 +688,7 @@ class SEL extends Base
 
         $game = new Game();
         $globalConfig = $game->GetGameConfigValues();
-        
+
         $region = $globalConfig["region"];
         $config = $globalConfig["SEL"];
 
@@ -705,7 +713,7 @@ class SEL extends Base
 
             $rasterData["url"] = $heatmap["layer_name"].".png";
             $rasterData["layer_download_from_geoserver"] = false;
-            
+
             if (isset($heatmap["output_for_mel"]) && $heatmap["output_for_mel"] === true) {
                 if (empty($globalConfig["MEL"])) {
                     throw new Exception(
@@ -715,7 +723,9 @@ class SEL extends Base
                     );
                 } else {
                     $melConfig = &$globalConfig["MEL"];
-                    if (!is_array($melConfig) ||
+                    if (
+                        // @phpstan-ignore-next-line function.alreadyNarrowedType
+                        !is_array($melConfig) ||
                         !array_key_exists("x_min", $melConfig) ||
                         !array_key_exists("y_min", $melConfig) ||
                         !array_key_exists("x_max", $melConfig) ||
@@ -772,7 +782,7 @@ class SEL extends Base
     {
         $config = $this->GetSELConfigInternal();
         $result = array();
-        
+
         if ($config != null && array_key_exists("shipping_kpi_config", $config)) {
             $categories = $config["shipping_kpi_config"];
             foreach ($categories as $categoryDefinition) {
@@ -857,7 +867,7 @@ class SEL extends Base
             $data = $this->getDatabase()->query(
                 "
                 SELECT geometry.geometry_data, geometry.geometry_country_id FROM geometry
-                LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id 
+                LEFT JOIN layer ON geometry.geometry_layer_id = layer.layer_id
 				WHERE layer.layer_name = ?",
                 array($portLayer['layer_name'])
             );
@@ -905,13 +915,13 @@ class SEL extends Base
     public function GetUpdatePackage(): array
     {
         $time = $this->getDatabase()->query('SELECT game_currentmonth FROM game')[0]['game_currentmonth'];
-        
+
         $result = array("rebuild_edges" => $this->HaveInterestedLayersChangedInMonth($time));
         if ($time == 0 && $result["rebuild_edges"] == false) {
             //Make sure we double check this for month -1 when exiting the setup phase.
             $result["rebuild_edges"] = $this->HaveInterestedLayersChangedInMonth(-1);
         }
-
+        $result['logs'] = $this->getLogMessages();
         return $result;
     }
 
@@ -929,9 +939,25 @@ class SEL extends Base
                 "SELECT layer_id FROM layer WHERE layer_name = ?",
                 array($shippingLaneLayer)
             );
-            $interestedLayers[] = $shippingLayerData[0]['layer_id'];
+            if (empty($shippingLayerData[0]['layer_id'])) {
+                $this->log(
+                    "SEL_API: Could not find layer with name \"".$shippingLaneLayer."\", Skipping" . PHP_EOL,
+                    self::LOG_LEVEL_ERROR
+                );
+                continue;
+            }
+            try {
+                $restrictionLayers = $this->GetRestrictionLayersForLayer($shippingLaneLayer);
+            } catch (Exception $e) {
+                $this->log(
+                    "SEL_API: " . $e->getMessage() . ", Skipping" . PHP_EOL,
+                    self::LOG_LEVEL_ERROR
+                );
+                continue;
+            }
 
-            $interestedLayers = array_merge($interestedLayers, $this->GetRestrictionLayersForLayer($shippingLaneLayer));
+            $interestedLayers[] = $shippingLayerData[0]['layer_id'];
+            $interestedLayers = array_merge($interestedLayers, $restrictionLayers);
         }
         $interestedLayers = array_unique($interestedLayers);
 

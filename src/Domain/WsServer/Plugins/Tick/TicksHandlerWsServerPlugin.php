@@ -36,7 +36,7 @@ class TicksHandlerWsServerPlugin extends Plugin
                         });
                     $gameSessionId = $this->getGameSessionIdFilter();
                     if ($gameSessionId != null) {
-                        $gameSessionIds = $gameSessionIds->only($gameSessionId);
+                        $gameSessionIds = $gameSessionIds->only([$gameSessionId]);
                     }
                     $gameSessionIds = $gameSessionIds->all(); // to raw array
                     // first unregister all tick plugins not required anymore

@@ -16,7 +16,14 @@
                 <tr>
                     <td>{{ attribute(entity, idPropertyName) }}</td>
                     {% for propertyName, header in headers|filter(h => not h.action) %}
-                    <td>{{ attribute(entity, propertyName) }}</td>
+                    {% set propertyValue = attribute(entity, propertyName) %}
+                    <td>
+                        {% if propertyValue.value is defined %}
+                            {{ propertyValue.value }}
+                        {% else %}
+                            {{ propertyValue }}
+                        {% endif %}
+                    </td>
                     {% endfor %}
                     <td>
                     {% if attribute(entity, idPropertyName) not in readonlyEntityIDs %}

@@ -43,9 +43,9 @@ class Energy extends Base
                 }
                 return parallel($toPromiseFunctions);
             })
-            ->done(
+            ->then(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // we do not care about the result
+                    $deferred->resolve(null); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -84,9 +84,9 @@ class Energy extends Base
                 }
                 return parallel($toPromiseFunctions);
             })
-            ->done(
+            ->then(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // we do not care about the result
+                    $deferred->resolve(null); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -138,9 +138,9 @@ class Energy extends Base
                 }
                 return parallel($toPromiseFunctions);
             })
-            ->done(
+            ->then(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // we do not care about the result
+                    $deferred->resolve(null); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -209,9 +209,9 @@ class Energy extends Base
                 ->set('energy_output_lastupdate', 'UNIX_TIMESTAMP(NOW(4))')
                 ->where($qb->expr()->eq('energy_output_geometry_id', $id))
         )
-        ->done(
+        ->then(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -298,9 +298,9 @@ class Energy extends Base
             ->then(function (/* array $results */) use ($id) {
                 return $this->getAsyncDatabase()->delete('grid', ['grid_id' => $id]);
             })
-            ->done(
+            ->then(
                 function (/* Result $result */) use ($deferred) {
-                    $deferred->resolve(); // we do not care about the result
+                    $deferred->resolve(null); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -354,7 +354,7 @@ class Energy extends Base
                  return $id;
             });
         })
-        ->done(
+        ->then(
             function (int $insertedId) use ($deferred) {
                 $deferred->resolve($insertedId);
             },
@@ -394,9 +394,9 @@ class Energy extends Base
                 }
                 return parallel($toPromiseFunctions);
             })
-            ->done(
+            ->then(
                 function (/* array $results */) use ($deferred) {
-                    $deferred->resolve(); // we do not care about the result
+                    $deferred->resolve(null); // we do not care about the result
                 },
                 function ($reason) use ($deferred) {
                     $deferred->reject($reason);
@@ -497,9 +497,9 @@ class Energy extends Base
                     'energy_connection_lastupdate' => 'UNIX_TIMESTAMP(NOW(6))'
                 ])
         )
-        ->done(
+        ->then(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -534,9 +534,9 @@ class Energy extends Base
                 ->set('energy_connection_lastupdate', 'UNIX_TIMESTAMP(NOW(6))')
                 ->where($qb->expr()->eq('energy_connection_cable_id', $qb->createPositionalParameter($cable)))
         )
-        ->done(
+        ->then(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -571,9 +571,9 @@ class Energy extends Base
                     ->with($qb->expr()->eq('energy_connection_active', 1))
                 )
         )
-        ->done(
+        ->then(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -687,9 +687,9 @@ class Energy extends Base
                     ->where($qb->expr()->eq('energy_output_geometry_id', $qb->createPositionalParameter($id)))
             );
         })
-        ->done(
+        ->then(
             function (/* Result $result */) use ($deferred) {
-                $deferred->resolve(); // we do not care about the result
+                $deferred->resolve(null); // we do not care about the result
             },
             function ($reason) use ($deferred) {
                 $deferred->reject($reason);
@@ -711,7 +711,7 @@ class Energy extends Base
     {
         // @todo: This is part of CEL
         return $this->getDatabase()->query(
-            "SELECT 
+            "SELECT
 					energy_connection_start_id as start,
 					energy_connection_end_id as end,
 					energy_connection_cable_id as cable,
@@ -1008,7 +1008,7 @@ class Energy extends Base
             '
             SELECT COALESCE(
                 grid_removed.grid_removed_grid_persistent, grid.grid_persistent
-            ) AS grid_persistent, plan.plan_gametime 
+            ) AS grid_persistent, plan.plan_gametime
             FROM plan
             LEFT OUTER JOIN grid_removed ON grid_removed.grid_removed_plan_id = plan.plan_id
             LEFT OUTER JOIN grid ON grid.grid_plan_id = plan.plan_id
@@ -1023,8 +1023,8 @@ class Energy extends Base
                 $toPromiseFunctions[] = tpf(function () use ($removedGridId, $planId, &$result) {
                     return $this->getAsyncDatabase()->queryBySQL(
                         '
-                        SELECT grid_plan_id as plan_id 
-                        FROM grid 
+                        SELECT grid_plan_id as plan_id
+                        FROM grid
                         INNER JOIN plan ON grid.grid_plan_id = plan.plan_id
                         WHERE grid_persistent = ? AND plan.plan_state <> \'DELETED\' AND (
                             plan.plan_gametime > ? OR (
@@ -1049,7 +1049,7 @@ class Energy extends Base
                 $toPromiseFunctions[] = tpf(function () use ($removedGridId, $planId, &$result) {
                     return $this->getAsyncDatabase()->queryBySQL(
                         '
-                        SELECT grid_removed_plan_id as plan_id 
+                        SELECT grid_removed_plan_id as plan_id
                         FROM grid_removed
                         INNER JOIN plan on grid_removed.grid_removed_plan_id = plan.plan_id
                         WHERE grid_removed_grid_persistent = ? AND plan.plan_state <> \'DELETED\' AND (
@@ -1109,8 +1109,8 @@ class Energy extends Base
         // @todo: Does not actually check if plans are in influencing state
         $result = $this->getDatabase()->query(
             "
-            SELECT grid_removed_grid_persistent 
-			FROM grid_removed 
+            SELECT grid_removed_grid_persistent
+			FROM grid_removed
             INNER JOIN plan ON grid_removed_plan_id = plan.plan_id
 			WHERE plan.plan_gametime < :planGameTime AND (
 			    plan.plan_state = 'APPROVED' OR plan.plan_state = 'IMPLEMENTED'

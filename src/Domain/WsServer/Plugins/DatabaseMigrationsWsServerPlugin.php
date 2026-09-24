@@ -40,7 +40,7 @@ class DatabaseMigrationsWsServerPlugin extends Plugin
                         });
                     $gameSessionId = $this->getGameSessionIdFilter();
                     if ($gameSessionId != null) {
-                        $gameSessionIds = $gameSessionIds->only($gameSessionId);
+                        $gameSessionIds = $gameSessionIds->only([$gameSessionId]);
                     }
                     $gameSessionIds = $gameSessionIds->all(); // to raw array
 
@@ -58,8 +58,14 @@ class DatabaseMigrationsWsServerPlugin extends Plugin
         // Run doctrine migrations.
         foreach ($gameSessionIds as $gameSessionId) {
             $dbName = ConnectionManager::getInstance()->getGameSessionDbName($gameSessionId);
-            if ($this->getServerManager()->getDoctrineMigrationsDependencyFactoryHelper()
-                ->getDependencyFactory($dbName)->getMigrationStatusCalculator()->getNewMigrations()->count() == 0) {
+            $dependencyFactory = $this->getServerManager()->getDoctrineMigrationsDependencyFactoryHelper()
+                ->getDependencyFactory($dbName);
+            try {
+                $hasNew = $dependencyFactory->getMigrationStatusCalculator()->getNewMigrations()->count() > 0;
+            } finally {
+                $dependencyFactory->getConnection()->close();
+            }
+            if (!$hasNew) {
                 // nothing to migrate
                 continue;
             }

@@ -19,7 +19,7 @@ use function App\await;
 
 class User extends Base implements JWTUserInterface
 {
-    private ?string $user_name;
+    private string $user_name;
     private ?int $user_id;
 
     // @note "Make the constructor final to prevent the class from being extended"
@@ -42,7 +42,7 @@ class User extends Base implements JWTUserInterface
             ->from('game_list')
             ->where($qb->expr()->eq('id', $this->getGameSessionId()));
         $passwordData = $connection->executeQuery($qb->getSQL())->fetchAllAssociative();
-        
+
         if (!parent::isNewPasswordFormat($passwordData[0]["password_admin"])
             || !parent::isNewPasswordFormat($passwordData[0]["password_player"])
         ) {
@@ -55,7 +55,7 @@ class User extends Base implements JWTUserInterface
                 $adminHasPassword = !empty($password_admin["admin"]["value"]);
             }
             if ($password_player["provider"] == "local") {
-                foreach ($password_player["value"] as $password) {
+                foreach ($password_player["value"] ?? [] as $password) {
                     if (!empty($password)) {
                         $playerHasPassword = true;
                         break;
@@ -178,12 +178,14 @@ class User extends Base implements JWTUserInterface
             $minDate = new DateTime("@0");
             $minBuildDate = $minDate;
             $maxBuildDate = new DateTime(); // now
+            // @phpstan-ignore-next-line function.alreadyNarrowedType
             if (array_key_exists("client_build_date_min", $versionConfig)) {
                 $minBuildDate = DateTime::createFromFormat(
                     DateTimeInterface::ATOM,
                     $versionConfig["client_build_date_min"]
                 );
             }
+            // @phpstan-ignore-next-line function.alreadyNarrowedType
             if (array_key_exists("client_build_date_max", $versionConfig)) {
                 $maxBuildDate = DateTime::createFromFormat(
                     DateTimeInterface::ATOM,
@@ -391,6 +393,7 @@ class User extends Base implements JWTUserInterface
         return null;
     }
 
+    #[\Deprecated]
     public function eraseCredentials(): void
     {
         // irrelevant, but required function

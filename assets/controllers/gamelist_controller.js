@@ -3,14 +3,36 @@ import { successNotification, errorNotification } from '../helpers/notification'
 
 export default class extends Controller {
 
+    refreshInterval = null;
+
+    isDefaultModalOpen()
+    {
+        return document.querySelector('[data-modal-default-target="modalDefault"].show') !== null;
+    }
+
+    reloadSessionsTable()
+    {
+        if (this.isDefaultModalOpen()) {
+            return;
+        }
+
+        document.querySelector('turbo-frame#sessionsTable')?.reload();
+    }
+
     connect()
     {
-        let frame = document.querySelector('turbo-frame#sessionsTable');
-        setInterval(function () {
-            frame.reload();
+        this.refreshInterval = setInterval(() => {
+            this.reloadSessionsTable();
         }, 10000);
     }
-    
+
+    disconnect()
+    {
+        clearInterval(this.refreshInterval);
+        this.refreshInterval = null;
+    }
+
+
     toggleSessionInfoLog()
     {
         if (document.getElementById('sessionInfoLog').style.display == 'none') {

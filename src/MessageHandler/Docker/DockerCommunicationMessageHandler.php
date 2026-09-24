@@ -15,9 +15,11 @@ use App\Message\Docker\DockerCommunicationMessageBase;
 use App\Message\Docker\ImmersiveSessionConnectionMessageBase;
 use App\Message\Docker\InspectDockerConnectionsMessage;
 use App\Message\Docker\RemoveImmersiveSessionConnectionMessage;
+use Doctrine\DBAL\Exception\ConnectionException;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\Exception\UnrecoverableMessageHandlingException;
 
 #[AsMessageHandler]
 readonly class DockerCommunicationMessageHandler
@@ -34,15 +36,24 @@ readonly class DockerCommunicationMessageHandler
      */
     public function __invoke(DockerCommunicationMessageBase $message): void
     {
-        if ($message instanceof ImmersiveSessionConnectionMessageBase) {
-            $this->handleImmersiveSessionContainer($message);
-            return;
+        try {
+            if ($message instanceof ImmersiveSessionConnectionMessageBase) {
+                $this->handleImmersiveSessionContainer($message);
+                return;
+            }
+            if (get_class($message) == InspectDockerConnectionsMessage::class) {
+                $this->inspectDockerConnections();
+                return;
+            }
+            $this->dockerMessengerLogger->error('Unknown message type: '.get_class($message));
+        } catch (ConnectionException $e) {
+            if ((int) $e->getCode() === 1049) { // MySQL "Unknown database"
+                throw new UnrecoverableMessageHandlingException($e->getMessage(), $e->getCode(), $e);
+            }
+            throw $e;
+        } finally {
+            $this->connectionManager->clearAndCloseDoctrineManagers();
         }
-        if (get_class($message) == InspectDockerConnectionsMessage::class) {
-            $this->inspectDockerConnections();
-            return;
-        }
-        $this->dockerMessengerLogger->error('Unknown message type: '.get_class($message));
     }
 
      /**

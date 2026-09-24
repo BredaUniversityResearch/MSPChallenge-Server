@@ -46,8 +46,8 @@ class Layer extends Base
             "
             SELECT geometry_id, geometry_FID, geometry_geometry, geometry_layer_id, geometry_type, geometry_data,
                 geometry_mspid
-            FROM layer 
-            LEFT JOIN geometry ON geometry_layer_id=layer.layer_id 
+            FROM layer
+            LEFT JOIN geometry ON geometry_layer_id=layer.layer_id
             LEFT JOIN plan_layer ON plan_layer_layer_id=layer.layer_id
             LEFT JOIN plan ON plan_layer_plan_id=plan.plan_id
             WHERE geometry.geometry_active=? AND (
@@ -63,8 +63,8 @@ class Layer extends Base
         $subtractiveArr = $this->getDatabase()->query(
             "
             SELECT geometry_id, geometry_FID, geometry_geometry, geometry_layer_id, geometry_type, geometry_data,
-                geometry_subtractive 
-            FROM geometry 
+                geometry_subtractive
+            FROM geometry
             WHERE geometry_layer_id=? AND geometry_subtractive<>? AND geometry_active=?
             ",
             array($layer_id, 0, 1)
@@ -167,9 +167,9 @@ class Layer extends Base
             throw new Exception("Not a vector layer.");
         }
 
-        $data = $this->getDatabase()->query("SELECT 
-					geometry_id as id, 
-					geometry_geometry as geometry, 
+        $data = $this->getDatabase()->query("SELECT
+					geometry_id as id,
+					geometry_geometry as geometry,
 					geometry_country_id as country,
 					geometry_FID as FID,
 					geometry_data as data,
@@ -179,7 +179,7 @@ class Layer extends Base
 					geometry_persistent as persistent,
 					geometry_mspid as mspid,
 					geometry_active as active
-				FROM layer 
+				FROM layer
 				LEFT JOIN geometry ON layer.layer_id=geometry.geometry_layer_id
 				WHERE layer.layer_id = ? ORDER BY geometry_FID, geometry_subtractive", array($layer_id));
 
@@ -187,7 +187,7 @@ class Layer extends Base
             return [];
         }
 
-        return self::MergeGeometry($data);
+        return self::mergeGeometry($data);
     }
 
     /**
@@ -235,7 +235,7 @@ class Layer extends Base
         }
 
         // if we still haven't found it, try the original path
-        if ($filePath == null || !file_exists($filePath)) {
+        if (!file_exists($filePath)) {
             throw new NotFoundHttpException(
                 "Could not find raster file for layer with name " . $layer_name . " at path " . $filePath
             );
@@ -349,7 +349,7 @@ class Layer extends Base
     public function UpdateRaster(
         \App\Entity\SessionAPI\Layer $layer,
         string $imageData,
-        array $raster_bounds = null,
+        ?array $raster_bounds = null,
         ?int $month = null
     ): void {
         $rasterData = $layer->getLayerRaster();
@@ -362,6 +362,18 @@ class Layer extends Base
         $this->asyncDataTransferTo($game);
         $curMonth = $game->GetCurrentMonthAsId();
         $month ??= $curMonth;
+
+        // raster bounds update
+        $rasterDataUpdated = false;
+        if (!empty($raster_bounds)) {
+            $layer
+                ->setLayerLastupdate(microtime(true))
+                // clone data, see https://github.com/dunglas/doctrine-json-odm/issues/21
+                ->setLayerRaster(clone $rasterData->setBoundingbox($raster_bounds));
+            $this->log('Set raster bounds for layer '.$layer->getLayerName().': '.
+                json_encode($layer->getLayerRaster()->getBoundingbox()));
+            $rasterDataUpdated = true;
+        }
 
         // we are processing the next month, so:
         // - replace the current one in raster/ folder,
@@ -381,18 +393,12 @@ class Layer extends Base
                 $this->log('Failed to save given image_data to '.$f.':'.$e->getMessage(), self::LOG_LEVEL_ERROR);
             }
 
-            // raster bounds update
-            $rasterDataUpdated = false;
-            if (!empty($raster_bounds)) {
-                $this->log('Set raster for layer '.$layer->getLayerName());
-                $layer->setLayerRaster($rasterData->setBoundingbox($raster_bounds));
-                $rasterDataUpdated = true;
-            }
-
             // update the layer record
             $layer
                 ->setLayerLastupdate(microtime(true))
                 ->setLayerMelupdate(1);
+        }
+        if ($layer->getLayerId() != null) { // still unflushed, so no need for an *updated* log message
             $this->log(sprintf(
                 'Updated layer %s with id %d',
                 ($rasterDataUpdated ? ' incl. raster data' : ''),

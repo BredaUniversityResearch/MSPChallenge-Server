@@ -1,7 +1,10 @@
 #syntax=docker/dockerfile:1
 
 # build a local image using the following command:
-#   git clean -d -x -f; docker build -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:5.2.1 -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
+# * Releasing x.x.x version:
+#   git clean -d -x -f; docker build --no-cache -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:x.x.x -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:latest -f Dockerfile --target frankenphp_prod .
+# * Building a staging image:
+#   git clean -d -x -f; docker build --no-cache -t docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:staging -f Dockerfile --target frankenphp_prod .
 # how to run it:
 #  (replace [branch_name] with the branch you want to run, e.g. `main` or `dev`)
 #  * from Linux:
@@ -9,7 +12,7 @@
 #  * from Windows:
 #    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/[branch_name]/setup/prod.ps1" -OutFile "prod.ps1"; .\prod.ps1 [branch_name]
 
-FROM dunglas/frankenphp:1-php8.3 AS frankenphp_upstream
+FROM dunglas/frankenphp:1-php8.4 AS frankenphp_upstream
 
 # The different stages of this Dockerfile are meant to be built into separate images
 # https://docs.docker.com/develop/develop-images/multistage-build/#stop-at-a-specific-build-stage
@@ -64,12 +67,17 @@ RUN docker-php-ext-install mysqli pdo pdo_mysql
 ###< doctrine/doctrine-bundle ###
 ###< recipes ###
 
+# Build custom extension for low-level DB connection tracking callbacks.
+COPY --link php-ext/msp_tracker /usr/src/php/ext/msp_tracker
+RUN set -eux; \
+    docker-php-ext-install msp_tracker
+
 COPY --link frankenphp/conf.d/10-app.ini $PHP_INI_DIR/app.conf.d/
 COPY --link --chmod=755 frankenphp/docker-entrypoint.sh /usr/local/bin/docker-entrypoint
 COPY --link frankenphp/Caddyfile /etc/caddy/Caddyfile
 
 # write command history to a history file
-RUN echo 'export HISTFILE=/root/.bash_history' >> /root/.bashrc
+RUN echo 'export HISTFILE=/host-history/.bash_history' >> /root/.bashrc
 # to force the command history to be written out, even if the shell is not exited properly
 RUN echo "export PROMPT_COMMAND='history -a'" >> /root/.bashrc
 
@@ -110,7 +118,7 @@ FROM frankenphp_base AS frankenphp_prod
 
 ENV APP_ENV=prod
 # this line enables the Blazing-fast performance thanks to the worker mode of FrankenPHP
-#   @todo however, disable for MSP, gives request issues in ServerManager
+#   @todo: does work now, but DB connections are piling up under worker mode, so we need to investigate and fix that before enabling it
 # ENV FRANKENPHP_CONFIG="import worker.Caddyfile"
 
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
@@ -119,10 +127,10 @@ COPY --link frankenphp/conf.d/20-app.prod.ini $PHP_INI_DIR/app.conf.d/
 COPY --link frankenphp/worker.Caddyfile /etc/caddy/worker.Caddyfile
 
 # Replace symbolic links with COPY --link
-COPY --link config-symfony6.4 config
-COPY --link composer-symfony6.4.json composer.json
-COPY --link composer-symfony6.4.lock composer.lock
-COPY --link symfony6.4.lock symfony.lock
+COPY --link config-symfony7.4 config
+COPY --link composer-symfony7.4.json composer.json
+COPY --link composer-symfony7.4.lock composer.lock
+COPY --link symfony7.4.lock symfony.lock
 COPY --link package.json package.json
 
 RUN set -eux; \
