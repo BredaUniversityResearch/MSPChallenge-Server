@@ -8,7 +8,7 @@ services:
       - fluent_bit_output:/fluent-bit/output
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock
-      - supervisor_log:/var/log/supervisor:ro\
+      - supervisor_log:/var/log/supervisor:ro
       - session_log:/var/log/session:ro
     logging:
       driver: "json-file"
