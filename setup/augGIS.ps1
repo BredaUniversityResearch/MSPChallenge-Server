@@ -113,6 +113,8 @@ docker pull docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:lat
 # Remove any docker-api container from a previous run (ignore the error if there is none)
 docker rm -f docker-api 2>&1 | Out-Null
 docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
+New-Item -ItemType Directory -Path ".\docker\database\init" -Force | Out-Null
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker/database/init/01-create-connection-tracker.sql" -OutFile ".\docker\database\init\01-create-connection-tracker.sql"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.yml" -OutFile "docker-compose.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.auggis.yml" -OutFile "docker-compose.auggis.yml"
 
