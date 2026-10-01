@@ -110,9 +110,35 @@ Read-Host "If needed, switch to a network that has an internet connection and th
 
 # pre-cache the auggis server image
 docker pull docker-hub.mspchallenge.info/cradlewebmaster/auggis-unity-server:latest
+# Remove any docker-api container from a previous run (ignore the error if there is none)
+docker rm -f docker-api 2>&1 | Out-Null
 docker run --name docker-api -d -p 2375:2375 -v /var/run/docker.sock:/var/run/docker.sock docker-hub.mspchallenge.info/cradlewebmaster/docker-api:latest
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.yml" -OutFile "docker-compose.yml"
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$branch_name/docker-compose.auggis.yml" -OutFile "docker-compose.auggis.yml"
+
+# Fresh install: remove containers, volumes and orphans from any previous run
+Write-Host "Removing previous containers and volumes for a fresh install.."
+$downArgs = @()
+if (Test-Path ".env.local") {
+    $downArgs += @('--env-file', '.env.local')
+}
+$downArgs += @('-f', 'docker-compose.yml', '-f', 'docker-compose.auggis.yml', 'down', '--volumes', '--remove-orphans')
+docker compose @downArgs
+
+# Safety net: remove anything of this compose project that 'down' missed (matched by compose project label)
+# Project name follows compose's rule: COMPOSE_PROJECT_NAME, else the lowercased folder name without invalid characters
+$projectName = IfEmpty $env:COMPOSE_PROJECT_NAME ((Split-Path -Leaf (Get-Location).Path).ToLower() -replace '[^a-z0-9_-]', '')
+Write-Host "Compose project name: $projectName"
+$leftoverContainers = @(docker ps -aq --filter "label=com.docker.compose.project=$projectName")
+if ($leftoverContainers.Count -gt 0) {
+    Write-Host "Removing leftover containers: $($leftoverContainers -join ', ')"
+    docker rm -f -v @leftoverContainers
+}
+$leftoverVolumes = @(docker volume ls -q --filter "label=com.docker.compose.project=$projectName")
+if ($leftoverVolumes.Count -gt 0) {
+    Write-Host "Removing leftover volumes: $($leftoverVolumes -join ', ')"
+    docker volume rm -f @leftoverVolumes
+}
 
 if (-not $env:CADDY_MERCURE_JWT_SECRET) {
     $caddyMercureJwtSecret = -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 32 | ForEach-Object {[char]$_})
@@ -127,6 +153,11 @@ if (Test-Path ".env.local") {
             $envVars[$matches[1]] = $matches[2]
         }
     }
+}
+
+# Remove the old .env.local, a fresh one is written below
+if (Test-Path ".env.local") {
+    Remove-Item ".env.local" -Force
 }
 
 # Override with environment variables if they exist
@@ -151,5 +182,24 @@ JWT_PASSPHRASE=$([guid]::NewGuid().ToString("N"))
 DATABASE_CREATOR_PASSWORD=$([guid]::NewGuid().ToString("N"))
 "@
 
-docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.auggis.yml" up -d
+$composeArgs = @('--env-file', '.env.local', '-f', 'docker-compose.yml', '-f', 'docker-compose.auggis.yml')
+docker compose @composeArgs up -d
+
+# Wait for the php container to report it is ready
+Write-Host "Awaiting php container to be ready.."
+$timeoutSeconds = 120
+$stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+$phpReady = $false
+while (-not $phpReady) {
+    $phpLogs = docker compose @composeArgs logs php 2>&1 | Out-String
+    if ($phpLogs -match 'PHP app ready!') {
+        $phpReady = $true
+    } elseif ($stopwatch.Elapsed.TotalSeconds -ge $timeoutSeconds) {
+        Write-Warning "Timed out after $timeoutSeconds seconds waiting for 'PHP app ready!' in the php container log."
+        exit 1
+    } else {
+        Start-Sleep -Seconds 2
+    }
+}
+Write-Host "PHP container is ready!"
 exit 0
