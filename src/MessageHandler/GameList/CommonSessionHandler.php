@@ -246,7 +246,7 @@ abstract class CommonSessionHandler
             );
         }
         $gameConfigContents = json_decode($gameConfigContent);
-        if ($gameConfigContents === false) {
+        if ($gameConfigContents === null) {
             throw new Exception(
                 "Cannot decode contents of the session's chosen configuration file: {$gameConfigFilepath}"
             );
