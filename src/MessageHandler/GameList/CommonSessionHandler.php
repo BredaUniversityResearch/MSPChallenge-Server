@@ -4,6 +4,9 @@ namespace App\MessageHandler\GameList;
 
 use App\Domain\API\v1\Game as GameAPI;
 use App\Domain\Common\EntityEnums\GameStateValue;
+use App\Domain\Config\ConfigLoader;
+use App\Domain\Config\InvalidSessionConfigException;
+use App\Domain\Config\SessionConfigValidator;
 use App\Domain\Communicator\WatchdogCommunicator;
 use App\Domain\Log\LogContainerInterface;
 use App\Domain\Services\ConnectionManager;
@@ -28,8 +31,6 @@ use Exception;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
-use Swaggest\JsonSchema\InvalidValue;
-use Swaggest\JsonSchema\Schema;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -75,6 +76,8 @@ abstract class CommonSessionHandler
     protected LoggerInterface $gameSessionLogger;
 
     protected SymfonyToLegacyHelper $symfonyToLegacyHelper;
+
+    private ?ConfigLoader $configLoader = null;
 
     /**
      * @throws Exception
@@ -235,7 +238,19 @@ abstract class CommonSessionHandler
         }
     }
 
+    protected function configLoader(): ConfigLoader
+    {
+        return $this->configLoader ??= new ConfigLoader(
+            (string)$this->params->get('app.server_manager_config_dir'),
+            new SessionConfigValidator($this->kernel->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json')
+        );
+    }
+
     /**
+     * Reads and validates the running config of a session (the config merged with generic.json at its creation, or
+     * an older one in the old shape), and sets the data model from it. The data model has CEL, SEL and MEL in
+     * simulation_settings and also directly in the data model, until the code that reads it has been moved.
+     *
      * @throws Exception
      */
     protected function validateGameConfig(string $gameConfigFilepath): void
@@ -245,32 +260,36 @@ abstract class CommonSessionHandler
                 "Cannot read contents of the session's chosen configuration file: {$gameConfigFilepath}"
             );
         }
-        $gameConfigContents = json_decode($gameConfigContent);
-        if ($gameConfigContents === null) {
+        $loader = $this->configLoader();
+        try {
+            // final already: not merged again, so a session does not change when generic.json does
+            $gameConfigContents = $loader->normalize($gameConfigContent);
+            $errors = $loader->errors($gameConfigContents);
+        } catch (InvalidSessionConfigException $e) {
             throw new Exception(
-                "Cannot decode contents of the session's chosen configuration file: {$gameConfigFilepath}"
+                "Cannot decode contents of the session's chosen configuration file: {$gameConfigFilepath}: ".
+                $e->getMessage()
             );
         }
-        $schema = Schema::import(json_decode(
-            file_get_contents($this->kernel->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json')
-        ));
-        try {
-            $schema->in($gameConfigContents);
-        } catch (InvalidValue $e) {
+        $metadata = json_encode($gameConfigContents->metadata ?? null);
+        if ($errors !== []) {
             $this->sessionLogHandler->error(
-                "Session config file {$gameConfigFilepath} failed to pass validation, having meta data: ".
-                    json_encode($gameConfigContents->metadata)
+                "Session config file {$gameConfigFilepath} failed to pass validation, having meta data: ".$metadata
             );
-            $this->sessionLogHandler->error($e->getMessage());
+            foreach ($errors as $error) {
+                $this->sessionLogHandler->error($error);
+            }
             throw new Exception('Session config file invalid, so not continuing.');
         }
         $this->sessionLogHandler->info(
-            "Contents of config file {$gameConfigFilepath} were successfully validated, having meta data: ".
-            json_encode($gameConfigContents->metadata)
+            "Contents of config file {$gameConfigFilepath} were successfully validated, having meta data: ".$metadata
         );
-        $gameConfigContents = json_decode($gameConfigContent, true); // to array
         // todo: we should just use the object version instead of the array one.
-        $this->dataModel = $gameConfigContents['datamodel'];
+        $gameConfigContents = json_decode(
+            json_encode($gameConfigContents, JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR),
+            true
+        );
+        $this->dataModel = ConfigLoader::datamodelWithBothShapes($gameConfigContents['datamodel']);
     }
 
     /**

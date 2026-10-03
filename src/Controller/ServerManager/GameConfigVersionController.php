@@ -6,17 +6,17 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Controller\BaseController;
 use App\Domain\Common\EntityEnums\GameConfigVersionVisibilityValue;
+use App\Domain\Config\ConfigLoader;
+use App\Domain\Config\ConfigParentException;
+use App\Domain\Config\InvalidSessionConfigException;
 use App\Entity\ServerManager\GameConfigFile;
 use App\Entity\ServerManager\GameConfigVersion;
 use App\Form\GameConfigVersionUploadFormType;
-use JsonSchema\Validator;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 #[Route(
     '/{manager}/gameconfig',
@@ -96,7 +96,8 @@ class GameConfigVersionController extends BaseController
         requirements: ['configId' => '\d+']
     )]
     public function gameConfigVersionDownload(
-        int $configId
+        int $configId,
+        ConfigLoader $configLoader
     ): Response {
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $gameConfigVersion = $entityManager->getRepository(GameConfigVersion::class)->find($configId);
@@ -108,7 +109,16 @@ class GameConfigVersionController extends BaseController
         if (!$fileSystem->exists($gameConfigFilePath)) {
             return new Response(null, 422);
         }
-        $response = new BinaryFileResponse($gameConfigFilePath);
+        // the final config: the stored file (which may be stripped) merged with its parents
+        try {
+            $response = new Response(
+                $configLoader->mergedJsonOfFile($gameConfigFilePath),
+                200,
+                ['Content-Type' => 'application/json']
+            );
+        } catch (InvalidSessionConfigException | ConfigParentException $e) {
+            return new Response($e->getMessage(), 500);
+        }
         $disposition = HeaderUtils::makeDisposition(
             HeaderUtils::DISPOSITION_ATTACHMENT,
             pathinfo($gameConfigFilePath)['filename']
@@ -141,7 +151,7 @@ class GameConfigVersionController extends BaseController
     #[Route('/form', name: 'manager_gameconfig_form')]
     public function gameConfigVersionForm(
         Request $request,
-        KernelInterface $kernel
+        ConfigLoader $configLoader
     ): Response {
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $form = $this->createForm(
@@ -150,7 +160,11 @@ class GameConfigVersionController extends BaseController
             ['entity_manager' => $entityManager, 'action' => $this->generateUrl('manager_gameconfig_form')]
         );
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid() && self::isConfigFileValid($form, $kernel)) {
+        $contentsToStore = null;
+        if ($form->isSubmitted() && $form->isValid()) {
+            $contentsToStore = self::checkUploadedConfig($form, $configLoader);
+        }
+        if ($contentsToStore !== null) {
             $gameConfigVersion = $form->getData();
             if (is_null($gameConfigVersion->getGameConfigFile())) {
                 $gameConfigFile = new GameConfigFile;
@@ -166,10 +180,12 @@ class GameConfigVersionController extends BaseController
                         ->findLatestVersion($gameConfigVersion->getGameConfigFile())->getVersion() + 1
                 );
             }
-            $form->get('gameConfigFileActual')->getData()->move(
+            // the config as it is stored: the final config, complete (so it needs no parent file)
+            (new Filesystem)->dumpFile(
                 $this->getParameter('app.server_manager_config_dir').
-                    $gameConfigVersion->getGameConfigFile()->getFilename(),
-                "{$gameConfigVersion->getGameConfigFile()->getFilename()}_{$gameConfigVersion->getVersion()}.json"
+                    $gameConfigVersion->getGameConfigFile()->getFilename().'/'.
+                    "{$gameConfigVersion->getGameConfigFile()->getFilename()}_{$gameConfigVersion->getVersion()}.json",
+                $contentsToStore
             );
             $entityManager->persist($gameConfigVersion);
             $entityManager->flush();
@@ -181,24 +197,21 @@ class GameConfigVersionController extends BaseController
         );
     }
 
-    private static function isConfigFileValid(FormInterface $form, KernelInterface $kernel): bool
+    /**
+     * Checks the uploaded config: it has to be valid JSON, its parents (if it names any) have to be known, and its
+     * final config has to match the schema. The errors, with the line of a syntax error, are shown on the form.
+     *
+     * @return ?string what to store: the final config, complete and in the new shape; null when the config is not
+     *         valid
+     * @throws \JsonException
+     */
+    private static function checkUploadedConfig(FormInterface $form, ConfigLoader $configLoader): ?string
     {
-        $uploadedGameConfigFileContents = json_decode(
-            file_get_contents($form->get('gameConfigFileActual')->getData()->getRealPath())
-        );
-        $validator = new Validator();
-        $validator->validate(
-            $uploadedGameConfigFileContents,
-            json_decode(file_get_contents($kernel->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json'))
-        );
-        if (!$validator->isValid()) {
-            foreach ($validator->getErrors() as $error) {
-                $form->get('gameConfigFileActual')->addError(
-                    new FormError(sprintf("[%s] %s", $error['property'], $error['message']))
-                );
-            }
-            return false;
+        $uploaded = $form->get('gameConfigFileActual')->getData()->getRealPath();
+        $check = $configLoader->checkUpload((string)file_get_contents($uploaded));
+        foreach ($check->errors as $error) {
+            $form->get('gameConfigFileActual')->addError(new FormError($error));
         }
-        return true;
+        return $check->contents;
     }
 }

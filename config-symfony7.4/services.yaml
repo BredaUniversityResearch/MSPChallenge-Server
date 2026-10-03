@@ -262,6 +262,7 @@ services:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 0 }
 
     App\Domain\Config\SessionConfigValidator:
+    App\Domain\Config\ConfigLoader:
 
 when@dev:
     parameters:
