@@ -100,9 +100,29 @@ class ConfigSplitterTest extends ConfigTestCase
         $this->assertSame('Countries', $entry->startlayer, 'a layer of the generic config: its generic name');
         $this->assertSame('B_Only', $entry->endlayer, 'a layer of this config only: its layer name');
         $this->assertSame(['B_Only'], $regionB->simulation_settings->SEL->shipping_lane_layers);
-        $this->assertStringNotContainsString('B_Only', json_encode($result->generic));
-        $this->assertStringNotContainsString('OnlyB', json_encode($result->generic));
+        // the layers and sections of the generic config never mention it (only its layer_names does, see below)
+        $this->assertStringNotContainsString('B_Only', json_encode($result->generic->datamodel));
+        $this->assertStringNotContainsString('OnlyB', json_encode($result->generic->datamodel));
+        $this->assertSame(['B_Only'], $result->generic->layer_names->OnlyB, 'so it can join the generic config later');
         $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions['b/b'], $b));
+    }
+
+    public function testTheGenericConfigHoldsTheLayerNamesOfAllLayersEvenOfThoseOnlyOneConfigHas(): void
+    {
+        $a = self::configFor('A');
+        $b = self::configFor('B');
+        $b->datamodel->meta[] = ConfigFactory::layer('B_Only', 'Only B');
+
+        [$result] = self::split(['a/a' => $a, 'b/b' => $b]);
+
+        $names = $result->generic->layer_names;
+        $this->assertSame(['A_Countries', 'B_Countries'], $names->Countries);
+        $this->assertSame(['B_Only'], $names->OnlyB, 'so the layer can join the generic config when another has it');
+        $this->assertSame(
+            ['metadata', 'datamodel', 'layer_names'],
+            array_keys(get_object_vars($result->generic)),
+            'next to the metadata and the datamodel, where merging does not look'
+        );
     }
 
     public function testALayerOfOneConfigWithTheGenericNameOfAnotherLayerOfThatConfigIsRejected(): void
@@ -170,7 +190,7 @@ class ConfigSplitterTest extends ConfigTestCase
 
         [$result] = self::split(['a/a' => $a, 'b/b' => $b]);
 
-        $this->assertSame(3, $result->dropped['layer_width / layer_height (every layer)']);
+        $this->assertSame(3, $result->dropped['layer_width / layer_height of layers that are not raster layers']);
         $this->assertSame(1, $result->dropped['layer_information with a non-empty value']);
         $this->assertSame(1, $result->dropped['layer_raster_filter_mode with a value other than 1']);
         $documents = array_merge([$result->generic], array_values($result->regions));
@@ -184,6 +204,45 @@ class ConfigSplitterTest extends ConfigTestCase
                 }
             }
         }
+    }
+
+    public function testRasterLayersKeepTheirWidthAndHeight(): void
+    {
+        // the server needs the layer_height of a raster layer to download it from GeoServer, and it differs per layer
+        $raster = static fn(string $name, string $short, int $width, int $height) => ConfigFactory::layer(
+            $name,
+            $short,
+            ['layer_geotype' => 'raster', 'layer_width' => $width, 'layer_height' => $height]
+        );
+        $a = ConfigFactory::config([
+            $raster('A_Bathymetry', 'Bathymetry', 131, 113),
+            ConfigFactory::layer('A_Countries', 'Countries'),
+        ]);
+        $b = ConfigFactory::config([
+            $raster('B_Bathymetry', 'Bathymetry', 76, 44),
+            ConfigFactory::layer('B_Countries', 'Countries'),
+            $raster('B_Only', 'Only Raster', 1024, 2048),
+        ]);
+
+        [$result] = self::split(['a/a' => $a, 'b/b' => $b]);
+
+        $generic = $result->generic->datamodel->meta;
+        $this->assertSame(['Bathymetry', 'Countries'], self::layerNames($generic));
+        $this->assertSame(131, $generic[0]->layer_width, 'a tie goes to the first config');
+        $this->assertSame(113, $generic[0]->layer_height);
+        $this->assertFalse(ConfigValues::has($generic[1], 'layer_width'), 'removed from a layer that is not a raster');
+        $this->assertFalse(ConfigValues::has($generic[1], 'layer_height'));
+        $regionB = $result->regions['b/b']->datamodel->meta;
+        $this->assertSame(76, $regionB[0]->layer_width, 'the size of this config is an override');
+        $this->assertSame(44, $regionB[0]->layer_height);
+        $this->assertSame(1024, $regionB[2]->layer_width, 'also in a raster layer that only this config has');
+        $this->assertSame(2048, $regionB[2]->layer_height);
+        $this->assertSame(
+            2,
+            $result->dropped['layer_width / layer_height of layers that are not raster layers']
+        );
+        $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions['a/a'], $a));
+        $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions['b/b'], $b));
     }
 
     public function testRegionSpecificSectionsOnlyExistInTheRegionFile(): void

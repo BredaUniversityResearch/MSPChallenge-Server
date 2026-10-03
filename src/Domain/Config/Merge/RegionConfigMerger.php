@@ -37,10 +37,11 @@ final class RegionConfigMerger
     /** Order of the keys in a layer, as in the existing configs (cosmetic only). */
     public const array LAYER_KEY_ORDER = [
         'layer_name', 'layer_geotype', 'layer_entity_value_max', 'layer_short', 'layer_category',
-        'layer_subcategory', 'layer_download_from_geoserver', 'layer_raster_material',
-        'layer_raster_color_interpolation', 'layer_raster_pattern', 'layer_raster_minimum_value_cutoff',
-        'layer_active', 'layer_selectable', 'layer_editable', 'layer_toggleable', 'layer_active_on_start',
-        'layer_green', 'layer_tooltip', 'layer_media', 'layer_text_info', 'layer_states', 'layer_editing_type',
+        'layer_subcategory', 'layer_download_from_geoserver', 'layer_width', 'layer_height', 'layer_raster_material',
+        'layer_raster_filter_mode', 'layer_raster_color_interpolation', 'layer_raster_pattern',
+        'layer_raster_minimum_value_cutoff', 'layer_active', 'layer_selectable', 'layer_editable',
+        'layer_toggleable', 'layer_active_on_start', 'layer_green', 'layer_tooltip', 'layer_information',
+        'layer_media', 'layer_text_info', 'layer_states', 'layer_editing_type',
         'layer_special_entity_type', 'layer_depth', 'layer_property_as_type', 'layer_type',
         'layer_info_properties', 'layer_tags',
     ];
@@ -116,6 +117,9 @@ final class RegionConfigMerger
         $result = new \stdClass();
         if (isset($config->metadata)) {
             $result->metadata = ConfigValues::clone($config->metadata);
+            if ($result->metadata instanceof \stdClass) {
+                unset($result->metadata->parent); // it says where the config came from, the final config is complete
+            }
         }
         $datamodel = new \stdClass();
         $done = [];
@@ -180,6 +184,79 @@ final class RegionConfigMerger
         }
         $result->datamodel = $datamodel;
         return $result;
+    }
+
+    /**
+     * Combines two generic configs: the config of a parent and the generic config that has it as its parent. The
+     * result is a generic config again (layers keep their msp_config_generic_name), so it can be merged with a
+     * region config, or serve as the parent of another generic config.
+     *
+     * The layers are a pool: the child adds layers and changes layers of the parent by name, with the same rules as a
+     * region has for the layers of a generic config. The sections (restrictions, dependencies, simulation settings)
+     * combine as they do for a region, except that all the layers of both are known, so nothing is left out.
+     */
+    public function mergeGeneric(\stdClass $parent, \stdClass $child): \stdClass
+    {
+        $parentDatamodel = ($parent->datamodel ?? null) instanceof \stdClass ? $parent->datamodel : new \stdClass();
+        $childDatamodel = ($child->datamodel ?? null) instanceof \stdClass ? $child->datamodel : new \stdClass();
+
+        $layers = [];
+        foreach (is_array($parentDatamodel->meta ?? null) ? $parentDatamodel->meta : [] as $layer) {
+            $layers[$layer->msp_config_generic_name] = ConfigValues::clone($layer);
+        }
+        foreach (is_array($childDatamodel->meta ?? null) ? $childDatamodel->meta : [] as $layer) {
+            $name = $layer->msp_config_generic_name;
+            $layers[$name] = isset($layers[$name])
+                ? $this->withName($name, $this->mergeLayer($layers[$name], $layer))
+                : ConfigValues::clone($layer);
+        }
+        $present = array_fill_keys(array_map('strval', array_keys($layers)), true);
+        $unchanged = static fn(string $reference): string => $reference;
+
+        $result = new \stdClass();
+        $metadata = ConfigValues::clone($child->metadata ?? $parent->metadata ?? new \stdClass());
+        if ($metadata instanceof \stdClass) {
+            unset($metadata->parent);
+        }
+        $result->metadata = $metadata;
+        $datamodel = new \stdClass();
+        $datamodel->meta = array_values($layers);
+        if (ConfigValues::has($parentDatamodel, 'restrictions') || ConfigValues::has($childDatamodel, 'restrictions')) {
+            $datamodel->restrictions = $this->mergeRestrictions(
+                $parentDatamodel->restrictions ?? null,
+                $childDatamodel->restrictions ?? null,
+                $present,
+                $unchanged
+            );
+        }
+        foreach ([$childDatamodel, $parentDatamodel] as $source) {
+            if (ConfigValues::has($source, 'dependencies')) {
+                $datamodel->dependencies = ConfigValues::clone($source->dependencies);
+                break;
+            }
+        }
+        if (ConfigValues::has($parentDatamodel, 'simulation_settings')
+            || ConfigValues::has($childDatamodel, 'simulation_settings')) {
+            $datamodel->simulation_settings = $this->mergeSimulation(
+                $parentDatamodel->simulation_settings ?? null,
+                $childDatamodel->simulation_settings ?? null,
+                [],
+                $present,
+                $unchanged
+            );
+        }
+        $result->datamodel = $datamodel;
+        return $result;
+    }
+
+    private function withName(string $name, \stdClass $layer): \stdClass
+    {
+        $named = new \stdClass();
+        $named->msp_config_generic_name = $name;
+        foreach (ConfigValues::props($layer) as $key => $value) {
+            $named->{$key} = $value;
+        }
+        return $named;
     }
 
     /**

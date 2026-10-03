@@ -38,12 +38,15 @@ final class RegionConfigStripper
     /**
      * @param bool $isEffective $config is already the final config (see RegionConfigMerger::merge()), for example
      *        expanded with an older generic config: it is not merged with $generic again
+     * @param ?string $parent the name of the generic config ($generic), written in the metadata of the result as the
+     *        parent of the config
      */
     public function strip(
         \stdClass $generic,
         \stdClass $config,
         GenericNameRegistry $names,
-        bool $isEffective = false
+        bool $isEffective = false,
+        ?string $parent = null
     ): StripResult {
         $warnings = [];
         $stats = ['layers inherited' => 0, 'layers standalone' => 0];
@@ -52,6 +55,10 @@ final class RegionConfigStripper
             : $this->merger->merge($generic, $config, $warnings);
         try {
             $region = $this->build($generic, $effective, $names, $stats, $warnings);
+            if ($parent !== null) {
+                $region->metadata ??= new \stdClass();
+                $region->metadata->parent = $parent;
+            }
         } catch (\DomainException $e) {
             return StripResult::failed([$e->getMessage()], $warnings);
         }
@@ -235,8 +242,9 @@ final class RegionConfigStripper
         $genericBase = ConfigValues::clone($generic);
         unset($genericBase->msp_config_generic_name, $genericBase->layer_info_properties);
         $base = new \stdClass();
+        $removed = ConfigSplitter::removedLayerKeys($layer);
         foreach (ConfigValues::props($layer) as $key => $value) {
-            if (!in_array($key, ConfigSplitter::REMOVED_LAYER_KEYS, true)
+            if (!in_array($key, $removed, true)
                 && !in_array($key, ConfigSplitter::REGION_LAYER_KEYS, true)
                 && $key !== 'layer_info_properties') {
                 $base->{$key} = ConfigValues::clone($value);
@@ -268,8 +276,9 @@ final class RegionConfigStripper
         if ($alias !== null) {
             $entry->msp_config_generic_name = $alias;
         }
+        $removed = ConfigSplitter::removedLayerKeys($layer);
         foreach (ConfigValues::props($layer) as $key => $value) {
-            if (!in_array($key, ConfigSplitter::REMOVED_LAYER_KEYS, true)) {
+            if (!in_array($key, $removed, true)) {
                 $entry->{$key} = ConfigValues::clone($value);
             }
         }

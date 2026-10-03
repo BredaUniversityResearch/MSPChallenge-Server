@@ -37,12 +37,14 @@ final class ConfigFileStripper
         \stdClass $current,
         \stdClass $generic,
         GenericNameRegistry $names,
-        ?\stdClass $effective = null
+        ?\stdClass $effective = null,
+        ?string $parent = null
     ): StripPlan {
         $warnings = [];
-        // $effective: the final config of a file that was stripped against another generic config
+        // $effective: the final config of the file. Without it the file is merged with $generic, which is right when
+        // that is the generic config the file has as its parent (or when it is a complete config)
         $effective ??= $this->merger->merge($generic, $current, $warnings);
-        $result = $this->stripper->strip($generic, $effective, $names, true);
+        $result = $this->stripper->strip($generic, $effective, $names, true, $parent);
         $warnings = array_merge($warnings, $result->warnings);
         if (!$result->isStripped()) {
             return new StripPlan(

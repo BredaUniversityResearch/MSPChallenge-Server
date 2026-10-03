@@ -202,6 +202,50 @@ class RegionConfigStripperTest extends ConfigTestCase
         );
     }
 
+    public function testTheStrippedConfigNamesItsParentAndTheFinalConfigDoesNot(): void
+    {
+        [$generic, $registry, $config] = self::custom();
+
+        $result = self::stripper()->strip($generic, $config, $registry, false, 'public');
+
+        $region = $this->assertStrippedAndLossless($result, $generic, $config);
+        $this->assertSame('public', $region->metadata->parent);
+        $this->assertFalse(ConfigValues::has($config->metadata ?? new \stdClass(), 'parent'), 'input unchanged');
+        $final = self::merger()->merge($generic, $region);
+        $this->assertFalse(ConfigValues::has($final->metadata, 'parent'));
+    }
+
+    public function testWithoutAParentNameTheMetadataIsTheOneOfTheConfig(): void
+    {
+        [$generic, $registry, $config] = self::custom();
+
+        $result = self::stripper()->strip($generic, $config, $registry);
+
+        $region = $this->assertStrippedAndLossless($result, $generic, $config);
+        $this->assertFalse(ConfigValues::has($region->metadata ?? new \stdClass(), 'parent'));
+    }
+
+    public function testRasterLayersKeepTheirWidthAndHeightWhenAConfigIsStripped(): void
+    {
+        [$generic, $registry, $config] = self::custom();
+        $config->datamodel->meta[] = ConfigFactory::layer('MY_RASTER', 'My Raster', [
+            'layer_geotype' => 'raster',
+            'layer_width' => 300,
+            'layer_height' => 200,
+        ]);
+        $config->datamodel->meta[] = ConfigFactory::layer('MY_POLYGON', 'My Polygon'); // width and height 1024
+
+        $result = self::stripper()->strip($generic, $config, $registry);
+        $region = $this->assertStrippedAndLossless($result, $generic, $config);
+
+        $raster = $region->datamodel->meta[3];
+        $polygon = $region->datamodel->meta[4];
+        $this->assertSame(300, $raster->layer_width);
+        $this->assertSame(200, $raster->layer_height);
+        $this->assertFalse(ConfigValues::has($polygon, 'layer_width'));
+        $this->assertFalse(ConfigValues::has($polygon, 'layer_height'));
+    }
+
     public function testChangedValuesBecomeSmallOverrides(): void
     {
         [$generic, $registry, $config] = self::custom();

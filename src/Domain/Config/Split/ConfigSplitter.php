@@ -26,11 +26,30 @@ final class ConfigSplitter
 {
     /** Removed from every layer by the design document. */
     public const array REMOVED_LAYER_KEYS = [
-        'layer_width',
-        'layer_height',
         'layer_raster_filter_mode',
         'layer_information',
     ];
+
+    /**
+     * Removed from the layers that are not raster layers. A raster layer keeps them: the server needs its
+     * layer_height to download the raster from GeoServer (the width follows from it), and the sizes differ per layer.
+     */
+    public const array REMOVED_NON_RASTER_LAYER_KEYS = [
+        'layer_width',
+        'layer_height',
+    ];
+
+    /**
+     * The keys that are removed from this layer.
+     *
+     * @return string[]
+     */
+    public static function removedLayerKeys(\stdClass $layer): array
+    {
+        return ($layer->layer_geotype ?? null) === 'raster'
+            ? self::REMOVED_LAYER_KEYS
+            : array_merge(self::REMOVED_LAYER_KEYS, self::REMOVED_NON_RASTER_LAYER_KEYS);
+    }
 
     /** Always kept in the region layer entry. */
     public const array REGION_LAYER_KEYS = [
@@ -110,6 +129,9 @@ final class ConfigSplitter
         $generic = new \stdClass();
         $generic->metadata = $this->genericMetadata($configs);
         $generic->datamodel = $genericDatamodel;
+        // which layer names belong to which generic layer: authoring information, it is not used when merging, but it
+        // travels with the generic config so a restricted generic config never has to put its names in a shared file
+        $generic->layer_names = (object)$this->names->toMap();
 
         $regions = [];
         foreach ($configs as $id => $root) {
@@ -160,8 +182,9 @@ final class ConfigSplitter
                     throw new \RuntimeException("Config \"$id\" has two layers with generic name \"$generic\".");
                 }
                 $base = new \stdClass();
+                $removed = self::removedLayerKeys($layer);
                 foreach (ConfigValues::props($layer) as $key => $value) {
-                    if (in_array($key, self::REMOVED_LAYER_KEYS, true)) {
+                    if (in_array($key, $removed, true)) {
                         $this->countRemovedLayerKey($key, $value);
                         continue;
                     }
@@ -301,8 +324,9 @@ final class ConfigSplitter
     private function regionOnlyLayer(\stdClass $layer): \stdClass
     {
         $entry = new \stdClass();
+        $removed = self::removedLayerKeys($layer);
         foreach (ConfigValues::props($layer) as $key => $value) {
-            if (!in_array($key, self::REMOVED_LAYER_KEYS, true)) {
+            if (!in_array($key, $removed, true)) {
                 $entry->{$key} = ConfigValues::clone($value);
             }
         }
@@ -335,7 +359,10 @@ final class ConfigSplitter
     {
         // counted: every layer for width/height (once per layer), otherwise only a value that is not the default
         [$label, $counts] = match ($key) {
-            'layer_width', 'layer_height' => ['layer_width / layer_height (every layer)', $key === 'layer_width'],
+            'layer_width', 'layer_height' => [
+                'layer_width / layer_height of layers that are not raster layers',
+                $key === 'layer_width',
+            ],
             'layer_raster_filter_mode' => ['layer_raster_filter_mode with a value other than 1', $value !== 1],
             'layer_information' => ['layer_information with a non-empty value', $value !== '' && $value !== null],
             default => [$key, false],

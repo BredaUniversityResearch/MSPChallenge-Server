@@ -223,6 +223,126 @@ class RegionConfigMergerTest extends ConfigTestCase
         $this->assertSame(['X_Mine'], array_map(static fn($l) => $l->layer_name, $merged->datamodel->meta));
     }
 
+    /**
+     * @return array{0: \stdClass, 1: \stdClass} a parent and a child generic config
+     */
+    private static function parentAndChild(): array
+    {
+        $restriction = static fn(string $start, string $end, string $message): string => json_encode([[
+            'message' => $message, 'value' => 0.0, 'type' => 'ERROR',
+            'startlayer' => $start, 'starttype' => '', 'endlayer' => $end, 'endtype' => '', 'sort' => 'Inclusion',
+        ]]);
+        $parent = ConfigFactory::json('{
+            "metadata": {"config_version": "2.0.0"},
+            "datamodel": {
+                "meta": [
+                    {"msp_config_generic_name": "A", "layer_category": "x", "layer_tooltip": "a"},
+                    {"msp_config_generic_name": "B", "layer_category": "x", "layer_tooltip": "b",
+                     "layer_info_properties": [{"property_name": "p1"}]}
+                ],
+                "restrictions": {"A|B": ' . $restriction('A', 'B', 'of the parent') . '},
+                "dependencies": {"a": 1},
+                "simulation_settings": {
+                    "CEL": {"a": 1, "b": 2},
+                    "SEL": {"port_layers": [{"layer_name": "A"}], "ship": 1},
+                    "MEL": null
+                }
+            }
+        }');
+        $child = ConfigFactory::json('{
+            "metadata": {"config_version": "2.0.0", "parent": "base"},
+            "datamodel": {
+                "meta": [
+                    {"msp_config_generic_name": "B", "layer_tooltip": "b of the child",
+                     "layer_info_properties": [{"property_name": "p2"}]},
+                    {"msp_config_generic_name": "C", "layer_category": "y"}
+                ],
+                "restrictions": {"B|C": ' . $restriction('B', 'C', 'of the child') . '},
+                "dependencies": {"b": 2},
+                "simulation_settings": {"CEL": {"b": 3}, "SEL": {"port_layers": [{"layer_name": "C"}]}}
+            }
+        }');
+        return [$parent, $child];
+    }
+
+    public function testTwoGenericConfigsAreMergedByLayerName(): void
+    {
+        [$parent, $child] = self::parentAndChild();
+
+        $pool = self::merger()->mergeGeneric($parent, $child);
+
+        $layers = $pool->datamodel->meta;
+        $this->assertSame(['A', 'B', 'C'], array_map(static fn($l) => $l->msp_config_generic_name, $layers));
+        $this->assertSame('msp_config_generic_name', array_key_first(get_object_vars($layers[1])), 'the name stays');
+        $this->assertSame('b of the child', $layers[1]->layer_tooltip, 'the child changes a layer of the parent');
+        $this->assertSame('x', $layers[1]->layer_category, 'and what it does not change stays');
+        $this->assertSame(
+            ['p1', 'p2'],
+            array_map(static fn($p) => $p->property_name, $layers[1]->layer_info_properties),
+            'layer_info_properties of the child add to the ones of the parent'
+        );
+        $this->assertSame('y', $layers[2]->layer_category, 'and it adds layers');
+    }
+
+    public function testTwoGenericConfigsCombineTheirSections(): void
+    {
+        [$parent, $child] = self::parentAndChild();
+
+        $pool = self::merger()->mergeGeneric($parent, $child);
+
+        $datamodel = $pool->datamodel;
+        $this->assertSame(['A|B', 'B|C'], array_keys(get_object_vars($datamodel->restrictions)), 'restrictions add up');
+        $this->assertSame(
+            ['b' => 2],
+            get_object_vars($datamodel->dependencies),
+            'dependencies are replaced as a whole'
+        );
+        $settings = $datamodel->simulation_settings;
+        $this->assertSame(['a' => 1, 'b' => 3], get_object_vars($settings->CEL), 'values: the child wins');
+        $this->assertSame(
+            ['A', 'C'],
+            array_map(static fn($port) => $port->layer_name, $settings->SEL->port_layers),
+            'lists of layers add up'
+        );
+        $this->assertSame(1, $settings->SEL->ship);
+        $this->assertNull($settings->MEL);
+    }
+
+    public function testTheMergeOfTwoGenericConfigsIsAGenericConfigThatCanBeMergedAgain(): void
+    {
+        [$parent, $child] = self::parentAndChild();
+        $grandChild = ConfigFactory::json(
+            '{"metadata": {"parent": "child"}, "datamodel": {"meta": [{"msp_config_generic_name": "D"}]}}'
+        );
+
+        $pool = self::merger()->mergeGeneric(self::merger()->mergeGeneric($parent, $child), $grandChild);
+
+        $this->assertSame(
+            ['A', 'B', 'C', 'D'],
+            array_map(static fn($l) => $l->msp_config_generic_name, $pool->datamodel->meta)
+        );
+        $this->assertSame(['b' => 2], get_object_vars($pool->datamodel->dependencies), 'sections carry on');
+    }
+
+    public function testTheMetadataOfAMergedGenericConfigIsThatOfTheChildWithoutItsParent(): void
+    {
+        [$parent, $child] = self::parentAndChild();
+
+        $pool = self::merger()->mergeGeneric($parent, $child);
+
+        $this->assertSame(['config_version' => '2.0.0'], get_object_vars($pool->metadata));
+    }
+
+    public function testMergingTwoGenericConfigsChangesNeitherOfThem(): void
+    {
+        [$parent, $child] = self::parentAndChild();
+        $before = [self::canonical($parent), self::canonical($child)];
+
+        self::merger()->mergeGeneric($parent, $child);
+
+        $this->assertSame($before, [self::canonical($parent), self::canonical($child)]);
+    }
+
     public function testRegionWithoutDependenciesInheritsTheGenericOnes(): void
     {
         $merged = self::merger()->merge(self::generic(), self::region());

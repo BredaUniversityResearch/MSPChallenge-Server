@@ -7,9 +7,10 @@ use App\Domain\Config\Split\ConfigValues;
 
 /**
  * Brings a complete (legacy) config in the form a region config produces after merging, so the two can be
- * compared: CEL, SEL and MEL are moved into simulation_settings, layer_width, layer_height,
- * layer_raster_filter_mode and layer_information are removed from every layer, "valueDefinitions" are
- * removed from the MEL ecologyCategories and restriction map keys are rebuilt as startlayer|endlayer.
+ * compared: CEL, SEL and MEL are moved into simulation_settings, layer_raster_filter_mode and layer_information
+ * are removed from every layer (and layer_width and layer_height from layers that are not raster layers),
+ * "valueDefinitions" are removed from the MEL ecologyCategories and restriction map keys are rebuilt as
+ * startlayer|endlayer.
  */
 final class ConfigNormalizer
 {
@@ -21,7 +22,7 @@ final class ConfigNormalizer
             return $config;
         }
         foreach (is_array($datamodel->meta ?? null) ? $datamodel->meta : [] as $layer) {
-            foreach (ConfigSplitter::REMOVED_LAYER_KEYS as $key) {
+            foreach (ConfigSplitter::removedLayerKeys($layer) as $key) {
                 unset($layer->{$key});
             }
         }

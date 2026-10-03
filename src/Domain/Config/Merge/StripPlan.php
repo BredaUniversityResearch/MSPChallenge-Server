@@ -21,7 +21,7 @@ final readonly class StripPlan
      * @param string[] $warnings
      * @param array<string, int> $stats
      * @param ?\stdClass $effective the final config the stripped version has to give back (null: the file merged
-     *        with generic.json)
+     *        with the generic config)
      */
     public function __construct(
         public string $id,
