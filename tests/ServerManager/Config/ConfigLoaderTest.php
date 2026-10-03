@@ -268,6 +268,53 @@ class ConfigLoaderTest extends ConfigCommandTestCase
         $this->assertSame([], self::comparator()->differences($download, $stored));
     }
 
+    public function testAnUploadOfSeveralFilesUsesTheUploadedParentsButDoesNotStoreThem(): void
+    {
+        $uploaded = [
+            'child.json' => $this->stripped('public'),
+            'public.json' => self::emptyChildGenericJson('generic'),
+        ];
+        $this->writeGeneric(); // the server has the generic config
+
+        $check = $this->loader()->checkUploadFiles($uploaded);
+
+        $this->assertTrue($check->isValid(), implode("\n", $check->errors));
+        $stored = ConfigFactory::json($check->contents);
+        $this->assertSame([], self::comparator()->differences(
+            self::normalizer()->normalize(self::realConfigs()[self::ID]),
+            $stored
+        ));
+        $this->assertFileDoesNotExist($this->dir . '/public.json', 'the parents of an upload are not stored');
+    }
+
+    public function testAnUploadedParentIsUsedBeforeTheOneOfTheServer(): void
+    {
+        $this->writeHandMadeGeneric('{"datamodel": {"meta": [], "simulation_settings": {"CEL": {"x": "server"}}}}');
+        $uploaded = '{"datamodel": {"meta": [], "simulation_settings": {"CEL": {"x": "uploaded"}}}}';
+        $child = '{"metadata": {"parent": "generic"}, "datamodel": {"meta": [{"layer_name": "L"}]}}';
+
+        $inspection = $this->loader()->inspectUpload(['c.json' => $child, 'generic.json' => $uploaded]);
+
+        $this->assertTrue($inspection->isComplete());
+        $this->assertSame(['generic.json'], $inspection->parents, 'the uploaded file, not the one of the server');
+    }
+
+    public function testAnIncompleteUploadIsNotProcessed(): void
+    {
+        $check = $this->loader()->checkUploadFiles(['child.json' => $this->stripped()]);
+
+        $this->assertFalse($check->isValid());
+        $this->assertSame(['Missing: generic.json, the parent of child.json.'], $check->errors);
+    }
+
+    public function testAnUploadWithTwoConfigurationsIsNotProcessed(): void
+    {
+        $check = $this->loader()->checkUploadFiles(['a.json' => $this->original(), 'b.json' => $this->original()]);
+
+        $this->assertFalse($check->isValid());
+        $this->assertStringContainsString('Upload one configuration at a time', $check->errors[0]);
+    }
+
     public function testAnUploadWithASyntaxErrorIsRefusedWithTheLine(): void
     {
         $check = $this->loader()->checkUpload(

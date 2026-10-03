@@ -128,6 +128,50 @@ final class ConfigLoader
     }
 
     /**
+     * Looks at the files of an upload (a config and the parents that come with it): is it complete, what is missing.
+     *
+     * @param array<string, string> $files the uploaded files: name => contents
+     */
+    public function inspectUpload(array $files): UploadInspection
+    {
+        return new UploadInspector(
+            fn(string $json): \stdClass => $this->decode($json),
+            fn(string $name): ?\stdClass => ConfigParents::readParent($this->directory, $name)
+        )->inspect($files);
+    }
+
+    /**
+     * Checks a complete upload of several files: the config, and the parents it needs that the server does not have.
+     * Like checkUpload(), the result holds what to store: the final config, complete, in the new shape. The uploaded
+     * parents are only used for that: they are not stored.
+     *
+     * @param array<string, string> $files the uploaded files: name => contents
+     * @throws \JsonException
+     */
+    public function checkUploadFiles(array $files): UploadCheck
+    {
+        $inspection = $this->inspectUpload($files);
+        if (!$inspection->isComplete() || $inspection->config === null) {
+            return UploadCheck::invalid($inspection->errors !== [] ? $inspection->errors : [$inspection->summary()]);
+        }
+        try {
+            $config = $this->decode($files[$inspection->config]);
+            $uploaded = [];
+            foreach ($inspection->parents as $file) {
+                $uploaded[pathinfo($file, PATHINFO_FILENAME)] = $this->decode($files[$file]);
+            }
+            $pool = ConfigParents::fromDirectory($this->directory, $uploaded)->poolOf($config, 'the uploaded config');
+            $merged = $this->merger->merge($pool, $config);
+        } catch (InvalidSessionConfigException $e) {
+            return UploadCheck::invalid($e->getErrors());
+        } catch (ConfigParentException $e) {
+            return UploadCheck::invalid([$e->getMessage()]);
+        }
+        $errors = $this->validator->errors($merged);
+        return $errors === [] ? UploadCheck::valid(ConfigDirectory::encode($merged)) : UploadCheck::invalid($errors);
+    }
+
+    /**
      * Makes a decoded complete config (an assoc array with "datamodel") readable the old and the new way: CEL, SEL
      * and MEL directly in datamodel, and in datamodel.simulation_settings.
      *

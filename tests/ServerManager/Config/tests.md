@@ -2,7 +2,8 @@
 
 Tests for the session config tooling in `src/Domain/Config` and `src/Command/Config*`: splitting complete configs into
 a generic config (the parent) and small region configs, merging them back, stripping, verifying, parents and
-chains of parents, the loader and validator used by the Server Manager, and the commands around them.
+chains of parents, the loader and validator used by the Server Manager, uploading a config together with the parents
+it needs (in as many steps as it takes), and the commands around them.
 
 ```bash
 vendor/bin/phpunit tests/ServerManager/Config                                  # all of them
@@ -11,7 +12,7 @@ vendor/bin/phpunit tests/ServerManager/Config --filter testItFollowsAChainOfPare
 vendor/bin/phpunit tests/ServerManager/Config --verbose                        # also says why tests were skipped
 ```
 
-297 test cases in 17 classes (data providers count as one case per data set). A full run takes one to a few minutes:
+347 test cases in 20 classes (data providers count as one case per data set). A full run takes one to a few minutes:
 most tests work on the six real configs.
 
 ## The ideas behind the tests
@@ -38,7 +39,10 @@ most tests work on the six real configs.
 | `ConfigComparatorTest` | 12 | The comparison used everywhere: key order and number types are ignored, additive lists are compared as sets, other lists keep their order, missing and unexpected items, restrictions, simulations, layer fields and metadata, a limit on the number of reported differences. |
 | `ConfigDirectoryTest` | 25 | The config folder: finding configs (one folder deep, no `.region.json`, patterns), reading (byte order mark, JSON object), resolving file arguments, generic config files in the folder root and which parent names are valid, JSON encoding like the originals (two spaces, newline, floats, size), safe replacing and staged writes, showing paths (also on another drive). |
 | `ConfigParentsTest` | 23 | `metadata.parent`: the pool of a config, of a parent and of a chain (the child adds and changes layers by name, siblings do not see each other), layer names along the chain, errors for a missing parent, a missing parent higher up, loops, too many levels, a parent that is not a generic config, invalid names and an unreadable file, the real configs through a chain of two generic configs, no parent in the final config. |
-| `ConfigLoaderTest` | 21 | The loader of the Server Manager: merging stripped, complete and chained configs, `normalize` (a final config is not merged again), a changed parent is read again, error messages, the merged JSON has the shape of the schema, both shapes readable, and uploads: stored as the complete final config, an unknown parent is refused with the file that is needed, a download that is edited and uploaded again keeps the edit, JSON syntax errors with line numbers, schema errors. |
+| `ConfigLoaderTest` | 25 | The loader of the Server Manager: merging stripped, complete and chained configs, `normalize` (a final config is not merged again), a changed parent is read again, error messages, the merged JSON has the shape of the schema, both shapes readable, and uploads: stored as the complete final config, an unknown parent is refused with the file that is needed, a download that is edited and uploaded again keeps the edit, JSON syntax errors with line numbers, schema errors, uploads of several files (the uploaded parents are used before the ones of the server, and are never stored). |
+| `UploadInspectorTest` | 15 | Looking at the files of an upload: a config alone, with its parents, with parents that the server has, a chain that is partly uploaded, which file is missing and which file needs it, only generic configs (the configuration itself is missing), two configurations are refused, parents that are not needed, loops, a chain that is too long, invalid JSON with its line, a stripped config without a parent, parents are found by the name of their file. |
+| `PendingConfigUploadsTest` | 15 | The files of uploads that are not complete: kept in upload order, a file with the same name replaces the old one, names can not point anywhere else, a limit on the number of files, discarding, tokens of the right shape only, uploads that are too old are gone and purged. |
+| `ConfigUploadsTest` | 16 | Uploading in steps: a config without parents is processed at once, a missing parent is asked for and the files are kept, the missing parent completes the upload and nothing is kept (or stored on the server), forgetting the configuration, parents of the server, an invalid file rejects only that submission, a second configuration is rejected, cancelling, replacing a file, a complete upload that is no valid config, an upload that became complete, expired uploads, foreign tokens. |
 | `JsonSyntaxTest` | 22 | The JSON syntax error locator: valid forms, 16 kinds of errors with line and column and a message, agreement with `json_decode`, the real configs have no errors, short one-line messages. |
 | `SessionConfigValidatorTest` | 14 | The schema and the rules it can not express: the final config of every real config is valid (also old-style ones once normalized), null SEL/MEL are fine and CEL is not, `simulation_settings` is required, optional fields of the design document, a raster layer needs `layer_width` and `layer_height`, other required properties and types, `validate()` throws with all errors, the limit on the number of errors, the short summary. |
 | `ConfigSplitCommandTest` | 23 | `app:config:split`: validation against the schema, a dry run by default, `--apply`, `--output-dir`, `--force`, `--check`, `--generic=NAME`, splitting stripped configs again is a fixed point, a layer that a second config uses becomes generic and moves back when the config is gone, a parent that has a parent itself is not replaced, files that did not change are not rewritten, paths on another drive, report and error messages. |
@@ -53,6 +57,19 @@ most tests work on the six real configs.
 | Class | Purpose |
 |---|---|
 | `ConfigTestCase` | Base class (a `KernelTestCase`): the real configs, `realSplit()`, a shared merger, normalizer and comparator, and assertions that compare big values by size and MD5, so a failure is reported at once instead of after minutes of diffing. |
-| `ConfigCommandTestCase` | Base class for tests on a temporary config folder and for the commands: the original configs, `writeGeneric()`, `writeChildGeneric()`, `strippedCopy()`, snapshots of the folder, fixed terminal width, `text()`. |
+| `ConfigCommandTestCase` | Base class for tests on a temporary config folder and for the commands: temporary directories, the original configs (`writeOriginals()`), `writeGeneric()` and `writeChildGeneric()` for the parents on the server, `strippedCopy()`, `dropAGenericPortLayer()` (a config that can not be stripped), snapshots of the folder, a fixed terminal width, `text()`. Also the files of an upload as JSON: `genericJson()`, `strippedJson()`, `emptyChildGenericJson()`, `smallConfigJson()`. |
 | `ConfigFactory` | Small synthetic configs for the unit tests. |
 | `ConfigFixtures` | Downloads, verifies and caches the six original configs. |
+
+## What these tests do not cover
+
+- **The Server Manager screens.** The upload form (several files), its controller (`GameConfigVersionController`),
+  the modal (`gameconfigversion_form.html.twig`, `modal-gameconfig_controller.js`) and the cancel route have no
+  automated test here. The logic behind them is covered: `ConfigUploads`, `UploadInspector`,
+  `PendingConfigUploads` and `ConfigLoader`.
+- **Creating a session and restoring a save.** The code that writes the merged running config and validates saves
+  (`GameListCreationMessageHandler`, `CommonSessionHandler`, `GameSaveZipFileValidator`, the entity listeners and
+  `api/v1/Game.php`) uses `ConfigLoader`, which is tested, but the wiring itself is only checked by the tests of the
+  rest of the application.
+- **The Unity client and the config editor**, and a real run of `app:config:split --apply` on the released configs.
+

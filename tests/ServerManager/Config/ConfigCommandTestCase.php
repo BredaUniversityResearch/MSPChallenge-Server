@@ -85,6 +85,50 @@ abstract class ConfigCommandTestCase extends ConfigTestCase
     }
 
     /**
+     * The generic config as app:config:split makes it, as an uploaded file would have it.
+     */
+    protected static function genericJson(): string
+    {
+        [$result] = self::realSplit();
+        return ConfigDirectory::encode($result->generic);
+    }
+
+    /**
+     * The stripped version of a real config, naming $parent as its parent, as an uploaded file would have it.
+     */
+    protected static function strippedJson(string $id, string $parent = 'generic'): string
+    {
+        [$result] = self::realSplit();
+        $region = ConfigFactory::copy($result->regions[$id]);
+        $region->metadata->parent = $parent;
+        return ConfigDirectory::encode($region);
+    }
+
+    /**
+     * A generic config without layers of its own that has $parent as its parent.
+     */
+    protected static function emptyChildGenericJson(string $parent): string
+    {
+        return (string)json_encode([
+            'metadata' => ['config_version' => '2.0.0', 'parent' => $parent],
+            'datamodel' => ['meta' => []],
+        ]);
+    }
+
+    /**
+     * A small complete config that names $parent as its parent, as an uploaded file would have it.
+     */
+    protected static function smallConfigJson(?string $parent): string
+    {
+        $config = ConfigFactory::config([ConfigFactory::layer('X_A', 'A')]);
+        $config->metadata ??= new \stdClass();
+        if ($parent !== null) {
+            $config->metadata->parent = $parent;
+        }
+        return (string)json_encode($config);
+    }
+
+    /**
      * A copy of the original configs, stripped against generic.json, in a new directory that has generic.json too.
      *
      * @return string the directory

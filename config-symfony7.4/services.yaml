@@ -263,6 +263,8 @@ services:
 
     App\Domain\Config\SessionConfigValidator:
     App\Domain\Config\ConfigLoader:
+    App\Domain\Config\PendingConfigUploads:
+    App\Domain\Config\ConfigUploads:
 
 when@dev:
     parameters:

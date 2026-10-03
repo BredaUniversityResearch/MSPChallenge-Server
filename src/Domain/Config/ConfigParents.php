@@ -35,22 +35,36 @@ final class ConfigParents
         $this->merger = $merger ?? new RegionConfigMerger();
     }
 
-    public static function fromDirectory(ConfigDirectory $directory): self
+    /**
+     * @param array<string, \stdClass> $uploaded generic configs that were uploaded together with the config, by name:
+     *        they are used before the files of the folder
+     */
+    public static function fromDirectory(ConfigDirectory $directory, array $uploaded = []): self
     {
-        return new self(static function (string $name) use ($directory): ?\stdClass {
-            // a messenger worker lives long: do not trust what PHP remembers about a file that may have changed
-            clearstatcache(true, $directory->parentPath($name));
-            if (!$directory->hasGeneric($name)) {
-                return null;
-            }
-            try {
-                return $directory->read($directory->parentPath($name));
-            } catch (\JsonException | \RuntimeException $e) {
-                throw new ConfigParentException(
-                    sprintf('The parent file %s cannot be used: %s', $directory->parentPath($name), $e->getMessage())
-                );
-            }
-        });
+        return new self(
+            static fn(string $name): ?\stdClass => $uploaded[$name] ?? self::readParent($directory, $name)
+        );
+    }
+
+    /**
+     * The generic config <name>.json of a config folder, null when there is none.
+     *
+     * @throws ConfigParentException when the file cannot be used
+     */
+    public static function readParent(ConfigDirectory $directory, string $name): ?\stdClass
+    {
+        // a messenger worker lives long: do not trust what PHP remembers about a file that may have changed
+        clearstatcache(true, $directory->parentPath($name));
+        if (!$directory->hasGeneric($name)) {
+            return null;
+        }
+        try {
+            return $directory->read($directory->parentPath($name));
+        } catch (\JsonException | \RuntimeException $e) {
+            throw new ConfigParentException(
+                sprintf('The parent file %s cannot be used: %s', $directory->parentPath($name), $e->getMessage())
+            );
+        }
     }
 
     /**

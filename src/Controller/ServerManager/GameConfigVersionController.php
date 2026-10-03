@@ -8,6 +8,7 @@ use App\Controller\BaseController;
 use App\Domain\Common\EntityEnums\GameConfigVersionVisibilityValue;
 use App\Domain\Config\ConfigLoader;
 use App\Domain\Config\ConfigParentException;
+use App\Domain\Config\ConfigUploads;
 use App\Domain\Config\InvalidSessionConfigException;
 use App\Entity\ServerManager\GameConfigFile;
 use App\Entity\ServerManager\GameConfigVersion;
@@ -15,6 +16,7 @@ use App\Form\GameConfigVersionUploadFormType;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -25,6 +27,9 @@ use Symfony\Component\HttpFoundation\Request;
 )]
 class GameConfigVersionController extends BaseController
 {
+    private const string UPLOAD_TOKEN = 'gameconfig.upload.token';
+    private const string CANCEL_CSRF_ID = 'gameconfig_upload_cancel';
+
     #[Route(name: 'manager_gameconfig')]
     public function index(): Response
     {
@@ -146,23 +151,46 @@ class GameConfigVersionController extends BaseController
     }
 
     /**
+     * Uploading a configuration, together with the generic configs (parents) it needs and the server does not have.
+     * When files are missing, what was uploaded is kept (for the session of the user) and the form tells which files
+     * to add; nothing is processed before the upload is complete.
+     *
      * @throws \Exception
      */
     #[Route('/form', name: 'manager_gameconfig_form')]
-    public function gameConfigVersionForm(
-        Request $request,
-        ConfigLoader $configLoader
-    ): Response {
+    public function gameConfigVersionForm(Request $request, ConfigUploads $uploads): Response
+    {
+        $session = $request->getSession();
+        $token = $session->get(self::UPLOAD_TOKEN);
+        $token = is_string($token) ? $token : null;
+        $pendingUpload = $uploads->describe($token);
+        if ($pendingUpload->token === null) {
+            $session->remove(self::UPLOAD_TOKEN);
+        }
         $entityManager = $this->connectionManager->getServerManagerEntityManager();
         $form = $this->createForm(
             GameConfigVersionUploadFormType::class,
             new GameConfigVersion,
-            ['entity_manager' => $entityManager, 'action' => $this->generateUrl('manager_gameconfig_form')]
+            [
+                'entity_manager' => $entityManager,
+                'action' => $this->generateUrl('manager_gameconfig_form'),
+                'has_pending_upload' => $pendingUpload->isWaiting(),
+            ]
         );
         $form->handleRequest($request);
         $contentsToStore = null;
         if ($form->isSubmitted() && $form->isValid()) {
-            $contentsToStore = self::checkUploadedConfig($form, $configLoader);
+            $progress = $uploads->submit($token, self::uploadedFiles($form));
+            foreach ($progress->errors as $error) {
+                $form->get('gameConfigFileActual')->addError(new FormError($error));
+            }
+            if ($progress->token === null) {
+                $session->remove(self::UPLOAD_TOKEN);
+            } else {
+                $session->set(self::UPLOAD_TOKEN, $progress->token);
+            }
+            $pendingUpload = $progress->isDone() ? $uploads->describe(null) : $progress;
+            $contentsToStore = $progress->contents;
         }
         if ($contentsToStore !== null) {
             $gameConfigVersion = $form->getData();
@@ -190,28 +218,46 @@ class GameConfigVersionController extends BaseController
             $entityManager->persist($gameConfigVersion);
             $entityManager->flush();
         }
+        // anything but a finished upload is shown again (status 422, as for any other problem with the form)
+        $finished = $contentsToStore !== null;
         return $this->render(
             'manager/GameConfigVersion/gameconfigversion_form.html.twig',
-            ['gameConfigVersionForm' => $form->createView()],
-            new Response(null, $form->isSubmitted() && !$form->isValid() ? 422 : 200)
+            [
+                'gameConfigVersionForm' => $form->createView(),
+                'pendingUpload' => $pendingUpload->token === null ? null : $pendingUpload,
+            ],
+            new Response(null, $form->isSubmitted() && !($form->isValid() && $finished) ? 422 : 200)
         );
     }
 
     /**
-     * Checks the uploaded config: it has to be valid JSON, its parents (if it names any) have to be known, and its
-     * final config has to match the schema. The errors, with the line of a syntax error, are shown on the form.
-     *
-     * @return ?string what to store: the final config, complete and in the new shape; null when the config is not
-     *         valid
-     * @throws \JsonException
+     * Throws away the files of the upload that is waiting for more files.
      */
-    private static function checkUploadedConfig(FormInterface $form, ConfigLoader $configLoader): ?string
+    #[Route('/form/cancel', name: 'manager_gameconfig_form_cancel', methods: ['POST'])]
+    public function gameConfigVersionFormCancel(Request $request, ConfigUploads $uploads): Response
     {
-        $uploaded = $form->get('gameConfigFileActual')->getData()->getRealPath();
-        $check = $configLoader->checkUpload((string)file_get_contents($uploaded));
-        foreach ($check->errors as $error) {
-            $form->get('gameConfigFileActual')->addError(new FormError($error));
+        if (!$this->isCsrfTokenValid(self::CANCEL_CSRF_ID, (string)$request->request->get('_token'))) {
+            return new Response(null, 400);
         }
-        return $check->contents;
+        $session = $request->getSession();
+        $token = $session->get(self::UPLOAD_TOKEN);
+        $uploads->cancel(is_string($token) ? $token : null);
+        $session->remove(self::UPLOAD_TOKEN);
+        return new Response(null, 204);
+    }
+
+    /**
+     * @return array<string, string> the uploaded files: name => contents
+     */
+    private static function uploadedFiles(FormInterface $form): array
+    {
+        $files = [];
+        /** @var iterable<UploadedFile> $uploadedFiles */
+        $uploadedFiles = $form->get('gameConfigFileActual')->getData() ?? [];
+        foreach ($uploadedFiles as $uploaded) {
+            $contents = file_get_contents($uploaded->getRealPath());
+            $files[$uploaded->getClientOriginalName()] = $contents === false ? '' : $contents;
+        }
+        return $files;
     }
 }
