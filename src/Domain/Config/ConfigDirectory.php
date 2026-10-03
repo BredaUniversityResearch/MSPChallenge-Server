@@ -3,20 +3,18 @@
 namespace App\Domain\Config;
 
 use App\Domain\Config\Split\ConfigValues;
-use App\Domain\Config\Split\GenericNameRegistry;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Finder\Finder;
 
 /**
- * The folder with the session configs: <root>/<folder>/<name>.json, next to generic.json and the layer name
- * mapping file (layer_generic_names.json). Knows how to find and read them, and how to replace a file
- * safely.
+ * The folder with the session configs: <root>/<folder>/<name>.json, next to the generic configs (parents) in
+ * <root>/<name>.json. Knows how to find and read them, and how to replace a file safely.
  */
 final class ConfigDirectory
 {
-    public const string GENERIC_FILE = 'generic.json';
-    public const string NAME_MAP_FILE = 'layer_generic_names.json';
+    /** The name of the generic config the commands use when they are not told another one. */
+    public const string DEFAULT_GENERIC = 'generic';
 
     public function __construct(private readonly string $root)
     {
@@ -27,14 +25,26 @@ final class ConfigDirectory
         return $this->root;
     }
 
-    public function genericPath(): string
+    /**
+     * The file of a generic config, which other configs have as their parent: <root>/<name>.json
+     */
+    public function parentPath(string $name): string
     {
-        return $this->root . '/' . self::GENERIC_FILE;
+        return $this->root . '/' . $name . '.json';
     }
 
-    public function nameMapPath(string $fileName = self::NAME_MAP_FILE): string
+    public function genericPath(string $name = self::DEFAULT_GENERIC): string
     {
-        return $this->root . '/' . $fileName;
+        return $this->parentPath($name);
+    }
+
+    /**
+     * Names of parents are file names without the extension: letters, digits, "_" and "-". A parent is always a
+     * file in the root of the config folder, so a name cannot point anywhere else.
+     */
+    public static function isValidParentName(string $name): bool
+    {
+        return preg_match('/^[A-Za-z0-9_-]+$/', $name) === 1;
     }
 
     /**
@@ -109,51 +119,23 @@ final class ConfigDirectory
         return $document;
     }
 
-    public function hasGeneric(): bool
+    public function hasGeneric(string $name = self::DEFAULT_GENERIC): bool
     {
-        return is_file($this->genericPath());
+        return is_file($this->parentPath($name));
     }
 
     /**
-     * @throws \RuntimeException when generic.json is missing
+     * @throws \RuntimeException when there is no such file, or it is not valid JSON
      * @throws \JsonException
      */
-    public function loadGeneric(): \stdClass
+    public function loadGeneric(string $name = self::DEFAULT_GENERIC): \stdClass
     {
-        if (!$this->hasGeneric()) {
+        if (!$this->hasGeneric($name)) {
             throw new \RuntimeException(
-                'Missing ' . $this->genericPath() . '. Create it with app:config:split --apply.'
+                'Missing ' . $this->parentPath($name) . '. Create it with app:config:split --apply.'
             );
         }
-        return $this->read($this->genericPath());
-    }
-
-    /**
-     * The mapping from region layer names to generic names (only what is in the file, nothing is proposed).
-     *
-     * @return array<string, string[]> generic name => layer names
-     * @throws \JsonException
-     */
-    public function loadNameMap(string $fileName = self::NAME_MAP_FILE): array
-    {
-        $path = $this->nameMapPath($fileName);
-        if (!is_file($path)) {
-            return [];
-        }
-        $decoded = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
-        return is_array($decoded['layers'] ?? null) ? $decoded['layers'] : [];
-    }
-
-    /**
-     * @throws \RuntimeException when the mapping file is missing
-     * @throws \JsonException
-     */
-    public function loadNames(string $fileName = self::NAME_MAP_FILE): GenericNameRegistry
-    {
-        if (!is_file($this->nameMapPath($fileName))) {
-            throw new \RuntimeException('Missing ' . $this->nameMapPath($fileName) . '.');
-        }
-        return GenericNameRegistry::fromMap($this->loadNameMap($fileName));
+        return $this->read($this->parentPath($name));
     }
 
     /**

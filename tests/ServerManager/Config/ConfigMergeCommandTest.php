@@ -19,9 +19,7 @@ class ConfigMergeCommandTest extends ConfigCommandTestCase
 
     private function strippedCopyOf(string $id): string
     {
-        $outputDirectory = $this->temporaryDirectory();
-        $this->execute('app:config:strip', ['--output-dir' => $outputDirectory, '--skip-validation' => true]);
-        return $outputDirectory . '/' . $id . '.json';
+        return $this->strippedCopy() . '/' . $id . '.json';
     }
 
     public function testItPrintsTheFinalConfigOfAStrippedFile(): void
@@ -43,6 +41,28 @@ class ConfigMergeCommandTest extends ConfigCommandTestCase
         );
         $this->assertTrue(ConfigValues::has($merged->datamodel, 'simulation_settings'));
         $this->assertFalse(ConfigValues::has($merged->datamodel, 'SEL'));
+        $this->assertFalse(ConfigValues::has($merged->metadata, 'parent'), 'the final config has no parent');
+    }
+
+    public function testItFollowsAChainOfParents(): void
+    {
+        $id = 'North_Sea_basic/North_Sea_basic_1';
+        $this->writeChildGeneric('public', 'generic');
+        $output = $this->temporaryDirectory();
+        $this->execute('app:config:strip', [
+            '--output-dir' => $output,
+            '--parent' => 'public',
+            '--skip-validation' => true,
+        ]);
+
+        $tester = $this->execute('app:config:merge', ['file' => $output . '/' . $id . '.json', '--dir' => $output]);
+
+        $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
+        $this->assertSame('public', $this->decode($output . '/' . $id . '.json')->metadata->parent);
+        $this->assertSame([], self::comparator()->differences(
+            self::normalizer()->normalize(self::realConfigs()[$id]),
+            json_decode($tester->getDisplay(), false, 512, JSON_THROW_ON_ERROR)
+        ));
     }
 
     public function testACompleteConfigIsPrintedInTheNewShape(): void
@@ -107,7 +127,19 @@ class ConfigMergeCommandTest extends ConfigCommandTestCase
         );
     }
 
-    public function testItNeedsTheGenericConfig(): void
+    public function testAStrippedConfigNeedsItsParent(): void
+    {
+        $stripped = $this->strippedCopyOf('Baltic_Sea_basic/Baltic_Sea_basic_1');
+        unlink($this->dir . '/generic.json');
+
+        $tester = $this->execute('app:config:merge', ['file' => $stripped]);
+
+        $this->assertSame(1, $tester->getStatusCode());
+        $this->assertStringContainsString('The parent "generic" of', self::text($tester));
+        $this->assertStringContainsString('generic.json is needed', self::text($tester));
+    }
+
+    public function testACompleteConfigNeedsNoParent(): void
     {
         unlink($this->dir . '/generic.json');
 
@@ -116,8 +148,32 @@ class ConfigMergeCommandTest extends ConfigCommandTestCase
             ['file' => $this->dir . '/Baltic_Sea_basic/Baltic_Sea_basic_1.json']
         );
 
+        $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
+    }
+
+    public function testAStrippedConfigThatDoesNotNameItsParentIsRefused(): void
+    {
+        $path = $this->strippedCopyOf('Baltic_Sea_basic/Baltic_Sea_basic_1');
+        $config = $this->decode($path);
+        unset($config->metadata->parent);
+        file_put_contents($path, json_encode($config));
+
+        $tester = $this->execute('app:config:merge', ['file' => $path]);
+
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('generic.json', self::text($tester));
+        $this->assertStringContainsString('but no metadata.parent', self::text($tester));
+    }
+
+    public function testAParentThatIsNoGenericConfigIsRefused(): void
+    {
+        $stripped = $this->strippedCopyOf('Baltic_Sea_basic/Baltic_Sea_basic_1');
+        // a complete config as the parent: its layers do not have a generic name
+        copy($this->dir . '/North_Sea_basic/North_Sea_basic_1.json', $this->dir . '/generic.json');
+
+        $tester = $this->execute('app:config:merge', ['file' => $stripped]);
+
+        $this->assertSame(1, $tester->getStatusCode());
+        $this->assertStringContainsString('cannot be a parent', self::text($tester));
     }
 
     public function testAMissingFileIsReported(): void

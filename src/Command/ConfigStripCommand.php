@@ -3,6 +3,8 @@
 namespace App\Command;
 
 use App\Domain\Config\ConfigDirectory;
+use App\Domain\Config\ConfigParents;
+use App\Domain\Config\InvalidSessionConfigException;
 use App\Domain\Config\Merge\ConfigFileStripper;
 use App\Domain\Config\Merge\RegionConfigMerger;
 use App\Domain\Config\Merge\StripPlan;
@@ -20,8 +22,9 @@ use Symfony\Component\Filesystem\Path;
 
 #[AsCommand(
     name: 'app:config:strip',
-    description: 'Removes everything generic.json already provides from config files (complete configs, or configs '
-        . 'stripped against an older generic.json). Reports only, unless --apply or --output-dir is given.'
+    description: 'Removes everything a generic config (the parent) already provides from config files (complete '
+        . 'configs, or configs stripped against another parent). Reports only, unless --apply or --output-dir is '
+        . 'given.'
 )]
 final class ConfigStripCommand extends Command
 {
@@ -45,7 +48,7 @@ final class ConfigStripCommand extends Command
                 'dir',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Config root with generic.json and the name map (absolute, or relative to the project dir)',
+                'Config root with the parent configs (absolute, or relative to the project dir)',
                 'ServerManager/configfiles'
             )
             ->addOption(
@@ -56,18 +59,18 @@ final class ConfigStripCommand extends Command
                 '*.json'
             )
             ->addOption(
-                'name-map',
+                'parent',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Layer name mapping file, relative to --dir',
-                ConfigDirectory::NAME_MAP_FILE
+                'The generic config to strip against: its name, a file <name>.json in --dir. By default the parent '
+                . 'that a file names in metadata.parent (a complete config has none: then this option is needed)'
             )
             ->addOption(
                 'apply',
                 null,
                 InputOption::VALUE_NONE,
                 'Replace the files by their stripped versions. Each one is written to a temporary file, read back '
-                . 'and verified (merged with generic.json it must give the same config as before) first'
+                . 'and verified (merged with its parent it must give the same config as before) first'
             )
             ->addOption(
                 'check',
@@ -103,12 +106,16 @@ final class ConfigStripCommand extends Command
             return Command::FAILURE;
         }
         $directory = new ConfigDirectory($root);
-        $mapFile = (string)$input->getOption('name-map');
+        $parents = ConfigParents::fromDirectory($directory);
+        $merger = new RegionConfigMerger();
+        $parentOption = $input->getOption('parent');
+        if ($parentOption !== null && !ConfigDirectory::isValidParentName((string)$parentOption)) {
+            $io->error('--parent is the name of a file without the extension: letters, digits, _ and - only.');
+            return Command::INVALID;
+        }
 
-        // 1. generic.json, the name map, and the files
+        // 1. the files
         try {
-            $generic = $directory->loadGeneric();
-            $names = $directory->loadNames($mapFile);
             $files = $directory->resolveFiles(
                 (array)$input->getArgument('files'),
                 getcwd() ?: $this->projectDir,
@@ -126,16 +133,45 @@ final class ConfigStripCommand extends Command
         // 2. read, validate (complete configs only: stripped ones are not valid on their own) and plan
         $stripper = new ConfigFileStripper();
         $plans = [];
+        $pools = []; // id => the generic config the file is stripped against
+        $parentNames = []; // id => its name
+        $registries = []; // parent name => the layer names of that generic config and its parents
         $errors = [];
         foreach ($files as $id => $path) {
             try {
                 $current = $directory->read($path);
                 if (!RegionConfigMerger::isRegionFormat($current) && !$input->getOption('skip-validation')) {
-                    $this->validator->validate($current);
+                    // the schema describes the final config: validate the config in that shape
+                    $this->validator->validate(RegionConfigMerger::toSimulationSettings($current));
                 }
-                $plans[$id] = $stripper->plan($id, $path, $current, $generic, $names);
+                $parentName = $parentOption ?? ConfigParents::parentOf($current);
+                if ($parentName === null) {
+                    throw new \RuntimeException(
+                        'it has no metadata.parent: say which generic config to strip it against with --parent=NAME'
+                    );
+                }
+                $parentName = (string)$parentName;
+                $label = '"' . $id . '"';
+                // its final config, with the parents it has now, and then stripped against the parent it gets
+                $effective = $merger->merge($parents->poolOf($current, $label), $current);
+                $pools[$id] = $parents->poolOfParent($parentName, $label);
+                $registries[$parentName] ??= $parents->namesOfParent($parentName, $label);
+                $parentNames[$id] = $parentName;
+                $plans[$id] = $stripper->plan(
+                    $id,
+                    $path,
+                    $current,
+                    $pools[$id],
+                    $registries[$parentName],
+                    $effective,
+                    $parentName
+                );
             } catch (\Throwable $e) {
-                $errors[] = sprintf('%s: %s', $id, strtok($e->getMessage(), "\n"));
+                $errors[] = sprintf(
+                    '%s: %s',
+                    $id,
+                    $e instanceof InvalidSessionConfigException ? $e->summary() : strtok($e->getMessage(), "\n")
+                );
             }
         }
         if ($errors !== []) {
@@ -179,7 +215,7 @@ final class ConfigStripCommand extends Command
                 if ($skip) {
                     continue;
                 }
-                $found = $stripper->apply($plan, $directory, $generic, $target, $outputRoot !== null);
+                $found = $stripper->apply($plan, $directory, $pools[$id], $target, $outputRoot !== null);
                 if ($found === []) {
                     $written++;
                 }
@@ -188,11 +224,13 @@ final class ConfigStripCommand extends Command
                 }
             }
             if ($outputRoot !== null) {
+                // the parents the files need go along, so the directory can be used on its own
                 $outputDirectory = new ConfigDirectory($outputRoot);
-                $outputDirectory->write($outputDirectory->genericPath(), $generic);
-                $outputDirectory->write($outputDirectory->nameMapPath($mapFile), (object)[
-                    'layers' => (object)$names->toMap(),
-                ]);
+                foreach (array_unique($parentNames) as $parentName) {
+                    foreach ($parents->chain($parentName) as $name => $parentConfig) {
+                        $outputDirectory->write($outputDirectory->parentPath($name), $parentConfig);
+                    }
+                }
             }
         } catch (\Throwable $e) {
             $io->error($e->getMessage());
@@ -209,7 +247,7 @@ final class ConfigStripCommand extends Command
             '%d config(s) %s%s.',
             $written,
             $outputRoot === null ? 'stripped in place' : 'written to ' . $outputRoot,
-            ' (each verified: merged with generic.json it gives the same config)'
+            ' (each verified: merged with its parent it gives the same config)'
         ));
         return Command::SUCCESS;
     }

@@ -3,6 +3,8 @@
 namespace App\Command;
 
 use App\Domain\Config\ConfigDirectory;
+use App\Domain\Config\ConfigParents;
+use App\Domain\Config\InvalidSessionConfigException;
 use App\Domain\Config\Merge\ConfigFileStripper;
 use App\Domain\Config\Merge\RegionConfigMerger;
 use App\Domain\Config\Merge\StripPlan;
@@ -23,16 +25,13 @@ use Symfony\Component\Filesystem\Path;
 
 #[AsCommand(
     name: 'app:config:split',
-    description: 'Derives generic.json from the configs in ServerManager/configfiles (complete ones, or ones that '
-        . 'are stripped already: those are expanded with the current generic.json first) and strips every config '
-        . 'down to what is specific for its region. Reports only, unless --apply or --output-dir is given.'
+    description: 'Derives a generic config (--generic) from the configs in ServerManager/configfiles (complete ones, '
+        . 'or ones that are stripped already: those are expanded with their parents first) and strips every config '
+        . 'down to what is specific for its region, with the generic config as its parent. Reports only, unless '
+        . '--apply or --output-dir is given.'
 )]
 final class ConfigSplitCommand extends Command
 {
-    private const string MAP_FILE_INFO = 'Maps msp_config_generic_name to the region specific layer names. Generated '.
-        'by app:config:split; edit it to merge or split generic layers, then restore the complete configs and run '.
-        'the command again with --apply --force.';
-
     public function __construct(
         #[Autowire('%kernel.project_dir%')]
         private readonly string $projectDir,
@@ -59,11 +58,13 @@ final class ConfigSplitCommand extends Command
                 '*.json'
             )
             ->addOption(
-                'name-map',
+                'generic',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Layer name mapping file, relative to --dir',
-                ConfigDirectory::NAME_MAP_FILE
+                'The name of the generic config to create, a file <name>.json in --dir. The configs get it as their '
+                . 'parent (metadata.parent). It holds the names of the layers too (layer_names): edit them to merge or '
+                . 'split generic layers',
+                ConfigDirectory::DEFAULT_GENERIC
             )
             ->addOption(
                 'skip-validation',
@@ -75,30 +76,30 @@ final class ConfigSplitCommand extends Command
                 'apply',
                 null,
                 InputOption::VALUE_NONE,
-                'Write generic.json and the name map, and replace every config by its stripped version. Each one '
-                . 'is written to a temporary file, read back and verified (merged with generic.json it must give '
-                . 'the original) before it replaces the config'
+                'Write the generic config, and replace every config by its stripped version. Each one is written '
+                . 'to a temporary file, read back and verified (merged with the generic config it must give the '
+                . 'original) before it replaces the config'
             )
             ->addOption(
                 'output-dir',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Write generic.json, the name map and the stripped configs (<folder>/<name>.json) to this directory '
+                'Write the generic config and the stripped configs (<folder>/<name>.json) to this directory '
                 . 'instead, and leave --dir alone. Handy to compare the result before applying it'
             )
             ->addOption(
                 'check',
                 null,
                 InputOption::VALUE_NONE,
-                'Write nothing, exit with status 1 when running with --apply would change anything: generic.json '
-                . '(for example layers that a second config now uses, or that only one config uses any more) or a '
-                . 'config'
+                'Write nothing, exit with status 1 when running with --apply would change anything: the generic '
+                . 'config (for example layers that a second config now uses, or that only one config uses any '
+                . 'more) or a config'
             )
             ->addOption(
                 'force',
                 null,
                 InputOption::VALUE_NONE,
-                'Overwrite generic.json if it exists (this loses changes made to it by hand)'
+                'Overwrite the generic config if it exists (this loses changes made to it by hand)'
             );
     }
 
@@ -119,14 +120,27 @@ final class ConfigSplitCommand extends Command
             return Command::FAILURE;
         }
         $directory = new ConfigDirectory($root);
+        $genericName = (string)$input->getOption('generic');
+        if (!ConfigDirectory::isValidParentName($genericName)) {
+            $io->error('--generic is the name of a file without the extension: letters, digits, _ and - only.');
+            return Command::INVALID;
+        }
 
-        // 1. read the configs. A config that is stripped already is expanded with the current generic.json
+        // 1. read the configs. A config that is stripped already is expanded with its parents
         $oldGeneric = null;
         try {
-            $oldGeneric = $directory->hasGeneric() ? $directory->loadGeneric() : null;
+            $oldGeneric = $directory->hasGeneric($genericName) ? $directory->loadGeneric($genericName) : null;
+            if ($oldGeneric !== null && ConfigParents::parentOf($oldGeneric) !== null) {
+                $io->error(
+                    "$genericName.json has a parent itself, and the command makes a generic config without one. "
+                    . 'Choose another name with --generic.'
+                );
+                return Command::FAILURE;
+            }
         } catch (\Throwable $e) {
-            $io->warning('Ignoring generic.json, it cannot be read: ' . $e->getMessage());
+            $io->warning("Ignoring $genericName.json, it cannot be used: " . $e->getMessage());
         }
+        $parents = ConfigParents::fromDirectory($directory);
         $merger = new RegionConfigMerger();
         $configs = []; // what is split: the complete configs, and the expanded stripped ones
         $currents = []; // the files as they are now
@@ -137,22 +151,23 @@ final class ConfigSplitCommand extends Command
             try {
                 $config = $directory->read($path);
                 if (RegionConfigMerger::isRegionFormat($config)) {
-                    if ($oldGeneric === null) {
-                        throw new \RuntimeException(
-                            'already stripped, but there is no usable generic.json to expand it with'
-                        );
-                    }
-                    $configs[$id] = $effectives[$id] = $merger->merge($oldGeneric, $config);
+                    $pool = $parents->poolOf($config, 'it'); // fails when a parent is missing
+                    $configs[$id] = $effectives[$id] = $merger->merge($pool, $config);
                 } else {
                     if (!$input->getOption('skip-validation')) {
-                        $this->validator->validate($config);
+                        // the schema describes the final config: validate the config in that shape
+                        $this->validator->validate(RegionConfigMerger::toSimulationSettings($config));
                     }
                     $configs[$id] = $config;
                 }
                 $currents[$id] = $config;
                 $paths[$id] = $path;
             } catch (\Throwable $e) {
-                $errors[] = sprintf('%s: %s', $id, strtok($e->getMessage(), "\n"));
+                $errors[] = sprintf(
+                    '%s: %s',
+                    $id,
+                    $e instanceof InvalidSessionConfigException ? $e->summary() : strtok($e->getMessage(), "\n")
+                );
             }
         }
         if ($errors !== []) {
@@ -172,17 +187,17 @@ final class ConfigSplitCommand extends Command
         $io->title(sprintf('Splitting %d configs from %s', count($configs), $root));
         if ($effectives !== []) {
             $io->writeln(sprintf(
-                '%d of them are stripped already: they are expanded with the current generic.json, so layers that '
-                . 'more (or fewer) configs use now can move into (or out of) it.',
-                count($effectives)
+                '%d of them are stripped already: they are expanded with their parents, so layers that more (or '
+                . 'fewer) configs use now can move into (or out of) %s.json.',
+                count($effectives),
+                $genericName
             ));
         }
 
-        // 2. generic names (mapping file first, proposals for the rest), the generic config, and the stripped configs
-        $mapFile = (string)$input->getOption('name-map');
-        $mapPath = $directory->nameMapPath($mapFile);
+        // 2. generic names (those in the generic config first, proposals for the rest), the generic config, and the
+        // stripped configs
         try {
-            $registry = GenericNameRegistry::fromMap($directory->loadNameMap($mapFile));
+            $registry = GenericNameRegistry::fromMap($oldGeneric === null ? [] : ConfigParents::nameMapOf($oldGeneric));
             $registry->register($configs);
             $result = new ConfigSplitter($registry)->split($configs);
             $stripper = new ConfigFileStripper();
@@ -194,7 +209,8 @@ final class ConfigSplitCommand extends Command
                     $currents[$id],
                     $result->generic,
                     $registry,
-                    $effectives[$id] ?? null
+                    $effectives[$id] ?? null,
+                    $genericName
                 );
             }
         } catch (\Throwable $e) {
@@ -220,8 +236,7 @@ final class ConfigSplitCommand extends Command
             $registry,
             $configs,
             $plans,
-            $mapPath,
-            $root,
+            $genericName,
             $oldGeneric !== null,
             $promoted,
             $demoted
@@ -242,7 +257,7 @@ final class ConfigSplitCommand extends Command
             if ($genericChanged || $changed !== []) {
                 $io->warning(sprintf(
                     'Running with --apply would change %s and %d config(s).',
-                    $genericChanged ? 'generic.json' : 'nothing in generic.json',
+                    $genericChanged ? "$genericName.json" : "nothing in $genericName.json",
                     count($changed)
                 ));
                 return Command::FAILURE;
@@ -252,9 +267,9 @@ final class ConfigSplitCommand extends Command
         }
         if (!$writing) {
             $io->note(
-                'Dry run, nothing written. Run with --apply to write generic.json and the name map and to replace '
-                . 'the configs by their stripped versions (each one verified first), or with --output-dir=DIR to '
-                . 'write them to another directory.'
+                "Dry run, nothing written. Run with --apply to write $genericName.json and to replace the configs "
+                . 'by their stripped versions (each one verified first), or with --output-dir=DIR to write them to '
+                . 'another directory.'
             );
             return Command::SUCCESS;
         }
@@ -264,12 +279,12 @@ final class ConfigSplitCommand extends Command
         );
         if ($unsafe !== []) {
             $io->error(array_merge(
-                ['Nothing is written: these stripped configs cannot be written for the new generic.json:'],
+                ['Nothing is written: these stripped configs cannot be written for the new generic config:'],
                 array_map(static fn(StripPlan $plan) => $plan->id, $unsafe)
             ));
             return Command::FAILURE;
         }
-        $genericPath = $outputRoot . '/' . ConfigDirectory::GENERIC_FILE;
+        $genericPath = $outputRoot . '/' . $genericName . '.json';
         if (is_file($genericPath) && !$input->getOption('force')) {
             $io->error(
                 ConfigDirectory::displayPath($genericPath, $this->projectDir)
@@ -283,7 +298,7 @@ final class ConfigSplitCommand extends Command
         $problems = [];
         try {
             // everything is written to temporary files and verified first; only when all of it is fine the files
-            // are replaced, so a problem never leaves stripped configs behind that do not fit generic.json
+            // are replaced, so a problem never leaves stripped configs behind that do not fit their parent
             foreach ($plans as $id => $plan) {
                 $skip = $plan->status === StripPlan::REFUSED
                     || ($plan->status === StripPlan::UNCHANGED && $outputDir === null);
@@ -310,16 +325,6 @@ final class ConfigSplitCommand extends Command
             if ($outputDir !== null || $genericChanged) {
                 $outputDirectory->write($genericPath, $result->generic);
             }
-            // in another directory the map is always written: it has to fit the generic.json written next to it
-            $writeMap = $outputDir !== null
-                || $registry->proposed() !== []
-                || !is_file($outputDirectory->nameMapPath($mapFile));
-            if ($writeMap) {
-                $outputDirectory->write(
-                    $outputDirectory->nameMapPath($mapFile),
-                    (object)['_info' => self::MAP_FILE_INFO, 'layers' => (object)$registry->toMap()]
-                );
-            }
             foreach ($staged as [$temporary, $target]) {
                 $outputDirectory->commit($temporary, $target);
             }
@@ -329,7 +334,7 @@ final class ConfigSplitCommand extends Command
             return Command::FAILURE;
         }
         $io->success(sprintf(
-            'Wrote %s, the name map and %d stripped config(s)%s.',
+            'Wrote %s and %d stripped config(s)%s.',
             ConfigDirectory::displayPath($genericPath, $this->projectDir),
             count($staged),
             $outputDir === null ? ' (replacing the existing ones, each verified)' : ' to ' . $outputRoot
@@ -347,8 +352,7 @@ final class ConfigSplitCommand extends Command
         GenericNameRegistry $registry,
         array $configs,
         array $plans,
-        string $mapPath,
-        string $root,
+        string $genericName,
         bool $hadGeneric,
         array $promoted,
         array $demoted
@@ -368,7 +372,7 @@ final class ConfigSplitCommand extends Command
         $io->section('Configs (sizes of compact JSON)');
         $io->table(['Config', 'Layers', 'Original', 'Stripped'], $rows);
         $genericSize = Util::getHumanReadableSize(strlen(json_encode($result->generic, JSON_UNESCAPED_SLASHES)));
-        $io->writeln("generic.json: $genericSize");
+        $io->writeln("$genericName.json: $genericSize");
 
         $io->section('Layers');
         $io->writeln(sprintf(
@@ -384,15 +388,13 @@ final class ConfigSplitCommand extends Command
         ))));
         $proposed = $registry->proposed();
         $io->writeln(sprintf(
-            '%d layer names were not in the mapping file and got a proposed generic name (%s).',
+            '%d layer names were not in layer_names of %s.json and got a proposed generic name.',
             count($proposed),
-            is_file($mapPath)
-                ? 'mapping file: ' . ConfigDirectory::displayPath($mapPath, $root)
-                : 'mapping file will be created'
+            $genericName
         ));
 
         if ($hadGeneric) {
-            $io->section('Changes to generic.json');
+            $io->section("Changes to $genericName.json");
             $map = $registry->toMap();
             $describe = static fn(array $names): string => implode(', ', array_map(
                 static fn(string $name) => $name . (($map[$name] ?? []) === []

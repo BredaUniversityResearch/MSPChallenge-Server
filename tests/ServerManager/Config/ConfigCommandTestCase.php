@@ -3,6 +3,7 @@
 namespace App\Tests\ServerManager\Config;
 
 use App\Domain\Config\ConfigDirectory;
+use App\Domain\Config\ConfigParents;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
@@ -15,19 +16,26 @@ use Symfony\Component\Finder\Finder;
  */
 abstract class ConfigCommandTestCase extends ConfigTestCase
 {
-    /** The config root of the test: <folder>/<name>.json, generic.json, layer_generic_names.json */
+    /** The config root of the test: <folder>/<name>.json, and generic configs (parents) <name>.json */
     protected string $dir;
     /** @var string[] */
     private array $temporaryDirectories = [];
+    private string|false $terminalWidth = false;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->dir = $this->temporaryDirectory();
+        // The console wraps messages in blocks such as [OK] and [ERROR] at the width of the terminal (at most 120),
+        // and a word that is longer than that is cut in two. The width is the one of the terminal the tests run in
+        // (COLUMNS): make it the same everywhere, so no test depends on how wide the developer's window is.
+        $this->terminalWidth = getenv('COLUMNS');
+        putenv('COLUMNS=120');
     }
 
     protected function tearDown(): void
     {
+        putenv($this->terminalWidth === false ? 'COLUMNS' : 'COLUMNS=' . $this->terminalWidth);
         new Filesystem()->remove($this->temporaryDirectories);
         parent::tearDown();
     }
@@ -51,17 +59,44 @@ abstract class ConfigCommandTestCase extends ConfigTestCase
     }
 
     /**
-     * Writes generic.json and the name map as app:config:split would, and returns the generic config.
+     * Writes generic.json (with the layer names in it) as app:config:split would, and returns the generic config.
      *
      * @throws \JsonException
      */
     protected function writeGeneric(?string $directory = null): \stdClass
     {
-        [$result, $registry] = self::realSplit();
+        [$result] = self::realSplit();
         $target = new ConfigDirectory($directory ?? $this->dir);
         $target->write($target->genericPath(), $result->generic);
-        $target->write($target->nameMapPath(), (object)['layers' => (object)$registry->toMap()]);
         return $result->generic;
+    }
+
+    /**
+     * Writes a generic config <name>.json that has $parent as its parent and adds nothing: it makes a chain of two.
+     *
+     * @throws \JsonException
+     */
+    protected function writeChildGeneric(string $name, string $parent, ?string $directory = null): void
+    {
+        $child = ConfigFactory::json('{"metadata": {"config_version": "2.0.0"}, "datamodel": {"meta": []}}');
+        $child->metadata->parent = $parent;
+        $target = new ConfigDirectory($directory ?? $this->dir);
+        $target->write($target->parentPath($name), $child);
+    }
+
+    /**
+     * A copy of the original configs, stripped against generic.json, in a new directory that has generic.json too.
+     *
+     * @return string the directory
+     */
+    protected function strippedCopy(): string
+    {
+        $directory = $this->temporaryDirectory();
+        $this->execute(
+            'app:config:strip',
+            ['--output-dir' => $directory, '--parent' => ConfigDirectory::DEFAULT_GENERIC, '--skip-validation' => true]
+        );
+        return $directory;
     }
 
     /**
@@ -107,18 +142,19 @@ abstract class ConfigCommandTestCase extends ConfigTestCase
     }
 
     /**
-     * Asserts that every config in $directory, merged with its generic.json, gives the original again.
+     * Asserts that every config in $directory, merged with its parents, gives the original again.
      *
      * @throws \JsonException
      */
     protected function assertMergesBackToTheOriginals(?string $directory = null): void
     {
         $directory ??= $this->dir;
-        $generic = $this->decode($directory . '/generic.json');
+        $parents = ConfigParents::fromDirectory(new ConfigDirectory($directory));
         foreach (self::realConfigs() as $id => $original) {
+            $config = $this->decode($directory . '/' . $id . '.json');
             $this->assertSame(
                 [],
-                self::differencesToOriginal($generic, $this->decode($directory . '/' . $id . '.json'), $original),
+                self::differencesToOriginal($parents->poolOf($config, $id), $config, $original),
                 $id
             );
         }

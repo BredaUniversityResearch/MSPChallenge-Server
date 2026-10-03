@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Domain\Config\ConfigDirectory;
+use App\Domain\Config\ConfigParents;
 use App\Domain\Config\Merge\RegionConfigMerger;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -16,7 +17,7 @@ use Symfony\Component\Filesystem\Path;
 
 #[AsCommand(
     name: 'app:config:merge',
-    description: 'Prints the final config of a config file: merged with generic.json, in the shape the server '
+    description: 'Prints the final config of a config file: merged with its parents, in the shape the server '
         . 'uses (CEL, SEL and MEL in simulation_settings; old-style CEL, SEL and MEL keys are laid on top of them).'
 )]
 final class ConfigMergeCommand extends Command
@@ -36,7 +37,7 @@ final class ConfigMergeCommand extends Command
                 'dir',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Config root with generic.json (absolute, or relative to the project dir)',
+                'Config root with the parent configs (absolute, or relative to the project dir)',
                 'ServerManager/configfiles'
             )
             ->addOption(
@@ -52,10 +53,11 @@ final class ConfigMergeCommand extends Command
         $errors = (new SymfonyStyle($input, $output))->getErrorStyle();
         $directory = new ConfigDirectory(Path::makeAbsolute((string)$input->getOption('dir'), $this->projectDir));
         try {
-            $generic = $directory->loadGeneric();
             $path = $directory->resolveFiles([(string)$input->getArgument('file')], getcwd() ?: $this->projectDir);
+            $config = $directory->read(reset($path));
+            $pool = ConfigParents::fromDirectory($directory)->poolOf($config, '"' . array_key_first($path) . '"');
             $warnings = [];
-            $merged = new RegionConfigMerger()->merge($generic, $directory->read(reset($path)), $warnings);
+            $merged = new RegionConfigMerger()->merge($pool, $config, $warnings);
             $json = ConfigDirectory::encode($merged);
         } catch (\Throwable $e) {
             $errors->error($e->getMessage());

@@ -29,6 +29,24 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         return $this->execute('app:config:split', $options + ['--skip-validation' => true]);
     }
 
+    public function testTheConfigsAreValidatedAgainstTheSchemaUnlessSkipped(): void
+    {
+        // the original configs are old-style: they are validated in the shape of the schema
+        $valid = $this->execute('app:config:split', []);
+
+        $broken = ConfigFactory::copy(array_values(self::realConfigs())[0]);
+        unset($broken->datamodel->edition_name);
+        new Filesystem()->dumpFile($this->dir . '/Broken/Broken.json', json_encode($broken));
+        $invalid = $this->execute('app:config:split', []);
+        $skipped = $this->execute('app:config:split', ['--skip-validation' => true]);
+
+        $this->assertSame(0, $valid->getStatusCode(), $valid->getDisplay());
+        $this->assertSame(1, $invalid->getStatusCode());
+        $this->assertStringContainsString('these configs are invalid', self::text($invalid));
+        $this->assertStringContainsString('Broken/Broken: [datamodel.edition_name]', self::text($invalid));
+        $this->assertSame(0, $skipped->getStatusCode(), $skipped->getDisplay());
+    }
+
     public function testByDefaultItOnlyReportsAndWritesNothing(): void
     {
         $before = $this->snapshot();
@@ -40,7 +58,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $this->assertSameFiles($before, $this->snapshot(), 'not a single file may change');
     }
 
-    public function testApplyWritesTheGenericConfigAndTheNameMapAndStripsTheConfigsInPlace(): void
+    public function testApplyWritesTheGenericConfigAndStripsTheConfigsInPlace(): void
     {
         $originals = self::realConfigFiles();
 
@@ -49,10 +67,11 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
         $this->assertStringContainsString('[OK] Wrote', self::text($tester));
         $this->assertFileExists($this->dir . '/generic.json');
-        $this->assertNotEmpty(get_object_vars($this->decode($this->dir . '/layer_generic_names.json')->layers));
+        $this->assertNotEmpty(get_object_vars($this->decode($this->dir . '/generic.json')->layer_names));
         foreach ($originals as $id => $contents) {
             $config = $this->decode($this->dir . '/' . $id . '.json');
             $this->assertTrue(RegionConfigMerger::isRegionFormat($config), "$id is stripped now");
+            $this->assertSame('generic', $config->metadata->parent, "$id has the generic config as its parent");
             $this->assertLessThan(strlen($contents), strlen(file_get_contents($this->dir . '/' . $id . '.json')), $id);
             $this->assertFileDoesNotExist($this->dir . '/' . $id . '.region.json', 'no staging files any more');
         }
@@ -70,7 +89,6 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
         $this->assertSameFiles($before, $this->snapshot(), 'the config root is not touched');
         $this->assertFileExists($output . '/generic.json');
-        $this->assertFileExists($output . '/layer_generic_names.json');
         $this->assertMergesBackToTheOriginals($output);
     }
 
@@ -79,13 +97,13 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $output = $this->temporaryDirectory();
         $this->runSplit(['--output-dir' => $output]);
         $first = $this->snapshot($output);
-        // the complete name map is in the config folder (as when it was copied from the preview), and one name in it
-        // is edited: nothing is proposed any more, and the output still has to follow the map
+        // the generic config, with all its layer names, is in the config folder (as when it was copied from the
+        // preview), and one name in it is edited: nothing is proposed any more, and the output has to follow it
         $this->writeGeneric();
-        $edited = $this->decode($this->dir . '/layer_generic_names.json');
-        $edited->layers->MyOwnName = $edited->layers->Countries;
-        unset($edited->layers->Countries);
-        file_put_contents($this->dir . '/layer_generic_names.json', json_encode($edited));
+        $edited = $this->decode($this->dir . '/generic.json');
+        $edited->layer_names->MyOwnName = $edited->layer_names->Countries;
+        unset($edited->layer_names->Countries);
+        file_put_contents($this->dir . '/generic.json', json_encode($edited));
 
         $refused = $this->runSplit(['--output-dir' => $output]);
         $refusedState = $this->snapshot($output);
@@ -95,8 +113,8 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $this->assertStringContainsString('use --force to overwrite it', self::text($refused));
         $this->assertSameFiles($first, $refusedState, 'a refused run changes nothing');
         $this->assertSame(0, $forced->getStatusCode(), $forced->getDisplay());
-        $map = $this->decode($output . '/layer_generic_names.json')->layers;
-        $this->assertTrue(ConfigValues::has($map, 'MyOwnName'), 'the name map follows the edited one');
+        $map = $this->decode($output . '/generic.json')->layer_names;
+        $this->assertTrue(ConfigValues::has($map, 'MyOwnName'), 'the layer names follow the edited ones');
         $names = array_map(
             static fn($layer) => $layer->msp_config_generic_name,
             $this->decode($output . '/generic.json')->datamodel->meta
@@ -229,7 +247,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $this->assertSameFiles($before, $this->snapshot());
     }
 
-    public function testAStrippedConfigNeedsTheGenericConfigItWasStrippedAgainst(): void
+    public function testAStrippedConfigNeedsItsParent(): void
     {
         $this->runSplit(['--apply' => true]);
         unlink($this->dir . '/generic.json');
@@ -238,7 +256,49 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $tester = $this->runSplit(['--apply' => true]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('no usable generic.json to expand it with', self::text($tester));
+        $this->assertStringContainsString('The parent "generic" of it was not found', self::text($tester));
+        $this->assertStringContainsString('generic.json is needed', self::text($tester));
+        $this->assertSameFiles($before, $this->snapshot());
+    }
+
+    public function testTheGenericConfigGetsTheNameThatIsAskedFor(): void
+    {
+        $tester = $this->runSplit(['--apply' => true, '--generic' => 'public']);
+
+        $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
+        $this->assertFileExists($this->dir . '/public.json');
+        $this->assertFileDoesNotExist($this->dir . '/generic.json');
+        foreach (self::realConfigs() as $id => $original) {
+            $this->assertSame('public', $this->decode($this->dir . '/' . $id . '.json')->metadata->parent, $id);
+        }
+        $this->assertMergesBackToTheOriginals();
+        $this->assertSame(
+            0,
+            $this->runSplit(['--check' => true, '--generic' => 'public'])->getStatusCode(),
+            'and splitting again changes nothing'
+        );
+    }
+
+    public function testTheNameOfTheGenericConfigIsChecked(): void
+    {
+        $before = $this->snapshot();
+
+        $tester = $this->runSplit(['--apply' => true, '--generic' => '../generic']);
+
+        $this->assertSame(2, $tester->getStatusCode());
+        $this->assertStringContainsString('--generic is the name of a file', self::text($tester));
+        $this->assertSameFiles($before, $this->snapshot());
+    }
+
+    public function testAGenericConfigThatHasAParentItselfIsNotReplaced(): void
+    {
+        $this->writeChildGeneric('public', 'generic');
+        $before = $this->snapshot();
+
+        $tester = $this->runSplit(['--apply' => true, '--generic' => 'public', '--force' => true]);
+
+        $this->assertSame(1, $tester->getStatusCode());
+        $this->assertStringContainsString('public.json has a parent itself', self::text($tester));
         $this->assertSameFiles($before, $this->snapshot());
     }
 
@@ -271,7 +331,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $dryRun = $run([]);
         $applied = $run(['--apply' => true]);
         $again = $run(['--apply' => true]); // generic.json exists now: the error names it
-        $report = $run(['--check' => true]); // the report names the mapping file
+        $report = $run(['--check' => true]); // nothing left to do now
 
         $this->assertSame(0, $dryRun->getStatusCode(), $dryRun->getDisplay());
         $this->assertSame(0, $applied->getStatusCode(), $applied->getDisplay());
@@ -279,7 +339,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $this->assertSame(1, $again->getStatusCode());
         $this->assertStringContainsString($this->dir . '/generic.json exists', self::text($again));
         $this->assertSame(0, $report->getStatusCode(), $report->getDisplay());
-        $this->assertStringContainsString('mapping file: layer_generic_names.json', self::text($report));
+        $this->assertStringContainsString('Nothing to re-split.', self::text($report));
         $this->assertMergesBackToTheOriginals();
     }
 
@@ -293,7 +353,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $this->assertStringContainsString('Splitting 6 configs', self::text($tester));
     }
 
-    public function testAnExistingNameMapDecidesTheGenericNames(): void
+    public function testTheLayerNamesInAnExistingGenericConfigDecideTheGenericNames(): void
     {
         // a layer name that two configs have (Baltic Sea and Western Baltic Sea share the BS_ layers)
         $layerName = 'BS_Countries';
@@ -303,12 +363,13 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
             true
         )));
         $this->assertGreaterThan(1, count($configsWithIt));
-        file_put_contents(
-            $this->dir . '/layer_generic_names.json',
-            json_encode(['layers' => ['MyOwnName' => [$layerName]]])
-        );
+        file_put_contents($this->dir . '/generic.json', json_encode([
+            'metadata' => ['config_version' => '2.0.0'],
+            'datamodel' => ['meta' => []],
+            'layer_names' => ['MyOwnName' => [$layerName]],
+        ]));
 
-        $tester = $this->runSplit(['--apply' => true]);
+        $tester = $this->runSplit(['--apply' => true, '--force' => true]);
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
         $names = array_map(
@@ -323,7 +384,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
             );
             $this->assertSame('MyOwnName', reset($entries)->msp_config_generic_name, $id);
         }
-        $this->assertContains($layerName, $this->decode($this->dir . '/layer_generic_names.json')->layers->MyOwnName);
+        $this->assertContains($layerName, $this->decode($this->dir . '/generic.json')->layer_names->MyOwnName);
     }
 
     public function testSizesAreReportedHumanReadable(): void

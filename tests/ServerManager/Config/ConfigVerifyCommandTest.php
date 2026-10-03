@@ -12,7 +12,7 @@ class ConfigVerifyCommandTest extends ConfigCommandTestCase
     {
         $tester = $this->execute(
             'app:config:strip',
-            ['--dir' => $directory, '--apply' => true, '--skip-validation' => true]
+            ['--dir' => $directory, '--apply' => true, '--skip-validation' => true, '--parent' => 'generic']
         );
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
     }
@@ -154,11 +154,38 @@ class ConfigVerifyCommandTest extends ConfigCommandTestCase
         $this->assertStringNotContainsString('cannot be made relative', self::text($tester));
     }
 
-    public function testItNeedsTheGenericConfig(): void
+    public function testAMissingParentIsReportedForEachConfig(): void
     {
-        $tester = $this->execute('app:config:verify', ['--original-dir' => $this->dir]);
+        $originals = $this->temporaryDirectory();
+        $this->writeOriginals($originals);
+        $this->writeOriginals();
+        $this->writeGeneric();
+        $this->stripAll($this->dir);
+        unlink($this->dir . '/generic.json');
+
+        $tester = $this->execute('app:config:verify', ['--original-dir' => $originals]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('generic.json', self::text($tester));
+        $this->assertStringContainsString('Could not compare: The parent "generic" of', self::text($tester));
+        $this->assertStringContainsString('6 of 6 config(s) do not match their original.', self::text($tester));
+    }
+
+    public function testConfigsWithAChainOfParentsAreVerified(): void
+    {
+        $originals = $this->temporaryDirectory();
+        $this->writeOriginals($originals);
+        $this->writeOriginals();
+        $this->writeGeneric();
+        $this->writeChildGeneric('public', 'generic');
+        $this->execute('app:config:strip', [
+            '--apply' => true,
+            '--parent' => 'public',
+            '--skip-validation' => true,
+        ]);
+
+        $tester = $this->execute('app:config:verify', ['--original-dir' => $originals]);
+
+        $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
+        $this->assertStringContainsString('All 6 config(s) give the original config.', self::text($tester));
     }
 }

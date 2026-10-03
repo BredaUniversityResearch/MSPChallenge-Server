@@ -7,8 +7,8 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
- * app:config:strip on a temporary config root that holds the original configs plus the generic.json and the name
- * map that app:config:split would have made.
+ * app:config:strip on a temporary config root that holds the original configs plus the generic.json that
+ * app:config:split would have made.
  */
 class ConfigStripCommandTest extends ConfigCommandTestCase
 {
@@ -26,7 +26,7 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
      */
     private function strip(array $input = []): CommandTester
     {
-        return $this->execute('app:config:strip', $input + ['--skip-validation' => true]);
+        return $this->execute('app:config:strip', $input + ['--skip-validation' => true, '--parent' => 'generic']);
     }
 
     public function testByDefaultItOnlyReports(): void
@@ -103,9 +103,66 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
         $this->assertSameFiles($before, $this->snapshot());
-        $this->assertFileExists($output . '/generic.json');
-        $this->assertFileExists($output . '/layer_generic_names.json');
+        $this->assertFileExists($output . '/generic.json', 'the parent goes along');
         $this->assertMergesBackToTheOriginals($output);
+    }
+
+    public function testTheStrippedConfigsNameTheirParent(): void
+    {
+        $this->strip(['--apply' => true]);
+
+        foreach (self::realConfigs() as $id => $original) {
+            $this->assertSame('generic', $this->decode($this->dir . '/' . $id . '.json')->metadata->parent, $id);
+        }
+    }
+
+    public function testAConfigCanBeStrippedAgainstAParentThatHasAParent(): void
+    {
+        $this->writeChildGeneric('public', 'generic');
+        $output = $this->temporaryDirectory();
+
+        $this->strip(['--parent' => 'public', '--apply' => true]);
+        $this->strip(['--parent' => 'public', '--output-dir' => $output]);
+
+        foreach (self::realConfigs() as $id => $original) {
+            $this->assertSame('public', $this->decode($this->dir . '/' . $id . '.json')->metadata->parent, $id);
+        }
+        $this->assertMergesBackToTheOriginals();
+        $this->assertFileExists($output . '/public.json', 'the parent goes along');
+        $this->assertFileExists($output . '/generic.json', 'and the parent of the parent');
+        $this->assertMergesBackToTheOriginals($output);
+    }
+
+    public function testAStrippedConfigIsStrippedAgainstTheParentThatIsAskedFor(): void
+    {
+        $this->writeChildGeneric('public', 'generic');
+        $this->strip(['--apply' => true]);
+
+        $this->strip(['--parent' => 'public', '--apply' => true]);
+
+        $stripped = $this->decode($this->dir . '/North_Sea_basic/North_Sea_basic_1.json');
+        $this->assertSame('public', $stripped->metadata->parent);
+        $this->assertMergesBackToTheOriginals();
+    }
+
+    public function testAConfigWithoutAParentNeedsToBeToldWhichOneToStripAgainst(): void
+    {
+        $before = $this->snapshot();
+
+        $tester = $this->execute('app:config:strip', ['--skip-validation' => true, '--apply' => true]);
+
+        $this->assertSame(1, $tester->getStatusCode());
+        $this->assertStringContainsString('it has no metadata.parent', self::text($tester));
+        $this->assertStringContainsString('--parent=NAME', self::text($tester));
+        $this->assertSameFiles($before, $this->snapshot());
+    }
+
+    public function testTheNameOfTheParentIsChecked(): void
+    {
+        $tester = $this->execute('app:config:strip', ['--skip-validation' => true, '--parent' => '../generic']);
+
+        $this->assertSame(2, $tester->getStatusCode());
+        $this->assertStringContainsString('--parent is the name of a file', self::text($tester));
     }
 
     public function testAnyConfigFileCanBeNamedAndIsStrippedInPlace(): void
@@ -208,25 +265,34 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
         ));
     }
 
-    public function testItNeedsTheGenericConfig(): void
+    public function testCompleteConfigsAreValidatedAgainstTheSchemaUnlessSkipped(): void
     {
-        unlink($this->dir . '/generic.json');
+        $valid = $this->execute('app:config:strip', ['--parent' => 'generic']);
+        $broken = ConfigFactory::copy(array_values(self::realConfigs())[0]);
+        unset($broken->datamodel->edition_name);
+        $path = $this->dir . '/Broken/Broken.json';
+        new Filesystem()->dumpFile($path, json_encode($broken));
+        $before = file_get_contents($path);
 
-        $tester = $this->strip();
+        $invalid = $this->execute('app:config:strip', ['files' => [$path], '--apply' => true, '--parent' => 'generic']);
 
-        $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('Missing', self::text($tester));
-        $this->assertStringContainsString('generic.json', self::text($tester));
+        $this->assertSame(0, $valid->getStatusCode(), $valid->getDisplay());
+        $this->assertSame(1, $invalid->getStatusCode());
+        $this->assertStringContainsString('Broken/Broken: [datamodel.edition_name]', self::text($invalid));
+        $this->assertSameContents($before, file_get_contents($path), 'an invalid config is not touched');
     }
 
-    public function testItNeedsTheNameMap(): void
+    public function testItNeedsTheParent(): void
     {
-        unlink($this->dir . '/layer_generic_names.json');
+        unlink($this->dir . '/generic.json');
+        $before = $this->snapshot();
 
-        $tester = $this->strip();
+        $tester = $this->strip(['--apply' => true]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('layer_generic_names.json', self::text($tester));
+        $this->assertStringContainsString('The parent "generic" of', self::text($tester));
+        $this->assertStringContainsString('generic.json is needed', self::text($tester));
+        $this->assertSameFiles($before, $this->snapshot());
     }
 
     public function testAnInvalidFileStopsEverythingBeforeAnythingIsWritten(): void

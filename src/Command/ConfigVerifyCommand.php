@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Domain\Config\ConfigDirectory;
+use App\Domain\Config\ConfigParents;
 use App\Domain\Config\Merge\ConfigComparator;
 use App\Domain\Config\Merge\ConfigNormalizer;
 use App\Domain\Config\Merge\RegionConfigMerger;
@@ -19,7 +20,7 @@ use Symfony\Component\Process\Process;
 
 #[AsCommand(
     name: 'app:config:verify',
-    description: 'Checks that config files, merged with generic.json, still give the original configs: the '
+    description: 'Checks that config files, merged with their parents, still give the original configs: the '
         . 'versions from a git revision, or from a directory.'
 )]
 final class ConfigVerifyCommand extends Command
@@ -43,7 +44,7 @@ final class ConfigVerifyCommand extends Command
                 'dir',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Config root with generic.json (absolute, or relative to the project dir)',
+                'Config root with the parent configs (absolute, or relative to the project dir)',
                 'ServerManager/configfiles'
             )
             ->addOption(
@@ -82,7 +83,6 @@ final class ConfigVerifyCommand extends Command
         $repo = Path::makeAbsolute((string)$input->getOption('repo'), $this->projectDir);
         $originalDir = $input->getOption('original-dir');
         try {
-            $generic = $directory->loadGeneric();
             $files = $directory->resolveFiles(
                 (array)$input->getArgument('files'),
                 getcwd() ?: $this->projectDir,
@@ -98,6 +98,7 @@ final class ConfigVerifyCommand extends Command
         }
 
         $merger = new RegionConfigMerger();
+        $parents = ConfigParents::fromDirectory($directory);
         $normalizer = new ConfigNormalizer();
         $comparator = new ConfigComparator();
         $source = $originalDir === null
@@ -111,9 +112,10 @@ final class ConfigVerifyCommand extends Command
                 $original = $originalDir === null
                     ? $this->originalFromGit($repo, (string)$input->getOption('against'), $path)
                     : $directory->read($source . '/' . $id . '.json');
+                $config = $directory->read($path);
                 $differences = $comparator->differences(
                     $normalizer->normalize($original),
-                    $normalizer->normalize($merger->merge($generic, $directory->read($path)))
+                    $normalizer->normalize($merger->merge($parents->poolOf($config, '"' . $id . '"'), $config))
                 );
             } catch (\Throwable $e) {
                 $differences = ['Could not compare: ' . strtok($e->getMessage(), "\n")];
@@ -124,7 +126,7 @@ final class ConfigVerifyCommand extends Command
                 $details[$id] = $differences;
             }
         }
-        $io->title('Merged with generic.json, compared with ' . $source);
+        $io->title('Merged with their parents, compared with ' . $source);
         $io->table(['Config', 'Result'], $rows);
         foreach ($details as $id => $differences) {
             $io->section($id);

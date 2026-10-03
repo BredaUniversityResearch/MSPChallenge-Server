@@ -103,32 +103,52 @@ class ConfigDirectoryTest extends ConfigCommandTestCase
         $this->assertSame(['a/a'], array_keys(new ConfigDirectory($this->dir)->resolveFiles([], '/anywhere')));
     }
 
-    public function testMissingGenericConfigAndNameMapAreReported(): void
+    public function testAMissingGenericConfigIsReported(): void
     {
         $directory = new ConfigDirectory($this->dir);
 
         $this->assertFalse($directory->hasGeneric());
-        $this->assertSame([], $directory->loadNameMap());
+        $this->assertFalse($directory->hasGeneric('public'));
         try {
-            $directory->loadGeneric();
-            $this->fail('generic.json is missing');
+            $directory->loadGeneric('public');
+            $this->fail('public.json is missing');
         } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('public.json', $e->getMessage());
             $this->assertStringContainsString('app:config:split --apply', $e->getMessage());
         }
-        $this->expectException(\RuntimeException::class);
-        $directory->loadNames();
     }
 
-    public function testNameMapIsLoadedIntoARegistry(): void
+    public function testAGenericConfigIsAFileInTheRootOfTheFolderNamedAfterIt(): void
     {
-        $this->put(
-            'layer_generic_names.json',
-            '{"_info": "x", "layers": {"Countries": ["A_Countries", "B_Countries"]}}'
-        );
+        $this->put('public.json', '{"datamodel": {"meta": []}}');
+        $directory = new ConfigDirectory($this->dir);
 
-        $names = new ConfigDirectory($this->dir)->loadNames();
+        $this->assertTrue($directory->hasGeneric('public'));
+        $this->assertSame($this->dir . '/public.json', $directory->parentPath('public'));
+        $this->assertSame($this->dir . '/generic.json', $directory->genericPath());
+        $this->assertNotNull($directory->loadGeneric('public')->datamodel);
+    }
 
-        $this->assertSame('Countries', $names->get('B_Countries'));
+    /**
+     * @return iterable<string, array{0: string, 1: bool}>
+     */
+    public static function parentNames(): iterable
+    {
+        yield 'a plain name' => ['generic', true];
+        yield 'with digits, _ and -' => ['public_2-base', true];
+        yield 'with a path' => ['../generic', false];
+        yield 'with a folder' => ['a/generic', false];
+        yield 'with the extension' => ['generic.json', false];
+        yield 'with a space' => ['my generic', false];
+        yield 'empty' => ['', false];
+    }
+
+    /**
+     * @dataProvider parentNames
+     */
+    public function testOnlyFileNamesWithoutTheExtensionAreValidParentNames(string $name, bool $valid): void
+    {
+        $this->assertSame($valid, ConfigDirectory::isValidParentName($name));
     }
 
     public function testEncodedConfigsEndWithANewlineAndKeepFloats(): void
