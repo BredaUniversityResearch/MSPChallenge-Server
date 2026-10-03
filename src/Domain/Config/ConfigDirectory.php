@@ -109,14 +109,38 @@ final class ConfigDirectory
      */
     public function read(string $path): \stdClass
     {
+        $fingerprint = '';
+        return $this->readFingerprinted($path, $fingerprint);
+    }
+
+    /**
+     * Reads a file once, and gives the fingerprint of the bytes that were read along with the document, so the
+     * fingerprint is the one of exactly the document that is returned, also when the file changes at the same moment.
+     *
+     * @param string $fingerprint set to the fingerprint of the contents of the file
+     * @throws \RuntimeException
+     * @throws \JsonException
+     */
+    public function readFingerprinted(string $path, string &$fingerprint): \stdClass
+    {
         if (false === $contents = @file_get_contents($path)) {
             throw new \RuntimeException("Cannot read $path");
         }
+        $fingerprint = self::fingerprint($contents);
         $document = json_decode(ltrim($contents, "\xEF\xBB\xBF"), false, 512, JSON_THROW_ON_ERROR);
         if (!$document instanceof \stdClass) {
             throw new \RuntimeException("$path does not contain a JSON object");
         }
         return $document;
+    }
+
+    /**
+     * A short hash of contents: the same contents always give the same fingerprint, and a change is never missed
+     * (unlike a modification time, that has a resolution of a second and that git, rsync and Docker volumes keep).
+     */
+    public static function fingerprint(string $contents): string
+    {
+        return hash('xxh128', $contents);
     }
 
     public function hasGeneric(string $name = self::DEFAULT_GENERIC): bool

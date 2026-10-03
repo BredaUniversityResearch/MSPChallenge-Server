@@ -9,6 +9,7 @@ use App\Domain\Config\ConfigParents;
 use App\Domain\Config\InvalidSessionConfigException;
 use App\Domain\Config\Merge\RegionConfigMerger;
 use App\Domain\Config\SessionConfigValidator;
+use Psr\Cache\CacheItemPoolInterface;
 
 /**
  * The ConfigLoader on a temporary config folder.
@@ -17,12 +18,13 @@ class ConfigLoaderTest extends ConfigCommandTestCase
 {
     private const string ID = 'North_Sea_basic/North_Sea_basic_1';
 
-    private function loader(): ConfigLoader
+    private function loader(?CacheItemPoolInterface $cache = null): ConfigLoader
     {
         // the folder parameter of the application ends with a slash
         return new ConfigLoader(
             $this->dir . '/',
-            new SessionConfigValidator(self::projectDir() . '/src/Domain/SessionConfigJSONSchema.json')
+            new SessionConfigValidator(self::projectDir() . '/src/Domain/SessionConfigJSONSchema.json'),
+            $cache
         );
     }
 
@@ -154,6 +156,145 @@ class ConfigLoaderTest extends ConfigCommandTestCase
         } catch (ConfigParentException $e) {
             $this->assertStringContainsString($this->dir . '/generic.json cannot be used', $e->getMessage());
         }
+    }
+
+    public function testTheMergedConfigIsServedFromTheCacheTheSecondTime(): void
+    {
+        $this->writeGeneric();
+        $cache = new ArrayCachePool();
+        $loader = $this->loader($cache);
+
+        $first = $loader->mergedJson($this->stripped());
+        $second = $loader->mergedJson($this->stripped());
+
+        $this->assertSame($first, $second);
+        $this->assertSame(1, $cache->saves, 'merged once, the second time came from the cache');
+    }
+
+    public function testTheCacheIsSharedByLoadersThatUseTheSamePool(): void
+    {
+        $this->writeGeneric();
+        $cache = new ArrayCachePool();
+
+        $first = $this->loader($cache)->mergedJson($this->stripped());
+        $second = $this->loader($cache)->mergedJson($this->stripped()); // another process
+
+        $this->assertSame($first, $second);
+        $this->assertSame(1, $cache->saves);
+    }
+
+    public function testTheCachedConfigIsTheConfigThatIsMergedWithoutACache(): void
+    {
+        $this->writeGeneric();
+        $cache = new ArrayCachePool();
+        $this->loader($cache)->mergedJson($this->stripped());
+
+        $cached = $this->loader($cache)->mergedJson($this->stripped());
+
+        $this->assertSame(1, $cache->saves);
+        $this->assertSame($this->loader()->mergedJson($this->stripped()), $cached);
+        $this->assertSameContents($this->loader()->mergedJson($this->original()), $this->loader($cache)->mergedJson(
+            $this->original()
+        ), 'also for a complete config');
+    }
+
+    public function testAConfigThatChangedIsMergedAgain(): void
+    {
+        $this->writeGeneric();
+        $cache = new ArrayCachePool();
+        $loader = $this->loader($cache);
+        $edited = ConfigFactory::json($this->original());
+        $edited->datamodel->meta[0]->layer_tooltip = 'edited';
+
+        $before = $loader->mergedJson($this->original());
+        $after = $loader->mergedJson(json_encode($edited));
+
+        $this->assertSame(2, $cache->saves);
+        $this->assertSame('edited', json_decode($after)->datamodel->meta[0]->layer_tooltip);
+        $this->assertNotSame($before, $after);
+        $this->assertSame($before, $loader->mergedJson($this->original()), 'and the first one is still cached');
+        $this->assertSame(2, $cache->saves);
+    }
+
+    public function testAParentThatChangedIsNoticedEvenWhenTheFileLooksTheSame(): void
+    {
+        // what a modification time would miss: the same size, and the same time (git, rsync and Docker volumes keep it)
+        $stripped = '{"metadata": {"parent": "generic"}, "datamodel": {"meta": []}}';
+        $generic = '{"datamodel": {"meta": [], "simulation_settings": {"CEL": {"x": %d}}}}';
+        $path = $this->dir . '/generic.json';
+        $this->writeHandMadeGeneric(sprintf($generic, 1));
+        $time = filemtime($path) - 100;
+        touch($path, $time);
+        $cache = new ArrayCachePool();
+        $loader = $this->loader($cache);
+        $this->assertSame(1, json_decode($loader->mergedJson($stripped))->datamodel->simulation_settings->CEL->x);
+
+        $this->writeHandMadeGeneric(sprintf($generic, 2));
+        touch($path, $time);
+
+        $this->assertSame(2, json_decode($loader->mergedJson($stripped))->datamodel->simulation_settings->CEL->x);
+        $this->assertSame(2, $cache->saves, 'merged again');
+    }
+
+    public function testAParentThatIsGoneIsAnErrorAlsoWhenTheResultWasCached(): void
+    {
+        $this->writeGeneric();
+        $cache = new ArrayCachePool();
+        $loader = $this->loader($cache);
+        $loader->mergedJson($this->stripped());
+        unlink($this->dir . '/generic.json');
+
+        $this->expectException(ConfigParentException::class);
+        $loader->mergedJson($this->stripped());
+    }
+
+    public function testNothingIsCachedWhenTheMergeFails(): void
+    {
+        $cache = new ArrayCachePool();
+
+        try {
+            $this->loader($cache)->mergedJson($this->stripped()); // the parent is not there
+            $this->fail('the parent is missing');
+        } catch (ConfigParentException) {
+            $this->assertSame(0, $cache->saves);
+        }
+    }
+
+    public function testAConfigWithoutParentsIsCachedToo(): void
+    {
+        $cache = new ArrayCachePool();
+        $loader = $this->loader($cache);
+
+        $loader->mergedJson($this->original());
+        $loader->mergedJson($this->original());
+
+        $this->assertSame(1, $cache->saves);
+    }
+
+    public function testAFileIsServedFromTheCacheToo(): void
+    {
+        $this->writeOriginals();
+        $this->writeGeneric();
+        $cache = new ArrayCachePool();
+        $loader = $this->loader($cache);
+        $path = $this->dir . '/' . self::ID . '.json';
+
+        $first = $loader->mergedJsonOfFile($path);
+        $second = $loader->mergedJsonOfFile($path);
+
+        $this->assertSame($first, $second);
+        $this->assertSame(1, $cache->saves);
+    }
+
+    public function testACacheThatDoesNotWorkDoesNoHarm(): void
+    {
+        $this->writeGeneric();
+        $cache = new ArrayCachePool();
+        $cache->failing = true;
+
+        $merged = $this->loader($cache)->mergedJson($this->stripped());
+
+        $this->assertSame($this->loader()->mergedJson($this->stripped()), $merged);
     }
 
     public function testASyntaxErrorIsReportedWithItsLine(): void

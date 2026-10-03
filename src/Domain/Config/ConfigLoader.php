@@ -3,6 +3,7 @@
 namespace App\Domain\Config;
 
 use App\Domain\Config\Merge\RegionConfigMerger;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
@@ -15,16 +16,32 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  * datamodel can use withBothShapes() on the decoded config.
  *
  * The parent files are read at every call: a messenger worker lives long, and a parent can change.
+ *
+ * Merging a config takes some tens of milliseconds, and the same stored config is asked for again and again, so the
+ * merged JSON of a config is cached (mergedJson(), which is what the stored configs are read with). The cache is
+ * keyed by a fingerprint of the contents of the config, and an entry remembers the fingerprints of the parent files it
+ * was made with: it is only used while all of those are unchanged. So it can not go stale, whatever happens to the
+ * files or their modification times, and it is shared by every process that uses the same cache pool.
  */
 final class ConfigLoader
 {
+    /** Part of the key of a cache entry: change it when the way an entry is made changes. */
+    private const string CACHE_KEY_PREFIX = 'msp_config_merged_v1_';
+    /** Entries of configs that changed or are gone are not removed, they expire. */
+    private const int CACHE_LIFETIME_SECONDS = 604800;
+
     private readonly ConfigDirectory $directory;
     private readonly RegionConfigMerger $merger;
 
+    /**
+     * @param ?CacheItemPoolInterface $cache where merged configs are kept, null for no caching
+     */
     public function __construct(
         #[Autowire('%app.server_manager_config_dir%')]
         string $configDir,
-        private readonly SessionConfigValidator $validator
+        private readonly SessionConfigValidator $validator,
+        #[Autowire(service: 'cache.app')]
+        private readonly ?CacheItemPoolInterface $cache = null
     ) {
         $this->directory = new ConfigDirectory(rtrim($configDir, '/\\'));
         $this->merger = new RegionConfigMerger();
@@ -58,8 +75,20 @@ final class ConfigLoader
      */
     public function merge(string $contents, array &$warnings = []): \stdClass
     {
+        return $this->mergeFingerprinted($contents, new \ArrayObject(), $warnings);
+    }
+
+    /**
+     * @param \ArrayObject<string, string> $fingerprints receives the fingerprints of the parent files that were used
+     * @param string[] $warnings
+     * @throws InvalidSessionConfigException
+     * @throws ConfigParentException
+     */
+    private function mergeFingerprinted(string $contents, \ArrayObject $fingerprints, array &$warnings = []): \stdClass
+    {
         $config = $this->decode($contents);
-        return $this->merger->merge($this->parents()->poolOf($config), $config, $warnings);
+        $pool = ConfigParents::fromDirectory($this->directory, [], $fingerprints)->poolOf($config);
+        return $this->merger->merge($pool, $config, $warnings);
     }
 
     /**
@@ -79,7 +108,15 @@ final class ConfigLoader
      */
     public function mergedJson(string $contents): string
     {
-        return ConfigDirectory::encode($this->merge($contents));
+        $key = self::CACHE_KEY_PREFIX . ConfigDirectory::fingerprint($contents);
+        $cached = $this->cached($key);
+        if ($cached !== null) {
+            return $cached;
+        }
+        $fingerprints = new \ArrayObject();
+        $json = ConfigDirectory::encode($this->mergeFingerprinted($contents, $fingerprints));
+        $this->cache($key, $json, $fingerprints->getArrayCopy());
+        return $json;
     }
 
     /**
@@ -212,5 +249,55 @@ final class ConfigLoader
     private function parents(): ConfigParents
     {
         return ConfigParents::fromDirectory($this->directory);
+    }
+
+    /**
+     * @return ?string the cached merged JSON, null when there is none or when a parent has changed since
+     */
+    private function cached(string $key): ?string
+    {
+        if ($this->cache === null) {
+            return null;
+        }
+        try {
+            $item = $this->cache->getItem($key);
+            $entry = $item->isHit() ? $item->get() : null;
+        } catch (\Throwable) {
+            return null; // a cache that does not work is no reason not to load a config
+        }
+        if (!is_array($entry) || !is_string($entry['json'] ?? null) || !is_array($entry['dependencies'] ?? null)) {
+            return null;
+        }
+        foreach ($entry['dependencies'] as $name => $fingerprint) {
+            $name = (string)$name;
+            if (!ConfigDirectory::isValidParentName($name)) {
+                return null;
+            }
+            $path = $this->directory->parentPath($name);
+            clearstatcache(true, $path);
+            $contents = @file_get_contents($path);
+            if ($contents === false || ConfigDirectory::fingerprint($contents) !== $fingerprint) {
+                return null;
+            }
+        }
+        return $entry['json'];
+    }
+
+    /**
+     * @param array<string, string> $dependencies the fingerprints of the parent files the merge was made with
+     */
+    private function cache(string $key, string $json, array $dependencies): void
+    {
+        if ($this->cache === null) {
+            return;
+        }
+        try {
+            $item = $this->cache->getItem($key);
+            $item->set(['json' => $json, 'dependencies' => $dependencies]);
+            $item->expiresAfter(self::CACHE_LIFETIME_SECONDS);
+            $this->cache->save($item);
+        } catch (\Throwable) {
+            // see cached()
+        }
     }
 }

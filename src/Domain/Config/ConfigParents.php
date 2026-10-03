@@ -38,28 +38,41 @@ final class ConfigParents
     /**
      * @param array<string, \stdClass> $uploaded generic configs that were uploaded together with the config, by name:
      *        they are used before the files of the folder
+     * @param ?\ArrayObject<string, string> $fingerprints filled with the fingerprint of the contents of every parent
+     *        file that is read, by name (see ConfigDirectory::fingerprint())
      */
-    public static function fromDirectory(ConfigDirectory $directory, array $uploaded = []): self
-    {
+    public static function fromDirectory(
+        ConfigDirectory $directory,
+        array $uploaded = [],
+        ?\ArrayObject $fingerprints = null
+    ): self {
         return new self(
-            static fn(string $name): ?\stdClass => $uploaded[$name] ?? self::readParent($directory, $name)
+            static fn(string $name): ?\stdClass => $uploaded[$name]
+                ?? self::readParent($directory, $name, $fingerprints)
         );
     }
 
     /**
      * The generic config <name>.json of a config folder, null when there is none.
      *
+     * @param ?\ArrayObject<string, string> $fingerprints receives the fingerprint of the contents that were read
      * @throws ConfigParentException when the file cannot be used
      */
-    public static function readParent(ConfigDirectory $directory, string $name): ?\stdClass
-    {
+    public static function readParent(
+        ConfigDirectory $directory,
+        string $name,
+        ?\ArrayObject $fingerprints = null
+    ): ?\stdClass {
         // a messenger worker lives long: do not trust what PHP remembers about a file that may have changed
         clearstatcache(true, $directory->parentPath($name));
         if (!$directory->hasGeneric($name)) {
             return null;
         }
         try {
-            return $directory->read($directory->parentPath($name));
+            $fingerprint = '';
+            $parent = $directory->readFingerprinted($directory->parentPath($name), $fingerprint);
+            $fingerprints?->offsetSet($name, $fingerprint);
+            return $parent;
         } catch (\JsonException | \RuntimeException $e) {
             throw new ConfigParentException(
                 sprintf('The parent file %s cannot be used: %s', $directory->parentPath($name), $e->getMessage())
