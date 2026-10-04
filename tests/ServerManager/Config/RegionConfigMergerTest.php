@@ -265,6 +265,122 @@ class RegionConfigMergerTest extends ConfigTestCase
         return [$parent, $child];
     }
 
+    public function testEverySimulationInSimulationSettingsIsMerged(): void
+    {
+        $generic = self::generic();
+        $generic->datamodel->simulation_settings->REL = ConfigFactory::objects(['a' => 1, 'b' => 1]);
+        $generic->datamodel->simulation_settings->OnlyGeneric = ConfigFactory::objects(['g' => 1]);
+        $generic->datamodel->simulation_settings->Dropped = ConfigFactory::objects(['g' => 1]);
+        $region = self::region();
+        $region->datamodel->simulation_settings->REL = ConfigFactory::objects(['b' => 2]);
+        $region->datamodel->simulation_settings->ExternalSim = ConfigFactory::objects(['url' => 'https://sim']);
+        $region->datamodel->simulation_settings->Dropped = null;
+        $region->datamodel->simulation_settings->Replaced = 5;
+        $generic->datamodel->simulation_settings->Replaced = ConfigFactory::objects(['x' => 1]);
+
+        $settings = self::merger()->merge($generic, $region)->datamodel->simulation_settings;
+
+        $this->assertSame(['a' => 1, 'b' => 2], get_object_vars($settings->REL), 'objects merge, the region wins');
+        $this->assertSame(['g' => 1], get_object_vars($settings->OnlyGeneric), 'inherited');
+        $this->assertSame(['url' => 'https://sim'], get_object_vars($settings->ExternalSim), 'only in the region');
+        $this->assertTrue(ConfigValues::has($settings, 'Dropped'));
+        $this->assertNull($settings->Dropped, 'null: this region has none, the generic one is not inherited');
+        $this->assertSame(5, $settings->Replaced, 'something that is no object replaces');
+        foreach (['CEL', 'SEL', 'MEL'] as $name) {
+            $this->assertTrue(ConfigValues::has($settings, $name), "$name is always there");
+        }
+    }
+
+    public function testASimulationThatNobodyHasIsNotInTheResultExceptTheOnesThatAreAlwaysThere(): void
+    {
+        $region = self::region();
+        unset($region->datamodel->simulation_settings->SEL);
+
+        $settings = self::merger()->merge(self::emptyGeneric(), $region)->datamodel->simulation_settings;
+
+        $this->assertSame(['CEL', 'SEL', 'MEL'], array_keys(get_object_vars($settings)));
+        $this->assertNull($settings->SEL);
+    }
+
+    public function testAnOldStyleRelIsMovedToSimulationSettings(): void
+    {
+        $region = self::region();
+        $region->datamodel->REL = ConfigFactory::objects(['x' => 1]);
+
+        $merged = self::merger()->merge(self::generic(), $region);
+
+        $this->assertSame(['x' => 1], get_object_vars($merged->datamodel->simulation_settings->REL));
+        $this->assertFalse(ConfigValues::has($merged->datamodel, 'REL'), 'old-style keys are not in the result');
+
+        $complete = ConfigFactory::config([ConfigFactory::layer('X_A', 'A')]);
+        $complete->datamodel->REL = ConfigFactory::objects(['y' => 2]);
+        $moved = RegionConfigMerger::toSimulationSettings($complete);
+        $this->assertSame(['y' => 2], get_object_vars($moved->datamodel->simulation_settings->REL));
+        $this->assertFalse(ConfigValues::has($moved->datamodel, 'REL'));
+    }
+
+    public function testLayerInfoPropertiesAreMergedByPropertyName(): void
+    {
+        $generic = ConfigFactory::json('{"datamodel": {"meta": [{
+            "msp_config_generic_name": "A", "layer_info_properties": [
+            {"property_name": "id", "enabled": 1, "display_name": "from the generic config"},
+            {"property_name": "name", "enabled": 1}
+        ]}]}}');
+        $region = ConfigFactory::json('{"metadata": {"parent": "x"}, "datamodel": {"meta": [{
+            "msp_config_generic_name": "A", "layer_name": "X_A", "layer_info_properties": [
+                {"property_name": "new", "enabled": 1},
+                {"property_name": "id", "enabled": 0},
+                {"property_name": "id", "enabled": 5}
+        ]}]}}');
+
+        $merged = self::merger()->merge($generic, $region)->datamodel->meta[0]->layer_info_properties;
+
+        $this->assertSame(
+            [
+                ['property_name' => 'id', 'enabled' => 0, 'display_name' => 'from the generic config'],
+                ['property_name' => 'name', 'enabled' => 1],
+                ['property_name' => 'new', 'enabled' => 1],
+                ['property_name' => 'id', 'enabled' => 5],
+            ],
+            array_map('get_object_vars', $merged),
+            'the generic order, the region wins field by field, then the others; a second one with a name is added'
+        );
+    }
+
+    public function testTwoGenericConfigsMergeEverySimulation(): void
+    {
+        $parent = ConfigFactory::json(
+            '{"datamodel": {"meta": [], "simulation_settings": {"REL": {"a": 1, "b": 1}, "Old": {"x": 1}}}}'
+        );
+        $child = ConfigFactory::json(
+            '{"datamodel": {"meta": [], "simulation_settings": {"REL": {"b": 2}, "New": {"y": 1}, "Old": null}}}'
+        );
+
+        $settings = self::merger()->mergeGeneric($parent, $child)->datamodel->simulation_settings;
+
+        $this->assertSame(['a' => 1, 'b' => 2], get_object_vars($settings->REL));
+        $this->assertSame(['y' => 1], get_object_vars($settings->New));
+        $this->assertNull($settings->Old);
+    }
+
+    public function testTwoGenericConfigsMergeLayerInfoPropertiesByPropertyName(): void
+    {
+        $parent = ConfigFactory::json('{"datamodel": {"meta": [{
+            "msp_config_generic_name": "A", "layer_info_properties": [
+            {"property_name": "id", "enabled": 1}, {"property_name": "name", "enabled": 1}]}]}}');
+        $child = ConfigFactory::json('{"datamodel": {"meta": [{
+            "msp_config_generic_name": "A", "layer_info_properties": [
+            {"property_name": "id", "enabled": 0}, {"property_name": "extra", "enabled": 1}]}]}}');
+
+        $merged = self::merger()->mergeGeneric($parent, $child)->datamodel->meta[0]->layer_info_properties;
+
+        $this->assertSame(
+            [['property_name' => 'id', 'enabled' => 0], ['property_name' => 'name', 'enabled' => 1],
+                ['property_name' => 'extra', 'enabled' => 1]],
+            array_map('get_object_vars', $merged)
+        );
+    }
+
     public function testTwoGenericConfigsAreMergedByLayerName(): void
     {
         [$parent, $child] = self::parentAndChild();

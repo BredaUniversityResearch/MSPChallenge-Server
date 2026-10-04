@@ -17,6 +17,14 @@ final class LayerReferences
     /**
      * Applies $translate(string $reference): string to every layer reference in the SEL object, in place.
      */
+    /**
+     * The key of an item of layer_info_properties, null when the item has none.
+     */
+    public static function propertyName(mixed $item): ?string
+    {
+        return $item instanceof \stdClass && is_string($item->property_name ?? null) ? $item->property_name : null;
+    }
+
     public static function mapSel(\stdClass $sel, \Closure $translate): void
     {
         if (is_array($sel->shipping_lane_layers ?? null)) {

@@ -260,7 +260,7 @@ final class RegionConfigStripper
         $genericProperties = $generic->layer_info_properties ?? null;
         $properties = $layer->layer_info_properties ?? null;
         if (is_array($genericProperties) && is_array($properties)) {
-            $additions = $this->subtract($properties, $genericProperties, 'layer_info_properties item');
+            $additions = $this->diffInfoProperties($genericProperties, $properties);
             if ($additions !== []) {
                 $entry->layer_info_properties = $additions;
             }
@@ -268,6 +268,57 @@ final class RegionConfigStripper
             $entry->layer_info_properties = ConfigValues::clone($properties);
         }
         return $entry;
+    }
+
+    /**
+     * What a layer has to say about layer_info_properties, when the generic layer has a list too: the items that
+     * differ from the generic item with the same property_name (they are merged into it by that name), and the items
+     * that the generic layer does not have.
+     *
+     * @param array<int, mixed> $generic
+     * @param array<int, mixed> $properties
+     * @return array<int, mixed>
+     * @throws \DomainException when the generic layer has an item that the layer has not: merging would add it
+     */
+    private function diffInfoProperties(array $generic, array $properties): array
+    {
+        $genericByName = [];
+        foreach ($generic as $item) {
+            $name = LayerReferences::propertyName($item);
+            if ($name === null || isset($genericByName[$name])) {
+                // not keyed: items that are the same are the generic ones, the others are added
+                return $this->subtract($properties, $generic, 'layer_info_properties item');
+            }
+            $genericByName[$name] = ConfigValues::canonical($item);
+        }
+        $mine = []; // property_name => the item of this layer that is merged into the generic one
+        $rest = [];
+        foreach ($properties as $item) {
+            $name = LayerReferences::propertyName($item);
+            if ($name !== null && isset($genericByName[$name]) && !isset($mine[$name])) {
+                $mine[$name] = $item;
+            } else {
+                $rest[] = $item;
+            }
+        }
+        // the versions that differ, in the order of the generic properties (they are merged into those), then the
+        // others in their own order: the order of the merged list
+        $emit = [];
+        foreach ($genericByName as $name => $canonical) {
+            if (!isset($mine[$name])) {
+                throw new \DomainException(
+                    'The generic config adds layer_info_properties item(s) that this config does not have; merging '
+                    . 'would add them.'
+                );
+            }
+            if (ConfigValues::canonical($mine[$name]) !== $canonical) {
+                $emit[] = ConfigValues::clone($mine[$name]);
+            }
+        }
+        foreach ($rest as $item) {
+            $emit[] = ConfigValues::clone($item);
+        }
+        return $emit;
     }
 
     private function standaloneEntry(\stdClass $layer, ?string $alias): \stdClass
@@ -299,13 +350,29 @@ final class RegionConfigStripper
         array &$stats
     ): ?\stdClass {
         $simulation = new \stdClass();
-        foreach (RegionConfigMerger::SIMULATIONS as $name) {
+        // every simulation there is: the ones that are always there, and every key of the generic and the config
+        $names = array_unique(array_map('strval', array_merge(
+            RegionConfigMerger::SIMULATIONS,
+            array_keys($generic instanceof \stdClass ? ConfigValues::props($generic) : []),
+            array_keys($settings instanceof \stdClass ? ConfigValues::props($settings) : [])
+        )));
+        foreach ($names as $name) {
             $genericPart = $generic instanceof \stdClass && ($generic->{$name} ?? null) instanceof \stdClass
                 ? $generic->{$name} : null;
             $part = $settings instanceof \stdClass ? ($settings->{$name} ?? null) : null;
             if (!$part instanceof \stdClass) {
-                if ($genericPart !== null) {
-                    $simulation->{$name} = null; // this config has none: do not inherit the generic one
+                // none (null), or something that is no object: it replaces what is generic, there is nothing to merge
+                $hasKey = $settings instanceof \stdClass && ConfigValues::has($settings, $name);
+                $genericHas = $generic instanceof \stdClass && ConfigValues::has($generic, $name);
+                $genericValue = $genericHas ? $generic->{$name} : null;
+                $standard = in_array($name, RegionConfigMerger::SIMULATIONS, true);
+                if ($hasKey && $part === null) {
+                    if ($genericValue !== null || (!$standard && !$genericHas)) {
+                        $simulation->{$name} = null; // none: the generic one is not inherited
+                    }
+                } elseif ($hasKey && ($genericValue === null
+                        || ConfigValues::canonical($genericValue) !== ConfigValues::canonical($part))) {
+                    $simulation->{$name} = ConfigValues::clone($part);
                 }
                 continue;
             }

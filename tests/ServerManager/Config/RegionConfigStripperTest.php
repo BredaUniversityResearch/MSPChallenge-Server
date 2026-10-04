@@ -246,6 +246,77 @@ class RegionConfigStripperTest extends ConfigTestCase
         $this->assertFalse(ConfigValues::has($polygon, 'layer_height'));
     }
 
+    public function testASimulationOfAnotherNameIsStrippedLikeTheOthers(): void
+    {
+        [$generic, $registry, $config] = self::custom();
+        $generic->datamodel->simulation_settings->REL = ConfigFactory::objects(['x' => 1, 'y' => 1]);
+        $config->datamodel->REL = ConfigFactory::objects(['x' => 1, 'y' => 2]); // old style
+        $config->datamodel->simulation_settings = ConfigFactory::objects(['ExternalSim' => ['url' => 'https://sim']]);
+
+        $result = self::stripper()->strip($generic, $config, $registry);
+
+        $region = $this->assertStrippedAndLossless($result, $generic, $config);
+        $settings = $region->datamodel->simulation_settings;
+        $this->assertSame(['y' => 2], get_object_vars($settings->REL), 'only what differs from the generic one');
+        $this->assertSame(['url' => 'https://sim'], get_object_vars($settings->ExternalSim));
+    }
+
+    public function testASimulationThatAConfigDoesNotHaveIsInheritedFromTheGenericConfig(): void
+    {
+        [$generic, $registry, $config] = self::custom();
+        $generic->datamodel->simulation_settings->REL = ConfigFactory::objects(['x' => 1]);
+
+        $result = self::stripper()->strip($generic, $config, $registry);
+
+        $this->assertTrue($result->isStripped(), implode(' | ', $result->reasons));
+        $this->assertFalse(ConfigValues::has($result->region->datamodel->simulation_settings, 'REL'));
+        $final = self::merger()->merge($generic, $result->region)->datamodel->simulation_settings;
+        $this->assertSame(['x' => 1], get_object_vars($final->REL));
+    }
+
+    public function testASimulationThatIsNoneStaysNoneInTheStrippedConfig(): void
+    {
+        [$generic, $registry, $config] = self::custom();
+        $generic->datamodel->simulation_settings->REL = ConfigFactory::objects(['x' => 1]);
+        $config->datamodel->REL = null;
+
+        $result = self::stripper()->strip($generic, $config, $registry);
+
+        $region = $this->assertStrippedAndLossless($result, $generic, $config);
+        $this->assertNull($region->datamodel->simulation_settings->REL);
+    }
+
+    public function testAnOverriddenLayerPropertyIsKeptAsAnOverrideByItsName(): void
+    {
+        [$generic, $registry, $config] = self::custom();
+        // the generic Countries layer has the property "id" (enabled 1): this config has its own version, and one more
+        $config->datamodel->meta[0]->layer_info_properties = ConfigFactory::objects([
+            ['property_name' => 'extra', 'enabled' => 1],
+            ['property_name' => 'id', 'enabled' => 0],
+        ]);
+
+        $result = self::stripper()->strip($generic, $config, $registry);
+
+        $region = $this->assertStrippedAndLossless($result, $generic, $config);
+        $this->assertSame(
+            [['property_name' => 'id', 'enabled' => 0], ['property_name' => 'extra', 'enabled' => 1]],
+            array_map('get_object_vars', $region->datamodel->meta[0]->layer_info_properties),
+            'the version that differs first (it is merged into the generic one), then what only this config has'
+        );
+    }
+
+    public function testALayerThatLacksAPropertyOfItsGenericLayerIsKeptStandalone(): void
+    {
+        [$generic, $registry, $config] = self::custom();
+        $config->datamodel->meta[0]->layer_info_properties = []; // the generic Countries layer has "id"
+
+        $result = self::stripper()->strip($generic, $config, $registry);
+
+        $region = $this->assertStrippedAndLossless($result, $generic, $config);
+        $this->assertFalse(ConfigValues::has($region->datamodel->meta[0], 'msp_config_generic_name'));
+        $this->assertStringContainsString('layer_info_properties', implode(' ', $result->warnings));
+    }
+
     public function testChangedValuesBecomeSmallOverrides(): void
     {
         [$generic, $registry, $config] = self::custom();

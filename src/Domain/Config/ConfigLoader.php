@@ -230,12 +230,16 @@ final class ConfigLoader
     public static function datamodelWithBothShapes(array $datamodel): array
     {
         $settings = is_array($datamodel['simulation_settings'] ?? null) ? $datamodel['simulation_settings'] : null;
-        foreach (RegionConfigMerger::SIMULATIONS as $name) {
-            if ($settings !== null && array_key_exists($name, $settings)) {
-                if (!array_key_exists($name, $datamodel)) {
-                    $datamodel[$name] = $settings[$name];
-                }
-            } elseif (array_key_exists($name, $datamodel)) {
+        // the new shape also in the old one: every simulation can be read directly in datamodel too (when the
+        // name is not taken by something else)
+        foreach (array_keys($settings ?? []) as $name) {
+            if (!array_key_exists($name, $datamodel)) {
+                $datamodel[$name] = $settings[$name];
+            }
+        }
+        // the old shape also in the new one: the simulations that old configs have directly in datamodel
+        foreach (RegionConfigMerger::LEGACY_SIMULATIONS as $name) {
+            if (array_key_exists($name, $datamodel) && !($settings !== null && array_key_exists($name, $settings))) {
                 $settings ??= [];
                 $settings[$name] = $datamodel[$name];
             }

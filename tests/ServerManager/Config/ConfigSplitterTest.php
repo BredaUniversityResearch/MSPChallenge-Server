@@ -2,8 +2,11 @@
 
 namespace App\Tests\ServerManager\Config;
 
+use App\Domain\Config\ConfigParents;
 use App\Domain\Config\Merge\RegionConfigMerger;
+use App\Domain\Config\Split\ConfigSplitter;
 use App\Domain\Config\Split\ConfigValues;
+use App\Domain\Config\Split\GenericNameRegistry;
 
 class ConfigSplitterTest extends ConfigTestCase
 {
@@ -123,6 +126,213 @@ class ConfigSplitterTest extends ConfigTestCase
             array_keys(get_object_vars($result->generic)),
             'next to the metadata and the datamodel, where merging does not look'
         );
+    }
+
+    public function testARestrictionIsGenericWhenEveryConfigThatHasBothLayersHasIt(): void
+    {
+        $restriction = static fn(string $p, string $a, string $b) => ConfigFactory::restriction(
+            $p . '_' . $a,
+            $p . '_' . $b
+        );
+        $a = self::configFor('A', ['restrictions' => ConfigFactory::restrictions([
+            $restriction('A', 'Countries', 'Ports'),
+            $restriction('A', 'Ports', 'Wind'),
+            $restriction('A', 'Countries', 'Wind'),
+        ])]);
+        $b = self::configFor('B', ['restrictions' => ConfigFactory::restrictions([
+            $restriction('B', 'Countries', 'Ports'),
+            $restriction('B', 'Ports', 'Wind'),
+        ])]);
+        $c = ConfigFactory::config( // no Wind layer
+            [ConfigFactory::layer('C_Countries', 'Countries'), ConfigFactory::layer('C_Ports', 'Ports')],
+            ['restrictions' => ConfigFactory::restrictions([$restriction('C', 'Countries', 'Ports')])]
+        );
+
+        [$result] = self::split(['a/a' => $a, 'b/b' => $b, 'c/c' => $c]);
+
+        $generic = array_keys(get_object_vars($result->generic->datamodel->restrictions));
+        $this->assertSame(
+            ['Countries|Ports', 'Ports|WindFarms'],
+            $generic,
+            'Ports|WindFarms: both configs that have both layers have it, that C has no such layer does not matter'
+        );
+        $this->assertSame(
+            ['Countries|WindFarms'],
+            array_keys(get_object_vars($result->regions['a/a']->datamodel->restrictions)),
+            'B has both layers but not this restriction: it stays in the region that has it'
+        );
+        $this->assertFalse(ConfigValues::has($result->regions['b/b']->datamodel, 'restrictions'));
+        $this->assertFalse(ConfigValues::has($result->regions['c/c']->datamodel, 'restrictions'));
+        foreach (['a/a' => $a, 'b/b' => $b, 'c/c' => $c] as $id => $original) {
+            $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions[$id], $original), $id);
+        }
+    }
+
+    public function testARestrictionThatRefersToALayerOfOneConfigOnlyIsNotGeneric(): void
+    {
+        $withOnly = static fn(string $p) => ConfigFactory::config(
+            [
+                ConfigFactory::layer($p . '_Countries', 'Countries'),
+                ConfigFactory::layer($p . '_Only', 'Only ' . $p),
+            ],
+            ['restrictions' => ConfigFactory::restrictions([
+                ConfigFactory::restriction($p . '_Countries', $p . '_Only'),
+            ])]
+        );
+        $a = $withOnly('A');
+        $b = $withOnly('B');
+
+        [$result] = self::split(['a/a' => $a, 'b/b' => $b]);
+
+        $this->assertFalse(ConfigValues::has($result->generic->datamodel, 'restrictions'));
+        $this->assertSame(
+            ['Countries|A_Only'],
+            array_keys(get_object_vars($result->regions['a/a']->datamodel->restrictions))
+        );
+        $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions['a/a'], $a));
+    }
+
+    public function testListItemsOfSelAreGenericWhenEveryConfigThatHasTheLayerHasThem(): void
+    {
+        $a = self::configFor('A');
+        $a->datamodel->SEL->shipping_lane_layers = ['A_Ports', 'A_Wind'];
+        $a->datamodel->SEL->port_layers = ConfigFactory::objects([
+            ['layer_name' => 'A_Ports', 'port_type' => 'DefinedPort'],
+        ]);
+        $b = self::configFor('B');
+        $b->datamodel->SEL->shipping_lane_layers = ['B_Ports', 'B_Wind'];
+        $b->datamodel->SEL->port_layers = ConfigFactory::objects([
+            ['layer_name' => 'B_Ports', 'port_type' => 'DefinedPort'],
+            ['layer_name' => 'B_Wind', 'port_type' => 'MaintenanceDestination'],
+        ]);
+        $c = ConfigFactory::config( // no Wind layer
+            [ConfigFactory::layer('C_Countries', 'Countries'), ConfigFactory::layer('C_Ports', 'Ports')]
+        );
+        $c->datamodel->SEL->shipping_lane_layers = ['C_Ports'];
+        $c->datamodel->SEL->port_layers = ConfigFactory::objects([
+            ['layer_name' => 'C_Ports', 'port_type' => 'DefinedPort'],
+        ]);
+        $configs = ['a/a' => $a, 'b/b' => $b, 'c/c' => $c];
+
+        [$result] = self::split($configs);
+
+        $sel = $result->generic->datamodel->simulation_settings->SEL;
+        $this->assertSame(
+            ['Ports', 'WindFarms'],
+            $sel->shipping_lane_layers,
+            'WindFarms: the two configs that have the layer'
+        );
+        $this->assertSame(
+            [['layer_name' => 'Ports', 'port_type' => 'DefinedPort']],
+            array_map('get_object_vars', $sel->port_layers),
+            'A has the WindFarms layer but not this port: it stays in the config that has it'
+        );
+        $regionB = $result->regions['b/b']->datamodel->simulation_settings->SEL;
+        $this->assertSame(
+            [['layer_name' => 'WindFarms', 'port_type' => 'MaintenanceDestination']],
+            array_map('get_object_vars', $regionB->port_layers)
+        );
+        foreach ($configs as $id => $original) {
+            $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions[$id], $original), $id);
+        }
+    }
+
+    public function testLayerInfoPropertiesAreGenericByNameAndAConfigCanOverrideTheVersion(): void
+    {
+        $withProperties = static fn(string $p, array $properties) => ConfigFactory::config([
+            ConfigFactory::layer($p . '_Countries', 'Countries', ['layer_info_properties' => $properties]),
+            ConfigFactory::layer($p . '_Ports', 'Ports'),
+        ]);
+        $shared = [['property_name' => 'id', 'enabled' => 1], ['property_name' => 'name', 'enabled' => 1]];
+        $a = $withProperties('A', $shared);
+        $b = $withProperties('B', $shared);
+        $c = $withProperties('C', [
+            ['property_name' => 'only_c', 'enabled' => 1],
+            ['property_name' => 'id', 'enabled' => 0],
+            ['property_name' => 'name', 'enabled' => 1],
+        ]);
+        $configs = ['a/a' => $a, 'b/b' => $b, 'c/c' => $c];
+
+        [$result] = self::split($configs);
+
+        $generic = $result->generic->datamodel->meta[0]->layer_info_properties;
+        $this->assertSame(['id', 'name'], array_map(static fn($p) => $p->property_name, $generic));
+        $this->assertSame(1, $generic[0]->enabled, 'the version that A and B share');
+        $this->assertFalse(ConfigValues::has($result->regions['a/a']->datamodel->meta[0], 'layer_info_properties'));
+        $carried = $result->regions['c/c']->datamodel->meta[0]->layer_info_properties;
+        $this->assertSame(
+            [['property_name' => 'id', 'enabled' => 0], ['property_name' => 'only_c', 'enabled' => 1]],
+            array_map('get_object_vars', $carried),
+            'C carries its version of id (merged into the generic one by the name) and the property only it has'
+        );
+        foreach ($configs as $id => $original) {
+            $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions[$id], $original), $id);
+        }
+    }
+
+    public function testAPropertyThatNoTwoConfigsShareStaysInTheConfigs(): void
+    {
+        $withProperty = static fn(string $p, int $enabled) => ConfigFactory::config([
+            ConfigFactory::layer($p . '_Countries', 'Countries', [
+                'layer_info_properties' => [['property_name' => 'id', 'enabled' => $enabled]],
+            ]),
+        ]);
+        $a = $withProperty('A', 1);
+        $b = $withProperty('B', 0);
+
+        [$result] = self::split(['a/a' => $a, 'b/b' => $b]);
+
+        $this->assertFalse(ConfigValues::has($result->generic->datamodel->meta[0], 'layer_info_properties'));
+        $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions['a/a'], $a));
+        $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions['b/b'], $b));
+    }
+
+    public function testEverySimulationInSimulationSettingsIsSplit(): void
+    {
+        $make = static function (string $p, int $x, bool $partial) {
+            $config = self::configFor($p);
+            $settings = ['ExternalSim' => ['url' => 'https://sim', 'mode' => 1]];
+            if ($partial) {
+                $settings['Partial'] = ['value' => 1];
+            }
+            $config->datamodel->simulation_settings = ConfigFactory::objects($settings);
+            $config->datamodel->REL = ConfigFactory::objects(['x' => $x, 'same' => true]); // old style
+            return $config;
+        };
+        $configs = ['a/a' => $make('A', 1, true), 'b/b' => $make('B', 1, true), 'c/c' => $make('C', 2, false)];
+
+        [$result] = self::split($configs);
+
+        $settings = $result->generic->datamodel->simulation_settings;
+        $this->assertSame(['url' => 'https://sim', 'mode' => 1], get_object_vars($settings->ExternalSim));
+        $this->assertSame(['x' => 1, 'same' => true], get_object_vars($settings->REL), 'A and B share x');
+        $this->assertFalse(ConfigValues::has($settings, 'Partial'), 'not every config has it: it stays in the regions');
+        $this->assertSame(['x' => 2], get_object_vars($result->regions['c/c']->datamodel->simulation_settings->REL));
+        $this->assertSame(
+            ['value' => 1],
+            get_object_vars($result->regions['a/a']->datamodel->simulation_settings->Partial)
+        );
+        foreach ($configs as $id => $original) {
+            $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions[$id], $original), $id);
+        }
+    }
+
+    public function testSplittingConfigsThatWereSplitAlreadyChangesNothing(): void
+    {
+        [$split] = self::realSplit();
+        $merged = [];
+        foreach ($split->regions as $id => $region) {
+            $merged[$id] = self::merger()->merge($split->generic, $region);
+        }
+        $registry = GenericNameRegistry::fromMap(ConfigParents::nameMapOf($split->generic));
+        $registry->register($merged);
+
+        $again = new ConfigSplitter($registry)->split($merged);
+
+        $this->assertSameJson($split->generic, $again->generic, 'the generic config is the same');
+        foreach ($split->regions as $id => $region) {
+            $this->assertSameJson($region, $again->regions[$id], "$id is the same");
+        }
     }
 
     public function testALayerOfOneConfigWithTheGenericNameOfAnotherLayerOfThatConfigIsRejected(): void

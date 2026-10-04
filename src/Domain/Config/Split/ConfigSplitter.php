@@ -2,25 +2,31 @@
 
 namespace App\Domain\Config\Split;
 
+use App\Domain\Config\Merge\LayerReferences;
+use App\Domain\Config\Merge\RegionConfigMerger;
+
 /**
  * Splits full MSP Challenge region configs into ONE generic config plus ONE region config per input,
- * following "Config simplification overview" (Hutchinson, 2025-07-02).
+ * following "Config simplification overview" (Hutchinson, 2025-07-02), with the differences that are in differences.md.
  *
- * Merge semantics the output is designed for (implemented by the later merge/compare step):
+ * Merge semantics the output is designed for (implemented by RegionConfigMerger):
  *  - objects merge recursively, region wins;
  *  - arrays and scalars in the region replace the generic value;
- *  - restrictions, shipping_lane_layers, port_layers and restriction_layer_exceptions (SEL) are lists to
- *    which the region ADDS items; layer_info_properties likewise, but only when generic and region value
- *    are both lists (null is a real value in the existing configs: a region list then replaces it);
+ *  - restrictions and the lists of SEL (shipping_lane_layers, port_layers, restriction_layer_exceptions) are lists to
+ *    which the region ADDS items;
+ *  - layer_info_properties are keyed by property_name: a region item with the name of a generic item is merged into it;
  *  - `dependencies` is replaced as a whole;
  *  - an explicit null in the region replaces the generic value (used for CEL/SEL/MEL of regions without them);
- *  - CEL, SEL and MEL live in `simulation_settings` (like `policy_settings`), in both input and output;
+ *  - simulation_settings is open-ended: every key of it is a simulation. CEL, SEL and MEL are always there (they live
+ *    in `simulation_settings`, like `policy_settings`), in both input and output;
  *  - `meta` is a list of region layer entries, each pointing at a generic layer through
  *    msp_config_generic_name; the region list defines which layers exist and in which order.
- * Because the generic side only ever holds what ALL participating regions share (objects: keys present in
- * all; additive lists: items present in all; values: the most common value, needing support from >= 2
- * regions for sections), a region never has to delete anything: the split is lossless by construction,
- * apart from the documented removals.
+ * Data is generic as soon as 2 or more regions share it, and a region never has to delete anything, because a region
+ * can not take away what is generic: objects: keys present in all; values: the most common value (sections need
+ * support from >= 2 regions); additive lists (restrictions, SEL lists): an item that refers to layers is generic when
+ * every config that has those layers has it and 2 or more configs have them; layer_info_properties: a property that
+ * every config has, of which 2 or more share a version. So the split is lossless by construction, apart from the
+ * documented removals.
  */
 final class ConfigSplitter
 {
@@ -90,6 +96,8 @@ final class ConfigSplitter
     private array $unresolved = [];
     /** @var array<string, true> generic names of the layers that are used by 2 or more configs */
     private array $shared = [];
+    /** @var array<string, array<string, true>> config id => the generic names of the shared layers it has */
+    private array $layersOf = [];
     private int $regionOnlyLayers = 0;
     /** @var string[] */
     private array $warnings = [];
@@ -210,6 +218,9 @@ final class ConfigSplitter
                 continue;
             }
             $this->shared[$generic] = true;
+            foreach (array_keys($byConfig) as $id) {
+                $this->layersOf[$id][$generic] = true;
+            }
             $shared++;
             $bases = array_map(static fn(array $entry) => $entry['base'], $byConfig);
             $properties = array_map(static fn(array $entry) => $entry['props'], $byConfig);
@@ -222,11 +233,7 @@ final class ConfigSplitter
             $genericProperties = null;
             $emitProperties = []; // config id => list the region entry carries
             if (array_reduce($properties, static fn(bool $all, $list) => $all && is_array($list), true)) {
-                [$hasProperties, $genericList, $propPatches] = $this->splitAdditive(
-                    $properties,
-                    'meta.layer_info_properties',
-                    false
-                );
+                [$hasProperties, $genericList, $propPatches] = $this->splitInfoProperties($properties);
                 $setGenericProperties = $hasProperties;
                 $genericProperties = $genericList;
                 foreach (array_keys($byConfig) as $id) {
@@ -341,6 +348,7 @@ final class ConfigSplitter
         $this->unresolved = [];
         $this->warnings = [];
         $this->shared = [];
+        $this->layersOf = [];
         $this->regionOnlyLayers = 0;
     }
 
@@ -401,7 +409,7 @@ final class ConfigSplitter
             $lists[$id] = $entries;
         }
 
-        [$has, $generic, $patches] = $this->splitAdditive($lists, 'restrictions');
+        [$has, $generic, $patches] = $this->splitAdditiveByLayers($lists, 'restrictions', 'restrictions');
         $regionRestrictions = [];
         foreach ($patches as $id => $entries) {
             if ($entries !== []) {
@@ -477,26 +485,38 @@ final class ConfigSplitter
      */
     private function splitSimulationSettings(array $configs): array
     {
-        $cels = [];
-        $sels = [];
-        $mels = [];
+        // the simulations of the configs, by name: every key of simulation_settings, and the old-style ones that a
+        // config has directly in datamodel
+        $objects = []; // name => config id => the settings (SEL with its layer references translated)
+        $others = [];  // name => config id => null or something that is no object, kept as it is
         foreach ($configs as $id => $root) {
-            $datamodel = $root->datamodel;
-            if (($cel = $this->simulationPart($datamodel, 'CEL')) instanceof \stdClass) {
-                $cels[$id] = $cel;
-            }
-            if (($sel = $this->simulationPart($datamodel, 'SEL')) instanceof \stdClass) {
-                $sels[$id] = $this->translateSel(ConfigValues::clone($sel), $id);
-            }
-            if (($mel = $this->simulationPart($datamodel, 'MEL')) instanceof \stdClass) {
-                $mels[$id] = $mel;
+            foreach ($this->simulationNames($root->datamodel) as $name) {
+                $value = $this->simulationPart($root->datamodel, $name);
+                if ($value instanceof \stdClass) {
+                    $objects[$name][$id] = $name === 'SEL'
+                        ? $this->translateSel(ConfigValues::clone($value), $id)
+                        : $value;
+                } elseif (!in_array($name, RegionConfigMerger::SIMULATIONS, true)) {
+                    $others[$name][$id] = $value;
+                }
             }
         }
-        $parts = [
-            'CEL' => [$cels, ...$this->splitCel($cels)],
-            'SEL' => [$sels, ...$this->splitSel($sels)],
-            'MEL' => [$mels, ...$this->splitMel($mels)],
-        ];
+        $parts = [];
+        foreach (array_unique(array_merge(
+            RegionConfigMerger::SIMULATIONS,
+            array_keys($objects),
+            array_keys($others)
+        )) as $name) {
+            $name = (string)$name;
+            $values = $objects[$name] ?? [];
+            $parts[$name] = [$values, ...match ($name) {
+                'CEL' => $this->splitCel($values),
+                'SEL' => $this->splitSel($values),
+                'MEL' => $this->splitMel($values),
+                // settings of other simulations: generic where the configs share them, like the settings of CEL
+                default => $this->splitOtherSimulation($values, $name, count($configs)),
+            }];
+        }
 
         $generic = new \stdClass();
         foreach ($parts as $name => [, $genericPart]) {
@@ -513,6 +533,8 @@ final class ConfigSplitter
                     if (ConfigValues::props($patchesPart[$id] ?? new \stdClass()) !== []) {
                         $simulation->{$name} = $patchesPart[$id];
                     }
+                } elseif (array_key_exists($id, $others[$name] ?? [])) {
+                    $simulation->{$name} = ConfigValues::clone($others[$name][$id]); // as it is: none, or no object
                 } elseif ($genericPart !== null) {
                     $simulation->{$name} = null; // this region has none: do not inherit the generic one
                 }
@@ -524,6 +546,24 @@ final class ConfigSplitter
         return [ConfigValues::props($generic) === [] ? null : $generic, $regionSimulation];
     }
 
+    /**
+     * The names of the simulations of a config: every key of simulation_settings, and the old-style ones directly in
+     * datamodel.
+     *
+     * @return string[]
+     */
+    private function simulationNames(\stdClass $datamodel): array
+    {
+        $settings = $datamodel->simulation_settings ?? null;
+        $names = array_map('strval', array_keys($settings instanceof \stdClass ? ConfigValues::props($settings) : []));
+        foreach (RegionConfigMerger::LEGACY_SIMULATIONS as $name) {
+            if (ConfigValues::has($datamodel, $name)) {
+                $names[] = $name;
+            }
+        }
+        return array_values(array_unique($names));
+    }
+
     private function simulationPart(\stdClass $datamodel, string $name): mixed
     {
         $settings = $datamodel->simulation_settings ?? null;
@@ -531,6 +571,27 @@ final class ConfigSplitter
             return $settings->{$name};
         }
         return $datamodel->{$name} ?? null;
+    }
+
+    /**
+     * The settings of a simulation that has no rules of its own: generic where 2 or more configs share a value, the
+     * rest in the regions. A region can not say that it does not have a simulation that is generic, except by the
+     * explicit null that is only written for the simulations CEL, SEL and MEL, so the settings only become generic
+     * when every config has them.
+     *
+     * @param array<string, \stdClass> $values
+     * @return array{0: ?\stdClass, 1: array<string, \stdClass>}
+     */
+    private function splitOtherSimulation(array $values, string $name, int $configCount): array
+    {
+        if ($values === []) {
+            return [null, []];
+        }
+        if (count($values) !== $configCount) {
+            return [null, array_map(ConfigValues::clone(...), $values)];
+        }
+        [$has, $generic, $patches] = $this->splitValue($values, self::SECTION_MIN_SUPPORT, $name);
+        return [$has ? $generic : null, $patches];
     }
 
     /**
@@ -589,7 +650,7 @@ final class ConfigSplitter
                 continue;
             }
             [$has, $genericValue, $valuePatches] = in_array($key, self::SEL_ADDITIVE, true)
-                ? $this->splitAdditive($values, 'SEL.' . $key)
+                ? $this->splitAdditiveByLayers($values, 'SEL.' . $key, $key)
                 : $this->splitValue($values, self::SECTION_MIN_SUPPORT, 'SEL.' . $key);
             if ($has) {
                 $generic->{$key} = $genericValue;
@@ -822,54 +883,162 @@ final class ConfigSplitter
     }
 
     /**
-     * Lists to which regions ADD items. Generic = items every config has; patches = the items a config
-     * adds on top. The merged order is generic items first, then the additions.
+     * Lists to which regions ADD items, where an item refers to layers: restrictions, and the lists of SEL. Generic
+     * items can not be taken away by a region, so an item is generic when every config that has the layers it refers
+     * to has it, and 2 or more configs have those layers (it is shared). An item that refers to a layer that only one
+     * config has can not be generic. The merged order is generic items (sorted by content) first, then the additions.
      *
      * @param array<string, array> $lists config id => list
+     * @param string $list the kind of list: "restrictions", or the key in SEL
      * @return array{0: bool, 1: array, 2: array<string, array>}
      * @throws \JsonException
      */
-    private function splitAdditive(array $lists, string $path, bool $record = true): array
+    private function splitAdditiveByLayers(array $lists, string $path, string $list): array
     {
-        $common = null;
-        foreach ($lists as $list) {
-            $set = [];
-            foreach ($list as $item) {
-                $set[ConfigValues::canonical($item)] = true;
-            }
-            $common = $common === null ? $set : array_intersect_key($common, $set);
-        }
-        $common ??= [];
-
-        $generic = [];
-        $seen = [];
-        foreach (reset($lists) ?: [] as $item) {
-            $canonical = ConfigValues::canonical($item);
-            if (isset($common[$canonical]) && !isset($seen[$canonical])) {
-                $generic[] = ConfigValues::clone($item);
-                $seen[$canonical] = true;
-            }
-        }
-        $patches = [];
-        $distinct = [];
-        foreach ($lists as $id => $list) {
-            $additions = [];
-            foreach ($list as $item) {
+        $ids = array_keys($lists);
+        $have = [];  // canonical item => config ids that have it
+        $first = []; // canonical item => the item, in the order of appearance
+        foreach ($lists as $id => $items) {
+            foreach ($items as $item) {
                 $canonical = ConfigValues::canonical($item);
-                $distinct[$canonical] = true;
-                if (!isset($common[$canonical])) {
+                $have[$canonical][$id] = true;
+                $first[$canonical] ??= $item;
+            }
+        }
+        $genericItems = [];
+        foreach ($first as $canonical => $item) {
+            $layers = $this->referencedLayers($list, $item);
+            if ($layers === null) {
+                continue;
+            }
+            $eligible = array_filter(
+                $ids,
+                fn($id) => array_diff($layers, array_keys($this->layersOf[$id] ?? [])) === []
+            );
+            if (count($eligible) >= 2 && array_diff($eligible, array_keys($have[$canonical])) === []) {
+                $genericItems[(string)$canonical] = ConfigValues::clone($item);
+            }
+        }
+        // in a fixed order, so that splitting configs that were split already gives the same generic config
+        ksort($genericItems, SORT_STRING);
+        $generic = array_values($genericItems);
+        $genericSet = $genericItems;
+        $patches = [];
+        foreach ($lists as $id => $items) {
+            $additions = [];
+            foreach ($items as $item) {
+                if (!isset($genericSet[ConfigValues::canonical($item)])) {
                     $additions[] = ConfigValues::clone($item);
                 }
             }
             $patches[$id] = $additions;
         }
-        if ($record) {
-            $this->recordSupport($path, count($lists), count($generic), count($distinct), $generic !== [], 'list');
-        }
+        $this->recordSupport($path, count($lists), count($generic), count($first), $generic !== [], 'list');
         if ($generic === []) {
             return [false, [], $patches];
         }
         return [true, $generic, array_filter($patches, static fn(array $additions) => $additions !== [])];
+    }
+
+    /**
+     * The generic names of the shared layers that an item of a list refers to, null when it refers to something
+     * else (a layer that only one config has, or a reference that is not understood): that can not be generic.
+     *
+     * @return ?string[]
+     */
+    private function referencedLayers(string $list, mixed $item): ?array
+    {
+        $references = match (true) {
+            $list === 'restrictions' && $item instanceof \stdClass
+                => [(string)($item->startlayer ?? ''), (string)($item->endlayer ?? '')],
+            $list === 'shipping_lane_layers' && is_string($item)
+                => [$item],
+            in_array($list, ['port_layers', 'restriction_layer_exceptions'], true)
+                && $item instanceof \stdClass && is_string($item->layer_name ?? null)
+                => [$item->layer_name],
+            default => null,
+        };
+        if ($references === null) {
+            return null;
+        }
+        $layers = [];
+        foreach ($references as $reference) {
+            $base = LayerReferences::base($reference);
+            if (!isset($this->shared[$base])) {
+                return null;
+            }
+            $layers[$base] = true;
+        }
+        return array_map('strval', array_keys($layers));
+    }
+
+    /**
+     * The layer_info_properties of the layers of one generic layer, by config. They are keyed by property_name: a
+     * property is generic when every config has it and 2 or more configs have the same version of it (the most
+     * common one). A config that has another version carries that version, which is merged into the generic one by
+     * the name; the properties that are not generic stay in the configs that have them.
+     *
+     * @param array<string, array<int, mixed>> $properties config id => list
+     * @return array{0: bool, 1: array, 2: array<string, array>} whether there is a generic list, that list, and what
+     *         every config carries
+     * @throws \JsonException
+     */
+    private function splitInfoProperties(array $properties): array
+    {
+        $byName = [];
+        foreach ($properties as $id => $list) {
+            foreach ($list as $item) {
+                $name = LayerReferences::propertyName($item);
+                if ($name === null || isset($byName[$id][$name])) {
+                    return [false, [], $properties]; // not keyed: every config carries its own list
+                }
+                $byName[$id][$name] = $item;
+            }
+        }
+        $names = null;
+        foreach ($properties as $id => $_) {
+            $mine = array_keys($byName[$id] ?? []);
+            $names = $names === null ? $mine : array_intersect($names, $mine);
+        }
+        $generic = [];
+        $genericCanonical = [];
+        foreach ($names ?? [] as $name) {
+            $versions = [];
+            foreach ($properties as $id => $_) {
+                $versions[ConfigValues::canonical($byName[$id][$name])][] = $id;
+            }
+            $best = null;
+            foreach ($versions as $canonical => $sharing) { // ties: the first config (input order) wins
+                if ($best === null || count($sharing) > count($versions[$best])) {
+                    $best = (string)$canonical;
+                }
+            }
+            if ($best !== null && count($versions[$best]) >= 2) {
+                $generic[] = ConfigValues::clone($byName[$versions[$best][0]][(string)$name]);
+                $genericCanonical[(string)$name] = $best;
+            }
+        }
+        if ($generic === []) {
+            return [false, [], $properties];
+        }
+        // what a config carries: first the versions that differ from the generic ones, in the order of the generic
+        // properties (they are merged into those), then the properties that are not generic, in its own order. That
+        // is the order of the merged list, so a config that was split already carries the same.
+        $carried = [];
+        foreach ($properties as $id => $list) {
+            $carried[$id] = [];
+            foreach ($genericCanonical as $name => $canonical) {
+                if (ConfigValues::canonical($byName[$id][$name]) !== $canonical) {
+                    $carried[$id][] = ConfigValues::clone($byName[$id][$name]);
+                }
+            }
+            foreach ($list as $item) {
+                if (!isset($genericCanonical[(string)LayerReferences::propertyName($item)])) {
+                    $carried[$id][] = ConfigValues::clone($item);
+                }
+            }
+        }
+        return [true, $generic, $carried];
     }
 
     private function recordSupport(string $path, int $of, int $best, int $distinct, bool $generic, string $kind): void

@@ -352,6 +352,27 @@ class ConfigLoaderTest extends ConfigCommandTestCase
         $this->assertSame(['x' => 1], ConfigLoader::withBothShapes(['x' => 1]));
     }
 
+    public function testEverySimulationIsReadableTheOldAndTheNewWay(): void
+    {
+        $new = ConfigLoader::withBothShapes(['datamodel' => [
+            'simulation_settings' => ['CEL' => ['a' => 1], 'ExternalSim' => ['url' => 'x'], 'REL' => null],
+            'ExternalSim' => 'already there',
+        ]]);
+        $old = ConfigLoader::withBothShapes(
+            ['datamodel' => ['REL' => ['r' => 1], 'ExternalSim' => 'not a simulation']]
+        );
+
+        $this->assertSame(['url' => 'x'], $new['datamodel']['simulation_settings']['ExternalSim']);
+        $this->assertSame('already there', $new['datamodel']['ExternalSim'], 'a name that is taken is not overwritten');
+        $this->assertTrue(array_key_exists('REL', $new['datamodel']) && $new['datamodel']['REL'] === null);
+        $this->assertSame(['r' => 1], $old['datamodel']['simulation_settings']['REL'], 'REL is old-style');
+        $this->assertFalse(
+            isset($old['datamodel']['simulation_settings']['ExternalSim']),
+            'what is not a known old-style simulation is not moved'
+        );
+        $this->assertSame($new, ConfigLoader::withBothShapes($new), 'a second time changes nothing');
+    }
+
     public function testACompleteUploadIsStoredAsTheCompleteFinalConfigInTheNewShape(): void
     {
         $check = $this->loader()->checkUpload($this->original());

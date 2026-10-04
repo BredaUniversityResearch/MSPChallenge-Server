@@ -24,9 +24,14 @@ use App\Domain\Config\Split\ConfigValues;
  * Merge rules (what ConfigSplitter produces):
  *  - objects merge recursively, the region wins; arrays and scalars of the region replace the generic value;
  *    an explicit null replaces too (a region without SEL/MEL has "SEL": null);
- *  - restrictions, SEL.shipping_lane_layers / port_layers / restriction_layer_exceptions and
- *    layer_info_properties are ADDITIVE: generic items first, then the region's. Generic items that refer
- *    to a layer the region does not have are skipped;
+ *  - restrictions and SEL.shipping_lane_layers / port_layers / restriction_layer_exceptions are ADDITIVE: generic
+ *    items first, then the region's. Generic items that refer to a layer the region does not have are skipped;
+ *  - layer_info_properties are merged by their key, property_name: an item of the region with the name of an item
+ *    of the generic layer is merged into it (the region wins), the other items of the region come after the
+ *    generic ones;
+ *  - simulation_settings is open-ended: every key of it is a simulation, and all of them merge in the same way
+ *    (objects recursively, the region wins, null means none). Only SEL has rules of its own (the additive lists
+ *    above, and its layer references). CEL, SEL and MEL are always in the result, null when there is none;
  *  - dependencies are replaced as a whole;
  *  - a region layer entry without a generic counterpart is used as is.
  * The inputs are never modified. isRegionFormat() only tells a stripped config from a complete one (the commands
@@ -46,8 +51,14 @@ final class RegionConfigMerger
         'layer_info_properties', 'layer_tags',
     ];
 
-    /** The simulation settings that live in datamodel.simulation_settings. */
+    /** The simulations that are always in datamodel.simulation_settings of a final config, null when there is none. */
     public const array SIMULATIONS = ['CEL', 'SEL', 'MEL'];
+
+    /**
+     * The simulations that configs in the old shape have directly in datamodel. Other simulations (settings of
+     * future or external simulations) only exist in datamodel.simulation_settings.
+     */
+    public const array LEGACY_SIMULATIONS = ['CEL', 'REL', 'SEL', 'MEL'];
 
     public static function isRegionFormat(\stdClass $config): bool
     {
@@ -77,7 +88,7 @@ final class RegionConfigMerger
         $genericDatamodel = $generic->datamodel ?? new \stdClass();
         $regionDatamodel = $config->datamodel;
         $oldStyle = [];
-        foreach (self::SIMULATIONS as $name) {
+        foreach (self::LEGACY_SIMULATIONS as $name) {
             if (ConfigValues::has($regionDatamodel, $name)) {
                 $oldStyle[$name] = $regionDatamodel->{$name};
             }
@@ -142,6 +153,7 @@ final class RegionConfigMerger
                     $done['dependencies'] = true;
                     break;
                 case 'CEL':
+                case 'REL':
                 case 'SEL':
                 case 'MEL':
                 case 'simulation_settings':
@@ -276,6 +288,36 @@ final class RegionConfigMerger
         return ConfigValues::clone($region);
     }
 
+    /**
+     * layer_info_properties are keyed by property_name: an item of the region with the name of an item of the generic
+     * layer is merged into it (the region wins), the other items of the region come after the generic ones.
+     *
+     * @param array<int, mixed> $generic
+     * @param array<int, mixed> $region
+     * @return array<int, mixed>
+     */
+    private function mergeInfoProperties(array $generic, array $region): array
+    {
+        $merged = array_values(ConfigValues::clone($generic));
+        $index = [];
+        foreach ($merged as $position => $item) {
+            $name = LayerReferences::propertyName($item);
+            if ($name !== null && !isset($index[$name])) {
+                $index[$name] = $position;
+            }
+        }
+        foreach ($region as $item) {
+            $name = LayerReferences::propertyName($item);
+            if ($name !== null && isset($index[$name])) {
+                $merged[$index[$name]] = self::deepMerge($merged[$index[$name]], $item);
+                unset($index[$name]); // a second item of the region with this name is added, not merged again
+            } else {
+                $merged[] = ConfigValues::clone($item);
+            }
+        }
+        return $merged;
+    }
+
     private function mergeLayer(?\stdClass $generic, \stdClass $entry): \stdClass
     {
         $entry = ConfigValues::clone($entry);
@@ -295,7 +337,7 @@ final class RegionConfigMerger
         $merged = self::deepMerge($generic, $entry);
         if ($regionHas) {
             $merged->layer_info_properties = is_array($genericProperties) && is_array($regionProperties)
-                ? array_merge($genericProperties, $regionProperties)
+                ? $this->mergeInfoProperties($genericProperties, $regionProperties)
                 : $regionProperties;
         } elseif ($genericHas) {
             $merged->layer_info_properties = $genericProperties;
@@ -356,24 +398,31 @@ final class RegionConfigMerger
         \Closure $back
     ): \stdClass {
         $settings = new \stdClass();
-        foreach (self::SIMULATIONS as $name) {
-            $genericPart = $generic instanceof \stdClass && ($generic->{$name} ?? null) instanceof \stdClass
+        // every simulation there is: the ones that are always there, and every key of the generic and region part
+        $names = array_merge(
+            self::SIMULATIONS,
+            array_keys($generic instanceof \stdClass ? ConfigValues::props($generic) : []),
+            array_keys($region instanceof \stdClass ? ConfigValues::props($region) : []),
+            array_keys($oldStyle)
+        );
+        foreach (array_unique(array_map('strval', $names)) as $name) {
+            $genericPart = $generic instanceof \stdClass && ConfigValues::has($generic, $name)
                 ? $generic->{$name} : null;
             $regionHas = $region instanceof \stdClass && ConfigValues::has($region, $name);
             $regionPart = $regionHas ? $region->{$name} : null;
-            if (($regionHas && $regionPart === null) || ($genericPart === null && !$regionHas)) {
-                $merged = null;
+            if ($regionHas && $regionPart === null) {
+                $merged = null; // explicitly none: the generic one is not inherited
             } elseif (!$regionHas) {
                 $merged = ConfigValues::clone($genericPart);
-                if ($name === 'SEL') {
+                if ($name === 'SEL' && $merged instanceof \stdClass) {
                     $this->filterAdditiveSel($merged, $present);
                 }
-            } elseif ($genericPart === null) {
-                $merged = ConfigValues::clone($regionPart);
-            } elseif ($name === 'SEL') {
-                $merged = $this->mergeSel($genericPart, $regionPart, $present);
+            } elseif ($genericPart instanceof \stdClass && $regionPart instanceof \stdClass) {
+                $merged = $name === 'SEL'
+                    ? $this->mergeSel($genericPart, $regionPart, $present)
+                    : self::deepMerge($genericPart, $regionPart);
             } else {
-                $merged = self::deepMerge($genericPart, $regionPart);
+                $merged = ConfigValues::clone($regionPart); // nothing to merge it with: it replaces
             }
             if ($name === 'SEL' && $merged instanceof \stdClass) {
                 // the generic and region part use generic names: back to layer names. The old-style SEL has them
@@ -437,7 +486,10 @@ final class RegionConfigMerger
         if (!$datamodel instanceof \stdClass) {
             return $config;
         }
-        $legacy = array_filter(self::SIMULATIONS, static fn(string $name) => ConfigValues::has($datamodel, $name));
+        $legacy = array_filter(
+            self::LEGACY_SIMULATIONS,
+            static fn(string $name) => ConfigValues::has($datamodel, $name)
+        );
         if ($legacy === []) {
             return $config;
         }
@@ -448,7 +500,7 @@ final class RegionConfigMerger
         foreach (ConfigValues::props($datamodel) as $key => $value) {
             if ($key === 'simulation_settings') {
                 $rebuilt->simulation_settings = $settings;
-            } elseif (in_array($key, self::SIMULATIONS, true)) {
+            } elseif (in_array($key, self::LEGACY_SIMULATIONS, true)) {
                 $settings->{$key} = ConfigValues::has($settings, $key)
                     ? self::layOldStyleOver($settings->{$key}, $value)
                     : $value;

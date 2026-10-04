@@ -443,7 +443,7 @@ final class ConfigSplitCommand extends Command
                 $group,
                 $g['of'] . ' configs',
                 $g['kind'] === 'list'
-                    ? sprintf('%d of %d distinct items are in every config', $g['best'], $g['distinct'])
+                    ? sprintf('%d of %d distinct items are generic (shared)', $g['best'], $g['distinct'])
                     : sprintf('%d of %d values shared by 2+ configs', $g['generic'], $g['values']),
             ];
         }
