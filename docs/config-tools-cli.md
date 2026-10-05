@@ -6,7 +6,7 @@ The config tools turn configs with parents into final configs, check them, and k
 
 This page is for programs and people that use the tools, such as the config editor and the CI of a repository with
 configs. How configs work (parents, merging, what becomes generic) is described in *Config simplification:
-implementation design*.
+implementation design* (`docs/config-simplification-impl-design/`).
 
 ## Running the tools
 
