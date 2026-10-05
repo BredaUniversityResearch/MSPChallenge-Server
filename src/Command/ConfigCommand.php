@@ -7,16 +7,15 @@ use App\Domain\Config\Split\ConfigValues;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * A command of the config tools. It can tell what it did to people (text, the default) or to programs (--format=json:
- * one JSON document on stdout, nothing else, also when the command fails).
- *
- * A command only says what it has to say to the report: ConfigReport::warning(), fail() and the data of its result.
- * What is shown, and when, is done here.
+ * A command of the config tools. A command does its work and says what it found out to a ConfigReport: the data of its
+ * result, its warnings and its errors. It prints nothing itself. This class turns that into
+ *  - a JSON document on stdout, and nothing else (--format=json, for programs), or
+ *  - text for people (the default): the document is passed through JSON and back (so that the text is made of exactly
+ *    what a program gets) and ConfigTextRenderer writes it.
  *
  * The JSON document:
  *   {"schema": 1, "command": "app:config:merge", "success": true, "exitCode": 0,
@@ -43,68 +42,29 @@ abstract class ConfigCommand extends Command
     }
 
     /**
-     * Does the command's work.
+     * Does the command's work, and says what it found out to the report.
      *
-     * @param OutputInterface $output what the command writes itself (stdout): for programs it goes nowhere
-     * @param SymfonyStyle $io the messages for people: for programs they go nowhere
      * @return int the exit code
      */
-    abstract protected function perform(
-        InputInterface $input,
-        OutputInterface $output,
-        SymfonyStyle $io,
-        ConfigReport $report
-    ): int;
+    abstract protected function perform(InputInterface $input, ConfigReport $report): int;
 
     /**
-     * Says that files were left out of the configs because they are not valid JSON (a file that can not be read may
-     * be a config). A command that writes does not go on without them.
-     *
-     * @param array<string, string> $skipped path => why
-     * @return ?int the exit code when the command has to stop, null when it can go on
+     * What a command that prints its result (not a report) writes to stdout in text mode, when it went well. Null:
+     * nothing. The data of the report that is only meant for this (the result itself) is not shown in the text.
      */
-    protected function skippedFiles(
-        ConfigReport $report,
-        ConfigDirectory $directory,
-        array $skipped,
-        bool $writing
-    ): ?int {
-        if ($skipped === []) {
-            return null;
-        }
-        $shown = array_map(
-            fn(string $path, string $why) => $directory->relativePath($path) . ': ' . $why,
-            array_keys($skipped),
-            $skipped
-        );
-        if ($writing) {
-            return $report->failWith(
-                array_merge(
-                    [
-                        'Nothing is written, these files are not valid JSON (fix them, or leave them out with '
-                        . '--pattern):'
-                    ],
-                    $shown
-                ),
-                array_map(
-                    fn(string $path, string $why) => [
-                        'code' => 'file_not_json',
-                        'message' => $why,
-                        'file' => $directory->relativePath($path),
-                    ],
-                    array_keys($skipped),
-                    $skipped
-                )
-            );
-        }
-        foreach ($skipped as $path => $why) {
-            $report->warning(
-                sprintf('Skipped %s, %s.', $directory->relativePath($path), $why),
-                'file_skipped',
-                details: ['path' => $directory->relativePath($path)]
-            );
-        }
+    protected function rawOutput(InputInterface $input, ConfigReport $report): ?string
+    {
         return null;
+    }
+
+    /**
+     * The data of the report that is the result itself: it is in the JSON document, and it is not part of the text.
+     *
+     * @return list<string>
+     */
+    protected function resultKeys(): array
+    {
+        return [];
     }
 
     /**
@@ -123,31 +83,25 @@ abstract class ConfigCommand extends Command
             return Command::INVALID;
         }
         $json = $format === 'json';
-        // for programs the document is all there is on stdout: what is meant for people goes nowhere
-        $sink = $json ? new NullOutput() : $output;
-        $io = new SymfonyStyle($input, $sink);
-        if (!$json && $this->messagesToStderr()) {
-            $io = $io->getErrorStyle();
-        }
-        $report = new ConfigReport($io, $json);
+        $report = new ConfigReport();
         try {
-            $exit = $this->perform($input, $sink, $io, $report);
+            $exit = $this->perform($input, $report);
         } catch (\Throwable $e) {
-            if (!$json) {
-                throw $e;
+            if (!$json && $output->isVerbose()) {
+                throw $e; // for people who want to see where it went wrong
             }
             $exit = $report->failThrowable($e);
         }
+        $document = [
+            'schema' => self::JSON_SCHEMA,
+            'command' => $this->getName(),
+            'success' => $exit === Command::SUCCESS,
+            'exitCode' => $exit,
+            'errors' => $report->errors,
+            'warnings' => $report->warnings,
+            'data' => (object)$report->data,
+        ];
         if ($json) {
-            $document = [
-                'schema' => self::JSON_SCHEMA,
-                'command' => $this->getName(),
-                'success' => $exit === Command::SUCCESS,
-                'exitCode' => $exit,
-                'errors' => $report->errors,
-                'warnings' => $report->warnings,
-                'data' => (object)$report->data,
-            ];
             $output->write(
                 json_encode(
                     $document,
@@ -156,7 +110,66 @@ abstract class ConfigCommand extends Command
                 false,
                 OutputInterface::OUTPUT_RAW
             );
+            return $exit;
+        }
+        $raw = $exit === Command::SUCCESS ? $this->rawOutput($input, $report) : null;
+        foreach ($this->resultKeys() as $key) {
+            unset($report->data[$key]);
+        }
+        $document['data'] = $report->data;
+        $io = new SymfonyStyle($input, $output);
+        if ($this->messagesToStderr()) {
+            $io = $io->getErrorStyle();
+        }
+        // text is made of what a program gets: the document as it is in JSON, not as it was in memory
+        /** @var array<string, mixed> $decoded */
+        $decoded = json_decode(
+            (string)json_encode($document, ConfigValues::ENCODE_FLAGS & ~JSON_PRETTY_PRINT),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+        (new ConfigTextRenderer())->render((string)$this->getName(), $decoded, $io);
+        if ($raw !== null) {
+            $output->write($raw, false, OutputInterface::OUTPUT_RAW);
         }
         return $exit;
+    }
+
+    /**
+     * Says that files were left out of the configs because they are not valid JSON (a file that can not be read may
+     * be a config). A command that writes does not go on without them.
+     *
+     * @param array<string, string> $skipped path => why
+     * @return ?int the exit code when the command has to stop, null when it can go on
+     */
+    protected function skippedFiles(
+        ConfigReport $report,
+        ConfigDirectory $directory,
+        array $skipped,
+        bool $writing
+    ): ?int {
+        if ($skipped === []) {
+            return null;
+        }
+        if ($writing) {
+            return $report->failWith(array_map(
+                fn(string $path, string $why) => [
+                    'code' => 'file_not_json',
+                    'message' => $why,
+                    'file' => $directory->relativePath($path),
+                ],
+                array_keys($skipped),
+                $skipped
+            ));
+        }
+        foreach ($skipped as $path => $why) {
+            $report->warning(
+                sprintf('Skipped %s, %s.', $directory->relativePath($path), $why),
+                'file_skipped',
+                ['path' => $directory->relativePath($path)]
+            );
+        }
+        return null;
     }
 }

@@ -102,8 +102,9 @@ languages read it as an object as it is.
 **Large documents.** `merge` puts the whole final config in the document (about 1 MB). Use `--output=FILE` to have it
 written to a file and get only the path.
 
-**Text mode.** `merge` prints the config on stdout and its messages on stderr, so that a pipe stays clean. The other
-commands print their messages on stdout.
+**Text mode.** The text for people is made from this same document (a command tells what it found to the document,
+and one renderer writes the text), so everything that a person sees is in the JSON too. `merge` prints the config on
+stdout and its messages on stderr, so that a pipe stays clean. The other commands print their messages on stdout.
 
 ### `app:config:list`
 

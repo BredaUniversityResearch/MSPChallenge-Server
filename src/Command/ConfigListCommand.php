@@ -9,8 +9,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Path;
 
@@ -58,12 +56,8 @@ final class ConfigListCommand extends ConfigCommand
             ->addFormatOption();
     }
 
-    protected function perform(
-        InputInterface $input,
-        OutputInterface $output,
-        SymfonyStyle $io,
-        ConfigReport $report
-    ): int {
+    protected function perform(InputInterface $input, ConfigReport $report): int
+    {
         $root = Path::makeAbsolute((string)$input->getOption('dir'), $this->projectDir);
         if (!is_dir($root)) {
             return $report->fail("Config directory not found: $root", 'dir_not_found');
@@ -151,7 +145,6 @@ final class ConfigListCommand extends ConfigCommand
                 'skipped' => count($skipped),
             ],
         ];
-        $this->show($io, $configs, $generics, $duplicates, $skipped);
 
         $wrong = $problems + count($duplicates) + count($skipped);
         if ($input->getOption('check') && $wrong > 0) {
@@ -183,70 +176,6 @@ final class ConfigListCommand extends ConfigCommand
         } catch (ConfigParentException $e) {
             $problem = ['code' => $e->reason, 'message' => $e->getMessage()];
             return [[], $problem + ($e->details === [] ? [] : ['details' => $e->details])];
-        }
-    }
-
-    /**
-     * Who uses a parent, in a few words: the first ones, and how many there are.
-     *
-     * @param string[] $children
-     */
-    private static function children(array $children): string
-    {
-        if ($children === []) {
-            return '-';
-        }
-        $shown = array_map(static fn(string $id) => basename($id), array_slice($children, 0, 2));
-        return count($children) . ': ' . implode(', ', $shown) . (count($children) > 2 ? ', ...' : '');
-    }
-
-    /**
-     * @param list<array<string, mixed>> $configs
-     * @param list<array<string, mixed>> $generics
-     * @param list<array<string, mixed>> $duplicates
-     * @param list<array<string, string>> $skipped
-     */
-    private function show(SymfonyStyle $io, array $configs, array $generics, array $duplicates, array $skipped): void
-    {
-        $io->section('Configs');
-        $io->table(
-            ['Config', 'Kind', 'Parents', 'Layers', 'Problem'],
-            array_map(
-                static fn(array $c) => [
-                    $c['id'],
-                    $c['kind'],
-                    $c['parent'] === null ? '-' : implode(' > ', $c['chain'] ?: [$c['parent'] . ' (?)']),
-                    $c['layers'],
-                    $c['problem']['message'] ?? '',
-                ],
-                $configs
-            )
-        );
-        $io->section('Generic configs (parents)');
-        $io->table(
-            ['Name', 'File', 'Parent', 'Layers', 'Used by', 'Problem'],
-            array_map(
-                static fn(array $g) => [
-                    $g['name'],
-                    $g['path'],
-                    $g['parent'] ?? '-',
-                    $g['layers'],
-                    self::children($g['children']),
-                    $g['problem']['message'] ?? '',
-                ],
-                $generics
-            )
-        );
-        if ($duplicates !== []) {
-            $io->section('Names that two files have');
-            $io->listing(array_map(
-                static fn(array $d) => $d['name'] . ': ' . implode(' and ', $d['paths']),
-                $duplicates
-            ));
-        }
-        if ($skipped !== []) {
-            $io->section('Files that are not valid JSON');
-            $io->listing(array_map(static fn(array $s) => $s['path'] . ': ' . $s['reason'], $skipped));
         }
     }
 }

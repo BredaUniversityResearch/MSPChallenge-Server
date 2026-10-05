@@ -114,10 +114,11 @@ class ConfigMergeCommandTest extends ConfigCommandTestCase
         $tester = $this->execute('app:config:merge', [
             'file' => $this->strippedCopyOf($id),
             '--output' => $target,
+            '--format' => 'json',
         ]);
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
-        $this->assertStringContainsString('Wrote ' . $target, self::text($tester));
+        $this->assertSame($target, self::documentOf($tester)['data']['output']);
         $this->assertSame(
             [],
             self::comparator()->differences(
@@ -132,11 +133,11 @@ class ConfigMergeCommandTest extends ConfigCommandTestCase
         $stripped = $this->strippedCopyOf('Baltic_Sea_basic/Baltic_Sea_basic_1');
         unlink($this->dir . '/generic.json');
 
-        $tester = $this->execute('app:config:merge', ['file' => $stripped]);
+        $tester = $this->execute('app:config:merge', ['file' => $stripped, '--format' => 'json']);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('The parent "generic" of', self::text($tester));
-        $this->assertStringContainsString('generic.json is needed', self::text($tester));
+        $this->assertContains('parent_missing', self::errorCodesOf($tester));
+        $this->assertSame('generic.json', self::documentOf($tester)['errors'][0]['details']['file']);
     }
 
     public function testACompleteConfigNeedsNoParent(): void
@@ -158,10 +159,10 @@ class ConfigMergeCommandTest extends ConfigCommandTestCase
         unset($config->metadata->parent);
         file_put_contents($path, json_encode($config));
 
-        $tester = $this->execute('app:config:merge', ['file' => $path]);
+        $tester = $this->execute('app:config:merge', ['file' => $path, '--format' => 'json']);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('but no metadata.parent', self::text($tester));
+        $this->assertContains('parent_required', self::errorCodesOf($tester));
     }
 
     public function testAParentThatIsNoGenericConfigIsRefused(): void
@@ -170,17 +171,17 @@ class ConfigMergeCommandTest extends ConfigCommandTestCase
         // a complete config as the parent: its layers do not have a generic name
         copy($this->dir . '/North_Sea_basic/North_Sea_basic_1.json', $this->dir . '/generic.json');
 
-        $tester = $this->execute('app:config:merge', ['file' => $stripped]);
+        $tester = $this->execute('app:config:merge', ['file' => $stripped, '--format' => 'json']);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('cannot be a parent', self::text($tester));
+        $this->assertContains('parent_not_generic', self::errorCodesOf($tester));
     }
 
     public function testAMissingFileIsReported(): void
     {
-        $tester = $this->execute('app:config:merge', ['file' => $this->dir . '/nope.json']);
+        $tester = $this->execute('app:config:merge', ['file' => $this->dir . '/nope.json', '--format' => 'json']);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('File not found', self::text($tester));
+        $this->assertContains('file_not_found', self::errorCodesOf($tester));
     }
 }

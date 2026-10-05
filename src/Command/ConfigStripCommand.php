@@ -3,20 +3,17 @@
 namespace App\Command;
 
 use App\Domain\Config\ConfigDirectory;
+use App\Domain\Config\ConfigParentException;
 use App\Domain\Config\ConfigParents;
-use App\Domain\Config\InvalidSessionConfigException;
 use App\Domain\Config\Merge\ConfigFileStripper;
 use App\Domain\Config\Merge\RegionConfigMerger;
 use App\Domain\Config\Merge\StripPlan;
 use App\Domain\Config\SessionConfigValidator;
-use App\Domain\Helper\Util;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Path;
 
@@ -95,12 +92,8 @@ final class ConfigStripCommand extends ConfigCommand
             ->addFormatOption();
     }
 
-    protected function perform(
-        InputInterface $input,
-        OutputInterface $output,
-        SymfonyStyle $io,
-        ConfigReport $report
-    ): int {
+    protected function perform(InputInterface $input, ConfigReport $report): int
+    {
         if ($input->getOption('apply') && $input->getOption('check')) {
             return $report->fail('Use either --apply or --check, not both.', 'invalid_usage', Command::INVALID);
         }
@@ -149,8 +142,7 @@ final class ConfigStripCommand extends ConfigCommand
         $pools = []; // id => the generic config the file is stripped against
         $parentNames = []; // id => its name
         $registries = []; // parent name => the layer names of that generic config and its parents
-        $errors = [];
-        $errorDetails = []; // the same errors, told to programs
+        $errors = []; // what is wrong with the configs, told to programs
         foreach ($files as $id => $path) {
             try {
                 $current = $directory->read($path);
@@ -160,8 +152,9 @@ final class ConfigStripCommand extends ConfigCommand
                 }
                 $parentName = $parentOption ?? ConfigParents::parentOf($current);
                 if ($parentName === null) {
-                    throw new \RuntimeException(
-                        'it has no metadata.parent: say which generic config to strip it against with --parent=NAME'
+                    throw new ConfigParentException(
+                        'it has no metadata.parent: say which generic config to strip it against with --parent=NAME',
+                        ConfigParentException::REQUIRED
                     );
                 }
                 $parentName = (string)$parentName;
@@ -181,23 +174,14 @@ final class ConfigStripCommand extends ConfigCommand
                     $parentName
                 );
             } catch (\Throwable $e) {
-                $errors[] = sprintf(
-                    '%s: %s',
-                    $id,
-                    $e instanceof InvalidSessionConfigException ? $e->summary() : strtok($e->getMessage(), "\n")
-                );
-                $errorDetails[] = ConfigReport::describe($e, $id);
+                $errors[] = ConfigReport::describe($e, $id);
             }
         }
         if ($errors !== []) {
-            return $report->failWith(
-                array_merge(['Cannot continue, these configs are invalid:'], $errors),
-                $errorDetails
-            );
+            return $report->failWith($errors);
         }
 
-        // 3. report
-        $this->report($io, $plans);
+        // 3. what there is to do
         $changed = array_filter($plans, static fn(StripPlan $plan) => $plan->status === StripPlan::CHANGED);
         $report->data = [
             'apply' => (bool)$input->getOption('apply'),
@@ -216,16 +200,9 @@ final class ConfigStripCommand extends ConfigCommand
                     ['configs' => count($changed)]
                 );
             }
-            $io->success('Nothing left to strip.');
             return Command::SUCCESS;
         }
-        if (!$input->getOption('apply') && $outputDir === null) {
-            $io->note(
-                $changed === []
-                    ? 'Nothing to change.'
-                    : 'Dry run, nothing written. Run with --apply to replace the files (each one verified first), '
-                        . 'or with --output-dir=DIR to write the result elsewhere.'
-            );
+        if (!$writing) {
             return Command::SUCCESS;
         }
         $outputRoot = $outputDir === null ? null : Path::makeAbsolute((string)$outputDir, $this->projectDir);
@@ -261,17 +238,11 @@ final class ConfigStripCommand extends ConfigCommand
         }
         $report->data['written'] = $written;
         if ($problems !== []) {
-            return $report->failWith(
-                array_merge(['Not everything could be written and verified, those files are untouched:'], $problems),
-                array_map(static fn(string $problem) => ['code' => 'write_failed', 'message' => $problem], $problems)
-            );
+            return $report->failWith(array_map(
+                static fn(string $problem) => ['code' => 'write_failed', 'message' => $problem],
+                $problems
+            ));
         }
-        $io->success(sprintf(
-            '%d config(s) %s%s.',
-            $written,
-            $outputRoot === null ? 'stripped in place' : 'written to ' . $outputRoot,
-            ' (each verified: merged with its parent it gives the same config)'
-        ));
         return Command::SUCCESS;
     }
 
@@ -306,47 +277,5 @@ final class ConfigStripCommand extends ConfigCommand
             ];
         }
         return $results;
-    }
-
-    /**
-     * @param array<string, StripPlan> $plans
-     */
-    private function report(SymfonyStyle $io, array $plans): void
-    {
-        $rows = [];
-        $counts = [StripPlan::CHANGED => 0, StripPlan::UNCHANGED => 0, StripPlan::REFUSED => 0];
-        foreach ($plans as $id => $plan) {
-            $counts[$plan->status]++;
-            $rows[] = [
-                $id,
-                match ($plan->status) {
-                    StripPlan::CHANGED => 'will be stripped',
-                    StripPlan::UNCHANGED => 'already stripped',
-                    StripPlan::REFUSED => 'kept as is',
-                },
-                Util::getHumanReadableSize(strlen(json_encode($plan->current, JSON_UNESCAPED_SLASHES))),
-                $plan->stripped === null
-                    ? '-'
-                    : Util::getHumanReadableSize(strlen(json_encode($plan->stripped, JSON_UNESCAPED_SLASHES))),
-                $plan->status === StripPlan::REFUSED ? (string)($plan->reasons[0] ?? '') : '',
-            ];
-        }
-        $io->table(['Config', 'Result', 'Now', 'Stripped', 'Why'], $rows);
-        $io->writeln(sprintf(
-            '%d to strip, %d already stripped, %d kept as is.',
-            $counts[StripPlan::CHANGED],
-            $counts[StripPlan::UNCHANGED],
-            $counts[StripPlan::REFUSED]
-        ));
-        foreach ($plans as $plan) {
-            if ($plan->status === StripPlan::REFUSED && $plan->reasons !== []) {
-                $io->writeln(' - ' . $plan->id . ': ' . implode(' ', array_slice($plan->reasons, 0, 4)));
-            }
-            if ($io->isVerbose()) {
-                foreach ($plan->warnings as $warning) {
-                    $io->writeln(' - ' . $plan->id . ': ' . $warning);
-                }
-            }
-        }
     }
 }

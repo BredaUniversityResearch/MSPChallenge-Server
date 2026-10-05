@@ -12,6 +12,8 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class ConfigStripCommandTest extends ConfigCommandTestCase
 {
+    protected string $defaultFormat = 'json';
+
     private \stdClass $generic;
 
     protected function setUp(): void
@@ -36,9 +38,13 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
         $tester = $this->strip();
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
-        $this->assertStringContainsString('will be stripped', self::text($tester));
-        $this->assertStringContainsString('6 to strip, 0 already stripped, 0 kept as is.', self::text($tester));
-        $this->assertStringContainsString('Dry run, nothing written', self::text($tester));
+        $this->assertSame('will_be_stripped', self::documentOf($tester)['data']['results'][0]['status']);
+        $this->assertSame(
+            ['will_be_stripped' => 6],
+            array_count_values(array_column(self::documentOf($tester)['data']['results'], 'status'))
+        );
+        $this->assertFalse(self::documentOf($tester)['data']['apply']);
+        $this->assertSame(0, self::documentOf($tester)['data']['written']);
         $this->assertSameFiles($before, $this->snapshot());
     }
 
@@ -49,7 +55,8 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
         $tester = $this->strip(['--check' => true]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('6 config(s) can be stripped further', self::text($tester));
+        $this->assertSame(['check_failed'], self::errorCodesOf($tester));
+        $this->assertSame(6, self::documentOf($tester)['errors'][0]['details']['configs']);
         $this->assertSameFiles($before, $this->snapshot(), '--check never writes');
     }
 
@@ -58,7 +65,7 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
         $tester = $this->strip(['--apply' => true, '--check' => true]);
 
         $this->assertSame(2, $tester->getStatusCode());
-        $this->assertStringContainsString('either --apply or --check', self::text($tester));
+        $this->assertContains('invalid_usage', self::errorCodesOf($tester));
     }
 
     public function testApplyReplacesTheConfigsByVerifiedStrippedVersions(): void
@@ -68,7 +75,7 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
         $tester = $this->strip(['--apply' => true]);
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
-        $this->assertStringContainsString('6 config(s) stripped in place', self::text($tester));
+        $this->assertSame(6, self::documentOf($tester)['data']['written']);
         foreach ($originals as $id => $contents) {
             $path = $this->dir . '/' . $id . '.json';
             $this->assertTrue(RegionConfigMerger::isRegionFormat($this->decode($path)), $id);
@@ -88,9 +95,10 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
         $again = $this->strip(['--apply' => true]);
 
         $this->assertSame(0, $check->getStatusCode(), $check->getDisplay());
-        $this->assertStringContainsString('Nothing left to strip', self::text($check));
+        $this->assertTrue(self::documentOf($check)['success']);
+        $this->assertTrue(self::documentOf($check)['data']['check']);
         $this->assertSame(0, $again->getStatusCode());
-        $this->assertStringContainsString('0 config(s) stripped in place', self::text($again));
+        $this->assertSame(0, self::documentOf($again)['data']['written']);
         $this->assertSameFiles($stripped, $this->snapshot(), 'a second run does not touch any file');
     }
 
@@ -152,8 +160,8 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
         $tester = $this->execute('app:config:strip', ['--skip-validation' => true, '--apply' => true]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('it has no metadata.parent', self::text($tester));
-        $this->assertStringContainsString('--parent=NAME', self::text($tester));
+        $this->assertContains('parent_required', self::errorCodesOf($tester));
+        $this->assertStringContainsString('--parent=NAME', self::documentOf($tester)['errors'][0]['message']);
         $this->assertSameFiles($before, $this->snapshot());
     }
 
@@ -162,7 +170,7 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
         $tester = $this->execute('app:config:strip', ['--skip-validation' => true, '--parent' => '../generic']);
 
         $this->assertSame(2, $tester->getStatusCode());
-        $this->assertStringContainsString('--parent is the name of a file', self::text($tester));
+        $this->assertContains('invalid_usage', self::errorCodesOf($tester));
     }
 
     public function testAnyConfigFileCanBeNamedAndIsStrippedInPlace(): void
@@ -197,7 +205,7 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
 
         $tester = $this->strip(['files' => [$path]]);
 
-        $this->assertStringContainsString('already stripped', self::text($tester));
+        $this->assertSame('already_stripped', self::documentOf($tester)['data']['results'][0]['status']);
         $this->assertSameContents($before, file_get_contents($path));
     }
 
@@ -217,7 +225,7 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
         // Northern Mozambique has no SEL, so it has nothing to gain from the three values: already stripped
-        $this->assertStringContainsString('5 config(s) stripped in place', self::text($tester));
+        $this->assertSame(5, self::documentOf($tester)['data']['written']);
         foreach (self::realConfigs() as $id => $original) {
             $file = $id . '.json';
             $this->assertLessThanOrEqual($sizeWithOlder[$file], strlen($this->snapshot()[$file]), $id);
@@ -236,8 +244,12 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
         $dryRun = $this->strip(['files' => [$path]]);
         $apply = $this->strip(['files' => [$path], '--apply' => true]);
 
-        $this->assertStringContainsString('kept as is', self::text($dryRun));
-        $this->assertStringContainsString('SEL.port_layers', self::text($dryRun));
+        $kept = array_filter(
+            self::documentOf($dryRun)['data']['results'],
+            static fn(array $result) => $result['status'] === 'kept_as_is'
+        );
+        $this->assertCount(1, $kept);
+        $this->assertStringContainsString('SEL.port_layers', implode(' ', reset($kept)['reasons']));
         $this->assertSame(0, $apply->getStatusCode(), $apply->getDisplay());
         $this->assertSameContents($before, file_get_contents($path), 'the file must stay exactly as it was');
     }
@@ -278,7 +290,9 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
 
         $this->assertSame(0, $valid->getStatusCode(), $valid->getDisplay());
         $this->assertSame(1, $invalid->getStatusCode());
-        $this->assertStringContainsString('Broken/Broken: [datamodel.edition_name]', self::text($invalid));
+        $this->assertSame('Broken/Broken', self::documentOf($invalid)['errors'][0]['file']);
+        $message = self::documentOf($invalid)['errors'][0]['message'];
+        $this->assertStringContainsString('[datamodel.edition_name]', $message);
         $this->assertSameContents($before, file_get_contents($path), 'an invalid config is not touched');
     }
 
@@ -290,8 +304,8 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
         $tester = $this->strip(['--apply' => true]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('The parent "generic" of', self::text($tester));
-        $this->assertStringContainsString('generic.json is needed', self::text($tester));
+        $this->assertContains('parent_missing', self::errorCodesOf($tester));
+        $this->assertSame('generic.json', self::documentOf($tester)['errors'][0]['details']['file']);
         $this->assertSameFiles($before, $this->snapshot());
     }
 
@@ -303,8 +317,8 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
         $tester = $this->strip(['--apply' => true]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('Nothing is written, these files are not valid JSON', self::text($tester));
-        $this->assertStringContainsString('Broken/Broken.json: not valid JSON', self::text($tester));
+        $this->assertSame(['file_not_json'], self::errorCodesOf($tester));
+        $this->assertSame('Broken/Broken.json', self::documentOf($tester)['errors'][0]['file']);
         $this->assertSameFiles($before, $this->snapshot());
     }
 
@@ -315,7 +329,7 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
         $tester = $this->strip();
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
-        $this->assertStringContainsString('Skipped Broken/Broken.json, not valid JSON', self::text($tester));
+        $this->assertSame(['file_skipped'], self::warningCodesOf($tester));
     }
 
     public function testANamedFileThatDoesNotExistIsReported(): void
@@ -323,6 +337,6 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
         $tester = $this->strip(['files' => [$this->dir . '/nope.json']]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('File not found', self::text($tester));
+        $this->assertContains('file_not_found', self::errorCodesOf($tester));
     }
 }

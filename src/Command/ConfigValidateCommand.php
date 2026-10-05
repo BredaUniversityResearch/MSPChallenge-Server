@@ -12,8 +12,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Path;
 
@@ -60,12 +58,8 @@ final class ConfigValidateCommand extends ConfigCommand
             ->addFormatOption();
     }
 
-    protected function perform(
-        InputInterface $input,
-        OutputInterface $output,
-        SymfonyStyle $io,
-        ConfigReport $report
-    ): int {
+    protected function perform(InputInterface $input, ConfigReport $report): int
+    {
         $root = Path::makeAbsolute((string)$input->getOption('dir'), $this->projectDir);
         if (!is_dir($root)) {
             return $report->fail("Config directory not found: $root", 'dir_not_found');
@@ -99,25 +93,9 @@ final class ConfigValidateCommand extends ConfigCommand
         }
         $invalid = count(array_filter($results, static fn(array $result) => !$result['valid']));
         $report->data = ['results' => $results, 'valid' => count($results) - $invalid, 'invalid' => $invalid];
-
-        $io->table(
-            ['Config', 'Kind', 'Result'],
-            array_map(
-                static fn(array $result) => [
-                    $result['id'],
-                    $result['kind'] ?? '-',
-                    $result['valid'] ? 'valid' : count($result['errors']) . ' problem(s)',
-                ],
-                $results
-            )
-        );
         foreach ($results as $result) {
             foreach ($result['warnings'] as $warning) {
-                $report->recordWarnings([$warning['message']], $warning['code'], ['file' => $result['id']]);
-            }
-            if (!$result['valid']) {
-                $io->section($result['id']);
-                $io->listing(array_map(static fn(array $error) => $error['message'], $result['errors']));
+                $report->warning($warning['message'], $warning['code'], ['file' => $result['id']]);
             }
         }
         if ($invalid > 0) {
@@ -127,7 +105,6 @@ final class ConfigValidateCommand extends ConfigCommand
                 details: ['invalid' => $invalid, 'total' => count($results)]
             );
         }
-        $io->success(sprintf('All %d config(s) are valid.', count($results)));
         return Command::SUCCESS;
     }
 

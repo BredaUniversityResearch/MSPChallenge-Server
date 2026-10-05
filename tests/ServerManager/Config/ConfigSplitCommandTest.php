@@ -17,6 +17,8 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class ConfigSplitCommandTest extends ConfigCommandTestCase
 {
+    protected string $defaultFormat = 'json';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -44,8 +46,10 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
 
         $this->assertSame(0, $valid->getStatusCode(), $valid->getDisplay());
         $this->assertSame(1, $invalid->getStatusCode());
-        $this->assertStringContainsString('these configs are invalid', self::text($invalid));
-        $this->assertStringContainsString('Broken/Broken: [datamodel.edition_name]', self::text($invalid));
+        $this->assertContains('invalid_config', self::errorCodesOf($invalid));
+        $error = self::documentOf($invalid)['errors'][0];
+        $this->assertSame('Broken/Broken', $error['file']);
+        $this->assertStringContainsString('[datamodel.edition_name]', $error['message']);
         $this->assertSame(0, $skipped->getStatusCode(), $skipped->getDisplay());
     }
 
@@ -56,7 +60,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $tester = $this->runSplit();
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
-        $this->assertStringContainsString('Dry run, nothing written', self::text($tester));
+        $this->assertFalse(self::documentOf($tester)['data']['apply']);
         $this->assertSameFiles($before, $this->snapshot(), 'not a single file may change');
     }
 
@@ -67,7 +71,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $tester = $this->runSplit(['--apply' => true]);
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
-        $this->assertStringContainsString('[OK] Wrote', self::text($tester));
+        $this->assertTrue(self::documentOf($tester)['data']['written']['generic']);
         $this->assertFileExists($this->dir . '/generic.json');
         $this->assertNotEmpty(get_object_vars($this->decode($this->dir . '/generic.json')->layer_names));
         foreach ($originals as $id => $contents) {
@@ -112,7 +116,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $forced = $this->runSplit(['--output-dir' => $output, '--force' => true]);
 
         $this->assertSame(1, $refused->getStatusCode());
-        $this->assertStringContainsString('use --force to overwrite it', self::text($refused));
+        $this->assertContains('generic_exists', self::errorCodesOf($refused));
         $this->assertSameFiles($first, $refusedState, 'a refused run changes nothing');
         $this->assertSame(0, $forced->getStatusCode(), $forced->getDisplay());
         $map = $this->decode($output . '/generic.json')->layer_names;
@@ -144,7 +148,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $tester = $this->runSplit(['--apply' => true]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('use --force to overwrite it', self::text($tester));
+        $this->assertContains('generic_exists', self::errorCodesOf($tester));
         $this->assertSameFiles($before, $this->snapshot(), 'nothing may be written, the configs stay complete');
     }
 
@@ -168,8 +172,9 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $again = $this->runSplit(['--apply' => true, '--force' => true]);
 
         $this->assertSame(0, $check->getStatusCode(), $check->getDisplay());
-        $this->assertStringContainsString('Nothing to re-split.', self::text($check));
-        $this->assertStringContainsString('6 of them are stripped already', self::text($again));
+        $this->assertTrue(self::documentOf($check)['success']);
+        $this->assertTrue(self::documentOf($check)['data']['check']);
+        $this->assertSame(6, self::documentOf($again)['data']['strippedCount']);
         $this->assertSame(0, $again->getStatusCode(), $again->getDisplay());
         $this->assertSameFiles($before, $this->snapshot(), 're-splitting stripped configs is a fixed point');
     }
@@ -210,7 +215,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $promote = $this->runSplit(['--apply' => true, '--force' => true]);
 
         $this->assertSame(1, $check->getStatusCode(), 'a re-split would change things');
-        $this->assertStringContainsString("$onlyEms layer(s) become generic", self::text($check));
+        $this->assertCount($onlyEms, self::documentOf($check)['data']['layers']['promoted']);
         $this->assertSame(0, $promote->getStatusCode(), $promote->getDisplay());
         $this->assertSame($layersBefore + $onlyEms, $this->genericLayers()[0]);
         $this->assertSame(0, $this->layersWithoutGenericName($ems), 'they are inherited now');
@@ -229,7 +234,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $demote = $this->runSplit(['--apply' => true, '--force' => true]);
 
         $this->assertSame(1, $checkBack->getStatusCode());
-        $this->assertStringContainsString("$onlyEms layer(s) move back", self::text($checkBack));
+        $this->assertCount($onlyEms, self::documentOf($checkBack)['data']['layers']['demoted']);
         $this->assertSame(0, $demote->getStatusCode(), $demote->getDisplay());
         $this->assertSameContents($genericBefore, $this->genericLayers()[1], 'generic.json is what it was');
         $this->assertSame($onlyEms, $this->layersWithoutGenericName($ems));
@@ -245,7 +250,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
 
         $this->assertSame(1, $fresh->getStatusCode(), 'there is no generic.json yet, so there is work to do');
         $this->assertSame(2, $both->getStatusCode());
-        $this->assertStringContainsString('Use --check on its own', self::text($both));
+        $this->assertContains('invalid_usage', self::errorCodesOf($both));
         $this->assertSameFiles($before, $this->snapshot());
     }
 
@@ -258,8 +263,8 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $tester = $this->runSplit(['--apply' => true]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('The parent "generic" of it was not found', self::text($tester));
-        $this->assertStringContainsString('generic.json is needed', self::text($tester));
+        $this->assertContains('parent_missing', self::errorCodesOf($tester));
+        $this->assertSame('generic.json', self::documentOf($tester)['errors'][0]['details']['file']);
         $this->assertSameFiles($before, $this->snapshot());
     }
 
@@ -288,7 +293,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $tester = $this->runSplit(['--apply' => true, '--generic' => '../generic']);
 
         $this->assertSame(2, $tester->getStatusCode());
-        $this->assertStringContainsString('--generic is the name of a file', self::text($tester));
+        $this->assertContains('invalid_usage', self::errorCodesOf($tester));
         $this->assertSameFiles($before, $this->snapshot());
     }
 
@@ -300,37 +305,29 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $tester = $this->runSplit(['--apply' => true, '--generic' => 'public', '--force' => true]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('public.json has a parent itself', self::text($tester));
+        $this->assertContains('generic_has_parent', self::errorCodesOf($tester));
         $this->assertSameFiles($before, $this->snapshot());
     }
 
-    public function testTheReportShowsTheFileSizesNowAndAfterAndWhatIsWon(): void
+    public function testTheDocumentHasTheFileSizesNowAndAfter(): void
     {
         $dryRun = $this->runSplit();
 
-        $text = self::text($dryRun);
-        $this->assertStringContainsString('file sizes now, and as they would be written', $text);
-        $this->assertStringNotContainsString('compact JSON', $text);
-        foreach (['Now', 'After', 'Win'] as $header) {
-            $this->assertStringContainsString($header, $text);
+        $data = self::documentOf($dryRun)['data'];
+        $this->assertCount(6, $data['configs']);
+        $now = 0;
+        $after = 0;
+        foreach ($data['configs'] as $config) {
+            $this->assertSame(filesize($config['path']), $config['nowBytes'], 'the size of the file as it is now');
+            $this->assertLessThan($config['nowBytes'], $config['afterBytes'], $config['id'] . ' gets smaller');
+            $this->assertSame('will_be_stripped', $config['status']);
+            $now += $config['nowBytes'];
+            $after += $config['afterBytes'];
         }
-        foreach (glob($this->dir . '/*/*.json') as $file) {
-            $this->assertStringContainsString(
-                number_format(filesize($file) / 1024, 1, '.', '') . ' kb',
-                $text,
-                'the size of the file as it is now: ' . basename($file)
-            );
-        }
-        $this->assertGreaterThanOrEqual(
-            6,
-            preg_match_all('/\d+\.\d kb\s+\d+\.\d kb\s+-?\d+\.\d%/', $text),
-            'every config has its size now, its size after, and the percentage'
-        );
-        $this->assertMatchesRegularExpression('/generic\.json: \d+\.\d kb \(new\)/', $text);
-        $this->assertMatchesRegularExpression(
-            '/All files, with generic\.json: \d+\.\d kb now, \d+\.\d kb after \(\d+\.\d% smaller\)/',
-            $text
-        );
+        $this->assertFalse($data['generic']['existed']);
+        $this->assertNull($data['generic']['nowBytes'], 'there is no generic config yet');
+        $this->assertSame($now, $data['total']['nowBytes']);
+        $this->assertSame($after + $data['generic']['afterBytes'], $data['total']['afterBytes']);
     }
 
     /**
@@ -354,18 +351,26 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $report = $this->runSplit(['--force' => true]);
 
         $this->assertSame(0, $report->getStatusCode(), $report->getDisplay());
-        $text = self::text($report);
-        $this->assertStringContainsString('Splitting 8 configs', $text);
-        $this->assertStringContainsString('6 of them are stripped already', $text, 'the uploads are complete');
-        $this->assertStringContainsString('These configs have the same content: ', $text);
-        $this->assertStringContainsString('North_Sea_basic/North_Sea_basic_3', $text);
-        $this->assertStringContainsString('North_Sea_basic has 2 versions (North_Sea_basic_1, ', $text);
-        $this->assertStringContainsString('A negative win', $text, 'what the copies share moves into generic.json');
+        $document = self::documentOf($report);
+        $this->assertCount(8, $document['data']['configs']);
+        $this->assertSame(6, $document['data']['strippedCount'], 'the uploads are complete');
+        $warnings = array_column($document['warnings'], null, 'code');
+        $this->assertEqualsCanonicalizing(
+            [$id, 'North_Sea_basic/North_Sea_basic_3', 'North_Sea_OR_ELSE_basic/North_Sea_OR_ELSE_basic_2'],
+            $warnings['same_content']['details']['configs']
+        );
+        $this->assertContains('several_versions', self::warningCodesOf($report));
+        $larger = static fn(array $config) => $config['afterBytes'] > $config['nowBytes'];
+        $this->assertNotSame(
+            [],
+            array_filter($document['data']['configs'], $larger),
+            'what the copies share moves into generic.json: other configs get larger'
+        );
         // and leaving the uploads out gives the same as before: nothing to do
-        $withoutUploads = $this->runSplit(['--pattern' => '*_1.json']);
-        $this->assertStringContainsString('6 of them are stripped already', self::text($withoutUploads));
-        $this->assertStringNotContainsString('same content', self::text($withoutUploads));
-        $this->assertStringNotContainsString('A negative win', self::text($withoutUploads));
+        $without = self::documentOf($this->runSplit(['--pattern' => '*_1.json']));
+        $this->assertSame(6, $without['data']['strippedCount']);
+        $this->assertNotContains('same_content', array_column($without['warnings'], 'code'));
+        $this->assertSame([], array_filter($without['data']['configs'], $larger));
     }
 
     public function testNothingHasChangedAfterARunThatChangesNothing(): void
@@ -381,12 +386,14 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $this->assertSame($modified, array_map('filemtime', glob($this->dir . '/*/*.json')), 'files are not rewritten');
         $this->assertSame($generic, filemtime($this->dir . '/generic.json'), 'the generic config is not rewritten');
         $this->assertSame(0, $again->getStatusCode(), $again->getDisplay());
-        $text = self::text($again);
-        $this->assertStringContainsString('Nothing to write', $text, 'and the message says so');
-        $this->assertStringNotContainsString('Wrote ', $text);
-        $this->assertSame(6, substr_count($text, ' 0.0%'), 'nothing is won by splitting what is split already');
-        $this->assertStringContainsString('(unchanged)', $text);
-        $this->assertStringContainsString('(0.0% smaller)', $text);
+        $data = self::documentOf($again)['data'];
+        $this->assertTrue($data['written']['nothingToWrite']);
+        $this->assertFalse($data['generic']['changed']);
+        foreach ($data['configs'] as $config) {
+            $this->assertSame('already_stripped', $config['status']);
+            $this->assertSame($config['nowBytes'], $config['afterBytes'], 'nothing is won by splitting it again');
+        }
+        $this->assertSame($data['total']['nowBytes'], $data['total']['afterBytes']);
     }
 
     public function testWhenOnlyTheConfigsChangeTheGenericConfigIsNotRewrittenAndTheMessageSaysSo(): void
@@ -400,10 +407,10 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
 
         $this->assertSame(0, $again->getStatusCode(), $again->getDisplay());
         $this->assertSame($generic, filemtime($this->dir . '/generic.json'), 'the generic config did not change');
-        $text = self::text($again);
-        $this->assertStringContainsString('Wrote 6 stripped config(s)', $text);
-        $this->assertStringContainsString('/generic.json is unchanged', $text);
-        $this->assertStringNotContainsString('Nothing to write', $text);
+        $written = self::documentOf($again)['data']['written'];
+        $this->assertSame(6, $written['configs']);
+        $this->assertFalse($written['generic'], 'the generic config is not written');
+        $this->assertFalse($written['nothingToWrite']);
         $this->assertMergesBackToTheOriginals();
     }
 
@@ -416,7 +423,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $run = function (array $options) use ($command): CommandTester {
             $tester = new CommandTester($command);
             $tester->execute(
-                $options + ['--dir' => $this->dir, '--skip-validation' => true],
+                $options + ['--dir' => $this->dir, '--skip-validation' => true, '--format' => 'json'],
                 ['decorated' => false]
             );
             return $tester;
@@ -429,11 +436,11 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
 
         $this->assertSame(0, $dryRun->getStatusCode(), $dryRun->getDisplay());
         $this->assertSame(0, $applied->getStatusCode(), $applied->getDisplay());
-        $this->assertStringContainsString('Wrote ' . $this->dir . '/generic.json', self::text($applied));
+        $this->assertSame('generic.json', self::documentOf($applied)['data']['written']['genericPath']);
         $this->assertSame(1, $again->getStatusCode());
-        $this->assertStringContainsString($this->dir . '/generic.json exists', self::text($again));
+        $this->assertSame('generic.json', self::documentOf($again)['errors'][0]['details']['path']);
         $this->assertSame(0, $report->getStatusCode(), $report->getDisplay());
-        $this->assertStringContainsString('Nothing to re-split.', self::text($report));
+        $this->assertTrue(self::documentOf($report)['data']['check']);
         $this->assertMergesBackToTheOriginals();
     }
 
@@ -444,7 +451,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $tester = $this->runSplit();
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
-        $this->assertStringContainsString('Splitting 6 configs', self::text($tester));
+        $this->assertCount(6, self::documentOf($tester)['data']['configs']);
     }
 
     public function testTheLayerNamesInAnExistingGenericConfigDecideTheGenericNames(): void
@@ -481,21 +488,13 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $this->assertContains($layerName, $this->decode($this->dir . '/generic.json')->layer_names->MyOwnName);
     }
 
-    public function testSizesAreReportedHumanReadable(): void
-    {
-        $display = self::text($this->runSplit());
-
-        $this->assertMatchesRegularExpression('/\b\d+(\.\d+)? kb\b/', $display);
-        $this->assertStringContainsString('generic.json:', $display);
-    }
-
     public function testReportsTheSimulationSections(): void
     {
-        $display = self::text($this->runSplit());
+        $sections = array_column(self::documentOf($this->runSplit())['data']['sections'], 'name');
 
-        $this->assertStringContainsString('CEL', $display);
-        $this->assertStringContainsString('SEL.ship_types', $display);
-        $this->assertStringContainsString('restrictions', $display);
+        $this->assertContains('CEL', $sections);
+        $this->assertContains('SEL.ship_types', $sections);
+        $this->assertContains('restrictions', $sections);
     }
 
     public function testStopsOnAFileThatIsNoValidJsonWhenWriting(): void
@@ -506,8 +505,8 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $tester = $this->runSplit(['--apply' => true]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('Nothing is written, these files are not valid JSON', self::text($tester));
-        $this->assertStringContainsString('Broken/Broken.json: not valid JSON', self::text($tester));
+        $this->assertSame(['file_not_json'], self::errorCodesOf($tester));
+        $this->assertSame('Broken/Broken.json', self::documentOf($tester)['errors'][0]['file']);
         $this->assertSameFiles($before, $this->snapshot());
     }
 
@@ -518,8 +517,10 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $tester = $this->runSplit();
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
-        $this->assertStringContainsString('Skipped Broken/Broken.json, not valid JSON', self::text($tester));
-        $this->assertStringContainsString('Splitting 6 configs', self::text($tester));
+        $this->assertContains('file_skipped', self::warningCodesOf($tester));
+        $skipped = array_column(self::documentOf($tester)['warnings'], null, 'code')['file_skipped'];
+        $this->assertSame('Broken/Broken.json', $skipped['details']['path']);
+        $this->assertCount(6, self::documentOf($tester)['data']['configs']);
     }
 
     public function testAnInvalidGenericConfigCanBeOverwrittenAndIsNotReportedAsSkipped(): void
@@ -529,8 +530,8 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $tester = $this->runSplit(['--apply' => true, '--force' => true]);
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
-        $this->assertStringContainsString('Ignoring generic.json, it cannot be used', self::text($tester));
-        $this->assertStringNotContainsString('Skipped generic.json', self::text($tester));
+        $this->assertContains('generic_unusable', self::warningCodesOf($tester));
+        $this->assertNotContains('file_skipped', self::warningCodesOf($tester));
         $this->assertMergesBackToTheOriginals();
     }
 
@@ -539,6 +540,6 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $tester = $this->runSplit(['--dir' => $this->dir . '/does-not-exist']);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('Config directory not found', self::text($tester));
+        $this->assertContains('dir_not_found', self::errorCodesOf($tester));
     }
 }

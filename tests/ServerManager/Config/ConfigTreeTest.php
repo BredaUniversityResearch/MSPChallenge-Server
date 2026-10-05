@@ -12,6 +12,8 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class ConfigTreeTest extends ConfigCommandTestCase
 {
+    protected string $defaultFormat = 'json';
+
     /**
      * Where each original config is put (a path below the root => the id of the original): in folders of any depth,
      * and one in the root itself.
@@ -92,7 +94,7 @@ class ConfigTreeTest extends ConfigCommandTestCase
 
         $this->assertSame(0, $check->getStatusCode(), $check->getDisplay());
         $this->assertSame(0, $again->getStatusCode(), $again->getDisplay());
-        $this->assertStringContainsString('Nothing to write', self::text($again));
+        $this->assertTrue(self::documentOf($again)['data']['written']['nothingToWrite']);
         $this->assertSame($before, $this->snapshot());
     }
 
@@ -147,8 +149,13 @@ class ConfigTreeTest extends ConfigCommandTestCase
         $tester = $this->execute('app:config:verify', ['--original-dir' => $originals]);
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
-        $this->assertStringContainsString('All 5 config(s) give the original config', self::text($tester));
-        $this->assertStringContainsString('NS/Digitwin/2000/NS_DT_2000', self::text($tester), 'ids are paths');
+        $this->assertSame(0, self::documentOf($tester)['data']['failed']);
+        $this->assertCount(5, self::documentOf($tester)['data']['results']);
+        $this->assertContains(
+            'NS/Digitwin/2000/NS_DT_2000',
+            array_column(self::documentOf($tester)['data']['results'], 'id'),
+            'ids are paths'
+        );
     }
 
     public function testTwoParentsWithTheSameNameAreAnErrorThatNamesBothAndNothingIsWritten(): void
@@ -163,9 +170,11 @@ class ConfigTreeTest extends ConfigCommandTestCase
 
         foreach ([$merge, $split] as $tester) {
             $this->assertSame(1, $tester->getStatusCode(), $tester->getDisplay());
-            $text = self::text($tester);
-            $this->assertStringContainsString('The parent "generic" is ambiguous', $text);
-            $this->assertStringContainsString('NS/generic.json and generic.json have that name', $text);
+            $this->assertSame(['parent_ambiguous'], array_values(array_unique(self::errorCodesOf($tester))));
+            $this->assertEqualsCanonicalizing(
+                ['NS/generic.json', 'generic.json'],
+                self::documentOf($tester)['errors'][0]['details']['paths']
+            );
         }
         $this->assertSame($before, $this->snapshot(), 'nothing is written');
     }

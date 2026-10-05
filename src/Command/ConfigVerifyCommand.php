@@ -12,8 +12,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Process\Process;
@@ -78,12 +76,8 @@ final class ConfigVerifyCommand extends ConfigCommand
             ->addFormatOption();
     }
 
-    protected function perform(
-        InputInterface $input,
-        OutputInterface $output,
-        SymfonyStyle $io,
-        ConfigReport $report
-    ): int {
+    protected function perform(InputInterface $input, ConfigReport $report): int
+    {
         $directory = new ConfigDirectory(Path::makeAbsolute((string)$input->getOption('dir'), $this->projectDir));
         $repo = Path::makeAbsolute((string)$input->getOption('repo'), $this->projectDir);
         $originalDir = $input->getOption('original-dir');
@@ -95,16 +89,10 @@ final class ConfigVerifyCommand extends ConfigCommand
                 (string)$input->getOption('pattern'),
                 $skipped
             );
-            foreach ($skipped as $skippedPath => $why) {
-                $report->warning(
-                    sprintf('Skipped %s, %s.', $directory->relativePath($skippedPath), $why),
-                    'file_skipped',
-                    details: ['path' => $directory->relativePath($skippedPath)]
-                );
-            }
         } catch (\Throwable $e) {
             return $report->failThrowable($e);
         }
+        $this->skippedFiles($report, $directory, $skipped, false); // verify only says so
         if ($files === []) {
             $report->warning('No configs found.', 'no_configs');
             return Command::SUCCESS;
@@ -118,8 +106,6 @@ final class ConfigVerifyCommand extends ConfigCommand
             ? 'git revision ' . $input->getOption('against')
             : Path::makeAbsolute((string)$originalDir, $this->projectDir);
         $failed = 0;
-        $rows = [];
-        $details = [];
         $results = [];
         foreach ($files as $id => $path) {
             try {
@@ -134,25 +120,15 @@ final class ConfigVerifyCommand extends ConfigCommand
             } catch (\Throwable $e) {
                 $differences = ['Could not compare: ' . strtok($e->getMessage(), "\n")];
             }
-            $rows[] = [$id, $differences === [] ? 'same as the original' : 'DIFFERENT'];
             $results[] = [
                 'id' => $id,
                 'path' => $directory->relativePath($path),
                 'same' => $differences === [],
                 'differences' => $differences,
             ];
-            if ($differences !== []) {
-                $failed++;
-                $details[$id] = $differences;
-            }
+            $failed += $differences === [] ? 0 : 1;
         }
         $report->data = ['source' => $source, 'results' => $results, 'failed' => $failed];
-        $io->title('Merged with their parents, compared with ' . $source);
-        $io->table(['Config', 'Result'], $rows);
-        foreach ($details as $id => $differences) {
-            $io->section($id);
-            $io->listing($differences);
-        }
         if ($failed > 0) {
             return $report->fail(
                 sprintf('%d of %d config(s) do not match their original.', $failed, count($files)),
@@ -160,7 +136,6 @@ final class ConfigVerifyCommand extends ConfigCommand
                 details: ['failed' => $failed, 'total' => count($files)]
             );
         }
-        $io->success(sprintf('All %d config(s) give the original config.', count($files)));
         return Command::SUCCESS;
     }
 

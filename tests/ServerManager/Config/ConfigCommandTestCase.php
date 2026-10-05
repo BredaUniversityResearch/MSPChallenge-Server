@@ -22,6 +22,9 @@ abstract class ConfigCommandTestCase extends ConfigTestCase
     private array $temporaryDirectories = [];
     private string|false $terminalWidth = false;
 
+    /** The format that execute() asks for: a class that tests what a command finds out runs it with json. */
+    protected string $defaultFormat = 'text';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -150,7 +153,7 @@ abstract class ConfigCommandTestCase extends ConfigTestCase
     {
         self::bootKernel();
         $tester = new CommandTester(new Application(self::$kernel)->find($command));
-        $tester->execute($input + ['--dir' => $this->dir], ['decorated' => false]);
+        $tester->execute($input + ['--dir' => $this->dir, '--format' => $this->defaultFormat], ['decorated' => false]);
         return $tester;
     }
 
@@ -158,6 +161,32 @@ abstract class ConfigCommandTestCase extends ConfigTestCase
      * The output of a command as one line of text. Symfony wraps long messages in blocks such as [ERROR] at 120
      * columns, so a phrase can end up on two lines: assert on this, never on getDisplay(), unless it is JSON.
      */
+    /**
+     * The document of a command that was run with --format=json (all of stdout is that document).
+     *
+     * @return array<string, mixed>
+     */
+    protected static function documentOf(CommandTester $tester): array
+    {
+        return json_decode($tester->getDisplay(), true, 512, JSON_THROW_ON_ERROR);
+    }
+
+    /**
+     * @return list<string> the codes of the errors in the document
+     */
+    protected static function errorCodesOf(CommandTester $tester): array
+    {
+        return array_column(self::documentOf($tester)['errors'], 'code');
+    }
+
+    /**
+     * @return list<string> the codes of the warnings in the document
+     */
+    protected static function warningCodesOf(CommandTester $tester): array
+    {
+        return array_column(self::documentOf($tester)['warnings'], 'code');
+    }
+
     protected static function text(CommandTester $tester): string
     {
         return trim((string)preg_replace('/\s+/', ' ', $tester->getDisplay()));

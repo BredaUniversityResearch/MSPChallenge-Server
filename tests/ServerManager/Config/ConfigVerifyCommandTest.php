@@ -8,6 +8,8 @@ use Symfony\Component\Process\Process;
 
 class ConfigVerifyCommandTest extends ConfigCommandTestCase
 {
+    protected string $defaultFormat = 'json';
+
     private function stripAll(string $directory): void
     {
         $tester = $this->execute(
@@ -39,8 +41,10 @@ class ConfigVerifyCommandTest extends ConfigCommandTestCase
         $tester = $this->execute('app:config:verify', ['--original-dir' => $originals]);
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
-        $this->assertStringContainsString('All 6 config(s) give the original config.', self::text($tester));
-        $this->assertStringNotContainsString('DIFFERENT', self::text($tester));
+        $this->assertTrue(self::documentOf($tester)['success']);
+        $this->assertCount(6, self::documentOf($tester)['data']['results']);
+        $this->assertSame(0, self::documentOf($tester)['data']['failed']);
+        $this->assertNotContains(false, array_column(self::documentOf($tester)['data']['results'], 'same'));
     }
 
     public function testCompleteConfigsVerifyAgainstThemselves(): void
@@ -70,9 +74,10 @@ class ConfigVerifyCommandTest extends ConfigCommandTestCase
         $tester = $this->execute('app:config:verify', ['--original-dir' => $originals]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('DIFFERENT', self::text($tester));
-        $this->assertStringContainsString('layer_tooltip differs', self::text($tester));
-        $this->assertStringContainsString('1 of 6 config(s) do not match their original.', self::text($tester));
+        $this->assertContains(false, array_column(self::documentOf($tester)['data']['results'], 'same'));
+        $differences = array_merge(...array_column(self::documentOf($tester)['data']['results'], 'differences'));
+        $this->assertNotSame([], preg_grep('/layer_tooltip differs/', $differences));
+        $this->assertSame(['failed' => 1, 'total' => 6], self::documentOf($tester)['errors'][0]['details']);
     }
 
     public function testAMissingOriginalIsReported(): void
@@ -84,7 +89,8 @@ class ConfigVerifyCommandTest extends ConfigCommandTestCase
         $tester = $this->execute('app:config:verify', ['--original-dir' => $empty]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('Could not compare', self::text($tester));
+        $differences = array_merge(...array_column(self::documentOf($tester)['data']['results'], 'differences'));
+        $this->assertNotSame([], preg_grep('/^Could not compare/', $differences));
     }
 
     public function testStrippedConfigsAreComparedWithTheirVersionInGit(): void
@@ -107,8 +113,10 @@ class ConfigVerifyCommandTest extends ConfigCommandTestCase
         );
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
-        $this->assertStringContainsString('compared with git revision HEAD', self::text($tester));
-        $this->assertStringContainsString('All 6 config(s) give the original config.', self::text($tester));
+        $this->assertSame('git revision HEAD', self::documentOf($tester)['data']['source']);
+        $this->assertTrue(self::documentOf($tester)['success']);
+        $this->assertCount(6, self::documentOf($tester)['data']['results']);
+        $this->assertSame(0, self::documentOf($tester)['data']['failed']);
     }
 
     public function testGitIsAskedForTheRightRevision(): void
@@ -138,7 +146,8 @@ class ConfigVerifyCommandTest extends ConfigCommandTestCase
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
         $this->assertSame(1, $notThere->getStatusCode());
-        $this->assertStringContainsString('git cannot show', self::text($notThere));
+        $differences = array_merge(...array_column(self::documentOf($notThere)['data']['results'], 'differences'));
+        $this->assertNotSame([], preg_grep('/git cannot show/', $differences));
     }
 
     public function testAConfigOutsideTheRepositoryIsReportedClearly(): void
@@ -150,8 +159,9 @@ class ConfigVerifyCommandTest extends ConfigCommandTestCase
         $tester = $this->execute('app:config:verify', ['--repo' => $otherPlace]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('is not inside the repository', self::text($tester));
-        $this->assertStringNotContainsString('cannot be made relative', self::text($tester));
+        $differences = array_merge(...array_column(self::documentOf($tester)['data']['results'], 'differences'));
+        $this->assertNotSame([], preg_grep('/is not inside the repository/', $differences));
+        $this->assertSame([], preg_grep('/cannot be made relative/', $differences));
     }
 
     public function testAMissingParentIsReportedForEachConfig(): void
@@ -166,8 +176,9 @@ class ConfigVerifyCommandTest extends ConfigCommandTestCase
         $tester = $this->execute('app:config:verify', ['--original-dir' => $originals]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('Could not compare: The parent "generic" of', self::text($tester));
-        $this->assertStringContainsString('6 of 6 config(s) do not match their original.', self::text($tester));
+        $differences = array_merge(...array_column(self::documentOf($tester)['data']['results'], 'differences'));
+        $this->assertNotSame([], preg_grep('/^Could not compare: The parent "generic" of/', $differences));
+        $this->assertSame(['failed' => 6, 'total' => 6], self::documentOf($tester)['errors'][0]['details']);
     }
 
     public function testConfigsWithAChainOfParentsAreVerified(): void
@@ -186,6 +197,8 @@ class ConfigVerifyCommandTest extends ConfigCommandTestCase
         $tester = $this->execute('app:config:verify', ['--original-dir' => $originals]);
 
         $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
-        $this->assertStringContainsString('All 6 config(s) give the original config.', self::text($tester));
+        $this->assertTrue(self::documentOf($tester)['success']);
+        $this->assertCount(6, self::documentOf($tester)['data']['results']);
+        $this->assertSame(0, self::documentOf($tester)['data']['failed']);
     }
 }

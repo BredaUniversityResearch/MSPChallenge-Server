@@ -4,7 +4,6 @@ namespace App\Command;
 
 use App\Domain\Config\ConfigDirectory;
 use App\Domain\Config\ConfigParents;
-use App\Domain\Config\InvalidSessionConfigException;
 use App\Domain\Config\Merge\ConfigFileStripper;
 use App\Domain\Config\Merge\RegionConfigMerger;
 use App\Domain\Config\Merge\StripPlan;
@@ -17,8 +16,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Path;
 
@@ -105,12 +102,8 @@ final class ConfigSplitCommand extends ConfigCommand
             ->addFormatOption();
     }
 
-    protected function perform(
-        InputInterface $input,
-        OutputInterface $output,
-        SymfonyStyle $io,
-        ConfigReport $report
-    ): int {
+    protected function perform(InputInterface $input, ConfigReport $report): int
+    {
         $root = Path::makeAbsolute((string)$input->getOption('dir'), $this->projectDir);
         $outputDir = $input->getOption('output-dir');
         $outputRoot = $outputDir === null ? $root : Path::makeAbsolute((string)$outputDir, $this->projectDir);
@@ -150,7 +143,7 @@ final class ConfigSplitCommand extends ConfigCommand
             $report->warning(
                 "Ignoring $genericName.json, it cannot be used: " . $e->getMessage(),
                 'generic_unusable',
-                details: ['generic' => $genericName]
+                ['generic' => $genericName]
             );
         }
         $parents = ConfigParents::fromDirectory($directory);
@@ -160,17 +153,16 @@ final class ConfigSplitCommand extends ConfigCommand
         $effectives = []; // the expanded stripped ones, and the complete ones that are in the new shape
         $strippedCount = 0; // how many of those really are stripped
         $paths = [];
-        $errors = [];
+        $errors = []; // what is wrong with the configs
         $skipped = [];
         $found = $directory->configFiles((string)$input->getOption('pattern'), $skipped);
         if ($genericFile !== null) {
             unset($skipped[$genericFile]); // the generic config is told about by itself when it can not be used
         }
-        $stop = $this->skippedFiles($report, $directory, $skipped, $writing);
+        $stop = $this->skippedFiles($report, $directory, $skipped, (bool)$writing);
         if ($stop !== null) {
             return $stop;
         }
-        $errorDetails = []; // the errors of the configs, told to programs
         foreach ($found as $id => $path) {
             try {
                 $config = $directory->read($path);
@@ -188,19 +180,11 @@ final class ConfigSplitCommand extends ConfigCommand
                 $currents[$id] = $config;
                 $paths[$id] = $path;
             } catch (\Throwable $e) {
-                $errors[] = sprintf(
-                    '%s: %s',
-                    $id,
-                    $e instanceof InvalidSessionConfigException ? $e->summary() : strtok($e->getMessage(), "\n")
-                );
-                $errorDetails[] = ConfigReport::describe($e, $id);
+                $errors[] = ConfigReport::describe($e, $id);
             }
         }
         if ($errors !== []) {
-            return $report->failWith(
-                array_merge(['Cannot continue, these configs are invalid:'], $errors),
-                $errorDetails
-            );
+            return $report->failWith($errors);
         }
         if (count($configs) < 2) {
             $tooFew = sprintf(
@@ -212,15 +196,6 @@ final class ConfigSplitCommand extends ConfigCommand
                 return $report->finding($tooFew, 'no_configs');
             }
             $report->warning($tooFew, 'too_few_configs');
-        }
-        $io->title(sprintf('Splitting %d configs from %s', count($configs), $root));
-        if ($strippedCount > 0) {
-            $io->writeln(sprintf(
-                '%d of them are stripped already: they are expanded with their parents, so layers that more (or '
-                . 'fewer) configs use now can move into (or out of) %s.json.',
-                $strippedCount,
-                $genericName
-            ));
         }
 
         // 2. generic names (those in the generic config first, proposals for the rest), the generic config, and the
@@ -257,10 +232,11 @@ final class ConfigSplitCommand extends ConfigCommand
             || ConfigValues::canonical($oldGeneric) !== ConfigValues::canonical($result->generic);
         $changed = array_filter($plans, static fn(StripPlan $plan) => $plan->status === StripPlan::CHANGED);
 
-        // 3. report
-        $this->report(
-            $io,
+        // 3. what was found
+        $this->describe(
             $report,
+            $root,
+            $strippedCount,
             $result,
             $registry,
             $configs,
@@ -276,18 +252,11 @@ final class ConfigSplitCommand extends ConfigCommand
         $report->data['check'] = $check;
         $report->data['outputDir'] = $outputDir === null ? null : (string)$outputDir;
         $refused = array_filter($plans, static fn(StripPlan $plan) => $plan->status === StripPlan::REFUSED);
-        if ($refused !== []) {
-            $refusedMessages = array_map(
-                static fn(StripPlan $plan) => $plan->id . ': ' . implode(' ', array_slice($plan->reasons, 0, 3)),
-                $refused
-            );
+        foreach ($refused as $plan) {
             $report->warning(
-                array_merge(
-                    ['These configs cannot be stripped without changing their meaning, they will be left as they are:'],
-                    $refusedMessages
-                ),
+                $plan->id . ': ' . implode(' ', array_slice($plan->reasons, 0, 3)),
                 'config_not_strippable',
-                array_values($refusedMessages)
+                ['config' => $plan->id]
             );
         }
 
@@ -304,15 +273,9 @@ final class ConfigSplitCommand extends ConfigCommand
                     ['genericChanged' => $genericChanged, 'configs' => count($changed)]
                 );
             }
-            $io->success('Nothing to re-split.');
             return Command::SUCCESS;
         }
         if (!$writing) {
-            $io->note(
-                "Dry run, nothing written. Run with --apply to write $genericName.json and to replace the configs "
-                . 'by their stripped versions (each one verified first), or with --output-dir=DIR to write them to '
-                . 'another directory.'
-            );
             return Command::SUCCESS;
         }
         $unsafe = array_filter(
@@ -320,14 +283,11 @@ final class ConfigSplitCommand extends ConfigCommand
             static fn(StripPlan $plan) => $outputDir === null && isset($effectives[$plan->id])
         );
         if ($unsafe !== []) {
-            $unsafeIds = array_map(static fn(StripPlan $plan) => $plan->id, $unsafe);
             return $report->fail(
-                array_merge(
-                    ['Nothing is written: these stripped configs cannot be written for the new generic config:'],
-                    $unsafeIds
-                ),
+                'Nothing is written: these stripped configs cannot be written for the new generic config: '
+                . implode(', ', array_map(static fn(StripPlan $plan) => $plan->id, $unsafe)),
                 'stripped_configs_unsafe',
-                details: ['configs' => array_values($unsafeIds)]
+                details: ['configs' => array_values(array_map(static fn(StripPlan $plan) => $plan->id, $unsafe))]
             );
         }
         // an existing generic config is written where it is (also when it is deeper in the tree); a new one goes in the
@@ -335,8 +295,7 @@ final class ConfigSplitCommand extends ConfigCommand
         $genericPath = ($outputDir === null ? $genericFile : null) ?? $outputRoot . '/' . $genericName . '.json';
         if (is_file($genericPath) && !$input->getOption('force')) {
             return $report->fail(
-                ConfigDirectory::displayPath($genericPath, $this->projectDir)
-                . ' exists (it may have been edited by hand), '
+                $directory->relativePath($genericPath) . ' exists (it may have been edited by hand), '
                 . 'use --force to overwrite it.',
                 'generic_exists',
                 details: ['path' => $directory->relativePath($genericPath)]
@@ -365,13 +324,10 @@ final class ConfigSplitCommand extends ConfigCommand
             }
             if ($problems !== []) {
                 $outputDirectory->discard(...array_column($staged, 0));
-                return $report->failWith(
-                    array_merge(['Nothing was changed, not everything could be written and verified:'], $problems),
-                    array_map(
-                        static fn(string $problem) => ['code' => 'write_failed', 'message' => $problem],
-                        $problems
-                    )
-                );
+                return $report->failWith(array_map(
+                    static fn(string $problem) => ['code' => 'write_failed', 'message' => $problem],
+                    $problems
+                ));
             }
             if ($outputDir !== null || $genericChanged) {
                 $outputDirectory->write($genericPath, $result->generic);
@@ -383,7 +339,6 @@ final class ConfigSplitCommand extends ConfigCommand
             $outputDirectory->discard(...array_column($staged, 0));
             return $report->failThrowable($e);
         }
-        $genericShown = ConfigDirectory::displayPath($genericPath, $this->projectDir);
         $genericWritten = $outputDir !== null || $genericChanged;
         $report->data['written'] = [
             'generic' => $genericWritten,
@@ -391,22 +346,6 @@ final class ConfigSplitCommand extends ConfigCommand
             'configs' => count($staged),
             'nothingToWrite' => !$genericWritten && $staged === [],
         ];
-        if (!$genericWritten && $staged === []) {
-            // a split of what is split already gives the same: only files that would change are written
-            $io->success(sprintf(
-                'Nothing to write: %s and the %d stripped config(s) are what a split gives already.',
-                $genericShown,
-                count(array_filter($plans, static fn(StripPlan $plan) => $plan->status === StripPlan::UNCHANGED))
-            ));
-            return Command::SUCCESS;
-        }
-        $io->success(sprintf(
-            'Wrote %s%d stripped config(s)%s%s.',
-            $genericWritten ? $genericShown . ' and ' : '',
-            count($staged),
-            $outputDir === null ? ' (replacing the existing ones, each verified)' : ' to ' . $outputRoot,
-            $genericWritten ? '' : '; ' . $genericShown . ' is unchanged'
-        ));
         return Command::SUCCESS;
     }
 
@@ -416,7 +355,7 @@ final class ConfigSplitCommand extends ConfigCommand
      * them. Say so, so that they can be left out (--pattern).
      *
      * @param array<string, \stdClass> $configs
-     * @return string[]
+     * @return list<array{code: string, message: string, details: array<string, mixed>}>
      */
     private function sameRegionWarnings(array $configs): array
     {
@@ -427,11 +366,15 @@ final class ConfigSplitCommand extends ConfigCommand
         }
         foreach ($identical as $ids) {
             if (count($ids) > 1) {
-                $warnings[] = sprintf(
-                    'These configs have the same content: %s. They count as separate regions, so what they have is '
-                    . 'shared by definition. Leave out the copies (--pattern) to see what is really shared.',
-                    implode(', ', $ids)
-                );
+                $warnings[] = [
+                    'code' => 'same_content',
+                    'message' => sprintf(
+                        'These configs have the same content: %s. They count as separate regions, so what they have '
+                        . 'is shared by definition. Leave out the copies (--pattern) to see what is really shared.',
+                        implode(', ', $ids)
+                    ),
+                    'details' => ['configs' => $ids],
+                ];
             }
         }
         $versions = [];
@@ -440,40 +383,33 @@ final class ConfigSplitCommand extends ConfigCommand
         }
         foreach ($versions as $folder => $names) {
             if (count($names) > 1) {
-                $warnings[] = sprintf(
-                    '%s has %d versions (%s). Each version counts as a region of its own.',
-                    $folder,
-                    count($names),
-                    implode(', ', $names)
-                );
+                $warnings[] = [
+                    'code' => 'several_versions',
+                    'message' => sprintf(
+                        '%s has %d versions (%s). Each version counts as a region of its own.',
+                        $folder,
+                        count($names),
+                        implode(', ', $names)
+                    ),
+                    'details' => ['folder' => $folder, 'versions' => $names],
+                ];
             }
         }
         return $warnings;
     }
 
     /**
-     * Always in kb, so that sizes can be compared at a glance (and with what a file manager says).
-     */
-    private static function kb(int $bytes): string
-    {
-        return number_format($bytes / 1024, 1, '.', '') . ' kb';
-    }
-
-    /**
-     * How much smaller a file gets, as a percentage of its size now (negative: it gets larger).
-     */
-    private static function win(int $now, int $after): string
-    {
-        return $now === 0 ? '-' : sprintf('%.1f%%', 100 * ($now - $after) / $now);
-    }
-
-    /**
+     * What was found, for the report: the data of the result.
+     *
      * @param array<string, \stdClass> $configs
      * @param array<string, StripPlan> $plans
+     * @param string[] $promoted
+     * @param string[] $demoted
      */
-    private function report(
-        SymfonyStyle $io,
+    private function describe(
         ConfigReport $report,
+        string $root,
+        int $strippedCount,
         SplitResult $result,
         GenericNameRegistry $registry,
         array $configs,
@@ -489,7 +425,6 @@ final class ConfigSplitCommand extends ConfigCommand
         $rows = [];
         $totalNow = 0;
         $totalAfter = 0;
-        $larger = false; // does a config get larger?
         foreach ($configs as $id => $config) {
             $plan = $plans[$id];
             $now = is_file($plan->path)
@@ -500,8 +435,7 @@ final class ConfigSplitCommand extends ConfigCommand
                 : strlen(ConfigDirectory::encode($plan->stripped));
             $totalNow += $now;
             $totalAfter += $after;
-            $larger = $larger || ($plan->stripped !== null && $after > $now);
-            $report->data['configs'][] = [
+            $rows[] = [
                 'id' => $id,
                 'path' => $plan->path,
                 'layers' => count($config->datamodel->meta ?? []),
@@ -514,109 +448,14 @@ final class ConfigSplitCommand extends ConfigCommand
                 'afterBytes' => $after,
                 'reasons' => $plan->reasons,
             ];
-            $rows[] = [
-                $id,
-                count($config->datamodel->meta ?? []),
-                self::kb($now),
-                $plan->stripped === null ? 'cannot be stripped' : self::kb($after),
-                $plan->stripped === null ? '-' : self::win($now, $after),
-            ];
         }
-        $io->section('Configs (file sizes now, and as they would be written)');
-        $io->table(['Config', 'Layers', 'Now', 'After', 'Win'], $rows);
         $genericAfter = $genericNow !== null && !$genericChanged
             ? $genericNow
             : strlen(ConfigDirectory::encode($result->generic));
-        $io->writeln(
-            $genericNow === null
-                ? sprintf('%s.json: %s (new)', $genericName, self::kb($genericAfter))
-                : sprintf(
-                    '%s.json: %s now, %s after%s',
-                    $genericName,
-                    self::kb($genericNow),
-                    self::kb($genericAfter),
-                    $genericChanged ? '' : ' (unchanged)'
-                )
-        );
-        $report->data['generic'] = [
-            'name' => $genericName,
-            'existed' => $hadGeneric,
-            'changed' => $genericChanged,
-            'nowBytes' => $genericNow,
-            'afterBytes' => $genericAfter,
-        ];
         $totalNow += $genericNow ?? 0;
         $totalAfter += $genericAfter;
-        $report->data['total'] = ['nowBytes' => $totalNow, 'afterBytes' => $totalAfter];
-        $io->writeln(sprintf(
-            'All files, with %s.json: %s now, %s after (%s)',
-            $genericName,
-            self::kb($totalNow),
-            self::kb($totalAfter),
-            $totalAfter <= $totalNow
-                ? self::win($totalNow, $totalAfter) . ' smaller'
-                : sprintf('%.1f%% larger', 100 * ($totalAfter - $totalNow) / $totalNow)
-        ));
-        if ($larger) {
-            $io->writeln(
-                'A negative win: that config needs more overrides afterwards, because what most configs share '
-                . '(the generic config) changed.'
-            );
-        }
 
-        $io->section('Layers');
-        $io->writeln(sprintf(
-            '%d generic layers (each used by 2 or more configs); %d layers are used by one config only and stay in '.
-            'its file. Region layer entries overriding a generic value, per field:',
-            $result->genericLayerCount,
-            $result->regionOnlyLayerCount
-        ));
-        $io->writeln('  ' . ($result->layerOverrides === [] ? 'none' : implode(', ', array_map(
-            static fn($field, $count) => "$field: $count",
-            array_keys($result->layerOverrides),
-            $result->layerOverrides
-        ))));
-        $proposed = $registry->proposed();
-        $report->data['layers'] = [
-            'generic' => $result->genericLayerCount,
-            'regionOnly' => $result->regionOnlyLayerCount,
-            'overrides' => (object)$result->layerOverrides,
-            'proposedNames' => count($proposed),
-            'promoted' => $promoted,
-            'demoted' => $demoted,
-        ];
-        $io->writeln(sprintf(
-            '%d layer names were not in layer_names of %s.json and got a proposed generic name.',
-            count($proposed),
-            $genericName
-        ));
-
-        if ($hadGeneric) {
-            $io->section("Changes to $genericName.json");
-            $map = $registry->toMap();
-            $describe = static fn(array $names): string => implode(', ', array_map(
-                static fn(string $name) => $name . (($map[$name] ?? []) === []
-                    ? '' // no longer in the name map, for example renamed there
-                    : ' (' . implode(', ', $map[$name]) . ')'),
-                $io->isVerbose() ? $names : array_slice($names, 0, 8)
-            )) . (!$io->isVerbose() && count($names) > 8 ? ', ... (-v lists all)' : '');
-            $io->writeln($promoted === []
-                ? 'No layer becomes generic.'
-                : sprintf(
-                    '%d layer(s) become generic, because 2 or more configs use them now: %s',
-                    count($promoted),
-                    $describe($promoted)
-                ));
-            $io->writeln($demoted === []
-                ? 'No layer moves back to a single config.'
-                : sprintf(
-                    '%d layer(s) move back into the one config that uses them: %s',
-                    count($demoted),
-                    $describe($demoted)
-                ));
-        }
-
-        $io->section('Sections: how much is actually shared between the configs');
+        // how much of every section is shared
         $groups = [];
         foreach ($result->support as $path => $info) {
             $parts = explode('.', $path);
@@ -635,10 +474,9 @@ final class ConfigSplitCommand extends ConfigCommand
             $groups[$group]['distinct'] += $info['distinct'];
         }
         ksort($groups);
-        $rows = [];
-        $report->data['sections'] = [];
+        $sections = [];
         foreach ($groups as $group => $g) {
-            $report->data['sections'][] = [
+            $sections[] = [
                 'name' => $group,
                 'participating' => $g['of'],
                 'kind' => $g['kind'],
@@ -647,38 +485,37 @@ final class ConfigSplitCommand extends ConfigCommand
                 'distinctItems' => $g['distinct'],
                 'genericItems' => $g['best'],
             ];
-            $rows[] = [
-                $group,
-                $g['of'] . ' configs',
-                $g['kind'] === 'list'
-                    ? sprintf('%d of %d distinct items are generic (shared)', $g['best'], $g['distinct'])
-                    : sprintf('%d of %d values shared by 2+ configs', $g['generic'], $g['values']),
-            ];
         }
-        $io->table(['Section', 'Participating', 'Generic result'], $rows);
 
-        $report->data['removed'] = (object)$result->dropped;
-        if ($result->dropped !== []) {
-            $io->section('Removed / rewritten on purpose (design document)');
-            $io->table(['What', 'Count'], array_map(
-                static fn($what, $count) => [$what, $count],
-                array_keys($result->dropped),
-                $result->dropped
-            ));
+        foreach (array_merge($registry->warnings(), $result->warnings) as $warning) {
+            $report->warning($warning, 'split_warning');
         }
-        $warnings = array_merge($registry->warnings(), $result->warnings, $this->sameRegionWarnings($configs));
-        $report->recordWarnings($warnings, 'split_warning');
-        if ($warnings !== []) {
-            $io->section('Warnings');
-            $io->listing($warnings);
+        foreach ($this->sameRegionWarnings($configs) as $warning) {
+            $report->warning($warning['message'], $warning['code'], $warning['details']);
         }
-        if ($io->isVerbose() && $proposed !== []) {
-            $io->section('Proposed generic names (review these)');
-            $rows = [];
-            foreach ($registry->toMap() as $generic => $names) {
-                $rows[] = [$generic, implode(', ', $names)];
-            }
-            $io->table(['Generic name', 'Layer names'], $rows);
-        }
+        $report->data += [
+            'root' => $root,
+            'strippedCount' => $strippedCount,
+            'configs' => $rows,
+            'generic' => [
+                'name' => $genericName,
+                'existed' => $hadGeneric,
+                'changed' => $genericChanged,
+                'nowBytes' => $genericNow,
+                'afterBytes' => $genericAfter,
+            ],
+            'total' => ['nowBytes' => $totalNow, 'afterBytes' => $totalAfter],
+            'layers' => [
+                'generic' => $result->genericLayerCount,
+                'regionOnly' => $result->regionOnlyLayerCount,
+                'overrides' => (object)$result->layerOverrides,
+                'proposedNames' => count($registry->proposed()),
+                'promoted' => $promoted,
+                'demoted' => $demoted,
+                'nameMap' => (object)$registry->toMap(),
+            ],
+            'sections' => $sections,
+            'removed' => (object)$result->dropped,
+        ];
     }
 }

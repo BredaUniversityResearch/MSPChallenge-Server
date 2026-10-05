@@ -10,8 +10,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Path;
 
@@ -57,12 +55,21 @@ final class ConfigMergeCommand extends ConfigCommand
         return true;
     }
 
-    protected function perform(
-        InputInterface $input,
-        OutputInterface $output,
-        SymfonyStyle $io,
-        ConfigReport $report
-    ): int {
+    protected function resultKeys(): array
+    {
+        return ['config'];
+    }
+
+    protected function rawOutput(InputInterface $input, ConfigReport $report): ?string
+    {
+        $config = $report->data['config'] ?? null;
+        return $input->getOption('output') === null && $config instanceof \stdClass
+            ? ConfigDirectory::encode($config)
+            : null;
+    }
+
+    protected function perform(InputInterface $input, ConfigReport $report): int
+    {
         $directory = new ConfigDirectory(Path::makeAbsolute((string)$input->getOption('dir'), $this->projectDir));
         /** @var \ArrayObject<string, array{path: string, fingerprint: string}> $fingerprints */
         $fingerprints = new \ArrayObject();
@@ -86,17 +93,12 @@ final class ConfigMergeCommand extends ConfigCommand
             $report->data['parents'][] = ['name' => $name] + $found;
         }
         if ($input->getOption('output') === null) {
-            if ($report->json) {
-                $report->data['config'] = $merged;
-            } else {
-                $output->write(ConfigDirectory::encode($merged), false, OutputInterface::OUTPUT_RAW);
-            }
+            $report->data['config'] = $merged;
             return Command::SUCCESS;
         }
         $target = Path::makeAbsolute((string)$input->getOption('output'), getcwd() ?: $this->projectDir);
         $directory->write($target, $merged);
         $report->data['output'] = $target;
-        $io->success('Wrote ' . $target);
         return Command::SUCCESS;
     }
 }
