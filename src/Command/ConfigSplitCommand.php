@@ -24,17 +24,18 @@ use Symfony\Component\Filesystem\Path;
 
 #[AsCommand(
     name: 'app:config:split',
-    description: 'Derives a generic config (--generic) from the configs in ServerManager/configfiles (complete ones, '
+    description: 'Derives a generic config (--generic) from the configs below --dir (complete ones, '
         . 'or ones that are stripped already: those are expanded with their parents first) and strips every config '
         . 'down to what is specific for its region, with the generic config as its parent. Reports only, unless '
         . '--apply or --output-dir is given.'
 )]
-final class ConfigSplitCommand extends Command
+final class ConfigSplitCommand extends ConfigCommand
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%')]
         private readonly string $projectDir,
-        private readonly SessionConfigValidator $validator
+        private readonly SessionConfigValidator $validator,
+        private readonly string $defaultDir = 'ServerManager/configfiles'
     ) {
         parent::__construct();
     }
@@ -48,7 +49,7 @@ final class ConfigSplitCommand extends Command
                 InputOption::VALUE_REQUIRED,
                 'Config root (absolute, or relative to the project dir). The configs and the generic configs can be '
                 . 'anywhere below it',
-                'ServerManager/configfiles'
+                $this->defaultDir
             )
             ->addOption(
                 'pattern',
@@ -100,30 +101,35 @@ final class ConfigSplitCommand extends Command
                 null,
                 InputOption::VALUE_NONE,
                 'Overwrite the generic config if it exists (this loses changes made to it by hand)'
-            );
+            )
+            ->addFormatOption();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $io = new SymfonyStyle($input, $output);
+    protected function perform(
+        InputInterface $input,
+        OutputInterface $output,
+        SymfonyStyle $io,
+        ConfigReport $report
+    ): int {
         $root = Path::makeAbsolute((string)$input->getOption('dir'), $this->projectDir);
         $outputDir = $input->getOption('output-dir');
         $outputRoot = $outputDir === null ? $root : Path::makeAbsolute((string)$outputDir, $this->projectDir);
         $check = (bool)$input->getOption('check');
         $writing = $input->getOption('apply') || $outputDir !== null;
         if ($check && $writing) {
-            $io->error('Use --check on its own, it never writes.');
-            return Command::INVALID;
+            return $report->fail('Use --check on its own, it never writes.', 'invalid_usage', Command::INVALID);
         }
         if (!is_dir($root)) {
-            $io->error("Config directory not found: $root");
-            return Command::FAILURE;
+            return $report->fail("Config directory not found: $root", 'dir_not_found');
         }
         $directory = new ConfigDirectory($root);
         $genericName = (string)$input->getOption('generic');
         if (!ConfigDirectory::isValidParentName($genericName)) {
-            $io->error('--generic is the name of a file without the extension: letters, digits, _ and - only.');
-            return Command::INVALID;
+            return $report->fail(
+                '--generic is the name of a file without the extension: letters, digits, _ and - only.',
+                'invalid_usage',
+                Command::INVALID
+            );
         }
 
         // 1. read the configs. A config that is stripped already is expanded with its parents
@@ -133,14 +139,19 @@ final class ConfigSplitCommand extends Command
             $genericFile = $directory->locateParent($genericName);
             $oldGeneric = $genericFile === null ? null : $directory->read($genericFile);
             if ($oldGeneric !== null && ConfigParents::parentOf($oldGeneric) !== null) {
-                $io->error(
+                return $report->fail(
                     "$genericName.json has a parent itself, and the command makes a generic config without one. "
-                    . 'Choose another name with --generic.'
+                    . 'Choose another name with --generic.',
+                    'generic_has_parent',
+                    details: ['generic' => $genericName]
                 );
-                return Command::FAILURE;
             }
         } catch (\Throwable $e) {
-            $io->warning("Ignoring $genericName.json, it cannot be used: " . $e->getMessage());
+            $report->warning(
+                "Ignoring $genericName.json, it cannot be used: " . $e->getMessage(),
+                'generic_unusable',
+                details: ['generic' => $genericName]
+            );
         }
         $parents = ConfigParents::fromDirectory($directory);
         $merger = new RegionConfigMerger();
@@ -155,21 +166,11 @@ final class ConfigSplitCommand extends Command
         if ($genericFile !== null) {
             unset($skipped[$genericFile]); // the generic config is told about by itself when it can not be used
         }
-        if ($skipped !== [] && $writing) {
-            // a file that can not be read may be a config: do not split without it
-            $io->error(array_merge(
-                ['Nothing is written, these files are not valid JSON (fix them, or leave them out with --pattern):'],
-                array_map(
-                    fn(string $path, string $why) => $directory->relativePath($path) . ': ' . $why,
-                    array_keys($skipped),
-                    $skipped
-                )
-            ));
-            return Command::FAILURE;
+        $stop = $this->skippedFiles($report, $directory, $skipped, $writing);
+        if ($stop !== null) {
+            return $stop;
         }
-        foreach ($skipped as $path => $why) {
-            $io->warning(sprintf('Skipped %s, %s.', $directory->relativePath($path), $why));
-        }
+        $errorDetails = []; // the errors of the configs, told to programs
         foreach ($found as $id => $path) {
             try {
                 $config = $directory->read($path);
@@ -192,21 +193,25 @@ final class ConfigSplitCommand extends Command
                     $id,
                     $e instanceof InvalidSessionConfigException ? $e->summary() : strtok($e->getMessage(), "\n")
                 );
+                $errorDetails[] = ConfigReport::describe($e, $id);
             }
         }
         if ($errors !== []) {
-            $io->error(array_merge(['Cannot continue, these configs are invalid:'], $errors));
-            return Command::FAILURE;
+            return $report->failWith(
+                array_merge(['Cannot continue, these configs are invalid:'], $errors),
+                $errorDetails
+            );
         }
         if (count($configs) < 2) {
-            $io->warning(sprintf(
+            $tooFew = sprintf(
                 'Found %d config(s) in %s; at least 2 are needed to find anything generic.',
                 count($configs),
                 $root
-            ));
+            );
             if ($configs === []) {
-                return Command::FAILURE;
+                return $report->finding($tooFew, 'no_configs');
             }
+            $report->warning($tooFew, 'too_few_configs');
         }
         $io->title(sprintf('Splitting %d configs from %s', count($configs), $root));
         if ($strippedCount > 0) {
@@ -238,8 +243,7 @@ final class ConfigSplitCommand extends Command
                 );
             }
         } catch (\Throwable $e) {
-            $io->error($e->getMessage());
-            return Command::FAILURE;
+            return $report->failThrowable($e);
         }
         $layerNames = static fn(?\stdClass $generic): array => array_map(
             static fn(\stdClass $layer) => $layer->msp_config_generic_name,
@@ -256,6 +260,7 @@ final class ConfigSplitCommand extends Command
         // 3. report
         $this->report(
             $io,
+            $report,
             $result,
             $registry,
             $configs,
@@ -267,26 +272,37 @@ final class ConfigSplitCommand extends Command
             $oldGeneric === null ? null : (int)@filesize((string)$genericFile),
             $genericChanged
         );
+        $report->data['apply'] = (bool)$input->getOption('apply');
+        $report->data['check'] = $check;
+        $report->data['outputDir'] = $outputDir === null ? null : (string)$outputDir;
         $refused = array_filter($plans, static fn(StripPlan $plan) => $plan->status === StripPlan::REFUSED);
         if ($refused !== []) {
-            $io->warning(array_merge(
-                ['These configs cannot be stripped without changing their meaning, they will be left as they are:'],
-                array_map(
-                    static fn(StripPlan $plan) => $plan->id . ': ' . implode(' ', array_slice($plan->reasons, 0, 3)),
-                    $refused
-                )
-            ));
+            $refusedMessages = array_map(
+                static fn(StripPlan $plan) => $plan->id . ': ' . implode(' ', array_slice($plan->reasons, 0, 3)),
+                $refused
+            );
+            $report->warning(
+                array_merge(
+                    ['These configs cannot be stripped without changing their meaning, they will be left as they are:'],
+                    $refusedMessages
+                ),
+                'config_not_strippable',
+                array_values($refusedMessages)
+            );
         }
 
         // 4. check, or write
         if ($check) {
             if ($genericChanged || $changed !== []) {
-                $io->warning(sprintf(
-                    'Running with --apply would change %s and %d config(s).',
-                    $genericChanged ? "$genericName.json" : "nothing in $genericName.json",
-                    count($changed)
-                ));
-                return Command::FAILURE;
+                return $report->finding(
+                    sprintf(
+                        'Running with --apply would change %s and %d config(s).',
+                        $genericChanged ? "$genericName.json" : "nothing in $genericName.json",
+                        count($changed)
+                    ),
+                    'check_failed',
+                    ['genericChanged' => $genericChanged, 'configs' => count($changed)]
+                );
             }
             $io->success('Nothing to re-split.');
             return Command::SUCCESS;
@@ -304,22 +320,27 @@ final class ConfigSplitCommand extends Command
             static fn(StripPlan $plan) => $outputDir === null && isset($effectives[$plan->id])
         );
         if ($unsafe !== []) {
-            $io->error(array_merge(
-                ['Nothing is written: these stripped configs cannot be written for the new generic config:'],
-                array_map(static fn(StripPlan $plan) => $plan->id, $unsafe)
-            ));
-            return Command::FAILURE;
+            $unsafeIds = array_map(static fn(StripPlan $plan) => $plan->id, $unsafe);
+            return $report->fail(
+                array_merge(
+                    ['Nothing is written: these stripped configs cannot be written for the new generic config:'],
+                    $unsafeIds
+                ),
+                'stripped_configs_unsafe',
+                details: ['configs' => array_values($unsafeIds)]
+            );
         }
         // an existing generic config is written where it is (also when it is deeper in the tree); a new one goes in the
         // root of where is written. Another folder to write to gets a flat copy.
         $genericPath = ($outputDir === null ? $genericFile : null) ?? $outputRoot . '/' . $genericName . '.json';
         if (is_file($genericPath) && !$input->getOption('force')) {
-            $io->error(
+            return $report->fail(
                 ConfigDirectory::displayPath($genericPath, $this->projectDir)
                 . ' exists (it may have been edited by hand), '
-                . 'use --force to overwrite it.'
+                . 'use --force to overwrite it.',
+                'generic_exists',
+                details: ['path' => $directory->relativePath($genericPath)]
             );
-            return Command::FAILURE;
         }
         $outputDirectory = new ConfigDirectory($outputRoot);
         $staged = [];
@@ -344,11 +365,13 @@ final class ConfigSplitCommand extends Command
             }
             if ($problems !== []) {
                 $outputDirectory->discard(...array_column($staged, 0));
-                $io->error(array_merge(
-                    ['Nothing was changed, not everything could be written and verified:'],
-                    $problems
-                ));
-                return Command::FAILURE;
+                return $report->failWith(
+                    array_merge(['Nothing was changed, not everything could be written and verified:'], $problems),
+                    array_map(
+                        static fn(string $problem) => ['code' => 'write_failed', 'message' => $problem],
+                        $problems
+                    )
+                );
             }
             if ($outputDir !== null || $genericChanged) {
                 $outputDirectory->write($genericPath, $result->generic);
@@ -358,11 +381,16 @@ final class ConfigSplitCommand extends Command
             }
         } catch (\Throwable $e) {
             $outputDirectory->discard(...array_column($staged, 0));
-            $io->error($e->getMessage());
-            return Command::FAILURE;
+            return $report->failThrowable($e);
         }
         $genericShown = ConfigDirectory::displayPath($genericPath, $this->projectDir);
         $genericWritten = $outputDir !== null || $genericChanged;
+        $report->data['written'] = [
+            'generic' => $genericWritten,
+            'genericPath' => $directory->relativePath($genericPath),
+            'configs' => count($staged),
+            'nothingToWrite' => !$genericWritten && $staged === [],
+        ];
         if (!$genericWritten && $staged === []) {
             // a split of what is split already gives the same: only files that would change are written
             $io->success(sprintf(
@@ -445,6 +473,7 @@ final class ConfigSplitCommand extends Command
      */
     private function report(
         SymfonyStyle $io,
+        ConfigReport $report,
         SplitResult $result,
         GenericNameRegistry $registry,
         array $configs,
@@ -472,6 +501,19 @@ final class ConfigSplitCommand extends Command
             $totalNow += $now;
             $totalAfter += $after;
             $larger = $larger || ($plan->stripped !== null && $after > $now);
+            $report->data['configs'][] = [
+                'id' => $id,
+                'path' => $plan->path,
+                'layers' => count($config->datamodel->meta ?? []),
+                'status' => match ($plan->status) {
+                    StripPlan::CHANGED => 'will_be_stripped',
+                    StripPlan::UNCHANGED => 'already_stripped',
+                    StripPlan::REFUSED => 'kept_as_is',
+                },
+                'nowBytes' => $now,
+                'afterBytes' => $after,
+                'reasons' => $plan->reasons,
+            ];
             $rows[] = [
                 $id,
                 count($config->datamodel->meta ?? []),
@@ -496,8 +538,16 @@ final class ConfigSplitCommand extends Command
                     $genericChanged ? '' : ' (unchanged)'
                 )
         );
+        $report->data['generic'] = [
+            'name' => $genericName,
+            'existed' => $hadGeneric,
+            'changed' => $genericChanged,
+            'nowBytes' => $genericNow,
+            'afterBytes' => $genericAfter,
+        ];
         $totalNow += $genericNow ?? 0;
         $totalAfter += $genericAfter;
+        $report->data['total'] = ['nowBytes' => $totalNow, 'afterBytes' => $totalAfter];
         $io->writeln(sprintf(
             'All files, with %s.json: %s now, %s after (%s)',
             $genericName,
@@ -527,6 +577,14 @@ final class ConfigSplitCommand extends Command
             $result->layerOverrides
         ))));
         $proposed = $registry->proposed();
+        $report->data['layers'] = [
+            'generic' => $result->genericLayerCount,
+            'regionOnly' => $result->regionOnlyLayerCount,
+            'overrides' => (object)$result->layerOverrides,
+            'proposedNames' => count($proposed),
+            'promoted' => $promoted,
+            'demoted' => $demoted,
+        ];
         $io->writeln(sprintf(
             '%d layer names were not in layer_names of %s.json and got a proposed generic name.',
             count($proposed),
@@ -578,7 +636,17 @@ final class ConfigSplitCommand extends Command
         }
         ksort($groups);
         $rows = [];
+        $report->data['sections'] = [];
         foreach ($groups as $group => $g) {
+            $report->data['sections'][] = [
+                'name' => $group,
+                'participating' => $g['of'],
+                'kind' => $g['kind'],
+                'values' => $g['values'],
+                'genericValues' => $g['generic'],
+                'distinctItems' => $g['distinct'],
+                'genericItems' => $g['best'],
+            ];
             $rows[] = [
                 $group,
                 $g['of'] . ' configs',
@@ -589,6 +657,7 @@ final class ConfigSplitCommand extends Command
         }
         $io->table(['Section', 'Participating', 'Generic result'], $rows);
 
+        $report->data['removed'] = (object)$result->dropped;
         if ($result->dropped !== []) {
             $io->section('Removed / rewritten on purpose (design document)');
             $io->table(['What', 'Count'], array_map(
@@ -598,6 +667,7 @@ final class ConfigSplitCommand extends Command
             ));
         }
         $warnings = array_merge($registry->warnings(), $result->warnings, $this->sameRegionWarnings($configs));
+        $report->recordWarnings($warnings, 'split_warning');
         if ($warnings !== []) {
             $io->section('Warnings');
             $io->listing($warnings);

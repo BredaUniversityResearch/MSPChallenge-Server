@@ -26,12 +26,13 @@ use Symfony\Component\Filesystem\Path;
         . 'configs, or configs stripped against another parent). Reports only, unless --apply or --output-dir is '
         . 'given.'
 )]
-final class ConfigStripCommand extends Command
+final class ConfigStripCommand extends ConfigCommand
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%')]
         private readonly string $projectDir,
-        private readonly SessionConfigValidator $validator
+        private readonly SessionConfigValidator $validator,
+        private readonly string $defaultDir = 'ServerManager/configfiles'
     ) {
         parent::__construct();
     }
@@ -49,7 +50,7 @@ final class ConfigStripCommand extends Command
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Config root with the parent configs (absolute, or relative to the project dir)',
-                'ServerManager/configfiles'
+                $this->defaultDir
             )
             ->addOption(
                 'pattern',
@@ -82,36 +83,42 @@ final class ConfigStripCommand extends Command
                 'output-dir',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Write the stripped configs (<folder>/<name>.json) to this directory instead, leaving the files alone'
+                'Write the stripped configs (the same paths below it) to this directory instead, leaving the files '
+                . 'alone'
             )
             ->addOption(
                 'skip-validation',
                 null,
                 InputOption::VALUE_NONE,
                 'Do not validate complete configs against SessionConfigJSONSchema.json'
-            );
+            )
+            ->addFormatOption();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $io = new SymfonyStyle($input, $output);
+    protected function perform(
+        InputInterface $input,
+        OutputInterface $output,
+        SymfonyStyle $io,
+        ConfigReport $report
+    ): int {
         if ($input->getOption('apply') && $input->getOption('check')) {
-            $io->error('Use either --apply or --check, not both.');
-            return Command::INVALID;
+            return $report->fail('Use either --apply or --check, not both.', 'invalid_usage', Command::INVALID);
         }
         $root = Path::makeAbsolute((string)$input->getOption('dir'), $this->projectDir);
         $outputDir = $input->getOption('output-dir');
         if (!is_dir($root)) {
-            $io->error("Config directory not found: $root");
-            return Command::FAILURE;
+            return $report->fail("Config directory not found: $root", 'dir_not_found');
         }
         $directory = new ConfigDirectory($root);
         $parents = ConfigParents::fromDirectory($directory);
         $merger = new RegionConfigMerger();
         $parentOption = $input->getOption('parent');
         if ($parentOption !== null && !ConfigDirectory::isValidParentName((string)$parentOption)) {
-            $io->error('--parent is the name of a file without the extension: letters, digits, _ and - only.');
-            return Command::INVALID;
+            return $report->fail(
+                '--parent is the name of a file without the extension: letters, digits, _ and - only.',
+                'invalid_usage',
+                Command::INVALID
+            );
         }
 
         // 1. the files
@@ -123,30 +130,16 @@ final class ConfigStripCommand extends Command
                 (string)$input->getOption('pattern'),
                 $skipped
             );
-            if ($skipped !== [] && ($input->getOption('apply') || $outputDir !== null)) {
-                // a file that can not be read may be a config: do not strip without it
-                $io->error(array_merge(
-                    [
-                        'Nothing is written, these files are not valid JSON (fix them, or leave them out with '
-                        . '--pattern):'
-                    ],
-                    array_map(
-                        fn(string $path, string $why) => $directory->relativePath($path) . ': ' . $why,
-                        array_keys($skipped),
-                        $skipped
-                    )
-                ));
-                return Command::FAILURE;
-            }
-            foreach ($skipped as $skippedPath => $why) {
-                $io->warning(sprintf('Skipped %s, %s.', $directory->relativePath($skippedPath), $why));
-            }
         } catch (\Throwable $e) {
-            $io->error($e->getMessage());
-            return Command::FAILURE;
+            return $report->failThrowable($e);
+        }
+        $writing = (bool)$input->getOption('apply') || $outputDir !== null;
+        $stop = $this->skippedFiles($report, $directory, $skipped, $writing);
+        if ($stop !== null) {
+            return $stop;
         }
         if ($files === []) {
-            $io->warning("No configs found in $root");
+            $report->warning("No configs found in $root", 'no_configs');
             return Command::SUCCESS;
         }
 
@@ -157,6 +150,7 @@ final class ConfigStripCommand extends Command
         $parentNames = []; // id => its name
         $registries = []; // parent name => the layer names of that generic config and its parents
         $errors = [];
+        $errorDetails = []; // the same errors, told to programs
         foreach ($files as $id => $path) {
             try {
                 $current = $directory->read($path);
@@ -192,25 +186,35 @@ final class ConfigStripCommand extends Command
                     $id,
                     $e instanceof InvalidSessionConfigException ? $e->summary() : strtok($e->getMessage(), "\n")
                 );
+                $errorDetails[] = ConfigReport::describe($e, $id);
             }
         }
         if ($errors !== []) {
-            $io->error(array_merge(['Cannot continue, these configs are invalid:'], $errors));
-            return Command::FAILURE;
+            return $report->failWith(
+                array_merge(['Cannot continue, these configs are invalid:'], $errors),
+                $errorDetails
+            );
         }
 
         // 3. report
         $this->report($io, $plans);
         $changed = array_filter($plans, static fn(StripPlan $plan) => $plan->status === StripPlan::CHANGED);
+        $report->data = [
+            'apply' => (bool)$input->getOption('apply'),
+            'check' => (bool)$input->getOption('check'),
+            'outputDir' => $outputDir === null ? null : (string)$outputDir,
+            'results' => $this->results($plans, $parentNames),
+            'written' => 0,
+        ];
 
         // 4. write
         if ($input->getOption('check')) {
             if ($changed !== []) {
-                $io->warning(sprintf(
-                    '%d config(s) can be stripped further: run app:config:strip --apply.',
-                    count($changed)
-                ));
-                return Command::FAILURE;
+                return $report->finding(
+                    sprintf('%d config(s) can be stripped further: run app:config:strip --apply.', count($changed)),
+                    'check_failed',
+                    ['configs' => count($changed)]
+                );
             }
             $io->success('Nothing left to strip.');
             return Command::SUCCESS;
@@ -253,15 +257,14 @@ final class ConfigStripCommand extends Command
                 }
             }
         } catch (\Throwable $e) {
-            $io->error($e->getMessage());
-            return Command::FAILURE;
+            return $report->failThrowable($e);
         }
+        $report->data['written'] = $written;
         if ($problems !== []) {
-            $io->error(array_merge(
-                ['Not everything could be written and verified, those files are untouched:'],
-                $problems
-            ));
-            return Command::FAILURE;
+            return $report->failWith(
+                array_merge(['Not everything could be written and verified, those files are untouched:'], $problems),
+                array_map(static fn(string $problem) => ['code' => 'write_failed', 'message' => $problem], $problems)
+            );
         }
         $io->success(sprintf(
             '%d config(s) %s%s.',
@@ -270,6 +273,39 @@ final class ConfigStripCommand extends Command
             ' (each verified: merged with its parent it gives the same config)'
         ));
         return Command::SUCCESS;
+    }
+
+    /**
+     * What is known of every config, for programs.
+     *
+     * @param array<string, StripPlan> $plans
+     * @param array<string, string> $parentNames config id => the name of the parent it is stripped against
+     * @return list<array<string, mixed>>
+     */
+    private function results(array $plans, array $parentNames): array
+    {
+        $results = [];
+        foreach ($plans as $id => $plan) {
+            $now = is_file($plan->path) ? (int)filesize($plan->path) : strlen(ConfigDirectory::encode($plan->current));
+            $after = $plan->stripped === null || $plan->status === StripPlan::UNCHANGED
+                ? $now
+                : strlen(ConfigDirectory::encode($plan->stripped));
+            $results[] = [
+                'id' => $id,
+                'path' => $plan->path,
+                'status' => match ($plan->status) {
+                    StripPlan::CHANGED => 'will_be_stripped',
+                    StripPlan::UNCHANGED => 'already_stripped',
+                    StripPlan::REFUSED => 'kept_as_is',
+                },
+                'parent' => $parentNames[$id] ?? null,
+                'nowBytes' => $now,
+                'afterBytes' => $after,
+                'reasons' => $plan->reasons,
+                'warnings' => $plan->warnings,
+            ];
+        }
+        return $results;
     }
 
     /**

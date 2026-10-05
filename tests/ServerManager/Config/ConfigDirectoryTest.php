@@ -89,6 +89,32 @@ class ConfigDirectoryTest extends ConfigCommandTestCase
         $this->assertStringStartsWith('not valid JSON', $skipped[realpath($broken)]);
     }
 
+    public function testAScanTellsConfigsAndParentsAndWhatIsWrongWithTheirParents(): void
+    {
+        $this->putConfig('NS/ns.json', 'generic');
+        $this->putConfig('Complete/c.json');
+        $this->putConfig('Bad/bad.json', 'no/path');
+        $this->putGeneric('generic.json');
+        $this->putGeneric('NS/shared/public.json', 'generic');
+        $this->put('NS/settings.json', '{"some": "settings"}');
+        $broken = $this->put('Bad/broken.json', '{ nope');
+
+        $scan = new ConfigDirectory($this->dir)->scan();
+
+        $this->assertSame(['Bad/bad', 'Complete/c', 'NS/ns'], array_keys($scan['configs']));
+        $this->assertSame(['NS/shared/public', 'generic'], array_keys($scan['generics']));
+        $this->assertTrue($scan['configs']['NS/ns']['stripped']);
+        $this->assertFalse($scan['configs']['Complete/c']['stripped']);
+        $this->assertSame('generic', $scan['configs']['NS/ns']['parent']);
+        $this->assertNull($scan['configs']['NS/ns']['parentError']);
+        $this->assertSame(1, $scan['configs']['NS/ns']['layers']);
+        $this->assertNull($scan['configs']['Bad/bad']['parent']);
+        $this->assertSame('parent_name_invalid', $scan['configs']['Bad/bad']['parentError']['code']);
+        $this->assertSame('public', $scan['generics']['NS/shared/public']['name']);
+        $this->assertSame('generic', $scan['generics']['NS/shared/public']['parent']);
+        $this->assertSame([realpath($broken)], array_keys($scan['skipped']));
+    }
+
     public function testPatternSelectsFiles(): void
     {
         $this->putConfig('a/a_basic_1.json');

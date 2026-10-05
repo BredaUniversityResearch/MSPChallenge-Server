@@ -93,11 +93,14 @@ final class UploadInspector
     ): UploadInspection {
         $parentName = ConfigParents::parentOf($config);
         if ($parentName === null && ConfigParents::needsParent($config)) {
-            throw new ConfigParentException(sprintf(
-                '%s has layers that refer to a generic layer (msp_config_generic_name), but no metadata.parent that '
-                . 'says which generic config has them.',
-                $configFile
-            ));
+            throw new ConfigParentException(
+                sprintf(
+                    '%s has layers that refer to a generic layer (msp_config_generic_name), but no metadata.parent '
+                    . 'that says which generic config has them.',
+                    $configFile
+                ),
+                ConfigParentException::REQUIRED
+            );
         }
         $parents = [];
         $serverParents = [];
@@ -106,15 +109,21 @@ final class UploadInspector
         $neededBy = $configFile;
         while ($parentName !== null) {
             if (isset($seen[$parentName])) {
-                throw new ConfigParentException(sprintf(
-                    'The parents of %s loop: %s',
-                    $configFile,
-                    implode(' -> ', array_merge(array_keys($seen), [$parentName]))
-                ));
+                throw new ConfigParentException(
+                    sprintf(
+                        'The parents of %s loop: %s',
+                        $configFile,
+                        implode(' -> ', array_merge(array_keys($seen), [$parentName]))
+                    ),
+                    ConfigParentException::LOOP,
+                    ['chain' => array_merge(array_keys($seen), [$parentName])]
+                );
             }
             if (count($seen) >= ConfigParents::MAX_DEPTH) {
                 throw new ConfigParentException(
-                    sprintf('%s has more than %d levels of parents.', $configFile, ConfigParents::MAX_DEPTH)
+                    sprintf('%s has more than %d levels of parents.', $configFile, ConfigParents::MAX_DEPTH),
+                    ConfigParentException::TOO_DEEP,
+                    ['maxDepth' => ConfigParents::MAX_DEPTH]
                 );
             }
             $seen[$parentName] = true;

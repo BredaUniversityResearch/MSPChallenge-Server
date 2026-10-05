@@ -84,7 +84,9 @@ final class ConfigParents
             return $parent;
         } catch (\JsonException | \RuntimeException $e) {
             throw new ConfigParentException(
-                sprintf('The parent file %s cannot be used: %s', $path, $e->getMessage())
+                sprintf('The parent file %s cannot be used: %s', $path, $e->getMessage()),
+                ConfigParentException::UNREADABLE,
+                ['parent' => $name, 'path' => $directory->relativePath($path)]
             );
         }
     }
@@ -121,7 +123,9 @@ final class ConfigParents
         if (!is_string($parent) || !ConfigDirectory::isValidParentName($parent)) {
             throw new ConfigParentException(
                 'metadata.parent has to be the name of a file without the extension, letters, digits, _ and - '
-                . 'only: ' . json_encode($parent)
+                . 'only: ' . json_encode($parent),
+                ConfigParentException::INVALID_NAME,
+                ['parent' => $parent]
             );
         }
         return $parent;
@@ -137,11 +141,14 @@ final class ConfigParents
         $parent = self::parentOf($config);
         if ($parent === null) {
             if (self::needsParent($config)) {
-                throw new ConfigParentException(sprintf(
-                    '%s has layers that refer to a generic layer (msp_config_generic_name), but no metadata.parent '
-                    . 'that says which generic config has them.',
-                    ucfirst($label)
-                ));
+                throw new ConfigParentException(
+                    sprintf(
+                        '%s has layers that refer to a generic layer (msp_config_generic_name), but no '
+                        . 'metadata.parent that says which generic config has them.',
+                        ucfirst($label)
+                    ),
+                    ConfigParentException::REQUIRED
+                );
             }
             return $this->emptyPool();
         }
@@ -229,23 +236,33 @@ final class ConfigParents
         $from = $label;
         while ($current !== null) {
             if (isset($chain[$current])) {
-                throw new ConfigParentException(sprintf(
-                    'The parents of %s loop: %s',
-                    $label,
-                    implode(' -> ', array_merge(array_keys($chain), [$current]))
-                ));
+                throw new ConfigParentException(
+                    sprintf(
+                        'The parents of %s loop: %s',
+                        $label,
+                        implode(' -> ', array_merge(array_keys($chain), [$current]))
+                    ),
+                    ConfigParentException::LOOP,
+                    ['chain' => array_merge(array_keys($chain), [$current])]
+                );
             }
             if (count($chain) >= self::MAX_DEPTH) {
                 throw new ConfigParentException(
-                    sprintf('%s has more than %d levels of parents.', ucfirst($label), self::MAX_DEPTH)
+                    sprintf('%s has more than %d levels of parents.', ucfirst($label), self::MAX_DEPTH),
+                    ConfigParentException::TOO_DEEP,
+                    ['maxDepth' => self::MAX_DEPTH]
                 );
             }
-            $generic = ($this->load)($current) ?? throw new ConfigParentException(sprintf(
-                'The parent "%s" of %s was not found: %s.json is needed.',
-                $current,
-                $from,
-                $current
-            ));
+            $generic = ($this->load)($current) ?? throw new ConfigParentException(
+                sprintf('The parent "%s" of %s was not found: %s.json is needed.', $current, $from, $current),
+                ConfigParentException::MISSING,
+                [
+                    'parent' => $current,
+                    // the id of what needs it, without the quotes that it is shown with
+                    'neededBy' => (string)preg_replace('/^"(.*)"$/s', '$1', $from),
+                    'file' => $current . '.json',
+                ]
+            );
             $this->assertGeneric($current, $generic);
             $chain[$current] = $generic;
             $from = '"' . $current . '"';
@@ -259,12 +276,16 @@ final class ConfigParents
         $layers = ($generic->datamodel ?? null) instanceof \stdClass ? ($generic->datamodel->meta ?? []) : [];
         foreach (is_array($layers) ? $layers : [] as $index => $layer) {
             if (!$layer instanceof \stdClass || !isset($layer->msp_config_generic_name)) {
-                throw new ConfigParentException(sprintf(
-                    '"%s" cannot be a parent: layer %d has no msp_config_generic_name (a parent only holds generic '
-                    . 'layers).',
-                    $name,
-                    $index
-                ));
+                throw new ConfigParentException(
+                    sprintf(
+                        '"%s" cannot be a parent: layer %d has no msp_config_generic_name (a parent only holds '
+                        . 'generic layers).',
+                        $name,
+                        $index
+                    ),
+                    ConfigParentException::NOT_GENERIC,
+                    ['parent' => $name, 'layer' => $index]
+                );
             }
         }
     }

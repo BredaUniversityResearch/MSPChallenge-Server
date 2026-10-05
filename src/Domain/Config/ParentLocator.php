@@ -29,14 +29,17 @@ final class ParentLocator
         $paths = $this->index()[$name] ?? [];
         if (count($paths) > 1) {
             sort($paths); // the same message every time
-            throw new ConfigParentException(sprintf(
-                'The parent "%s" is ambiguous: %s have that name. The name of a file has to be unique in the tree.',
-                $name,
-                implode(' and ', array_map(
-                    fn(string $path) => $this->directory->relativePath($path),
-                    $paths
-                ))
-            ));
+            $shown = array_map(fn(string $path) => $this->directory->relativePath($path), $paths);
+            throw new ConfigParentException(
+                sprintf(
+                    'The parent "%s" is ambiguous: %s have that name. The name of a file has to be unique in the '
+                    . 'tree.',
+                    $name,
+                    implode(' and ', $shown)
+                ),
+                ConfigParentException::AMBIGUOUS,
+                ['parent' => $name, 'paths' => $shown]
+            );
         }
         return $paths[0] ?? null;
     }

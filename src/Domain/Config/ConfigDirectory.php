@@ -2,6 +2,7 @@
 
 namespace App\Domain\Config;
 
+use App\Domain\Config\Merge\RegionConfigMerger;
 use App\Domain\Config\Split\ConfigValues;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
@@ -71,7 +72,33 @@ final class ConfigDirectory
      */
     public function configFiles(string $pattern = '*.json', array &$skipped = []): array
     {
-        $files = [];
+        $scan = $this->scan($pattern);
+        foreach ($scan['skipped'] as $path => $why) {
+            $skipped[$path] = $why;
+        }
+        return array_map(static fn(array $config) => $config['path'], $scan['configs']);
+    }
+
+    /**
+     * Every JSON file with layers below the root, told apart by what it is: a config, or a generic config (a parent).
+     * Other JSON is left out. The contents of the files are read, but only what is needed to tell about them is kept.
+     *
+     * @return array{
+     *     configs: array<string, array{
+     *         path: string, layers: int, parent: ?string, parentError: ?array<string, string>, stripped: bool
+     *     }>,
+     *     generics: array<string, array{
+     *         path: string, layers: int, parent: ?string, parentError: ?array<string, string>, name: string
+     *     }>,
+     *     skipped: array<string, string>
+     * } configs and generics by id (the path below the root, without .json), sorted by id; the files that are not
+     *   valid JSON by absolute path => why. "parentError" is a code and a message when metadata.parent is no good.
+     */
+    public function scan(string $pattern = '*.json'): array
+    {
+        $configs = [];
+        $generics = [];
+        $skipped = [];
         $finder = new Finder()->files()->in($this->root)->name($pattern)->notName('*.region.json')->sortByName();
         foreach ($finder as $file) {
             $path = $file->getRealPath() ?: $file->getPathname(); // always a string
@@ -83,14 +110,25 @@ final class ConfigDirectory
                 continue;
             }
             $datamodel = $document->datamodel ?? null;
-            if (!$datamodel instanceof \stdClass || !is_array($datamodel->meta ?? null)
-                || ConfigParents::isGeneric($document)) {
-                continue; // a generic config (a parent), or some other JSON
+            if (!$datamodel instanceof \stdClass || !is_array($datamodel->meta ?? null)) {
+                continue; // some other JSON
             }
-            $files[preg_replace('/\.json$/', '', str_replace('\\', '/', $file->getRelativePathname()))] = $path;
+            $id = (string)preg_replace('/\.json$/', '', str_replace('\\', '/', $file->getRelativePathname()));
+            $record = ['path' => $path, 'layers' => count($datamodel->meta), 'parent' => null, 'parentError' => null];
+            try {
+                $record['parent'] = ConfigParents::parentOf($document);
+            } catch (ConfigParentException $e) {
+                $record['parentError'] = ['code' => $e->reason, 'message' => $e->getMessage()];
+            }
+            if (ConfigParents::isGeneric($document)) {
+                $generics[$id] = $record + ['name' => $file->getBasename('.json')];
+            } else {
+                $configs[$id] = $record + ['stripped' => RegionConfigMerger::isStripped($document)];
+            }
         }
-        ksort($files);
-        return $files;
+        ksort($configs);
+        ksort($generics);
+        return ['configs' => $configs, 'generics' => $generics, 'skipped' => $skipped];
     }
 
     /**

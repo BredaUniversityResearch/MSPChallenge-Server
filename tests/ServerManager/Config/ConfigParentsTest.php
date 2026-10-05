@@ -292,6 +292,66 @@ class ConfigParentsTest extends ConfigCommandTestCase
         $this->assertFalse(ConfigParents::isGeneric(ConfigFactory::json('{"some": "settings"}')));
     }
 
+    /**
+     * What a program learns from a problem with a parent: a reason that does not change, and what belongs to it.
+     */
+    public function testEveryProblemWithAParentHasAReasonAndDetails(): void
+    {
+        $problem = static function (callable $do): ConfigParentException {
+            try {
+                $do();
+            } catch (ConfigParentException $e) {
+                return $e;
+            }
+            throw new \LogicException('there is no problem');
+        };
+        $directory = new ConfigDirectory($this->dir);
+
+        $missing = $problem(fn() => self::parents([])->poolOfParent('base', 'config "c"'));
+        $loop = $problem(fn() => self::parents([
+            'a' => self::generic(['A'], 'b'),
+            'b' => self::generic(['B'], 'a'),
+        ])->poolOfParent('a'));
+        $notGeneric = $problem(fn() => self::parents(
+            ['base' => ConfigFactory::config([ConfigFactory::layer('X_A', 'A')])]
+        )->poolOfParent('base'));
+        $invalidName = $problem(
+            fn() => ConfigParents::parentOf(ConfigFactory::json('{"metadata": {"parent": "a/b"}}'))
+        );
+        $required = $problem(fn() => self::parents([])->poolOf(
+            ConfigFactory::json('{"datamodel": {"meta": [{"msp_config_generic_name": "A"}]}}')
+        ));
+        $directory->write($this->dir . '/A/twice.json', self::generic(['A']));
+        $directory->write($this->dir . '/B/twice.json', self::generic(['B']));
+        $ambiguous = $problem(fn() => ConfigParents::fromDirectory($directory)->poolOfParent('twice'));
+        file_put_contents($this->dir . '/broken.json', '{ nope');
+        $unreadable = $problem(fn() => ConfigParents::fromDirectory($directory)->poolOfParent('broken'));
+        $files = [];
+        for ($i = 0; $i <= ConfigParents::MAX_DEPTH; $i++) {
+            $files['p' . $i] = self::generic(['L' . $i], 'p' . ($i + 1));
+        }
+        $tooDeep = $problem(fn() => self::parents($files)->poolOfParent('p0'));
+
+        $this->assertSame(ConfigParentException::MISSING, $missing->reason);
+        $this->assertSame(
+            ['parent' => 'base', 'neededBy' => 'config "c"', 'file' => 'base.json'],
+            $missing->details
+        );
+        $this->assertSame(ConfigParentException::LOOP, $loop->reason);
+        $this->assertSame(['chain' => ['a', 'b', 'a']], $loop->details);
+        $this->assertSame(ConfigParentException::NOT_GENERIC, $notGeneric->reason);
+        $this->assertSame(['parent' => 'base', 'layer' => 0], $notGeneric->details);
+        $this->assertSame(ConfigParentException::INVALID_NAME, $invalidName->reason);
+        $this->assertSame(['parent' => 'a/b'], $invalidName->details);
+        $this->assertSame(ConfigParentException::REQUIRED, $required->reason);
+        $this->assertSame(ConfigParentException::AMBIGUOUS, $ambiguous->reason);
+        $this->assertSame(['parent' => 'twice', 'paths' => ['A/twice.json', 'B/twice.json']], $ambiguous->details);
+        $this->assertSame(ConfigParentException::UNREADABLE, $unreadable->reason);
+        $this->assertSame(['parent' => 'broken', 'path' => 'broken.json'], $unreadable->details);
+        $this->assertSame(ConfigParentException::TOO_DEEP, $tooDeep->reason);
+        $this->assertSame(['maxDepth' => ConfigParents::MAX_DEPTH], $tooDeep->details);
+    }
+
     public function testAParentFileThatIsNoValidJsonNamesTheFile(): void
     {
         file_put_contents($this->dir . '/base.json', '{ not json');

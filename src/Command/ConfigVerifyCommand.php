@@ -23,11 +23,12 @@ use Symfony\Component\Process\Process;
     description: 'Checks that config files, merged with their parents, still give the original configs: the '
         . 'versions from a git revision, or from a directory.'
 )]
-final class ConfigVerifyCommand extends Command
+final class ConfigVerifyCommand extends ConfigCommand
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%')]
-        private readonly string $projectDir
+        private readonly string $projectDir,
+        private readonly string $defaultDir = 'ServerManager/configfiles'
     ) {
         parent::__construct();
     }
@@ -44,8 +45,8 @@ final class ConfigVerifyCommand extends Command
                 'dir',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Config root with the parent configs (absolute, or relative to the project dir)',
-                'ServerManager/configfiles'
+                'Config root with the parent configs, anywhere below it (absolute, or relative to the project dir)',
+                $this->defaultDir
             )
             ->addOption(
                 'pattern',
@@ -72,13 +73,17 @@ final class ConfigVerifyCommand extends Command
                 'original-dir',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Take the originals from <dir>/<folder>/<name>.json instead of git'
-            );
+                'Take the originals from a folder, with the same paths below it as the configs have, instead of git'
+            )
+            ->addFormatOption();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $io = new SymfonyStyle($input, $output);
+    protected function perform(
+        InputInterface $input,
+        OutputInterface $output,
+        SymfonyStyle $io,
+        ConfigReport $report
+    ): int {
         $directory = new ConfigDirectory(Path::makeAbsolute((string)$input->getOption('dir'), $this->projectDir));
         $repo = Path::makeAbsolute((string)$input->getOption('repo'), $this->projectDir);
         $originalDir = $input->getOption('original-dir');
@@ -91,14 +96,17 @@ final class ConfigVerifyCommand extends Command
                 $skipped
             );
             foreach ($skipped as $skippedPath => $why) {
-                $io->warning(sprintf('Skipped %s, %s.', $directory->relativePath($skippedPath), $why));
+                $report->warning(
+                    sprintf('Skipped %s, %s.', $directory->relativePath($skippedPath), $why),
+                    'file_skipped',
+                    details: ['path' => $directory->relativePath($skippedPath)]
+                );
             }
         } catch (\Throwable $e) {
-            $io->error($e->getMessage());
-            return Command::FAILURE;
+            return $report->failThrowable($e);
         }
         if ($files === []) {
-            $io->warning('No configs found.');
+            $report->warning('No configs found.', 'no_configs');
             return Command::SUCCESS;
         }
 
@@ -112,6 +120,7 @@ final class ConfigVerifyCommand extends Command
         $failed = 0;
         $rows = [];
         $details = [];
+        $results = [];
         foreach ($files as $id => $path) {
             try {
                 $original = $originalDir === null
@@ -126,11 +135,18 @@ final class ConfigVerifyCommand extends Command
                 $differences = ['Could not compare: ' . strtok($e->getMessage(), "\n")];
             }
             $rows[] = [$id, $differences === [] ? 'same as the original' : 'DIFFERENT'];
+            $results[] = [
+                'id' => $id,
+                'path' => $directory->relativePath($path),
+                'same' => $differences === [],
+                'differences' => $differences,
+            ];
             if ($differences !== []) {
                 $failed++;
                 $details[$id] = $differences;
             }
         }
+        $report->data = ['source' => $source, 'results' => $results, 'failed' => $failed];
         $io->title('Merged with their parents, compared with ' . $source);
         $io->table(['Config', 'Result'], $rows);
         foreach ($details as $id => $differences) {
@@ -138,8 +154,11 @@ final class ConfigVerifyCommand extends Command
             $io->listing($differences);
         }
         if ($failed > 0) {
-            $io->error(sprintf('%d of %d config(s) do not match their original.', $failed, count($files)));
-            return Command::FAILURE;
+            return $report->fail(
+                sprintf('%d of %d config(s) do not match their original.', $failed, count($files)),
+                'verify_failed',
+                details: ['failed' => $failed, 'total' => count($files)]
+            );
         }
         $io->success(sprintf('All %d config(s) give the original config.', count($files)));
         return Command::SUCCESS;
