@@ -81,7 +81,9 @@ jobs:
             target: linux-x64
             spc: spc-linux-x86_64
             micro: buildroot/bin/micro.sfx
-          - os: windows-latest
+          # windows-2022 on purpose: windows-latest has Visual Studio 2026 since June 2026, and static-php-cli (spc 2.8.6)
+          # only knows VS 2019 and 2022 ("Visual Studio not installed"). Change it when spc knows 2026.
+          - os: windows-2022
             target: windows-x64
             spc: spc-windows-x64.exe
             micro: buildroot/bin/micro.sfx
