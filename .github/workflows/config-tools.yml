@@ -104,8 +104,8 @@ jobs:
           path: static-php/micro.sfx
           # static-php-cli is used as it is when this is built: change STATIC_PHP_CACHE_KEY to build it again
           key: micro-${{ matrix.target }}-php${{ env.PHP_VERSION }}-${{ env.STATIC_PHP_CACHE_KEY }}
-      - name: Build the static PHP (micro.sfx)
-        if: steps.cache.outputs.cache-hit != 'true'
+      - name: Build the static PHP (micro.sfx), Linux
+        if: runner.os == 'Linux' && steps.cache.outputs.cache-hit != 'true'
         shell: bash
         run: |
           # the downloads of static-php-cli sometimes answer with a server error (HTTP 500): try a step again
@@ -131,6 +131,32 @@ jobs:
           retry ./${{ matrix.spc }} download --for-extensions="${{ env.STATIC_PHP_EXTENSIONS }}" --with-php=${{ env.PHP_VERSION }} --prefer-pre-built
           ./${{ matrix.spc }} build "${{ env.STATIC_PHP_EXTENSIONS }}" --build-micro
           cp ${{ matrix.micro }} ../static-php/micro.sfx
+      # Windows runs in PowerShell, not in Git Bash: the tar of Git (GNU tar) does not read a path such as D:\a\..., and
+      # static-php-cli needs the tar of Windows (bsdtar, in System32), so System32 is first on the PATH.
+      - name: Build the static PHP (micro.sfx), Windows
+        if: runner.os == 'Windows' && steps.cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:SystemRoot\System32;$env:PATH"
+          # the downloads of static-php-cli sometimes answer with a server error: try a step again
+          function Run([scriptblock]$Command, [int]$Tries = 1) {
+            for ($i = 1; $i -le $Tries; $i++) {
+              & $Command
+              if ($LASTEXITCODE -eq 0) { return }
+              if ($i -lt $Tries) {
+                Write-Host "Attempt $i failed, trying again in 30 seconds..."
+                Start-Sleep -Seconds 30
+              }
+            }
+            throw "Failed: $Command"
+          }
+          New-Item -ItemType Directory -Force -Path spc-work, static-php | Out-Null
+          Set-Location spc-work
+          Run { curl.exe -fsSL --retry 5 --retry-all-errors --retry-delay 10 -o spc.exe https://dl.static-php.dev/static-php-cli/spc-bin/nightly/${{ matrix.spc }} }
+          Run { .\spc.exe doctor --auto-fix } 4
+          Run { .\spc.exe download '--for-extensions=${{ env.STATIC_PHP_EXTENSIONS }}' '--with-php=${{ env.PHP_VERSION }}' --prefer-pre-built } 4
+          Run { .\spc.exe build '${{ env.STATIC_PHP_EXTENSIONS }}' --build-micro }
+          Copy-Item buildroot\bin\micro.sfx ..\static-php\micro.sfx
       # saved right after it is built, not at the end of the job: a failure further on does not lose the build
       - name: Keep the static PHP in the cache
         if: steps.cache.outputs.cache-hit != 'true'
