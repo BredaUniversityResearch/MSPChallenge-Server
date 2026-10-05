@@ -26,11 +26,12 @@ permissions:
 
 env:
   PHP_VERSION: '8.4'
-  # what the PHP inside the executables has to have: phar (to run the phar) and mbstring. The rest that the packages
-  # want (ctype, intl, iconv) they do themselves, with polyfills.
-  STATIC_PHP_EXTENSIONS: 'phar,mbstring'
+  # what the PHP inside the executables has to have: phar (to run the phar), mbstring, and filter (the JSON schema library
+  # calls filter_var: found when validate failed in the first executable). The rest that the packages want (ctype, intl)
+  # they do themselves, with polyfills.
+  STATIC_PHP_EXTENSIONS: 'phar,mbstring,filter'
   # the same list for the cache key (a key can not have commas): change both together. Add -2, -3 to build it again.
-  STATIC_PHP_CACHE_KEY: 'phar-mbstring-1'
+  STATIC_PHP_CACHE_KEY: 'phar-mbstring-filter-1'
 
 jobs:
   # The phar is the same everywhere (it needs a PHP 8.4): it is built once, and tried.
