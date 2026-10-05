@@ -108,12 +108,27 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         shell: bash
         run: |
+          # the downloads of static-php-cli sometimes answer with a server error (HTTP 500): try a step again
+          retry() {
+            local attempt=1
+            until "$@"; do
+              if [ "$attempt" -ge 4 ]; then
+                echo "Giving up after $attempt attempts: $*"
+                return 1
+              fi
+              echo "Attempt $attempt failed: $*. Trying again in 30 seconds..."
+              attempt=$((attempt + 1))
+              sleep 30
+            done
+          }
           mkdir -p spc-work static-php
           cd spc-work
-          curl -fsSL -o ${{ matrix.spc }} https://dl.static-php.dev/static-php-cli/spc-bin/nightly/${{ matrix.spc }}
+          curl -fsSL --retry 5 --retry-all-errors --retry-delay 10 -o ${{ matrix.spc }} \
+            https://dl.static-php.dev/static-php-cli/spc-bin/nightly/${{ matrix.spc }}
           chmod +x ${{ matrix.spc }}
-          ./${{ matrix.spc }} doctor --auto-fix
-          ./${{ matrix.spc }} download --for-extensions="${{ env.STATIC_PHP_EXTENSIONS }}" --with-php=${{ env.PHP_VERSION }} --prefer-pre-built
+          # doctor and download do what is not done yet, so doing them again after a failure is fine
+          retry ./${{ matrix.spc }} doctor --auto-fix
+          retry ./${{ matrix.spc }} download --for-extensions="${{ env.STATIC_PHP_EXTENSIONS }}" --with-php=${{ env.PHP_VERSION }} --prefer-pre-built
           ./${{ matrix.spc }} build "${{ env.STATIC_PHP_EXTENSIONS }}" --build-micro
           cp ${{ matrix.micro }} ../static-php/micro.sfx
       # saved right after it is built, not at the end of the job: a failure further on does not lose the build
