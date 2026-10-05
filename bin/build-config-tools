@@ -458,10 +458,11 @@ function smokeTest(?string $phar, ?string $exe, string $version): void
         "$what merge does not merge with the parent"
     );
     $invalid = $json(['app:config:validate', 'NS/ns.json'], 1);
-    $codes = array_column($invalid['data']['results'][0]['errors'] ?? [], 'code');
+    $errors = $invalid['data']['results'][0]['errors'] ?? [];
     check(
-        in_array('invalid_config', $codes, true),
-        "$what validate does not have the schema: " . implode(', ', $codes)
+        in_array('invalid_config', array_column($errors, 'code'), true),
+        "$what validate does not have the schema, it says: "
+        . substr((string)json_encode($errors, JSON_UNESCAPED_SLASHES), 0, 1500)
     );
     $missing = $json(['app:config:merge', 'nope.json'], 1);
     check(($missing['errors'][0]['code'] ?? null) === 'file_not_found', "$what merge of a missing file: wrong error");
