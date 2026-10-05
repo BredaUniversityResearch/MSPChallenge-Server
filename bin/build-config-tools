@@ -464,6 +464,18 @@ function smokeTest(?string $phar, ?string $exe, string $version): void
         "$what validate does not have the schema, it says: "
         . substr((string)json_encode($errors, JSON_UNESCAPED_SLASHES), 0, 1500)
     );
+    // the text for people uses other parts of the packages (tables, wrapped blocks): a runtime that lacks something
+    // finds out here, and not when somebody runs the tool without --format=json
+    [$code, $out, $err] = capture(array_merge($command, ['app:config:list']), $dir);
+    check(
+        $code === 0 && str_contains($out, 'Configs') && str_contains($out, 'NS/ns'),
+        "$what list in text mode gave exit code $code:\n" . trim($out . "\n" . $err)
+    );
+    [$code, $out, $err] = capture(array_merge($command, ['app:config:validate', 'NS/ns.json']), $dir);
+    check(
+        $code === 1 && str_contains($out, 'NS/ns') && str_contains($out, 'not valid'),
+        "$what validate in text mode gave exit code $code:\n" . trim($out . "\n" . $err)
+    );
     $missing = $json(['app:config:merge', 'nope.json'], 1);
     check(($missing['errors'][0]['code'] ?? null) === 'file_not_found', "$what merge of a missing file: wrong error");
     remove($dir);
