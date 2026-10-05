@@ -47,6 +47,13 @@ main($argv);
 function main(array $argv): void
 {
     $options = parseOptions(array_slice($argv, 1));
+    // the smoke test starts what was built from another folder: a path that is relative to where this script was
+    // started would not be found there
+    foreach (['root', 'output', 'vendor', 'from-phar', 'micro', 'bundle-php'] as $name) {
+        if (isset($options[$name]) && is_string($options[$name])) {
+            $options[$name] = absolutePath($options[$name]);
+        }
+    }
     if (!isset($options['check']) && !isset($options['from-phar']) && ini_get('phar.readonly')) {
         // PHP only writes a phar when phar.readonly is off, and the default is on: run this script again with it off
         $again = escapeshellarg(PHP_BINARY) . ' -d phar.readonly=0 ' . escapeshellarg(__FILE__);
@@ -63,6 +70,16 @@ function main(array $argv): void
         fail("The config tools are not self-contained:\n  - " . implode("\n  - ", $problems));
     }
     say(sprintf('The config tools are self-contained (%d files).', count($files)));
+    $ignored = ignoredBuildFiles($root);
+    if ($ignored !== []) {
+        fail(
+            "A .gitignore keeps these files out of git, so the CI would not have them:\n  - "
+            . implode("\n  - ", $ignored)
+            . "\nA pattern such as `composer.json` in the root .gitignore matches at every depth: write "
+            . "`/composer.json` and `/composer.lock` there (only the root symlinks of the Symfony version switch), or "
+            . "un-ignore them in build/config-tools/.gitignore with `!composer.json` and `!composer.lock`."
+        );
+    }
     if (isset($options['check'])) {
         return;
     }
@@ -154,6 +171,28 @@ function stagedFiles(string $root): array
     }
     ksort($files);
     return $files;
+}
+
+/**
+ * The files that the build needs from git, and that a .gitignore keeps out of it (the root one ignores composer.json
+ * and composer.lock for the switch of the Symfony version): the build would work here, and fail in the CI. Nothing is
+ * said when git is not there, or the project is not a git repository.
+ *
+ * @return string[]
+ */
+function ignoredBuildFiles(string $root): array
+{
+    $ignored = [];
+    foreach (['build/config-tools/composer.json', 'build/config-tools/composer.lock'] as $file) {
+        if (!is_file($root . '/' . $file)) {
+            continue;
+        }
+        [$code] = capture(['git', '-C', $root, 'check-ignore', '-q', $file], null);
+        if ($code === 0) { // 0: ignored, 1: not ignored, anything else: no git, or no repository
+            $ignored[] = $file;
+        }
+    }
+    return $ignored;
 }
 
 /**
@@ -465,6 +504,18 @@ function parseOptions(array $arguments): array
         $options[$match[1]] = $match[2] ?? true;
     }
     return $options;
+}
+
+/**
+ * A path as an absolute one, with slashes, relative to the folder the script was started in.
+ */
+function absolutePath(string $path): string
+{
+    $path = str_replace('\\', '/', $path);
+    if (str_starts_with($path, '/') || preg_match('#^[A-Za-z]:/#', $path)) {
+        return rtrim($path, '/') === '' ? '/' : rtrim($path, '/');
+    }
+    return rtrim(str_replace('\\', '/', (string)getcwd()), '/') . '/' . preg_replace('#^\./#', '', rtrim($path, '/'));
 }
 
 function gitVersion(string $root): string
