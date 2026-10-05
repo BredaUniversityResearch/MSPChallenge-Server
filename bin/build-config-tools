@@ -1,0 +1,585 @@
+#!/usr/bin/env php
+<?php
+
+// Builds the config tools without the server: config-tools.phar, and (when a runtime is given) an executable that has
+// PHP in it, or a zip with PHP next to the phar. The same script runs on a developer machine and in the CI.
+// See docs/building-config-tools.md.
+//
+//   php bin/build-config-tools --check                    is the code of the tools self-contained? (offline, fast)
+//   php bin/build-config-tools                            config-tools.phar (needs composer, and PHP 8.4 for the phar)
+//   php bin/build-config-tools --micro=micro.sfx          + config-tools-<target>[.exe]: the phar inside static PHP
+//   php bin/build-config-tools --bundle-php=C:\php\php.exe + config-tools-<target>.zip: PHP next to the phar
+//
+// Options:
+//   --check            only check that the code of the tools uses nothing but its own classes and the packages of
+//                      build/config-tools/composer.json; writes nothing
+//   --root=DIR         the project to build from (default: the one this script is in)
+//   --version=X        the version that `config-tools --version` says (default: git describe, or "dev")
+//   --output=DIR       where the results go (default: build/dist)
+//   --vendor=DIR       use this vendor folder instead of running composer (offline, or to try things)
+//   --from-phar=FILE   do not build the phar: use this one (to put it in a runtime of another system)
+//   --micro=FILE       a micro.sfx (static PHP, micro SAPI) to put the phar in
+//   --bundle-php=FILE  a php binary: its folder is put in a zip next to the phar (meant for Windows)
+//   --target=NAME      what the executable is for: windows-x64, linux-x64, linux-arm64, macos-x64, macos-arm64
+//                      (default: this machine)
+//   --no-smoke         do not try what was built
+//   --keep-stage       keep build/stage (to look at what is in the phar)
+
+declare(strict_types=1);
+
+/** The packages the tools may use (the namespaces of build/config-tools/composer.json), and the attribute only. */
+const ALLOWED_VENDOR = [
+    'Symfony\\Component\\Console',
+    'Symfony\\Component\\Filesystem',
+    'Symfony\\Component\\Finder',
+    'Symfony\\Component\\Process',
+    // an attribute is only read when somebody asks for it: the tools do not, so the package is not needed
+    'Symfony\\Component\\DependencyInjection\\Attribute',
+    'Psr\\Cache',
+    'JsonSchema',
+];
+
+main($argv);
+
+/**
+ * @param string[] $argv
+ */
+function main(array $argv): void
+{
+    $options = parseOptions(array_slice($argv, 1));
+    if (!isset($options['check']) && !isset($options['from-phar']) && ini_get('phar.readonly')) {
+        // PHP only writes a phar when phar.readonly is off, and the default is on: run this script again with it off
+        $again = escapeshellarg(PHP_BINARY) . ' -d phar.readonly=0 ' . escapeshellarg(__FILE__);
+        foreach (array_slice($argv, 1) as $argument) {
+            $again .= ' ' . escapeshellarg($argument);
+        }
+        exit(run($again, null));
+    }
+    $root = rtrim(str_replace('\\', '/', $options['root'] ?? dirname(__DIR__)), '/');
+    $files = stagedFiles($root);
+
+    $problems = checkSelfContained($files);
+    if ($problems !== []) {
+        fail("The config tools are not self-contained:\n  - " . implode("\n  - ", $problems));
+    }
+    say(sprintf('The config tools are self-contained (%d files).', count($files)));
+    if (isset($options['check'])) {
+        return;
+    }
+
+    $version = (string)($options['version'] ?? gitVersion($root));
+    $output = rtrim(str_replace('\\', '/', $options['output'] ?? $root . '/build/dist'), '/');
+    $stage = $root . '/build/stage';
+    $target = (string)($options['target'] ?? thisTarget());
+
+    @mkdir($output, 0777, true);
+    if (isset($options['from-phar'])) {
+        $phar = (string)$options['from-phar'];
+        if (!is_file($phar)) {
+            fail("Cannot find the phar: $phar");
+        }
+    } else {
+        stage($root, $stage, $files, isset($options['vendor']) ? (string)$options['vendor'] : null);
+        say("Building config-tools.phar $version...");
+        $phar = makePhar($stage, $version);
+    }
+    $artifacts = [];
+    if (realpath($phar) !== realpath($output . '/config-tools.phar')) {
+        copy($phar, $output . '/config-tools.phar');
+    }
+    $artifacts['config-tools.phar'] = $output . '/config-tools.phar';
+
+    $exe = null;
+    if (isset($options['micro'])) {
+        $exe = $output . '/config-tools-' . $target . (str_starts_with($target, 'windows') ? '.exe' : '');
+        embed((string)$options['micro'], $phar, $exe, $target);
+        $artifacts[basename($exe)] = $exe;
+    }
+    if (isset($options['bundle-php'])) {
+        $zip = $output . '/config-tools-' . $target . '.zip';
+        bundle((string)$options['bundle-php'], $phar, $zip, $target);
+        $artifacts[basename($zip)] = $zip;
+    }
+
+    $sums = '';
+    foreach ($artifacts as $name => $path) {
+        $sums .= hash_file('sha256', $path) . '  ' . $name . "\n";
+    }
+    file_put_contents($output . '/SHA256SUMS', $sums);
+    if (!isset($options['keep-stage']) && !isset($options['from-phar'])) {
+        remove($stage);
+    }
+
+    if (!isset($options['no-smoke'])) {
+        smokeTest($artifacts['config-tools.phar'], null, $version); // what was built, not what was staged
+        if ($exe !== null && $target === thisTarget()) {
+            smokeTest(null, $exe, $version); // an executable of another system can not be tried here
+        }
+    }
+    say("\nDone. In $output:");
+    foreach ($artifacts as $name => $path) {
+        say(sprintf('  %-34s %6.1f MB', $name, filesize($path) / 1048576));
+    }
+    say('  SHA256SUMS');
+}
+
+// ------------------------------------------------------------------------------------------- what goes in
+
+/**
+ * The files of the tools: path in the project and in the phar => path on disk.
+ *
+ * @return array<string, string>
+ */
+function stagedFiles(string $root): array
+{
+    $files = [];
+    $add = static function (string $relative) use ($root, &$files): void {
+        if (!is_file($root . '/' . $relative)) {
+            fail("Missing $relative in $root");
+        }
+        $files[$relative] = $root . '/' . $relative;
+    };
+    $add('bin/config-tools');
+    $add('src/Domain/SessionConfigJSONSchema.json');
+    foreach (glob($root . '/src/Command/Config*.php') ?: [] as $file) {
+        $add('src/Command/' . basename($file));
+    }
+    foreach (['src/ConfigTools', 'src/Domain/Config'] as $directory) {
+        if (!is_dir($root . '/' . $directory)) {
+            fail("Missing $directory in $root");
+        }
+        foreach (listFiles($root . '/' . $directory) as $file) {
+            $add(ltrim(substr($file, strlen($root)), '/'));
+        }
+    }
+    ksort($files);
+    return $files;
+}
+
+/**
+ * The tools are built from a part of the source of the server. That part may only use itself and the packages that are
+ * in build/config-tools/composer.json, or the phar would not run: say so while it is a small fix.
+ *
+ * @param array<string, string> $files
+ * @return string[] what is wrong
+ */
+function checkSelfContained(array $files): array
+{
+    $problems = [];
+    foreach ($files as $relative => $path) {
+        if (!str_ends_with($relative, '.php')) {
+            continue;
+        }
+        $code = (string)file_get_contents($path);
+        // classes of the project that are used (use statements, and a name that is written out)
+        preg_match_all('/^use (App\\\\[A-Za-z0-9_\\\\]+)(?: as \w+)?;/m', $code, $uses);
+        preg_match_all('/(?<![A-Za-z0-9_])\\\\?(App\\\\[A-Za-z0-9_\\\\]+)/', stripUses($code), $named);
+        foreach (array_unique(array_merge($uses[1], $named[1])) as $class) {
+            $classFile = 'src/' . str_replace('\\', '/', substr($class, 4)) . '.php';
+            if (!isset($files[$classFile]) && !classIsANamespaceOfStagedFiles($class, $files)) {
+                $problems[] = "$relative uses $class, that is not part of the tools ($classFile)";
+            }
+        }
+        // classes of other packages
+        $vendorPattern = '/(?<![A-Za-z0-9_])\\\\?((?:Symfony|Doctrine|Psr|JsonSchema|Twig|Monolog)'
+            . '\\\\[A-Za-z0-9_\\\\]+)/';
+        preg_match_all($vendorPattern, $code, $vendors);
+        foreach (array_unique($vendors[1]) as $class) {
+            $allowed = false;
+            foreach (ALLOWED_VENDOR as $prefix) {
+                $allowed = $allowed || str_starts_with($class, $prefix);
+            }
+            if (!$allowed) {
+                $problems[] = "$relative uses $class: add its package to build/config-tools/composer.json and to "
+                    . 'ALLOWED_VENDOR in bin/build-config-tools, or do not use it';
+            }
+        }
+    }
+    sort($problems);
+    return array_values(array_unique($problems));
+}
+
+function stripUses(string $code): string
+{
+    return (string)preg_replace('/^(?:use|namespace) [^;]+;/m', '', $code);
+}
+
+/**
+ * @param array<string, string> $files
+ */
+function classIsANamespaceOfStagedFiles(string $name, array $files): bool
+{
+    // "App\Domain\Config" in `use App\Domain\Config\Split;` can be a folder: a name that is a namespace of files
+    $folder = 'src/' . str_replace('\\', '/', substr($name, 4)) . '/';
+    foreach (array_keys($files) as $file) {
+        if (str_starts_with($file, $folder)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * @param array<string, string> $files
+ */
+function stage(string $root, string $stage, array $files, ?string $vendor): void
+{
+    remove($stage);
+    foreach ($files as $relative => $path) {
+        @mkdir(dirname($stage . '/' . $relative), 0777, true);
+        copy($path, $stage . '/' . $relative);
+    }
+    $composer = $root . '/build/config-tools/composer.json';
+    if (!is_file($composer)) {
+        fail("Missing build/config-tools/composer.json in $root");
+    }
+    copy($composer, $stage . '/composer.json');
+    if (is_file($root . '/build/config-tools/composer.lock')) {
+        copy($root . '/build/config-tools/composer.lock', $stage . '/composer.lock');
+    }
+    if ($vendor !== null) {
+        say("Using the packages in $vendor");
+        copyTree($vendor, $stage . '/vendor');
+        return;
+    }
+    say('Installing the packages with composer...');
+    $code = run(
+        'composer install --no-dev --no-interaction --no-progress --prefer-dist --optimize-autoloader '
+        . '--classmap-authoritative',
+        $stage
+    );
+    if ($code !== 0) {
+        fail('composer install failed (is composer installed? it is needed to build, not to use the tools)');
+    }
+}
+
+// ------------------------------------------------------------------------------------------------- the phar
+
+/**
+ * Makes the phar of what is in the stage, with PHP's own Phar class (no other tool is needed): the files of the tools
+ * and of the packages that run, and not their tests and docs. Not only the php files: Symfony Console reads the shell
+ * completion scripts in its Resources folder when it starts. Without compression, so that a runtime without zlib can
+ * read it, and it is only some megabytes.
+ */
+function makePhar(string $stage, string $version): string
+{
+    $file = $stage . '/config-tools.phar';
+    @unlink($file);
+    $phar = new Phar($file, 0, 'config-tools.phar');
+    $phar->startBuffering();
+    $count = 0;
+    foreach (listFiles($stage) as $path) {
+        $relative = ltrim(substr($path, strlen($stage)), '/');
+        if (!pharContains($relative)) {
+            continue;
+        }
+        $content = (string)file_get_contents($path);
+        if ($relative === 'bin/config-tools') {
+            // the shebang line is for the shell: in a file that is included it would be written to the output
+            $content = (string)preg_replace('/^#!.*\R/', '', $content, 1);
+        }
+        if (str_ends_with($relative, '.php')) {
+            $content = str_replace('@git-version@', $version, $content); // the version that --version says
+        }
+        $phar->addFromString($relative, $content);
+        $count++;
+    }
+    $phar->setStub(
+        "#!/usr/bin/env php\n<?php\nPhar::mapPhar('config-tools.phar');\n"
+        . "\$_SERVER['SCRIPT_FILENAME'] = 'phar://config-tools.phar/bin/config-tools';\n"
+        . "require 'phar://config-tools.phar/bin/config-tools';\n__HALT_COMPILER();\n"
+    );
+    $phar->stopBuffering();
+    unset($phar); // let go of the file, or Windows does not let it be moved or removed
+    gc_collect_cycles();
+    chmod($file, 0755);
+    if (!is_file($file)) {
+        fail('The phar was not written');
+    }
+    say(sprintf('Wrote config-tools.phar: %d files, %.1f MB', $count, filesize($file) / 1048576));
+    return $file;
+}
+
+/**
+ * Does a file of the stage go in the phar? Everything of our own, and of the packages what runs.
+ */
+function pharContains(string $relative): bool
+{
+    if ($relative === 'bin/config-tools' || str_starts_with($relative, 'src/')) {
+        return true;
+    }
+    if (!str_starts_with($relative, 'vendor/')) {
+        return false; // composer.json and the like
+    }
+    foreach (explode('/', $relative) as $segment) {
+        if (in_array($segment, ['Tests', 'tests', 'Test', 'test', 'Fixtures', 'docs', 'bin'], true)) {
+            return false;
+        }
+    }
+    $name = basename($relative);
+    return !preg_match('/\.(md|dist|xml|yml)$|^(LICENSE|CHANGELOG)|^\.git/', $name);
+}
+
+// --------------------------------------------------------------------------------------------- the runtime
+
+/**
+ * The phar behind a micro.sfx (static PHP, micro SAPI) is one file that runs without PHP on the machine.
+ */
+function embed(string $micro, string $phar, string $exe, string $target): void
+{
+    if (!is_file($micro)) {
+        fail("Cannot find the micro.sfx: $micro");
+    }
+    $head = (string)file_get_contents($micro, false, null, 0, 4);
+    $ok = match (true) {
+        str_starts_with($target, 'windows') => str_starts_with($head, 'MZ'),
+        str_starts_with($target, 'linux') => $head === "\x7fELF",
+        default => in_array(bin2hex($head), ['cffaedfe', 'cafebabe', 'feedfacf'], true),
+    };
+    if (!$ok) {
+        fail(
+            "$micro does not look like a micro.sfx for $target "
+            . '(the first bytes are not those of an executable of that system)'
+        );
+    }
+    file_put_contents($exe, file_get_contents($micro) . file_get_contents($phar));
+    chmod($exe, 0755);
+    say('Put the phar in ' . basename($micro) . ': ' . basename($exe));
+}
+
+/**
+ * PHP next to the phar, in a zip, with a script that starts it: for a PHP that is not static (windows.php.net).
+ */
+function bundle(string $php, string $phar, string $zip, string $target): void
+{
+    if (!is_file($php)) {
+        fail("Cannot find the php binary: $php");
+    }
+    @unlink($zip);
+    $archive = new PharData($zip, 0, null, Phar::ZIP);
+    $archive->addFile($phar, 'config-tools.phar');
+    $folder = rtrim(str_replace('\\', '/', dirname($php)), '/');
+    foreach (listFiles($folder) as $file) {
+        $archive->addFile($file, 'php/' . ltrim(substr($file, strlen($folder)), '/'));
+    }
+    $name = basename($php);
+    if (str_starts_with($target, 'windows')) {
+        $archive->addFromString(
+            'config-tools.cmd',
+            "@echo off\r\n\"%~dp0php\\$name\" \"%~dp0config-tools.phar\" %*\r\n"
+        );
+    } else {
+        $archive->addFromString(
+            'config-tools',
+            "#!/bin/sh\nexec \"\$(dirname \"\$0\")/php/$name\" \"\$(dirname \"\$0\")/config-tools.phar\" \"\$@\"\n"
+        );
+    }
+    say('Put PHP and the phar in ' . basename($zip));
+}
+
+// ------------------------------------------------------------------------------------------------ try it
+
+/**
+ * Runs what was built on a few small configs: it starts, it knows its version, it finds a parent and merges, and it
+ * has the schema (validating a config that is not valid says so with the code invalid_config: without the schema in
+ * the phar it would say that it could not read it).
+ */
+function smokeTest(?string $phar, ?string $exe, string $version): void
+{
+    $command = $exe !== null ? [$exe] : [PHP_BINARY, $phar];
+    $what = $exe !== null ? basename($exe) : 'config-tools.phar';
+    $dir = sys_get_temp_dir() . '/config-tools-smoke-' . bin2hex(random_bytes(4));
+    @mkdir($dir . '/NS', 0777, true);
+    file_put_contents($dir . '/generic.json', '{"metadata": {"config_version": "2.0.0"}, "datamodel": {"meta": '
+        . '[{"msp_config_generic_name": "A", "layer_category": "x"}]}}');
+    file_put_contents($dir . '/NS/ns.json', '{"metadata": {"parent": "generic"}, "datamodel": {"meta": '
+        . '[{"msp_config_generic_name": "A", "layer_name": "NS_A"}]}}');
+    $json = static function (array $arguments, int $exit) use ($command, $dir, $what): array {
+        [$code, $out, $err] = capture(array_merge($command, $arguments, ['--format=json']), $dir);
+        $document = json_decode($out, true);
+        if ($code !== $exit || !is_array($document) || ($document['exitCode'] ?? null) !== $exit) {
+            fail("$what " . implode(' ', $arguments) . " gave exit code $code, expected $exit:\n$out\n$err");
+        }
+        return $document;
+    };
+
+    [$code, $out, $err] = capture(array_merge($command, ['--version']), $dir);
+    check(
+        $code === 0 && str_contains($out, $version),
+        "$what --version gave exit code $code and says: " . trim($out) . " (expected $version)\n" . trim($err)
+    );
+    $list = $json(['app:config:list'], 0);
+    $found = ($list['data']['summary']['configs'] ?? null) === 1
+        && ($list['data']['configs'][0]['chain'] ?? null) === ['generic'];
+    check($found, "$what list does not find the config and its parent");
+    $merge = $json(['app:config:merge', 'NS/ns.json'], 0);
+    check(
+        ($merge['data']['config']['datamodel']['meta'][0]['layer_category'] ?? null) === 'x'
+            && !isset($merge['data']['config']['metadata']['parent']),
+        "$what merge does not merge with the parent"
+    );
+    $invalid = $json(['app:config:validate', 'NS/ns.json'], 1);
+    $codes = array_column($invalid['data']['results'][0]['errors'] ?? [], 'code');
+    check(
+        in_array('invalid_config', $codes, true),
+        "$what validate does not have the schema: " . implode(', ', $codes)
+    );
+    $missing = $json(['app:config:merge', 'nope.json'], 1);
+    check(($missing['errors'][0]['code'] ?? null) === 'file_not_found', "$what merge of a missing file: wrong error");
+    remove($dir);
+    say("Tried $what: it starts, merges, validates and fails the way it should.");
+}
+
+function check(bool $ok, string $message): void
+{
+    if (!$ok) {
+        fail($message);
+    }
+}
+
+// ------------------------------------------------------------------------------------------------- helpers
+
+/**
+ * @param string[] $arguments
+ * @return array<string, string|true>
+ */
+function parseOptions(array $arguments): array
+{
+    $options = [];
+    foreach ($arguments as $argument) {
+        if ($argument === '--help' || $argument === '-h') {
+            $text = (string)file_get_contents(__FILE__);
+            echo trim(preg_replace('/^#!.*\n<\?php\n\n|\ndeclare\(strict_types=1\);.*$/s', '', $text) ?? '') . "\n";
+            exit(0);
+        }
+        if (!preg_match('/^--([a-z-]+)(?:=(.*))?$/', $argument, $match)) {
+            fail("Unknown argument: $argument (see --help)");
+        }
+        $known = [
+            'check', 'root', 'version', 'output', 'vendor', 'from-phar', 'micro', 'bundle-php', 'target',
+            'no-smoke', 'keep-stage',
+        ];
+        if (!in_array($match[1], $known, true)) {
+            fail("Unknown option: --{$match[1]} (see --help)");
+        }
+        $options[$match[1]] = $match[2] ?? true;
+    }
+    return $options;
+}
+
+function gitVersion(string $root): string
+{
+    [$code, $out] = capture(['git', '-C', $root, 'describe', '--tags', '--always'], null);
+    return $code === 0 && trim($out) !== '' ? ltrim(trim($out), 'v') : 'dev';
+}
+
+function thisTarget(): string
+{
+    $arm = in_array(strtolower(php_uname('m')), ['arm64', 'aarch64'], true);
+    return match (PHP_OS_FAMILY) {
+        'Windows' => 'windows-x64',
+        'Darwin' => $arm ? 'macos-arm64' : 'macos-x64',
+        default => $arm ? 'linux-arm64' : 'linux-x64',
+    };
+}
+
+/**
+ * Runs a command (in a shell, so that composer works on Windows too) and shows what it says.
+ */
+function run(string $command, ?string $cwd): int
+{
+    $process = proc_open($command, [0 => STDIN, 1 => STDOUT, 2 => STDERR], $pipes, $cwd);
+    return is_resource($process) ? proc_close($process) : 127;
+}
+
+/**
+ * Runs a program and keeps what it says.
+ *
+ * @param string[] $command
+ * @return array{0: int, 1: string, 2: string} the exit code, stdout and stderr
+ */
+function capture(array $command, ?string $cwd): array
+{
+    $process = @proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $cwd);
+    if (!is_resource($process)) {
+        return [127, '', 'could not start ' . $command[0]];
+    }
+    $out = (string)stream_get_contents($pipes[1]);
+    $err = (string)stream_get_contents($pipes[2]);
+    return [proc_close($process), $out, $err];
+}
+
+function copyTree(string $from, string $to): void
+{
+    $from = rtrim(str_replace('\\', '/', $from), '/');
+    foreach (listFiles($from) as $file) {
+        $target = $to . substr($file, strlen($from));
+        @mkdir(dirname($target), 0777, true);
+        copy($file, $target);
+    }
+}
+
+/**
+ * All the files below a folder, with slashes, in order.
+ *
+ * @return string[]
+ */
+function listFiles(string $folder): array
+{
+    $folder = rtrim(str_replace('\\', '/', $folder), '/');
+    $files = [];
+    foreach (scandir($folder) ?: [] as $entry) {
+        if ($entry === '.' || $entry === '..') {
+            continue;
+        }
+        $path = $folder . '/' . $entry;
+        if (is_dir($path) && !is_link($path)) {
+            array_push($files, ...listFiles($path));
+        } else {
+            $files[] = $path;
+        }
+    }
+    return $files;
+}
+
+function remove(string $path): void
+{
+    // on Windows a file that was just written can be locked for a moment (a virus scanner, the indexer): try again
+    for ($try = 0; $try < 5 && file_exists($path); $try++) {
+        if ($try > 0) {
+            usleep(300000);
+        }
+        removeOnce($path);
+    }
+    if (file_exists($path)) {
+        fwrite(STDERR, "Could not remove $path (it is left there: remove it by hand)\n");
+    }
+}
+
+function removeOnce(string $path): void
+{
+    if (!file_exists($path)) {
+        return;
+    }
+    if (is_file($path) || is_link($path)) {
+        @unlink($path);
+        return;
+    }
+    foreach (scandir($path) ?: [] as $entry) {
+        if ($entry !== '.' && $entry !== '..') {
+            removeOnce($path . '/' . $entry);
+        }
+    }
+    @rmdir($path);
+}
+
+function say(string $message): void
+{
+    echo $message . "\n";
+}
+
+function fail(string $message): never
+{
+    fwrite(STDERR, $message . "\n");
+    exit(1);
+}

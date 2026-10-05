@@ -1,0 +1,150 @@
+# Builds the config tools without the server (config-tools.phar, and executables with PHP in them) and releases them.
+# The same build script runs here and on a developer machine: bin/build-config-tools (see docs/building-config-tools.md).
+#
+#   - on a pull request that touches the config tools: checks them and builds them (nothing is released)
+#   - on a tag config-tools-v1.2.3: builds, tries what was built, and makes a GitHub release with the files
+#   - by hand (Run workflow): builds, the files are in the run (Artifacts)
+name: Config tools
+
+on:
+  push:
+    tags: ['config-tools-v*']
+  pull_request:
+    paths:
+      - 'bin/config-tools'
+      - 'bin/build-config-tools'
+      - 'build/config-tools/**'
+      - 'src/Command/Config*.php'
+      - 'src/ConfigTools/**'
+      - 'src/Domain/Config/**'
+      - 'src/Domain/SessionConfigJSONSchema.json'
+      - '.github/workflows/config-tools.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PHP_VERSION: '8.4'
+  # what the PHP inside the executables has to have: phar (to run the phar) and mbstring. The rest that the packages
+  # want (ctype, intl, iconv) they do themselves, with polyfills.
+  STATIC_PHP_EXTENSIONS: 'phar,mbstring'
+
+jobs:
+  # The phar is the same everywhere (it needs a PHP 8.4): it is built once, and tried.
+  phar:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          tools: composer:v2
+          coverage: none
+      - name: Version
+        id: version
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/config-tools-v* ]]; then
+            echo "version=${GITHUB_REF#refs/tags/config-tools-v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=dev-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Is the code of the tools self-contained?
+        run: php bin/build-config-tools --check
+      - name: Build config-tools.phar, and try it
+        run: php bin/build-config-tools --version=${{ steps.version.outputs.version }} --output=dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: config-tools-phar
+          path: dist/config-tools.phar
+          if-no-files-found: error
+
+  # The executables have PHP in them (static PHP, the micro SAPI of static-php-cli, with the phar behind it): they run
+  # on a machine without PHP. Building that PHP is the part that depends on other software (static-php-cli, and on
+  # Windows Visual Studio): when it fails the phar is still released.
+  executable:
+    needs: phar
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux-x64
+            spc: spc-linux-x86_64
+            micro: buildroot/bin/micro.sfx
+          - os: windows-latest
+            target: windows-x64
+            spc: spc-windows-x64.exe
+            micro: buildroot/bin/micro.sfx
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          coverage: none
+      - uses: actions/download-artifact@v4
+        with:
+          name: config-tools-phar
+          path: dist
+      - name: Cache the static PHP
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: static-php/micro.sfx
+          # change the last number to build it again (static-php-cli is used as it is when this is built)
+          key: micro-${{ matrix.target }}-php${{ env.PHP_VERSION }}-${{ env.STATIC_PHP_EXTENSIONS }}-1
+      - name: Build the static PHP (micro.sfx)
+        if: steps.cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          mkdir -p spc-work static-php
+          cd spc-work
+          curl -fsSL -o ${{ matrix.spc }} https://dl.static-php.dev/static-php-cli/spc-bin/nightly/${{ matrix.spc }}
+          chmod +x ${{ matrix.spc }}
+          ./${{ matrix.spc }} doctor --auto-fix
+          ./${{ matrix.spc }} download --for-extensions="${{ env.STATIC_PHP_EXTENSIONS }}" --with-php=${{ env.PHP_VERSION }} --prefer-pre-built
+          ./${{ matrix.spc }} build "${{ env.STATIC_PHP_EXTENSIONS }}" --build-micro
+          cp ${{ matrix.micro }} ../static-php/micro.sfx
+      - name: Put the phar in the static PHP, and try the executable
+        shell: bash
+        run: |
+          php bin/build-config-tools --from-phar=dist/config-tools.phar --micro=static-php/micro.sfx \
+            --target=${{ matrix.target }} --version=${{ needs.phar.outputs.version }} --output=dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: config-tools-${{ matrix.target }}
+          path: |
+            dist/config-tools-${{ matrix.target }}*
+          if-no-files-found: error
+
+  release:
+    if: ${{ always() && needs.phar.result == 'success' && startsWith(github.ref, 'refs/tags/config-tools-v') }}
+    needs: [phar, executable]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - name: Checksums of everything that is in the release
+        run: |
+          cd artifacts
+          sha256sum config-tools* > SHA256SUMS
+          cat SHA256SUMS
+      - name: Make the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" artifacts/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Config tools ${GITHUB_REF_NAME#config-tools-v}" \
+            --generate-notes

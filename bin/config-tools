@@ -10,6 +10,10 @@ if (PHP_VERSION_ID < 80400) {
     exit(1);
 }
 
+// a PHP without a php.ini (such as the one inside the executable) allows 128 MB, and a large config is read, merged and
+// compared as a whole: make room, for the one process of this tool (CONFIG_TOOLS_MEMORY_LIMIT changes it)
+ini_set('memory_limit', getenv('CONFIG_TOOLS_MEMORY_LIMIT') ?: '1G');
+
 // the autoloader of the project, or of the project that has this one as a dependency
 $autoloader = null;
 foreach ([__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php'] as $candidate) {

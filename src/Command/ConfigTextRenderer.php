@@ -190,7 +190,11 @@ final class ConfigTextRenderer
                 self::str(self::arr($config, 'problem'), 'message'),
             ];
         }
-        $io->table(['Config', 'Kind', 'Parents', 'Layers', 'Problem'], $rows);
+        if ($rows === []) {
+            $io->writeln('None: no config found.');
+        } else {
+            $io->table(['Config', 'Kind', 'Parents', 'Layers', 'Problem'], $rows);
+        }
 
         $io->section('Generic configs (parents)');
         $rows = [];
@@ -205,7 +209,11 @@ final class ConfigTextRenderer
                 self::str(self::arr($parent, 'problem'), 'message'),
             ];
         }
-        $io->table(['Name', 'File', 'Parent', 'Layers', 'Used by', 'Problem'], $rows);
+        if ($rows === []) {
+            $io->writeln('None: no generic config found.');
+        } else {
+            $io->table(['Name', 'File', 'Parent', 'Layers', 'Used by', 'Problem'], $rows);
+        }
 
         $duplicates = self::arr($data, 'duplicates');
         if ($duplicates !== []) {

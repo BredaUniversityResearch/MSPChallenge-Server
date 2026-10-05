@@ -326,6 +326,17 @@ class ConfigTextOutputTest extends ConfigCommandTestCase
         $this->assertStringContainsString('thing(s) are wrong: see above.', $check);
     }
 
+    public function testListSaysSoWhenThereIsNoGenericConfigYet(): void
+    {
+        $this->writeOriginals(); // nothing is split: six complete configs, and no parent
+
+        $words = $this->words('app:config:list');
+
+        $this->assertStringContainsString('Generic configs (parents)', $words);
+        $this->assertStringContainsString('None: no generic config found.', $words);
+        $this->assertStringNotContainsString('Used by', $words, 'no empty table');
+    }
+
     public function testMergePrintsTheConfigOnStdoutAndTellsWhereItWroteOnStderr(): void
     {
         $this->splitTheOriginals();
