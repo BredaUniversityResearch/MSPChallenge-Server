@@ -197,7 +197,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          version="${GITHUB_REF_NAME#config-tools-v}"
+          # a release of the tools is never the "Latest" release of the repository (the server has its own releases, and
+          # /releases/latest would give the tools to everything that wants the server); 6.1.0-rc1 is a pre-release
+          flags=(--latest=false)
+          if [[ "$version" == *-* ]]; then
+            flags+=(--prerelease)
+          fi
           gh release create "$GITHUB_REF_NAME" artifacts/* \
             --repo "$GITHUB_REPOSITORY" \
-            --title "Config tools ${GITHUB_REF_NAME#config-tools-v}" \
-            --generate-notes
+            --title "Config tools $version" \
+            --generate-notes \
+            "${flags[@]}"
