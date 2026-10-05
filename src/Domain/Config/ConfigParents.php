@@ -38,46 +38,74 @@ final class ConfigParents
     /**
      * @param array<string, \stdClass> $uploaded generic configs that were uploaded together with the config, by name:
      *        they are used before the files of the folder
-     * @param ?\ArrayObject<string, string> $fingerprints filled with the fingerprint of the contents of every parent
-     *        file that is read, by name (see ConfigDirectory::fingerprint())
+     * @param ?\ArrayObject<string, array{path: string, fingerprint: string}> $fingerprints filled with where every
+     *        parent file that is read was found (relative to the root) and the fingerprint of its contents
+     *        (see ConfigDirectory::fingerprint()), by name
      */
     public static function fromDirectory(
         ConfigDirectory $directory,
         array $uploaded = [],
         ?\ArrayObject $fingerprints = null
     ): self {
+        $locator = new ParentLocator($directory); // one scan of the names for the whole chain
         return new self(
             static fn(string $name): ?\stdClass => $uploaded[$name]
-                ?? self::readParent($directory, $name, $fingerprints)
+                ?? self::readParent($directory, $name, $fingerprints, $locator)
         );
     }
 
     /**
      * The generic config <name>.json of a config folder, null when there is none.
      *
-     * @param ?\ArrayObject<string, string> $fingerprints receives the fingerprint of the contents that were read
-     * @throws ConfigParentException when the file cannot be used
+     * @param ?\ArrayObject<string, array{path: string, fingerprint: string}> $fingerprints receives where the file was
+     *        found (relative to the root) and the fingerprint of the contents that were read
+     * @param ?ParentLocator $locator to look up several parents with one scan of the names
+     * @throws ConfigParentException when the file cannot be used, or when two files have the name
      */
     public static function readParent(
         ConfigDirectory $directory,
         string $name,
-        ?\ArrayObject $fingerprints = null
+        ?\ArrayObject $fingerprints = null,
+        ?ParentLocator $locator = null
     ): ?\stdClass {
-        // a messenger worker lives long: do not trust what PHP remembers about a file that may have changed
-        clearstatcache(true, $directory->parentPath($name));
-        if (!$directory->hasGeneric($name)) {
+        $path = ($locator ?? new ParentLocator($directory))->locate($name);
+        if ($path === null) {
             return null;
         }
+        // a messenger worker lives long: do not trust what PHP remembers about a file that may have changed
+        clearstatcache(true, $path);
         try {
             $fingerprint = '';
-            $parent = $directory->readFingerprinted($directory->parentPath($name), $fingerprint);
-            $fingerprints?->offsetSet($name, $fingerprint);
+            $parent = $directory->readFingerprinted($path, $fingerprint);
+            $fingerprints?->offsetSet(
+                $name,
+                ['path' => $directory->relativePath($path), 'fingerprint' => $fingerprint]
+            );
             return $parent;
         } catch (\JsonException | \RuntimeException $e) {
             throw new ConfigParentException(
-                sprintf('The parent file %s cannot be used: %s', $directory->parentPath($name), $e->getMessage())
+                sprintf('The parent file %s cannot be used: %s', $path, $e->getMessage())
             );
         }
+    }
+
+    /**
+     * Is a config generic: can it be a parent? A generic config only has layers with a msp_config_generic_name and
+     * without a layer_name (that belongs to a config), or no layers at all: a generic config can hold only sections.
+     * A config without layers is no valid config anyway.
+     */
+    public static function isGeneric(\stdClass $doc): bool
+    {
+        $layers = ($doc->datamodel ?? null) instanceof \stdClass ? ($doc->datamodel->meta ?? null) : null;
+        if (!is_array($layers)) {
+            return false;
+        }
+        foreach ($layers as $layer) {
+            if (!$layer instanceof \stdClass || !isset($layer->msp_config_generic_name) || isset($layer->layer_name)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

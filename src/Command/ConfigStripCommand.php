@@ -55,7 +55,7 @@ final class ConfigStripCommand extends Command
                 'pattern',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'File name pattern of the configs, one folder below --dir',
+                'File name pattern of the configs, anywhere below --dir',
                 '*.json'
             )
             ->addOption(
@@ -115,12 +115,32 @@ final class ConfigStripCommand extends Command
         }
 
         // 1. the files
+        $skipped = [];
         try {
             $files = $directory->resolveFiles(
                 (array)$input->getArgument('files'),
                 getcwd() ?: $this->projectDir,
-                (string)$input->getOption('pattern')
+                (string)$input->getOption('pattern'),
+                $skipped
             );
+            if ($skipped !== [] && ($input->getOption('apply') || $outputDir !== null)) {
+                // a file that can not be read may be a config: do not strip without it
+                $io->error(array_merge(
+                    [
+                        'Nothing is written, these files are not valid JSON (fix them, or leave them out with '
+                        . '--pattern):'
+                    ],
+                    array_map(
+                        fn(string $path, string $why) => $directory->relativePath($path) . ': ' . $why,
+                        array_keys($skipped),
+                        $skipped
+                    )
+                ));
+                return Command::FAILURE;
+            }
+            foreach ($skipped as $skippedPath => $why) {
+                $io->warning(sprintf('Skipped %s, %s.', $directory->relativePath($skippedPath), $why));
+            }
         } catch (\Throwable $e) {
             $io->error($e->getMessage());
             return Command::FAILURE;

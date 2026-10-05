@@ -26,7 +26,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 final class ConfigLoader
 {
     /** Part of the key of a cache entry: change it when the way an entry is made changes. */
-    private const string CACHE_KEY_PREFIX = 'msp_config_merged_v1_';
+    private const string CACHE_KEY_PREFIX = 'msp_config_merged_v2_';
     /** Entries of configs that changed or are gone are not removed, they expire. */
     private const int CACHE_LIFETIME_SECONDS = 604800;
 
@@ -40,7 +40,7 @@ final class ConfigLoader
         #[Autowire('%app.server_manager_config_dir%')]
         string $configDir,
         private readonly SessionConfigValidator $validator,
-        #[Autowire(service: 'cache.app')]
+        #[Autowire(service: 'config.cache')]
         private readonly ?CacheItemPoolInterface $cache = null
     ) {
         $this->directory = new ConfigDirectory(rtrim($configDir, '/\\'));
@@ -79,7 +79,8 @@ final class ConfigLoader
     }
 
     /**
-     * @param \ArrayObject<string, string> $fingerprints receives the fingerprints of the parent files that were used
+     * @param \ArrayObject<string, array{path: string, fingerprint: string}> $fingerprints receives where the parent
+     *        files that were used were found, and their fingerprints
      * @param string[] $warnings
      * @throws InvalidSessionConfigException
      * @throws ConfigParentException
@@ -171,9 +172,10 @@ final class ConfigLoader
      */
     public function inspectUpload(array $files): UploadInspection
     {
+        $locator = new ParentLocator($this->directory); // one scan of the names for the whole upload
         return new UploadInspector(
             fn(string $json): \stdClass => $this->decode($json),
-            fn(string $name): ?\stdClass => ConfigParents::readParent($this->directory, $name)
+            fn(string $name): ?\stdClass => ConfigParents::readParent($this->directory, $name, null, $locator)
         )->inspect($files);
     }
 
@@ -272,15 +274,19 @@ final class ConfigLoader
         if (!is_array($entry) || !is_string($entry['json'] ?? null) || !is_array($entry['dependencies'] ?? null)) {
             return null;
         }
-        foreach ($entry['dependencies'] as $name => $fingerprint) {
-            $name = (string)$name;
-            if (!ConfigDirectory::isValidParentName($name)) {
+        // the parent files the merge was made with, where they were found: all of them have to be unchanged. (A new
+        // file with the name of one of them somewhere else is not noticed here: that is found when the config is
+        // merged without the cache, and by verify.)
+        foreach ($entry['dependencies'] as $name => $dependency) {
+            if (!ConfigDirectory::isValidParentName((string)$name) || !is_array($dependency)
+                || !is_string($dependency['path'] ?? null) || !is_string($dependency['fingerprint'] ?? null)
+                || str_contains($dependency['path'], '..') || !str_ends_with($dependency['path'], '.json')) {
                 return null;
             }
-            $path = $this->directory->parentPath($name);
+            $path = $this->directory->root() . '/' . $dependency['path'];
             clearstatcache(true, $path);
             $contents = @file_get_contents($path);
-            if ($contents === false || ConfigDirectory::fingerprint($contents) !== $fingerprint) {
+            if ($contents === false || ConfigDirectory::fingerprint($contents) !== $dependency['fingerprint']) {
                 return null;
             }
         }
@@ -288,7 +294,8 @@ final class ConfigLoader
     }
 
     /**
-     * @param array<string, string> $dependencies the fingerprints of the parent files the merge was made with
+     * @param array<string, array{path: string, fingerprint: string}> $dependencies where the parent files the merge was
+     *        made with were found, and their fingerprints
      */
     private function cache(string $key, string $json, array $dependencies): void
     {

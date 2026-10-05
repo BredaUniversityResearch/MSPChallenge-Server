@@ -51,7 +51,7 @@ final class ConfigVerifyCommand extends Command
                 'pattern',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'File name pattern of the configs, one folder below --dir',
+                'File name pattern of the configs, anywhere below --dir',
                 '*.json'
             )
             ->addOption(
@@ -82,12 +82,17 @@ final class ConfigVerifyCommand extends Command
         $directory = new ConfigDirectory(Path::makeAbsolute((string)$input->getOption('dir'), $this->projectDir));
         $repo = Path::makeAbsolute((string)$input->getOption('repo'), $this->projectDir);
         $originalDir = $input->getOption('original-dir');
+        $skipped = [];
         try {
             $files = $directory->resolveFiles(
                 (array)$input->getArgument('files'),
                 getcwd() ?: $this->projectDir,
-                (string)$input->getOption('pattern')
+                (string)$input->getOption('pattern'),
+                $skipped
             );
+            foreach ($skipped as $skippedPath => $why) {
+                $io->warning(sprintf('Skipped %s, %s.', $directory->relativePath($skippedPath), $why));
+            }
         } catch (\Throwable $e) {
             $io->error($e->getMessage());
             return Command::FAILURE;

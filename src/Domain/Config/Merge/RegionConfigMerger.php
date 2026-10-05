@@ -60,6 +60,25 @@ final class RegionConfigMerger
      */
     public const array LEGACY_SIMULATIONS = ['CEL', 'REL', 'SEL', 'MEL'];
 
+    /**
+     * Is the config stripped: does it need a parent? That is so when it names a parent, or when it has layers that
+     * refer to a generic layer. (A complete config in the new shape is a region format too, but it is not stripped.)
+     */
+    public static function isStripped(\stdClass $config): bool
+    {
+        if (($config->metadata ?? null) instanceof \stdClass && isset($config->metadata->parent)) {
+            return true;
+        }
+        $datamodel = $config->datamodel ?? null;
+        $layers = $datamodel instanceof \stdClass && is_array($datamodel->meta ?? null) ? $datamodel->meta : [];
+        foreach ($layers as $layer) {
+            if ($layer instanceof \stdClass && ConfigValues::has($layer, 'msp_config_generic_name')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static function isRegionFormat(\stdClass $config): bool
     {
         $datamodel = $config->datamodel ?? null;

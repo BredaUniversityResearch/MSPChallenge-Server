@@ -13,6 +13,30 @@ class ConfigDirectoryTest extends ConfigCommandTestCase
         return $this->dir . '/' . $relativePath;
     }
 
+    /**
+     * A file that is a config: it has layers of its own.
+     */
+    private function putConfig(string $relativePath, ?string $parent = null): string
+    {
+        $metadata = $parent === null ? '{}' : '{"parent": "' . $parent . '"}';
+        return $this->put(
+            $relativePath,
+            '{"metadata": ' . $metadata . ', "datamodel": {"meta": [{"layer_name": "X_A", "layer_short": "A"}]}}'
+        );
+    }
+
+    /**
+     * A file that is a generic config (a parent).
+     */
+    private function putGeneric(string $relativePath, ?string $parent = null): string
+    {
+        $metadata = $parent === null ? '{}' : '{"parent": "' . $parent . '"}';
+        return $this->put(
+            $relativePath,
+            '{"metadata": ' . $metadata . ', "datamodel": {"meta": [{"msp_config_generic_name": "A"}]}}'
+        );
+    }
+
     public function testPathsAreShownRelativeWhenInsideTheBaseAndInFullOtherwise(): void
     {
         // A base with another root than the paths (like drive D: against drive C: on Windows): Path::makeRelative()
@@ -34,25 +58,41 @@ class ConfigDirectoryTest extends ConfigCommandTestCase
         $this->assertSame('a/b.json', ConfigDirectory::displayPath($this->dir . '/a/b.json', $this->dir));
     }
 
-    public function testConfigsAreTheJsonFilesOneFolderDeepWithoutRegionFiles(): void
+    public function testConfigsAreTheJsonFilesWithLayersAnywhereInTheTreeWithoutParentsAndOtherJson(): void
     {
-        $this->put('b/b.json');
-        $this->put('a/a.json');
-        $this->put('a/a.region.json');
-        $this->put('c/deeper/x.json');
-        $this->put('generic.json');
-        $this->put('a/notes.txt');
+        $this->putConfig('b/b.json');
+        $this->putConfig('a/a.json');
+        $this->putConfig('a/a.region.json');
+        $this->putConfig('c/deeper/still/x.json');
+        $this->putConfig('top.json');
+        $this->putGeneric('generic.json');
+        $this->putGeneric('c/generic_c.json', 'generic');
+        $this->put('a/other.json', '{"some": "settings"}');
+        $this->put('a/notes.txt', 'notes');
 
         $files = new ConfigDirectory($this->dir)->configFiles();
 
-        $this->assertSame(['a/a', 'b/b'], array_keys($files));
-        $this->assertSame(realpath($this->dir . '/a/a.json'), $files['a/a']);
+        $this->assertSame(['a/a', 'b/b', 'c/deeper/still/x', 'top'], array_keys($files));
+        $this->assertSame(realpath($this->dir . '/c/deeper/still/x.json'), $files['c/deeper/still/x']);
+    }
+
+    public function testAFileThatIsNoValidJsonIsLeftOutAndReported(): void
+    {
+        $this->putConfig('a/a.json');
+        $broken = $this->put('a/broken.json', '{ nope');
+        $skipped = [];
+
+        $files = new ConfigDirectory($this->dir)->configFiles('*.json', $skipped);
+
+        $this->assertSame(['a/a'], array_keys($files));
+        $this->assertSame([realpath($broken)], array_keys($skipped));
+        $this->assertStringStartsWith('not valid JSON', $skipped[realpath($broken)]);
     }
 
     public function testPatternSelectsFiles(): void
     {
-        $this->put('a/a_basic_1.json');
-        $this->put('a/a_other.json');
+        $this->putConfig('a/a_basic_1.json');
+        $this->putConfig('a/a_other.json');
 
         $this->assertSame(['a/a_basic_1'], array_keys(new ConfigDirectory($this->dir)->configFiles('*_basic_1.json')));
     }
@@ -74,7 +114,7 @@ class ConfigDirectoryTest extends ConfigCommandTestCase
 
     public function testFilesAreResolvedToIdsInsideAndOutsideTheDirectory(): void
     {
-        $inside = $this->put('folder/name.json');
+        $inside = $this->putConfig('folder/name.json');
         $outside = $this->put('../' . basename($this->dir) . '_other/custom.json');
         $directory = new ConfigDirectory($this->dir);
 
@@ -98,7 +138,7 @@ class ConfigDirectoryTest extends ConfigCommandTestCase
 
     public function testWithoutArgumentsAllConfigsAreResolved(): void
     {
-        $this->put('a/a.json');
+        $this->putConfig('a/a.json');
 
         $this->assertSame(['a/a'], array_keys(new ConfigDirectory($this->dir)->resolveFiles([], '/anywhere')));
     }
@@ -118,15 +158,53 @@ class ConfigDirectoryTest extends ConfigCommandTestCase
         }
     }
 
-    public function testAGenericConfigIsAFileInTheRootOfTheFolderNamedAfterIt(): void
+    public function testAGenericConfigIsTheFileNamedAfterItAnywhereInTheTree(): void
     {
-        $this->put('public.json', '{"datamodel": {"meta": []}}');
+        $this->put('a/b/c/public.json', '{"datamodel": {"meta": []}}');
         $directory = new ConfigDirectory($this->dir);
 
         $this->assertTrue($directory->hasGeneric('public'));
+        $this->assertSame(realpath($this->dir . '/a/b/c/public.json'), $directory->locateParent('public'));
+        $this->assertNotNull($directory->loadGeneric('public')->datamodel);
+        $this->assertFalse($directory->hasGeneric('generic'));
+    }
+
+    public function testANewParentGoesInTheRoot(): void
+    {
+        $directory = new ConfigDirectory($this->dir);
+
         $this->assertSame($this->dir . '/public.json', $directory->parentPath('public'));
         $this->assertSame($this->dir . '/generic.json', $directory->genericPath());
-        $this->assertNotNull($directory->loadGeneric('public')->datamodel);
+    }
+
+    public function testTwoFilesWithTheSameNameAreAnErrorThatNamesBoth(): void
+    {
+        $this->putGeneric('NS/generic_NS.json');
+        $this->putGeneric('SEA/other/generic_NS.json');
+        $directory = new ConfigDirectory($this->dir);
+
+        try {
+            $directory->locateParent('generic_NS');
+            $this->fail('which file is meant can not be told');
+        } catch (\App\Domain\Config\ConfigParentException $e) {
+            $this->assertStringContainsString('The parent "generic_NS" is ambiguous', $e->getMessage());
+            $this->assertStringContainsString(
+                'NS/generic_NS.json and SEA/other/generic_NS.json have that name',
+                $e->getMessage()
+            );
+        }
+    }
+
+    public function testTheNamesOfTheFilesAreAScanThatLooksAgainEveryTime(): void
+    {
+        $directory = new ConfigDirectory($this->dir);
+        $this->assertNull($directory->locateParent('late'));
+
+        $this->putGeneric('x/late.json');
+
+        $this->assertNotNull($directory->locateParent('late'), 'a long-lived process sees files that come later');
+        unlink($this->dir . '/x/late.json');
+        $this->assertNull($directory->locateParent('late'), 'and files that are gone');
     }
 
     /**

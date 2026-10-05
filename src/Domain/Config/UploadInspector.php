@@ -47,7 +47,7 @@ final class UploadInspector
         $configs = [];
         foreach ($docs as $file => $doc) {
             $file = (string)$file;
-            if (!self::isGeneric($doc)) {
+            if (!ConfigParents::isGeneric($doc)) {
                 $configs[$file] = $doc;
             } elseif (strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'json') {
                 $generics[pathinfo($file, PATHINFO_FILENAME)] = $file;
@@ -140,26 +140,5 @@ final class UploadInspector
             serverParents: $serverParents,
             unused: array_merge(array_values(array_diff($generics, $parents)), $unusable)
         );
-    }
-
-    /**
-     * A generic config has layers with a msp_config_generic_name and without a layer_name (that belongs to a config),
-     * or no layers at all: a generic config can hold only sections. A config without layers is no valid config anyway.
-     */
-    private static function isGeneric(\stdClass $doc): bool
-    {
-        $layers = ($doc->datamodel ?? null) instanceof \stdClass ? ($doc->datamodel->meta ?? null) : null;
-        if (!is_array($layers)) {
-            return false;
-        }
-        if ($layers === []) {
-            return true;
-        }
-        foreach ($layers as $layer) {
-            if (!$layer instanceof \stdClass || !isset($layer->msp_config_generic_name) || isset($layer->layer_name)) {
-                return false;
-            }
-        }
-        return true;
     }
 }

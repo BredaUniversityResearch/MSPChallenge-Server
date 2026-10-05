@@ -3,6 +3,8 @@
 namespace App\Tests\ServerManager\Config;
 
 use App\Command\ConfigSplitCommand;
+use App\Domain\Config\ConfigDirectory;
+use App\Domain\Config\ConfigParents;
 use App\Domain\Config\Merge\RegionConfigMerger;
 use App\Domain\Config\SessionConfigValidator;
 use App\Domain\Config\Split\ConfigValues;
@@ -302,15 +304,107 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $this->assertSameFiles($before, $this->snapshot());
     }
 
+    public function testTheReportShowsTheFileSizesNowAndAfterAndWhatIsWon(): void
+    {
+        $dryRun = $this->runSplit();
+
+        $text = self::text($dryRun);
+        $this->assertStringContainsString('file sizes now, and as they would be written', $text);
+        $this->assertStringNotContainsString('compact JSON', $text);
+        foreach (['Now', 'After', 'Win'] as $header) {
+            $this->assertStringContainsString($header, $text);
+        }
+        foreach (glob($this->dir . '/*/*.json') as $file) {
+            $this->assertStringContainsString(
+                number_format(filesize($file) / 1024, 1, '.', '') . ' kb',
+                $text,
+                'the size of the file as it is now: ' . basename($file)
+            );
+        }
+        $this->assertGreaterThanOrEqual(
+            6,
+            preg_match_all('/\d+\.\d kb\s+\d+\.\d kb\s+-?\d+\.\d%/', $text),
+            'every config has its size now, its size after, and the percentage'
+        );
+        $this->assertMatchesRegularExpression('/generic\.json: \d+\.\d kb \(new\)/', $text);
+        $this->assertMatchesRegularExpression(
+            '/All files, with generic\.json: \d+\.\d kb now, \d+\.\d kb after \(\d+\.\d% smaller\)/',
+            $text
+        );
+    }
+
+    /**
+     * What an upload stores: the complete final config, in the new shape, under a new version.
+     */
+    private function storeAnUploadOf(string $strippedId, string $newId): void
+    {
+        $directory = new ConfigDirectory($this->dir);
+        $stripped = $directory->read($this->dir . '/' . $strippedId . '.json');
+        $pool = ConfigParents::fromDirectory($directory)->poolOf($stripped, 'it');
+        $directory->write($this->dir . '/' . $newId . '.json', self::merger()->merge($pool, $stripped));
+    }
+
+    public function testCopiesAndVersionsOfOneConfigAreReportedAndCompleteConfigsAreNotCalledStripped(): void
+    {
+        $this->runSplit(['--apply' => true]);
+        $id = 'North_Sea_basic/North_Sea_basic_1';
+        $this->storeAnUploadOf($id, 'North_Sea_basic/North_Sea_basic_3');
+        $this->storeAnUploadOf($id, 'North_Sea_OR_ELSE_basic/North_Sea_OR_ELSE_basic_2');
+
+        $report = $this->runSplit(['--force' => true]);
+
+        $this->assertSame(0, $report->getStatusCode(), $report->getDisplay());
+        $text = self::text($report);
+        $this->assertStringContainsString('Splitting 8 configs', $text);
+        $this->assertStringContainsString('6 of them are stripped already', $text, 'the uploads are complete');
+        $this->assertStringContainsString('These configs have the same content: ', $text);
+        $this->assertStringContainsString('North_Sea_basic/North_Sea_basic_3', $text);
+        $this->assertStringContainsString('North_Sea_basic has 2 versions (North_Sea_basic_1, ', $text);
+        $this->assertStringContainsString('A negative win', $text, 'what the copies share moves into generic.json');
+        // and leaving the uploads out gives the same as before: nothing to do
+        $withoutUploads = $this->runSplit(['--pattern' => '*_1.json']);
+        $this->assertStringContainsString('6 of them are stripped already', self::text($withoutUploads));
+        $this->assertStringNotContainsString('same content', self::text($withoutUploads));
+        $this->assertStringNotContainsString('A negative win', self::text($withoutUploads));
+    }
+
     public function testNothingHasChangedAfterARunThatChangesNothing(): void
     {
         $this->runSplit(['--apply' => true]);
         $modified = array_map('filemtime', glob($this->dir . '/*/*.json'));
         sleep(1);
 
-        $this->runSplit(['--apply' => true, '--force' => true]);
+        $generic = filemtime($this->dir . '/generic.json');
+
+        $again = $this->runSplit(['--apply' => true, '--force' => true]);
 
         $this->assertSame($modified, array_map('filemtime', glob($this->dir . '/*/*.json')), 'files are not rewritten');
+        $this->assertSame($generic, filemtime($this->dir . '/generic.json'), 'the generic config is not rewritten');
+        $this->assertSame(0, $again->getStatusCode(), $again->getDisplay());
+        $text = self::text($again);
+        $this->assertStringContainsString('Nothing to write', $text, 'and the message says so');
+        $this->assertStringNotContainsString('Wrote ', $text);
+        $this->assertSame(6, substr_count($text, ' 0.0%'), 'nothing is won by splitting what is split already');
+        $this->assertStringContainsString('(unchanged)', $text);
+        $this->assertStringContainsString('(0.0% smaller)', $text);
+    }
+
+    public function testWhenOnlyTheConfigsChangeTheGenericConfigIsNotRewrittenAndTheMessageSaysSo(): void
+    {
+        $this->runSplit(['--apply' => true]);
+        $generic = filemtime($this->dir . '/generic.json');
+        sleep(1);
+        $this->writeOriginals(); // the complete configs are back: they have to be stripped again
+
+        $again = $this->runSplit(['--apply' => true, '--force' => true]);
+
+        $this->assertSame(0, $again->getStatusCode(), $again->getDisplay());
+        $this->assertSame($generic, filemtime($this->dir . '/generic.json'), 'the generic config did not change');
+        $text = self::text($again);
+        $this->assertStringContainsString('Wrote 6 stripped config(s)', $text);
+        $this->assertStringContainsString('/generic.json is unchanged', $text);
+        $this->assertStringNotContainsString('Nothing to write', $text);
+        $this->assertMergesBackToTheOriginals();
     }
 
     public function testAConfigFolderOnAnotherDriveThanTheProjectDoesNotBreakTheMessages(): void
@@ -404,7 +498,7 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $this->assertStringContainsString('restrictions', $display);
     }
 
-    public function testStopsOnAnInvalidConfigFile(): void
+    public function testStopsOnAFileThatIsNoValidJsonWhenWriting(): void
     {
         new Filesystem()->dumpFile($this->dir . '/Broken/Broken.json', '{ not json');
         $before = $this->snapshot();
@@ -412,9 +506,32 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $tester = $this->runSplit(['--apply' => true]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('these configs are invalid', self::text($tester));
-        $this->assertStringContainsString('Broken/Broken', self::text($tester));
+        $this->assertStringContainsString('Nothing is written, these files are not valid JSON', self::text($tester));
+        $this->assertStringContainsString('Broken/Broken.json: not valid JSON', self::text($tester));
         $this->assertSameFiles($before, $this->snapshot());
+    }
+
+    public function testAFileThatIsNoValidJsonIsSkippedWithAWarningInTheReport(): void
+    {
+        new Filesystem()->dumpFile($this->dir . '/Broken/Broken.json', '{ not json');
+
+        $tester = $this->runSplit();
+
+        $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
+        $this->assertStringContainsString('Skipped Broken/Broken.json, not valid JSON', self::text($tester));
+        $this->assertStringContainsString('Splitting 6 configs', self::text($tester));
+    }
+
+    public function testAnInvalidGenericConfigCanBeOverwrittenAndIsNotReportedAsSkipped(): void
+    {
+        new Filesystem()->dumpFile($this->dir . '/generic.json', '{ not json');
+
+        $tester = $this->runSplit(['--apply' => true, '--force' => true]);
+
+        $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
+        $this->assertStringContainsString('Ignoring generic.json, it cannot be used', self::text($tester));
+        $this->assertStringNotContainsString('Skipped generic.json', self::text($tester));
+        $this->assertMergesBackToTheOriginals();
     }
 
     public function testFailsWhenTheDirectoryDoesNotExist(): void

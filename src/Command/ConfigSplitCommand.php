@@ -13,7 +13,6 @@ use App\Domain\Config\Split\ConfigSplitter;
 use App\Domain\Config\Split\ConfigValues;
 use App\Domain\Config\Split\GenericNameRegistry;
 use App\Domain\Config\Split\SplitResult;
-use App\Domain\Helper\Util;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -47,14 +46,15 @@ final class ConfigSplitCommand extends Command
                 'dir',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Config root (absolute, or relative to the project dir)',
+                'Config root (absolute, or relative to the project dir). The configs and the generic configs can be '
+                . 'anywhere below it',
                 'ServerManager/configfiles'
             )
             ->addOption(
                 'pattern',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'File name pattern of the complete configs, one folder below --dir',
+                'File name pattern of the configs, anywhere below --dir',
                 '*.json'
             )
             ->addOption(
@@ -128,8 +128,10 @@ final class ConfigSplitCommand extends Command
 
         // 1. read the configs. A config that is stripped already is expanded with its parents
         $oldGeneric = null;
+        $genericFile = null; // where the generic config is now, if there is one
         try {
-            $oldGeneric = $directory->hasGeneric($genericName) ? $directory->loadGeneric($genericName) : null;
+            $genericFile = $directory->locateParent($genericName);
+            $oldGeneric = $genericFile === null ? null : $directory->read($genericFile);
             if ($oldGeneric !== null && ConfigParents::parentOf($oldGeneric) !== null) {
                 $io->error(
                     "$genericName.json has a parent itself, and the command makes a generic config without one. "
@@ -144,13 +146,35 @@ final class ConfigSplitCommand extends Command
         $merger = new RegionConfigMerger();
         $configs = []; // what is split: the complete configs, and the expanded stripped ones
         $currents = []; // the files as they are now
-        $effectives = []; // the expanded stripped ones
+        $effectives = []; // the expanded stripped ones, and the complete ones that are in the new shape
+        $strippedCount = 0; // how many of those really are stripped
         $paths = [];
         $errors = [];
-        foreach ($directory->configFiles((string)$input->getOption('pattern')) as $id => $path) {
+        $skipped = [];
+        $found = $directory->configFiles((string)$input->getOption('pattern'), $skipped);
+        if ($genericFile !== null) {
+            unset($skipped[$genericFile]); // the generic config is told about by itself when it can not be used
+        }
+        if ($skipped !== [] && $writing) {
+            // a file that can not be read may be a config: do not split without it
+            $io->error(array_merge(
+                ['Nothing is written, these files are not valid JSON (fix them, or leave them out with --pattern):'],
+                array_map(
+                    fn(string $path, string $why) => $directory->relativePath($path) . ': ' . $why,
+                    array_keys($skipped),
+                    $skipped
+                )
+            ));
+            return Command::FAILURE;
+        }
+        foreach ($skipped as $path => $why) {
+            $io->warning(sprintf('Skipped %s, %s.', $directory->relativePath($path), $why));
+        }
+        foreach ($found as $id => $path) {
             try {
                 $config = $directory->read($path);
                 if (RegionConfigMerger::isRegionFormat($config)) {
+                    $strippedCount += RegionConfigMerger::isStripped($config) ? 1 : 0;
                     $pool = $parents->poolOf($config, 'it'); // fails when a parent is missing
                     $configs[$id] = $effectives[$id] = $merger->merge($pool, $config);
                 } else {
@@ -185,11 +209,11 @@ final class ConfigSplitCommand extends Command
             }
         }
         $io->title(sprintf('Splitting %d configs from %s', count($configs), $root));
-        if ($effectives !== []) {
+        if ($strippedCount > 0) {
             $io->writeln(sprintf(
                 '%d of them are stripped already: they are expanded with their parents, so layers that more (or '
                 . 'fewer) configs use now can move into (or out of) %s.json.',
-                count($effectives),
+                $strippedCount,
                 $genericName
             ));
         }
@@ -239,7 +263,9 @@ final class ConfigSplitCommand extends Command
             $genericName,
             $oldGeneric !== null,
             $promoted,
-            $demoted
+            $demoted,
+            $oldGeneric === null ? null : (int)@filesize((string)$genericFile),
+            $genericChanged
         );
         $refused = array_filter($plans, static fn(StripPlan $plan) => $plan->status === StripPlan::REFUSED);
         if ($refused !== []) {
@@ -284,7 +310,9 @@ final class ConfigSplitCommand extends Command
             ));
             return Command::FAILURE;
         }
-        $genericPath = $outputRoot . '/' . $genericName . '.json';
+        // an existing generic config is written where it is (also when it is deeper in the tree); a new one goes in the
+        // root of where is written. Another folder to write to gets a flat copy.
+        $genericPath = ($outputDir === null ? $genericFile : null) ?? $outputRoot . '/' . $genericName . '.json';
         if (is_file($genericPath) && !$input->getOption('force')) {
             $io->error(
                 ConfigDirectory::displayPath($genericPath, $this->projectDir)
@@ -333,13 +361,82 @@ final class ConfigSplitCommand extends Command
             $io->error($e->getMessage());
             return Command::FAILURE;
         }
+        $genericShown = ConfigDirectory::displayPath($genericPath, $this->projectDir);
+        $genericWritten = $outputDir !== null || $genericChanged;
+        if (!$genericWritten && $staged === []) {
+            // a split of what is split already gives the same: only files that would change are written
+            $io->success(sprintf(
+                'Nothing to write: %s and the %d stripped config(s) are what a split gives already.',
+                $genericShown,
+                count(array_filter($plans, static fn(StripPlan $plan) => $plan->status === StripPlan::UNCHANGED))
+            ));
+            return Command::SUCCESS;
+        }
         $io->success(sprintf(
-            'Wrote %s and %d stripped config(s)%s.',
-            ConfigDirectory::displayPath($genericPath, $this->projectDir),
+            'Wrote %s%d stripped config(s)%s%s.',
+            $genericWritten ? $genericShown . ' and ' : '',
             count($staged),
-            $outputDir === null ? ' (replacing the existing ones, each verified)' : ' to ' . $outputRoot
+            $outputDir === null ? ' (replacing the existing ones, each verified)' : ' to ' . $outputRoot,
+            $genericWritten ? '' : '; ' . $genericShown . ' is unchanged'
         ));
         return Command::SUCCESS;
+    }
+
+    /**
+     * Every config counts as a region when it is decided what is shared. Copies of one config, and versions of it,
+     * are no separate regions: they make their data look more shared than it is, and shift what is generic towards
+     * them. Say so, so that they can be left out (--pattern).
+     *
+     * @param array<string, \stdClass> $configs
+     * @return string[]
+     */
+    private function sameRegionWarnings(array $configs): array
+    {
+        $warnings = [];
+        $identical = [];
+        foreach ($configs as $id => $config) {
+            $identical[md5(ConfigValues::canonical($config->datamodel ?? new \stdClass()))][] = $id;
+        }
+        foreach ($identical as $ids) {
+            if (count($ids) > 1) {
+                $warnings[] = sprintf(
+                    'These configs have the same content: %s. They count as separate regions, so what they have is '
+                    . 'shared by definition. Leave out the copies (--pattern) to see what is really shared.',
+                    implode(', ', $ids)
+                );
+            }
+        }
+        $versions = [];
+        foreach (array_keys($configs) as $id) {
+            $versions[dirname((string)$id)][] = basename((string)$id);
+        }
+        foreach ($versions as $folder => $names) {
+            if (count($names) > 1) {
+                $warnings[] = sprintf(
+                    '%s has %d versions (%s). Each version counts as a region of its own.',
+                    $folder,
+                    count($names),
+                    implode(', ', $names)
+                );
+            }
+        }
+        return $warnings;
+    }
+
+    /**
+     * Always in kb, so that sizes can be compared at a glance (and with what a file manager says).
+     */
+    private static function kb(int $bytes): string
+    {
+        return number_format($bytes / 1024, 1, '.', '') . ' kb';
+    }
+
+    /**
+     * How much smaller a file gets, as a percentage of its size now (negative: it gets larger).
+     */
+    private static function win(int $now, int $after): string
+    {
+        return $now === 0 ? '-' : sprintf('%.1f%%', 100 * ($now - $after) / $now);
     }
 
     /**
@@ -355,24 +452,67 @@ final class ConfigSplitCommand extends Command
         string $genericName,
         bool $hadGeneric,
         array $promoted,
-        array $demoted
+        array $demoted,
+        ?int $genericNow,
+        bool $genericChanged
     ): void {
+        // file sizes: the files as they are now, and as they would be written (or left alone, when nothing changes)
         $rows = [];
+        $totalNow = 0;
+        $totalAfter = 0;
+        $larger = false; // does a config get larger?
         foreach ($configs as $id => $config) {
-            $stripped = $plans[$id]->stripped;
+            $plan = $plans[$id];
+            $now = is_file($plan->path)
+                ? (int)filesize($plan->path)
+                : strlen(ConfigDirectory::encode($plan->current));
+            $after = $plan->stripped === null || $plan->status === StripPlan::UNCHANGED
+                ? $now
+                : strlen(ConfigDirectory::encode($plan->stripped));
+            $totalNow += $now;
+            $totalAfter += $after;
+            $larger = $larger || ($plan->stripped !== null && $after > $now);
             $rows[] = [
                 $id,
                 count($config->datamodel->meta ?? []),
-                Util::getHumanReadableSize(strlen(json_encode($plans[$id]->current, JSON_UNESCAPED_SLASHES))),
-                $stripped === null
-                    ? 'cannot be stripped'
-                    : Util::getHumanReadableSize(strlen(json_encode($stripped, JSON_UNESCAPED_SLASHES))),
+                self::kb($now),
+                $plan->stripped === null ? 'cannot be stripped' : self::kb($after),
+                $plan->stripped === null ? '-' : self::win($now, $after),
             ];
         }
-        $io->section('Configs (sizes of compact JSON)');
-        $io->table(['Config', 'Layers', 'Original', 'Stripped'], $rows);
-        $genericSize = Util::getHumanReadableSize(strlen(json_encode($result->generic, JSON_UNESCAPED_SLASHES)));
-        $io->writeln("$genericName.json: $genericSize");
+        $io->section('Configs (file sizes now, and as they would be written)');
+        $io->table(['Config', 'Layers', 'Now', 'After', 'Win'], $rows);
+        $genericAfter = $genericNow !== null && !$genericChanged
+            ? $genericNow
+            : strlen(ConfigDirectory::encode($result->generic));
+        $io->writeln(
+            $genericNow === null
+                ? sprintf('%s.json: %s (new)', $genericName, self::kb($genericAfter))
+                : sprintf(
+                    '%s.json: %s now, %s after%s',
+                    $genericName,
+                    self::kb($genericNow),
+                    self::kb($genericAfter),
+                    $genericChanged ? '' : ' (unchanged)'
+                )
+        );
+        $totalNow += $genericNow ?? 0;
+        $totalAfter += $genericAfter;
+        $io->writeln(sprintf(
+            'All files, with %s.json: %s now, %s after (%s)',
+            $genericName,
+            self::kb($totalNow),
+            self::kb($totalAfter),
+            $totalAfter <= $totalNow
+                ? self::win($totalNow, $totalAfter) . ' smaller'
+                : sprintf('%.1f%% larger', 100 * ($totalAfter - $totalNow) / $totalNow)
+        ));
+        if ($larger) {
+            $io->writeln(
+                'A negative win: that config needs more overrides afterwards, because what most configs share '
+                . '(the generic config) changed.'
+            );
+        }
 
         $io->section('Layers');
         $io->writeln(sprintf(
@@ -457,7 +597,7 @@ final class ConfigSplitCommand extends Command
                 $result->dropped
             ));
         }
-        $warnings = array_merge($registry->warnings(), $result->warnings);
+        $warnings = array_merge($registry->warnings(), $result->warnings, $this->sameRegionWarnings($configs));
         if ($warnings !== []) {
             $io->section('Warnings');
             $io->listing($warnings);

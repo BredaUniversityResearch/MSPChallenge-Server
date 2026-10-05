@@ -265,6 +265,22 @@ class RegionConfigMergerTest extends ConfigTestCase
         return [$parent, $child];
     }
 
+    public function testOnlyAConfigThatNeedsAParentIsStripped(): void
+    {
+        $withParent = ConfigFactory::json('{"metadata": {"parent": "generic"}, "datamodel": {"meta": []}}');
+        $withGenericNames = ConfigFactory::json('{"datamodel": {"meta": [{"msp_config_generic_name": "A"}]}}');
+        $completeNewShape = ConfigFactory::json(
+            '{"metadata": {}, "datamodel": {"meta": [{"layer_name": "X_A"}], "simulation_settings": {"CEL": null}}}'
+        );
+        $completeOldShape = ConfigFactory::json('{"datamodel": {"meta": [{"layer_name": "X_A"}], "CEL": null}}');
+
+        $this->assertTrue(RegionConfigMerger::isStripped($withParent));
+        $this->assertTrue(RegionConfigMerger::isStripped($withGenericNames));
+        $this->assertFalse(RegionConfigMerger::isStripped($completeNewShape), 'what an upload stores');
+        $this->assertTrue(RegionConfigMerger::isRegionFormat($completeNewShape), 'but it has the new shape');
+        $this->assertFalse(RegionConfigMerger::isStripped($completeOldShape));
+    }
+
     public function testEverySimulationInSimulationSettingsIsMerged(): void
     {
         $generic = self::generic();

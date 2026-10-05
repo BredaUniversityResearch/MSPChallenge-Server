@@ -303,8 +303,19 @@ class ConfigStripCommandTest extends ConfigCommandTestCase
         $tester = $this->strip(['--apply' => true]);
 
         $this->assertSame(1, $tester->getStatusCode());
-        $this->assertStringContainsString('these configs are invalid', self::text($tester));
+        $this->assertStringContainsString('Nothing is written, these files are not valid JSON', self::text($tester));
+        $this->assertStringContainsString('Broken/Broken.json: not valid JSON', self::text($tester));
         $this->assertSameFiles($before, $this->snapshot());
+    }
+
+    public function testAFileThatIsNoValidJsonIsSkippedWithAWarningWhenOnlyReporting(): void
+    {
+        new Filesystem()->dumpFile($this->dir . '/Broken/Broken.json', '{ not json');
+
+        $tester = $this->strip();
+
+        $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
+        $this->assertStringContainsString('Skipped Broken/Broken.json, not valid JSON', self::text($tester));
     }
 
     public function testANamedFileThatDoesNotExistIsReported(): void

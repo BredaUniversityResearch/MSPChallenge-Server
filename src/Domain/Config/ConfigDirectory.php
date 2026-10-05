@@ -28,6 +28,9 @@ final class ConfigDirectory
     /**
      * The file of a generic config, which other configs have as their parent: <root>/<name>.json
      */
+    /**
+     * Where a NEW parent goes: in the root. (Where an existing one is, is told by locateParent().)
+     */
     public function parentPath(string $name): string
     {
         return $this->root . '/' . $name . '.json';
@@ -58,36 +61,89 @@ final class ConfigDirectory
     }
 
     /**
-     * The configs, complete or stripped: <root>/<folder>/<name>.json. Leftover *.region.json files of the
-     * staging phase are not configs.
+     * The configs, complete or stripped, anywhere below the root: a JSON file with layers that is not a generic
+     * config. Generic configs (the parents), any other JSON, and the leftover *.region.json files of the staging phase
+     * are not configs. A file that is not valid JSON can not be told: it is left out and reported in $skipped.
      *
-     * @return array<string, string> config id "<folder>/<name>" => absolute path, sorted by id
+     * @param array<string, string> $skipped receives the files that were left out because they are not valid JSON:
+     *        absolute path => why
+     * @return array<string, string> config id (the path below the root, without .json) => absolute path, sorted by id
      */
-    public function configFiles(string $pattern = '*.json'): array
+    public function configFiles(string $pattern = '*.json', array &$skipped = []): array
     {
         $files = [];
-        $finder = new Finder()->files()->in($this->root)->depth('== 1')->name($pattern)
-            ->notName('*.region.json')->sortByName();
+        $finder = new Finder()->files()->in($this->root)->name($pattern)->notName('*.region.json')->sortByName();
         foreach ($finder as $file) {
-            $id = preg_replace('/\.json$/', '', str_replace('\\', '/', $file->getRelativePathname()));
-            $files[$id] = $file->getRealPath();
+            $path = $file->getRealPath() ?: $file->getPathname(); // always a string
+            try {
+                $document = $this->read($path);
+            } catch (\JsonException | \RuntimeException $e) {
+                // it can not be told what it is: it is left alone, and said
+                $skipped[$path] = 'not valid JSON: ' . strtok($e->getMessage(), "\n");
+                continue;
+            }
+            $datamodel = $document->datamodel ?? null;
+            if (!$datamodel instanceof \stdClass || !is_array($datamodel->meta ?? null)
+                || ConfigParents::isGeneric($document)) {
+                continue; // a generic config (a parent), or some other JSON
+            }
+            $files[preg_replace('/\.json$/', '', str_replace('\\', '/', $file->getRelativePathname()))] = $path;
         }
         ksort($files);
         return $files;
     }
 
     /**
+     * The names of all JSON files below the root, without the extension (a scan of the names only).
+     *
+     * @return array<string, string[]> name => the paths of the files that have it
+     */
+    public function jsonFileNames(): array
+    {
+        $names = [];
+        if (!is_dir($this->root)) {
+            return $names;
+        }
+        foreach (new Finder()->files()->in($this->root)->name('*.json')->sortByName() as $file) {
+            $names[$file->getBasename('.json')][] = $file->getRealPath() ?: $file->getPathname();
+        }
+        return $names;
+    }
+
+    /**
+     * The path of a parent: the file <name>.json anywhere below the root. Every call looks at the files again.
+     *
+     * @throws ConfigParentException when two files have that name
+     */
+    public function locateParent(string $name): ?string
+    {
+        return new ParentLocator($this)->locate($name);
+    }
+
+    /**
+     * The path that a path is known by to users: relative to the root.
+     */
+    public function relativePath(string $path): string
+    {
+        return Path::isBasePath($this->root, $path) ? Path::makeRelative($path, $this->root) : $path;
+    }
+
+    /**
      * The files named on the command line, or all configs of the directory when none are named. A file inside
-     * the directory gets the id "<folder>/<name>", any other file its name.
+     * the directory gets its path below the root as its id (without .json), any other file its name.
      *
      * @param string[] $arguments paths, absolute or relative to $baseDir
      * @return array<string, string> id => absolute path
      * @throws \RuntimeException when a named file does not exist
      */
-    public function resolveFiles(array $arguments, string $baseDir, string $pattern = '*.json'): array
-    {
+    public function resolveFiles(
+        array $arguments,
+        string $baseDir,
+        string $pattern = '*.json',
+        array &$skipped = []
+    ): array {
         if ($arguments === []) {
-            return $this->configFiles($pattern);
+            return $this->configFiles($pattern, $skipped);
         }
         $files = [];
         foreach ($arguments as $argument) {
@@ -145,7 +201,7 @@ final class ConfigDirectory
 
     public function hasGeneric(string $name = self::DEFAULT_GENERIC): bool
     {
-        return is_file($this->parentPath($name));
+        return $this->locateParent($name) !== null;
     }
 
     /**
@@ -154,12 +210,10 @@ final class ConfigDirectory
      */
     public function loadGeneric(string $name = self::DEFAULT_GENERIC): \stdClass
     {
-        if (!$this->hasGeneric($name)) {
-            throw new \RuntimeException(
-                'Missing ' . $this->parentPath($name) . '. Create it with app:config:split --apply.'
-            );
-        }
-        return $this->read($this->parentPath($name));
+        $path = $this->locateParent($name) ?? throw new \RuntimeException(
+            'Missing ' . $this->parentPath($name) . '. Create it with app:config:split --apply.'
+        );
+        return $this->read($path);
     }
 
     /**

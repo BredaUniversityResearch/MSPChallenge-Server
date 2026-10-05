@@ -225,6 +225,73 @@ class ConfigParentsTest extends ConfigCommandTestCase
         $this->assertSame(['A', 'B'], self::layerNames($pool));
     }
 
+    public function testAParentIsFoundByItsNameInAnyFolderAndNotOnlyNextToTheChildOrAboveIt(): void
+    {
+        $directory = new ConfigDirectory($this->dir);
+        $directory->write($this->dir . '/NS/shared/base.json', self::generic(['A']));
+        $directory->write($this->dir . '/SEA/other/deep/public.json', self::generic(['B'], 'base')); // another subtree
+
+        $fingerprints = new \ArrayObject();
+        $pool = ConfigParents::fromDirectory($directory, [], $fingerprints)->poolOfParent('public');
+
+        $this->assertSame(['A', 'B'], self::layerNames($pool));
+        $names = array_keys($fingerprints->getArrayCopy());
+        sort($names); // they are read child first
+        $this->assertSame(['base', 'public'], $names);
+        $this->assertSame('NS/shared/base.json', $fingerprints['base']['path'], 'where it is, from the root');
+        $this->assertSame('SEA/other/deep/public.json', $fingerprints['public']['path']);
+        $this->assertSame(
+            ConfigDirectory::fingerprint((string)file_get_contents($this->dir . '/NS/shared/base.json')),
+            $fingerprints['base']['fingerprint']
+        );
+    }
+
+    public function testTwoParentsWithTheSameNameAreAnErrorThatNamesBoth(): void
+    {
+        $directory = new ConfigDirectory($this->dir);
+        $directory->write($this->dir . '/A/base.json', self::generic(['A']));
+        $directory->write($this->dir . '/B/C/base.json', self::generic(['B']));
+
+        try {
+            ConfigParents::fromDirectory($directory)->poolOfParent('base', 'config "c"');
+            $this->fail('which base.json is meant can not be told');
+        } catch (ConfigParentException $e) {
+            $this->assertStringContainsString('The parent "base" is ambiguous', $e->getMessage());
+            $this->assertStringContainsString('A/base.json and B/C/base.json have that name', $e->getMessage());
+        }
+    }
+
+    public function testAParentThatIsNowhereInTheTreeIsReportedWithTheFileThatIsNeeded(): void
+    {
+        $directory = new ConfigDirectory($this->dir);
+        $directory->write($this->dir . '/A/other.json', self::generic(['A']));
+
+        $this->expectException(ConfigParentException::class);
+        $this->expectExceptionMessage('The parent "base" of config "c" was not found: base.json is needed.');
+        ConfigParents::fromDirectory($directory)->poolOfParent('base', 'config "c"');
+    }
+
+    public function testAFileOfAConfigThatIsNamedLikeAParentIsNoParent(): void
+    {
+        $directory = new ConfigDirectory($this->dir);
+        $directory->write(
+            $this->dir . '/NS/base.json',
+            ConfigFactory::config([ConfigFactory::layer('X_A', 'A')])
+        ); // a config, not a generic config
+
+        $this->expectException(ConfigParentException::class);
+        $this->expectExceptionMessage('"base" cannot be a parent');
+        ConfigParents::fromDirectory($directory)->poolOfParent('base');
+    }
+
+    public function testAGenericConfigIsToldByItsContentAndNotByItsPlace(): void
+    {
+        $this->assertTrue(ConfigParents::isGeneric(self::generic(['A'])));
+        $this->assertTrue(ConfigParents::isGeneric(self::generic([])), 'a generic config can hold only sections');
+        $this->assertFalse(ConfigParents::isGeneric(ConfigFactory::config([ConfigFactory::layer('X_A', 'A')])));
+        $this->assertFalse(ConfigParents::isGeneric(ConfigFactory::json('{"some": "settings"}')));
+    }
+
     public function testAParentFileThatIsNoValidJsonNamesTheFile(): void
     {
         file_put_contents($this->dir . '/base.json', '{ not json');

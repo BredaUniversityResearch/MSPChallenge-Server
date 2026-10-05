@@ -10,6 +10,7 @@ use App\Domain\Config\InvalidSessionConfigException;
 use App\Domain\Config\Merge\RegionConfigMerger;
 use App\Domain\Config\SessionConfigValidator;
 use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * The ConfigLoader on a temporary config folder.
@@ -459,6 +460,64 @@ class ConfigLoaderTest extends ConfigCommandTestCase
 
         $this->assertTrue($inspection->isComplete());
         $this->assertSame(['generic.json'], $inspection->parents, 'the uploaded file, not the one of the server');
+    }
+
+    public function testAParentInAnyFolderIsUsedAndTheCacheNoticesItsChanges(): void
+    {
+        $stripped = '{"metadata": {"parent": "generic"}, "datamodel": {"meta": []}}';
+        $generic = '{"datamodel": {"meta": [], "simulation_settings": {"CEL": {"x": %d}}}}';
+        $path = $this->dir . '/NS/shared/deep/generic.json';
+        new Filesystem()->dumpFile($path, sprintf($generic, 1));
+        $cache = new ArrayCachePool();
+        $loader = $this->loader($cache);
+        $x = static fn(string $json) => json_decode($json)->datamodel->simulation_settings->CEL->x;
+
+        $this->assertSame(1, $x($loader->mergedJson($stripped)));
+        $this->assertSame(1, $x($loader->mergedJson($stripped)));
+        $this->assertSame(1, $cache->saves, 'the second time came from the cache');
+
+        new Filesystem()->dumpFile($path, sprintf($generic, 2));
+        $this->assertSame(2, $x($loader->mergedJson($stripped)), 'a change of the parent in its folder is noticed');
+        $this->assertSame(2, $cache->saves);
+
+        // the parent is moved to another folder: the entry points to a file that is gone, so the config is merged
+        // again, and the parent is found where it is now
+        new Filesystem()->mkdir($this->dir . '/elsewhere');
+        new Filesystem()->rename($path, $this->dir . '/elsewhere/generic.json');
+        $this->assertSame(2, $x($loader->mergedJson($stripped)));
+        $this->assertSame(3, $cache->saves);
+    }
+
+    public function testAParentThatTwoFilesHaveTheNameOfIsFoundOutWhenTheConfigIsMergedAgain(): void
+    {
+        $stripped = '{"metadata": {"parent": "generic"}, "datamodel": {"meta": []}}';
+        $otherConfig = '{"metadata": {"parent": "generic"}, "datamodel": {"meta": [], "other": 1}}';
+        $generic = '{"datamodel": {"meta": [], "simulation_settings": {"CEL": null}}}';
+        new Filesystem()->dumpFile($this->dir . '/A/generic.json', $generic);
+        $cache = new ArrayCachePool();
+        $loader = $this->loader($cache);
+        $loader->mergedJson($stripped);
+
+        new Filesystem()->dumpFile($this->dir . '/B/generic.json', $generic); // the name is taken twice now
+
+        // what is cached is served: it was made with a parent that is unchanged, and the scan is not made for it
+        $this->assertNotSame('', $loader->mergedJson($stripped));
+        // but a config that is merged for the first time looks for the parent, and finds two
+        $this->expectException(ConfigParentException::class);
+        $this->expectExceptionMessage('The parent "generic" is ambiguous: A/generic.json and B/generic.json');
+        $loader->mergedJson($otherConfig);
+    }
+
+    public function testTheServerParentsOfAnUploadAreFoundAnywhereInTheTree(): void
+    {
+        $this->writeGeneric();
+        new Filesystem()->mkdir($this->dir . '/deep/er');
+        new Filesystem()->rename($this->dir . '/generic.json', $this->dir . '/deep/er/generic.json');
+
+        $inspection = $this->loader()->inspectUpload(['child.json' => $this->stripped()]);
+
+        $this->assertTrue($inspection->isComplete(), $inspection->summary());
+        $this->assertSame(['generic'], $inspection->serverParents);
     }
 
     public function testAnIncompleteUploadIsNotProcessed(): void
