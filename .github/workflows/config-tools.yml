@@ -29,6 +29,8 @@ env:
   # what the PHP inside the executables has to have: phar (to run the phar) and mbstring. The rest that the packages
   # want (ctype, intl, iconv) they do themselves, with polyfills.
   STATIC_PHP_EXTENSIONS: 'phar,mbstring'
+  # the same list for the cache key (a key can not have commas): change both together. Add -2, -3 to build it again.
+  STATIC_PHP_CACHE_KEY: 'phar-mbstring-1'
 
 jobs:
   # The phar is the same everywhere (it needs a PHP 8.4): it is built once, and tried.
@@ -98,8 +100,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: static-php/micro.sfx
-          # change the last number to build it again (static-php-cli is used as it is when this is built)
-          key: micro-${{ matrix.target }}-php${{ env.PHP_VERSION }}-${{ env.STATIC_PHP_EXTENSIONS }}-1
+          # static-php-cli is used as it is when this is built: change STATIC_PHP_CACHE_KEY to build it again
+          key: micro-${{ matrix.target }}-php${{ env.PHP_VERSION }}-${{ env.STATIC_PHP_CACHE_KEY }}
       - name: Build the static PHP (micro.sfx)
         if: steps.cache.outputs.cache-hit != 'true'
         shell: bash
