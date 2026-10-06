@@ -337,6 +337,31 @@ class ConfigTextOutputTest extends ConfigCommandTestCase
         $this->assertStringNotContainsString('Used by', $words, 'no empty table');
     }
 
+    public function testTheTextOfMergeAllIsItsDocument(): void
+    {
+        $this->splitTheOriginals();
+        $output = $this->temporaryDirectory() . '/merged';
+
+        $this->assertTheTextIsTheDocument('app:config:merge-all'); // a report
+        $this->assertTheTextIsTheDocument('app:config:merge-all', ['--output-dir' => $output]);
+        unlink($this->dir . '/generic.json');
+        $this->assertTheTextIsTheDocument('app:config:merge-all', ['--output-dir' => $output]); // a parent is missing
+    }
+
+    public function testMergeAllSaysWhatItWouldWriteAndWhatItWrote(): void
+    {
+        $this->splitTheOriginals();
+        $output = $this->temporaryDirectory() . '/merged';
+
+        $report = $this->words('app:config:merge-all');
+        $written = $this->words('app:config:merge-all', ['--output-dir' => $output]);
+
+        $this->assertStringContainsString('Merging 6 configs from ' . $this->dir, $report);
+        $this->assertStringContainsString('stripped', $report);
+        $this->assertStringContainsString('Dry run, nothing written. Run with --output-dir=DIR', $report);
+        $this->assertStringContainsString('[OK] 6 config(s) merged and written to ' . $output, $written);
+    }
+
     public function testMergePrintsTheConfigOnStdoutAndTellsWhereItWroteOnStderr(): void
     {
         $this->splitTheOriginals();

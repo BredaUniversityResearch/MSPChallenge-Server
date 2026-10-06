@@ -43,6 +43,9 @@ final class ConfigTextRenderer
             case 'app:config:verify':
                 $this->verify($io, $data);
                 break;
+            case 'app:config:merge-all':
+                $this->mergeAll($io, $data);
+                break;
             case 'app:config:strip':
                 $this->strip($io, $data);
                 break;
@@ -110,7 +113,9 @@ final class ConfigTextRenderer
                 foreach (self::arr(self::arr($error, 'details'), 'configs') as $config) {
                     $blocks['stripped_configs_unsafe'][] = (string)(is_scalar($config) ? $config : '');
                 }
-            } elseif ($file !== '' && in_array($command, ['app:config:split', 'app:config:strip'], true)) {
+            } elseif ($file !== ''
+                && in_array($command, ['app:config:split', 'app:config:strip', 'app:config:merge-all'], true)
+            ) {
                 $blocks['invalid_configs'][] = $line;
             } else {
                 $single[] = ['error', self::str($error, 'message')];
@@ -124,6 +129,10 @@ final class ConfigTextRenderer
             'stripped_configs_unsafe' => 'Nothing is written: these stripped configs cannot be written for the new '
                 . 'generic config:',
         ];
+        if ($command === 'app:config:merge-all') {
+            // the files that could be written are written: only the others are not
+            $headlines['write_failed'] = 'These files could not be written (the other files are written):';
+        }
         foreach ($blocks as $kind => $lines) {
             $io->error(array_merge([$headlines[$kind]], $lines));
         }
@@ -156,6 +165,9 @@ final class ConfigTextRenderer
                 if ($results !== []) {
                     $io->success(sprintf('All %d config(s) are valid.', count($results)));
                 }
+                break;
+            case 'app:config:merge-all':
+                $this->closingMergeAll($io, $data);
                 break;
             case 'app:config:strip':
                 $this->closingStrip($io, $data);
@@ -316,6 +328,55 @@ final class ConfigTextRenderer
             $io->section(self::str($result, 'id'));
             $io->listing(array_map('strval', self::arr($result, 'differences')));
         }
+    }
+
+    // ------------------------------------------------------------------------------------------------- merge-all
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function mergeAll(SymfonyStyle $io, array $data): void
+    {
+        $results = self::arr($data, 'results');
+        if ($results === []) {
+            return;
+        }
+        $io->title(sprintf('Merging %d configs from %s', count($results), self::str($data, 'root')));
+        $io->table(
+            ['Config', 'Kind', 'Parents', 'Size'],
+            array_map(
+                static function ($result) {
+                    $result = (array)$result;
+                    $parents = array_map('strval', self::arr($result, 'parents'));
+                    return [
+                        self::str($result, 'id'),
+                        self::str($result, 'kind'),
+                        $parents === [] ? '-' : implode(' > ', $parents),
+                        self::kb(self::int($result, 'bytes')),
+                    ];
+                },
+                $results
+            )
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function closingMergeAll(SymfonyStyle $io, array $data): void
+    {
+        if (self::arr($data, 'results') === []) {
+            return;
+        }
+        $outputDir = self::str($data, 'outputDir');
+        if ($outputDir === '') {
+            $io->note(
+                'Dry run, nothing written. Run with --output-dir=DIR to write the final configs there (the same names '
+                . 'and folders, without the parents).'
+            );
+            return;
+        }
+        $io->success(sprintf('%d config(s) merged and written to %s.', self::int($data, 'written'), $outputDir));
     }
 
     // ----------------------------------------------------------------------------------------------------- strip

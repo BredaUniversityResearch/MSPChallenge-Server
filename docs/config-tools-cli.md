@@ -31,6 +31,7 @@ php bin/console <command> [arguments] [options]       # in the server
 | `app:config:list` | Lists the configs and the parents below the root, who uses whom, and what is wrong with it |
 | `app:config:validate [files...]` | Checks configs the way an upload is checked (the final config against the schema, raster layers need `layer_width` and `layer_height`) |
 | `app:config:merge <file>` | Gives the final config of a config: merged with its parents |
+| `app:config:merge-all` | Writes the final config of every config below the root to another folder (`--output-dir`), with the same names and folders |
 | `app:config:verify [files...]` | Checks that configs merged with their parents give the originals they were made from |
 | `app:config:strip [files...]` | Removes what a parent already provides from configs (`--parent=NAME`) |
 | `app:config:split` | Makes a generic config of the configs that share data, and strips the configs against it |
@@ -47,6 +48,8 @@ Options that most commands have:
 More options, in short:
 
 - `merge`: `--output=FILE` writes the result to a file.
+- `merge-all`: `--output-dir=DIR` (not in or below `--dir`). Without it nothing is written. Files that are in `DIR` are
+  replaced. Nothing is written when one of the configs can not be merged.
 - `verify`: `--against=REV` (a git revision, default `HEAD`), `--repo=DIR`, `--original-dir=DIR` (originals in a folder
   with the same paths below it).
 - `strip`: `--parent=NAME`, `--apply` (replace the files, each one verified first), `--check` (exit 1 when a file could
@@ -155,6 +158,27 @@ stdout and its messages on stderr, so that a pipe stays clean. The other command
   `fingerprint` is a hash of the contents (xxh128): equal files have equal fingerprints.
 - `config` is the final config. With `--output` there is `output` (the absolute path that was written) instead.
 - The final config has no `metadata.parent` and its simulations are in `datamodel.simulation_settings`.
+
+### `app:config:merge-all`
+
+```json
+{ "data": { "root": "/abs/path/to/root", "outputDir": "/abs/path/to/merged", "written": 6,
+            "results": [ { "id": "NS/ns", "path": "NS/ns.json", "kind": "stripped", "parents": ["generic"],
+                           "output": "NS/ns.json", "bytes": 1441792 } ] } }
+```
+
+- Every config below the root is merged with its parents, in memory. Only when all of them could be merged are they
+  written: `<outputDir>/<id>.json`, so the folders and names are those of the root. Parents (generic configs) are not
+  written: a final config needs none.
+- `kind` is `stripped` (it had a parent) or `complete`. A complete config is written in the current shape too, so a folder
+  of configs in the old shape comes out in the new shape. `parents` are the names of the parents that were used, nearest
+  first. `bytes` is the size of the file that is written.
+- Without `--output-dir`, `outputDir` is `null`, `written` is 0 and `results` says what would be written.
+- `--output-dir` that is the root, or is in it, is refused (`invalid_usage`): the files would be read as configs the next
+  time, and a source could be replaced. A parent that is missing, or ambiguous, is an error for every config that has it,
+  and nothing is written. Files that are not valid JSON are a warning (`file_skipped`) in a report, and an error
+  (`file_not_json`) when something is going to be written. Problems of a merge that are not an error (a layer reference
+  to a layer that the config does not have) are warnings (`merge_warning`, with the config in `details.file`).
 
 ### `app:config:verify`
 

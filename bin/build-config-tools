@@ -464,6 +464,11 @@ function smokeTest(?string $phar, ?string $exe, string $version): void
         "$what validate does not have the schema, it says: "
         . substr((string)json_encode($errors, JSON_UNESCAPED_SLASHES), 0, 1500)
     );
+    $merged = $dir . '-merged';
+    $all = $json(['app:config:merge-all', '--output-dir=' . $merged], 0);
+    $written = ($all['data']['written'] ?? null) === 1 && is_file($merged . '/NS/ns.json');
+    check($written, "$what merge-all did not write the final config of NS/ns");
+    remove($merged);
     // the text for people uses other parts of the packages (tables, wrapped blocks): a runtime that lacks something
     // finds out here, and not when somebody runs the tool without --format=json
     [$code, $out, $err] = capture(array_merge($command, ['app:config:list']), $dir);

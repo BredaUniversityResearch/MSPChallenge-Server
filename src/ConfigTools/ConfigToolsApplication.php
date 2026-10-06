@@ -3,6 +3,7 @@
 namespace App\ConfigTools;
 
 use App\Command\ConfigListCommand;
+use App\Command\ConfigMergeAllCommand;
 use App\Command\ConfigMergeCommand;
 use App\Command\ConfigSplitCommand;
 use App\Command\ConfigStripCommand;
@@ -38,6 +39,7 @@ final class ConfigToolsApplication extends Application
             new ConfigListCommand($workingDirectory, '.'),
             new ConfigValidateCommand($workingDirectory, $validator, '.'),
             new ConfigMergeCommand($workingDirectory, '.'),
+            new ConfigMergeAllCommand($workingDirectory, '.'),
             new ConfigVerifyCommand($workingDirectory, '.'),
             new ConfigStripCommand($workingDirectory, $validator, '.'),
             new ConfigSplitCommand($workingDirectory, $validator, '.'),
