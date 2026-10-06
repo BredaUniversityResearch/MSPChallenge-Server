@@ -51,8 +51,11 @@ All options: `php bin/build-config-tools --help`. The ones that matter:
 | `--bundle-php=FILE` | A php binary: its folder goes in a zip next to the phar |
 | `--vendor=DIR` | A vendor folder that you have, instead of running composer (offline) |
 
-`build/.gitignore` keeps `build/stage` and `build/dist` out of git, and `build/config-tools/.gitignore` the `vendor` folder
-that `composer update` makes there. Commit `build/config-tools/composer.lock`.
+`build/.gitignore` keeps `build/stage`, `build/dist` and `build/cache` out of git, and `build/config-tools/.gitignore` the
+`vendor` folder that `composer update` makes there. The root `.gitignore` has to **anchor** the entries of the Symfony
+version switch (`/composer.json`, `/composer.lock`, `/symfony.lock`, `/config`): a pattern without the leading slash
+matches at every depth, and then the tool's `composer.json` is never committed and the CI fails without it. Commit
+`build/config-tools/composer.json` and `composer.lock`; `--check` says so when a `.gitignore` still keeps one of them out.
 
 ## An executable: PHP inside the file
 
@@ -62,7 +65,8 @@ file. So the executable is the two files one after the other: `micro.sfx` and `c
 when it can run on this machine.
 
 **Where micro.sfx comes from.** It is built with [static-php-cli](https://static-php.dev) (`spc`), for one system at a
-time, with the extensions the tools need: `phar` and `mbstring` (the rest the packages do themselves).
+time, with the extensions the tools need: `phar`, `mbstring` and `filter` (the JSON schema library calls `filter_var`; the
+rest the packages do themselves, with polyfills).
 
 - **From the workflow** (the easiest): the job `executable` builds it for Linux and Windows, and puts the phar in it.
   The files are in the run (Artifacts), and in the release for a tag.
@@ -70,12 +74,17 @@ time, with the extensions the tools need: `phar` and `mbstring` (the rest the pa
 
   ```
   spc doctor --auto-fix
-  spc download --for-extensions="phar,mbstring" --with-php=8.4 --prefer-pre-built
-  spc build "phar,mbstring" --build-micro
+  spc download --for-extensions="phar,mbstring,filter" --with-php=8.4 --prefer-pre-built
+  spc build "phar,mbstring,filter" --build-micro
   php bin/build-config-tools --micro=buildroot/bin/micro.sfx
   ```
 
   On **Windows** that needs Visual Studio 2022 (with the C++ tools) and Git; a build is some minutes the first time.
+  Run `spc` in **PowerShell or cmd, not in Git Bash**: under Git Bash `tar` is Git's GNU tar, that reads `D:\...` as a remote
+  host and fails extracting the PHP sources (the workflow runs that step in PowerShell, with `C:\Windows\System32` first on
+  the `PATH` so that the `tar` of Windows is used).
+  `spc` (2.8.6) does not recognise Visual Studio 2026 yet (`spc doctor` says "Visual Studio not installed"): that is why
+  the workflow uses the runner `windows-2022` and not `windows-latest`, which has VS 2026 since June 2026.
   On **Linux and macOS** it needs the usual compilers (`spc doctor --auto-fix` installs what is missing).
 - Pre-built binaries are published by the static-php-cli project, but for Windows only a small set is documented, so it
   is not known that one with `phar` is among them. Check before you rely on it.
@@ -89,13 +98,41 @@ built in a Linux container: that is built on Windows.
 8.4 build) makes `config-tools-windows-x64.zip` with the phar, the folder of that PHP, and `config-tools.cmd` that starts
 it. It needs the Visual C++ runtime on the machine, that a developer machine nearly always has.
 
+## Releasing
+
+```
+php bin/release-config-tools
+```
+
+The script asks what it needs and shows what it will do before it does it. It needs only `git` (the `gh` command is not
+needed). A release is a tag `config-tools-v<version>` that is pushed: the workflow then builds and publishes it.
+
+1. It checks that the workflow is in the last commit, runs `php bin/build-config-tools --check`, and tells you about changes
+   that are not committed (they are not in a release) and commits that are not pushed (it offers to push them).
+2. It asks for the version number (the highest one that exists is suggested) and the kind:
+   - **pre-release**: `config-tools-v6.0.5-pre`, for trying a build. GitHub marks it as a pre-release and not as "Latest", and
+     the config editor does not take it.
+   - **official release**: `config-tools-v6.0.5`.
+3. It makes the tag on the last commit and pushes it, and says where to look: the Actions page, and the release.
+
+To release officially after a pre-release, run it again and choose the official release of the same number; it then offers to
+remove the pre-release (menu item 2). A tag can only be used once: if the version has been released already, the script
+asks to remove the old one first. Removing is done in two steps, because without `gh` the GitHub release can only be deleted
+on the web: the script gives the address, waits, and then removes the tag with `git push --delete`. With `gh` installed it
+does both. `--dry-run` shows the git commands and runs none that changes something. `--help` lists the options for a run
+without questions (`--version=6.0.5 --pre --yes`).
+
 ## The workflow
 
 `.github/workflows/config-tools.yml`:
 
 - **A pull request** that touches the tools: `--check`, and a build with its try. Nothing is released.
 - **A tag `config-tools-v1.2.3`**: builds, tries, and makes a GitHub release with `config-tools.phar`, the executables and
-  `SHA256SUMS`. The tag has its own prefix because the repository has releases of the server too.
+  `SHA256SUMS`. The tag has its own prefix because the repository has releases of the server too, and the number is the
+  version of the platform that the tools belong to (`config-tools-v6.0.5`). A release of the tools is never marked
+  "Latest" (that is for the server: `/releases/latest` must keep giving the server), and a version with a `-`
+  (`6.0.5-rc1`) is a pre-release. Whoever wants the tools lists the releases and takes the newest `config-tools-v*`
+  that has the file it needs: see R-INT-4 of the config editor requirements.
 - **Run workflow** (by hand): the files are in the run.
 - The phar is built once (job `phar`). The executables are separate jobs (`executable`) that can fail without stopping
   the release of the phar: building a static PHP depends on other software.

@@ -1,0 +1,456 @@
+#!/usr/bin/env php
+<?php
+
+// Releases the config tools, step by step, and asks before it does anything. A release is a git tag
+// config-tools-v<version> that is pushed: the workflow .github/workflows/config-tools.yml then builds the phar and the
+// executables and makes the GitHub release. See docs/building-config-tools.md.
+//
+//   php bin/release-config-tools                      asks what you want: a release, or to remove a released version
+//   php bin/release-config-tools --dry-run            shows the git commands, does not run those that change something
+//
+// A pre-release is config-tools-v6.0.5-pre (the version 6.0.5-pre: a version with a "-" is a pre-release on GitHub, and
+// the config editor does not take it). An official release is config-tools-v6.0.5. To go from the one to the other,
+// make the official release (the same number without the suffix) and remove the pre-release.
+//
+// Options (everything that is not given is asked):
+//   --remote=NAME     the git remote that has the repository on GitHub (default: origin)
+//   --version=X.Y.Z   the version number, without the suffix
+//   --pre[=SUFFIX]    a pre-release, with this suffix (default: pre)
+//   --official        an official release
+//   --yes             do not ask to confirm
+//   --dry-run         do not change anything
+//   --help            this text
+
+declare(strict_types=1);
+
+const TAG_PREFIX = 'config-tools-v';
+const WORKFLOW = '.github/workflows/config-tools.yml';
+
+if (isset($_SERVER['SCRIPT_FILENAME']) && realpath((string)$_SERVER['SCRIPT_FILENAME']) === realpath(__FILE__)) {
+    main($argv);
+}
+
+/**
+ * @param string[] $argv
+ */
+function main(array $argv): void
+{
+    $options = parseOptions(array_slice($argv, 1));
+    $root = dirname(__DIR__);
+    chdir($root);
+    $state = readState($root, (string)($options['remote'] ?? 'origin'), isset($options['dry-run']));
+
+    if (isset($options['version']) || isset($options['pre']) || isset($options['official'])) {
+        $choice = '1';
+    } else {
+        say('');
+        say('What do you want to do?');
+        say('  1) Make a release (a pre-release, or an official release)');
+        say('  2) Remove a released version (its tag and its GitHub release)');
+        $choice = ask('Choose', '1');
+    }
+    if ($choice === '2') {
+        removeVersion($state, null);
+        return;
+    }
+    makeRelease($state, $options);
+}
+
+// ------------------------------------------------------------------------------------------------------ the state
+
+/**
+ * @return array<string, mixed>
+ */
+function readState(string $root, string $remote, bool $dryRun): array
+{
+    [$code, $top] = git(['rev-parse', '--show-toplevel']);
+    if ($code !== 0) {
+        fail('This is not a git repository (or git is not installed): ' . $root);
+    }
+    [$code, $remoteUrl] = git(['remote', 'get-url', $remote]);
+    if ($code !== 0) {
+        fail("There is no remote called \"$remote\" (see: git remote -v). Use --remote=NAME.");
+    }
+    [, $branch] = git(['rev-parse', '--abbrev-ref', 'HEAD']);
+    if ($branch === 'HEAD') {
+        fail('HEAD is detached: check out a branch first.');
+    }
+    [, $commit] = git(['log', '-1', '--format=%h %s']);
+    [, $dirty] = git(['status', '--porcelain']);
+    [$upstreamCode, $ahead] = git(['rev-list', '--count', '@{u}..HEAD']);
+
+    $state = [
+        'root' => $root,
+        'remote' => $remote,
+        'remoteUrl' => $remoteUrl,
+        'web' => webUrl($remoteUrl),
+        'branch' => $branch,
+        'commit' => $commit,
+        'dirty' => $dirty !== '',
+        'hasUpstream' => $upstreamCode === 0,
+        'ahead' => $upstreamCode === 0 ? (int)$ahead : 0,
+        'dryRun' => $dryRun,
+    ];
+    $state['tags'] = existingTags($remote);
+
+    say('');
+    say("Repository  : " . ($state['web'] ?? $remoteUrl));
+    say("Branch      : $branch");
+    say("Last commit : $commit");
+    say('Changes     : ' . ($state['dirty'] ? 'changes that are not committed' : 'none (everything is committed)'));
+    if (!$state['hasUpstream']) {
+        say('Pushed      : this branch is not on the remote yet');
+    } else {
+        say('Pushed      : ' . ($state['ahead'] === 0 ? 'yes' : $state['ahead'] . ' commit(s) are not pushed yet'));
+    }
+    $tags = array_keys($state['tags']);
+    $released = array_map(
+        static fn(string $tag) => substr($tag, strlen(TAG_PREFIX))
+            . ($state['tags'][$tag] === 'local' ? ' (only here)' : ''),
+        $tags
+    );
+    say('Released    : ' . ($tags === [] ? 'no version of the config tools yet' : implode(', ', $released)));
+    if ($dryRun) {
+        say('Dry run     : nothing is changed, the commands that would change something are shown');
+    }
+    return $state;
+}
+
+/**
+ * The tags of the config tools, on the remote and here: tag => 'remote', 'local' or 'both'.
+ *
+ * @return array<string, string>
+ */
+function existingTags(string $remote): array
+{
+    $tags = [];
+    [$code, $out] = git(['ls-remote', '--tags', $remote, 'refs/tags/' . TAG_PREFIX . '*']);
+    if ($code !== 0) {
+        say("(Could not ask $remote for its tags: only the tags in this repository are shown.)");
+    } else {
+        foreach (explode("\n", $out) as $line) {
+            if (preg_match('#refs/tags/(' . preg_quote(TAG_PREFIX, '#') . '[^\s^]+)#', $line, $m)) {
+                $tags[$m[1]] = 'remote';
+            }
+        }
+    }
+    [, $local] = git(['tag', '--list', TAG_PREFIX . '*']);
+    foreach (array_filter(explode("\n", $local)) as $tag) {
+        $tags[$tag] = isset($tags[$tag]) ? 'both' : 'local';
+    }
+    $version = static fn(string $tag): string => substr($tag, strlen(TAG_PREFIX));
+    uksort($tags, static fn(string $a, string $b) => version_compare($version($a), $version($b)));
+    return $tags;
+}
+
+function webUrl(string $remoteUrl): ?string
+{
+    if (preg_match('#github\.com[:/]([^/\s]+)/([^/\s]+?)(?:\.git)?$#', trim($remoteUrl), $m)) {
+        return "https://github.com/{$m[1]}/{$m[2]}";
+    }
+    return null;
+}
+
+// ------------------------------------------------------------------------------------------------------ a release
+
+/**
+ * @param array<string, mixed> $state
+ * @param array<string, string|true> $options
+ */
+function makeRelease(array $state, array $options): void
+{
+    // 1. is the code ready?
+    say('');
+    say('1. Checking');
+    if (!workflowIsAtHead()) {
+        fail(WORKFLOW . ' is not in the last commit: commit it first, a release is built by that workflow.');
+    }
+    if (is_file('bin/build-config-tools')) {
+        [$code, $out, $err] = capture([PHP_BINARY, 'bin/build-config-tools', '--check']);
+        if ($code !== 0) {
+            fail("The check of the build fails, fix it first (php bin/build-config-tools --check):\n$out\n$err");
+        }
+        say('   ' . trim(strtok($out, "\n") ?: 'The check of the build passes.'));
+    }
+    if ($state['dirty']) {
+        say('   WARNING: there are changes that are not committed. They are NOT in the release (the last commit is).');
+        if (!confirm('   Continue anyway?', false, $options)) {
+            fail('Stopped. Commit (or put away) the changes and run this again.');
+        }
+    }
+
+    // 2. what version?
+    say('');
+    say('2. The version');
+    $suggestion = suggestedNumber($state['tags']);
+    $number = (string)($options['version'] ?? ask('   Version number, no suffix (for example 6.0.5)', $suggestion));
+    if (!preg_match('/^\d+\.\d+\.\d+$/', $number)) {
+        fail("\"$number\" is not a version number like 6.0.5.");
+    }
+    if (isset($options['official'])) {
+        $suffix = '';
+    } elseif (isset($options['pre'])) {
+        $suffix = $options['pre'] === true ? 'pre' : (string)$options['pre'];
+    } else {
+        say("   1) pre-release: " . TAG_PREFIX . "$number-pre   (for trying it: not taken by the config editor)");
+        say("   2) official release: " . TAG_PREFIX . $number);
+        $suffix = ask('   Which one', '1') === '2' ? '' : ask('   Suffix of the pre-release', 'pre');
+    }
+    if ($suffix !== '' && !preg_match('/^[A-Za-z0-9.]+$/', $suffix)) {
+        fail("The suffix \"$suffix\" can only have letters, digits and dots.");
+    }
+    $version = $number . ($suffix === '' ? '' : '-' . $suffix);
+    $tag = TAG_PREFIX . $version;
+
+    // 3. a tag that is there already can not be used again
+    if (isset($state['tags'][$tag])) {
+        say('');
+        say("   The version $version has been released already (the tag $tag exists, " . $state['tags'][$tag] . ').');
+        say('   A tag can only be used once: the old one has to be removed first.');
+        if (!confirm('   Remove it now?', true, $options)) {
+            fail('Stopped.');
+        }
+        removeVersion($state, $tag);
+    }
+
+    // 4. push what is not pushed
+    if (!$state['hasUpstream'] || $state['ahead'] > 0) {
+        say('');
+        say('   The last commit is not on ' . $state['remote'] . ' yet, and the workflow builds what is there.');
+        if (!confirm('   Push the branch ' . $state['branch'] . ' now?', true, $options)) {
+            fail('Stopped. Push the branch, then run this again.');
+        }
+        $args = $state['hasUpstream'] ? ['push'] : ['push', '-u', $state['remote'], $state['branch']];
+        run($args, $state['dryRun']);
+    }
+
+    // 5. the tag
+    say('');
+    say('3. The release');
+    say("   Tag     : $tag");
+    $kind = $suffix === '' ? 'official' : 'a pre-release: not "Latest", not for the editor';
+    say("   Version : $version  ($kind)");
+    say('   Commit  : ' . $state['commit'] . '  (' . $state['branch'] . ')');
+    say('   Then    : the workflow builds the phar and the Windows and Linux executables and makes the release');
+    if (!confirm('   Make the tag and push it?', true, $options)) {
+        fail('Stopped: nothing is released.');
+    }
+    run(['tag', '-a', $tag, '-m', 'Config tools ' . $version], $state['dryRun']);
+    run(['push', $state['remote'], $tag], $state['dryRun']);
+
+    // 6. afterwards
+    say('');
+    say($state['dryRun'] ? 'Dry run: this is what would happen now.' : "Done: $tag is pushed.");
+    $web = $state['web'];
+    say('');
+    say('What happens now:');
+    say('  - The workflow "Config tools" runs' . ($web !== null ? ": $web/actions" : '.'));
+    say('    The first run of a tag builds the static PHP again (a few minutes: a pull request cache is not used).');
+    say('  - When it is green the release is there' . ($web !== null ? ": $web/releases/tag/$tag" : '.'));
+    say('    It has config-tools.phar, config-tools-linux-x64, config-tools-windows-x64.exe and SHA256SUMS.');
+    say("  - Check that `config-tools --version` of a downloaded file says $version.");
+    if ($suffix === '') {
+        $pre = array_values(array_filter(
+            array_keys($state['tags']),
+            static fn(string $t) => str_starts_with($t, TAG_PREFIX . $number . '-')
+        ));
+        if ($pre !== []) {
+            say('  - The pre-release ' . implode(', ', $pre) . ' is not needed any more: run this again, choose 2.');
+        }
+    } else {
+        say("  - For the official release: run this script again, and choose the official release of $number.");
+    }
+}
+
+/**
+ * The number to suggest: the highest version that has been released, without its suffix.
+ *
+ * @param array<string, string> $tags
+ */
+function suggestedNumber(array $tags): ?string
+{
+    $best = null;
+    foreach (array_keys($tags) as $tag) {
+        if (preg_match('/^' . preg_quote(TAG_PREFIX, '/') . '(\d+\.\d+\.\d+)/', $tag, $m)
+            && ($best === null || version_compare($m[1], $best, '>'))) {
+            $best = $m[1];
+        }
+    }
+    return $best;
+}
+
+function workflowIsAtHead(): bool
+{
+    [$code] = git(['cat-file', '-e', 'HEAD:' . WORKFLOW]);
+    return $code === 0;
+}
+
+// ------------------------------------------------------------------------------------------------------ remove one
+
+/**
+ * Removes the tag of a released version and its GitHub release.
+ *
+ * @param array<string, mixed> $state
+ */
+function removeVersion(array $state, ?string $tag): void
+{
+    if ($tag === null) {
+        $tags = array_keys($state['tags']);
+        if ($tags === []) {
+            fail('There is no released version of the config tools to remove.');
+        }
+        say('');
+        say('Which version?');
+        foreach ($tags as $i => $name) {
+            say('  ' . ($i + 1) . ') ' . substr($name, strlen(TAG_PREFIX)));
+        }
+        $index = (int)ask('Choose', null) - 1;
+        if (!isset($tags[$index])) {
+            fail('That is not one of the versions.');
+        }
+        $tag = $tags[$index];
+        if (!confirm("Remove the release and the tag $tag?", false, [])) {
+            fail('Stopped: nothing is removed.');
+        }
+    }
+    $web = $state['web'];
+    [$ghCode] = capture(['gh', '--version']);
+    $useGh = $ghCode === 0 && $web !== null
+        && confirm('   gh (GitHub CLI) is here: remove the release and the tag with it?', true, []);
+    if ($useGh) {
+        $repo = substr($web, strlen('https://github.com/'));
+        run(['gh', 'release', 'delete', $tag, '--yes', '--cleanup-tag', '--repo', $repo], $state['dryRun']);
+    } else {
+        // the release is removed on the web: without gh there is no way to do it from here
+        say('');
+        say('   The GitHub release can only be removed on the web (this machine has no gh):');
+        say('   1. Open ' . ($web !== null ? "$web/releases/tag/$tag" : 'the release of ' . $tag . ' on GitHub'));
+        say('   2. Click "Delete" (the trash icon) and confirm. The tag is removed by this script.');
+        if (!$state['dryRun']) {
+            ask('   Press Enter when the release is removed', '');
+        }
+        if (($state['tags'][$tag] ?? '') !== 'local') {
+            run(['push', $state['remote'], '--delete', $tag], $state['dryRun']);
+        }
+    }
+    if (in_array($state['tags'][$tag] ?? '', ['local', 'both'], true)) {
+        run(['tag', '-d', $tag], $state['dryRun']);
+    }
+    say("   Removed $tag.");
+}
+
+// ---------------------------------------------------------------------------------------------------------- helpers
+
+/**
+ * @param string[] $arguments
+ * @return array<string, string|true>
+ */
+function parseOptions(array $arguments): array
+{
+    $options = [];
+    foreach ($arguments as $argument) {
+        if ($argument === '--help' || $argument === '-h') {
+            $text = (string)file_get_contents(__FILE__);
+            echo trim((string)preg_replace('/^#!.*\n<\?php\n\n|\ndeclare\(strict_types=1\);.*$/s', '', $text)) . "\n";
+            exit(0);
+        }
+        if (!preg_match('/^--([a-z-]+)(?:=(.*))?$/', $argument, $m)
+            || !in_array($m[1], ['remote', 'version', 'pre', 'official', 'yes', 'dry-run'], true)) {
+            fail("Unknown argument: $argument (see --help)");
+        }
+        $options[$m[1]] = $m[2] ?? true;
+    }
+    return $options;
+}
+
+/**
+ * Runs git where it changes something (and only says what it would do in a dry run).
+ *
+ * @param string[] $arguments
+ */
+function run(array $arguments, bool $dryRun): void
+{
+    $program = $arguments[0] === 'gh' ? 'gh' : 'git';
+    $shown = ($program === 'gh' ? '' : 'git ') . implode(' ', array_map(
+        static fn(string $a) => str_contains($a, ' ') ? '"' . $a . '"' : $a,
+        $arguments
+    ));
+    if ($dryRun) {
+        say("   [dry run] $shown");
+        return;
+    }
+    say("   > $shown");
+    $command = $program === 'gh' ? $arguments : array_merge(['git'], $arguments);
+    // git asks for a password through the terminal itself: it does not need the input of this script (and must not
+    // take it)
+    $nothing = PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null';
+    $process = proc_open($command, [0 => ['file', $nothing, 'r'], 1 => STDOUT, 2 => STDERR], $pipes);
+    $code = is_resource($process) ? proc_close($process) : 127;
+    if ($code !== 0) {
+        fail("That failed (exit code $code): $shown");
+    }
+}
+
+/**
+ * Runs git and gives the exit code and what it says. For reading only.
+ *
+ * @param string[] $arguments
+ * @return array{0: int, 1: string, 2: string}
+ */
+function git(array $arguments): array
+{
+    return capture(array_merge(['git'], $arguments));
+}
+
+/**
+ * @param string[] $command
+ * @return array{0: int, 1: string, 2: string} the exit code, stdout (trimmed) and stderr
+ */
+function capture(array $command): array
+{
+    $process = @proc_open($command, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+    if (!is_resource($process)) {
+        return [127, '', 'could not start ' . $command[0]];
+    }
+    $out = (string)stream_get_contents($pipes[1]);
+    $err = (string)stream_get_contents($pipes[2]);
+    return [proc_close($process), trim($out), trim($err)];
+}
+
+function ask(string $question, ?string $default): string
+{
+    echo $question . ($default === null || $default === '' ? '' : " [$default]") . ': ';
+    $line = fgets(STDIN);
+    if ($line === false) {
+        if ($default === null) {
+            fail("\nNo answer to: $question");
+        }
+        echo "\n";
+        return $default;
+    }
+    $answer = trim($line);
+    return $answer === '' ? (string)$default : $answer;
+}
+
+/**
+ * @param array<string, string|true> $options
+ */
+function confirm(string $question, bool $default, array $options): bool
+{
+    if (isset($options['yes'])) {
+        return true;
+    }
+    $answer = strtolower(ask($question . ($default ? ' (Y/n)' : ' (y/N)'), $default ? 'y' : 'n'));
+    return in_array($answer, ['y', 'yes', 'j', 'ja'], true);
+}
+
+function say(string $message): void
+{
+    echo $message . "\n";
+}
+
+function fail(string $message): never
+{
+    fwrite(STDERR, $message . "\n");
+    exit(1);
+}

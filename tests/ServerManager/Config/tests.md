@@ -95,6 +95,9 @@ most tests work on the six real configs.
   (`ConfigToolsBuildTest`). Composer, Box, static PHP and the files that come out are tried by the build script itself
   (it runs the result on a few small configs) and by the workflow `.github/workflows/config-tools.yml`: see
   `docs/building-config-tools.md` for what has and has not been tried.
+- **The release script.** `bin/release-config-tools` is interactive and runs git: it was tried by hand in a scratch repository
+  with its own remote (pre-release, official release, a tag that exists already, uncommitted changes, an unpushed commit,
+  removing a version, a dry run, wrong input), and is not part of the tests.
 - **A PHP that is not 8.4.** The tests run in the PHP of the project. `bin/config-tools` is only tested as a process when
   the `vendor` folder is there, and the version check of the script (PHP 8.4 or later) is not tested.
 - **The Unity client and the config editor**, and a real run of `app:config:split --apply` on the released configs.
