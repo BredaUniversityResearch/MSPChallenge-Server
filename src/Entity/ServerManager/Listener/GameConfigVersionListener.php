@@ -3,6 +3,7 @@
 namespace App\Entity\ServerManager\Listener;
 
 use App\Domain\Common\EntityEnums\GameConfigVersionVisibilityValue;
+use App\Domain\Config\ConfigLoader;
 use App\Entity\ServerManager\GameConfigVersion;
 use App\Entity\ServerManager\User;
 use Doctrine\ORM\Event\PostLoadEventArgs;
@@ -15,7 +16,8 @@ class GameConfigVersionListener
 {
     public function __construct(
         private readonly KernelInterface $kernel,
-        private readonly Security $security
+        private readonly Security $security,
+        private readonly ConfigLoader $configLoader
     ) {
     }
 
@@ -44,7 +46,8 @@ class GameConfigVersionListener
                         "Cannot read contents of the session's chosen configuration file: {$path}"
                     );
                 }
-                return $contents;
+                // the final config: the file merged with generic.json (the file itself may be stripped)
+                return $this->configLoader->mergedJson($contents);
             }
         );
         $gameConfigVersion->hasLazyLoader(
@@ -55,13 +58,15 @@ class GameConfigVersionListener
             function () use ($gameConfigVersion) {
                 $gameConfigContentCompleteRaw = $gameConfigVersion->getGameConfigCompleteRaw();
                 $gameConfigContentComplete = json_decode($gameConfigContentCompleteRaw, true);
-                if ($gameConfigContentComplete === false) {
+                if ($gameConfigContentComplete === null) {
                     throw new Exception(
                         'Cannot decode the contents of the session\'s chosen configuration file: '.
                         $gameConfigVersion->getFilePath()
                     );
                 }
-                return $gameConfigContentComplete;
+                // CEL, SEL and MEL are in datamodel.simulation_settings; code that reads them from datamodel directly
+                // still works until it has been moved
+                return ConfigLoader::withBothShapes($gameConfigContentComplete);
             }
         );
     }

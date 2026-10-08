@@ -5,7 +5,9 @@ namespace App\Domain\Common;
 use App\Domain\Services\ConnectionManager;
 use App\Entity\ServerManager\GameSave;
 use Doctrine\ORM\EntityManagerInterface;
-use JsonSchema\Validator;
+use App\Domain\Config\ConfigLoader;
+use App\Domain\Config\InvalidSessionConfigException;
+use App\Domain\Config\SessionConfigValidator;
 use Symfony\Component\HttpKernel\KernelInterface;
 use \ZipArchive;
 
@@ -144,21 +146,23 @@ class GameSaveZipFileValidator
 
     private function sessionConfigSchemaValid(): bool
     {
-        $gameConfigContents = json_decode($this->getSessionConfigContents());
-        $validator = new Validator();
-        $validator->validate(
-            $gameConfigContents,
-            json_decode(
-                file_get_contents($this->kernel->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json')
-            )
+        $loader = new ConfigLoader(
+            (string)$this->kernel->getContainer()->getParameter('app.server_manager_config_dir'),
+            new SessionConfigValidator($this->kernel->getProjectDir().'/src/Domain/SessionConfigJSONSchema.json')
         );
-        if (!$validator->isValid()) {
-            foreach ($validator->getErrors() as $error) {
-                $this->setError(sprintf("[%s] %s", $error['property'], $error['message']));
-            }
-            return false;
+        try {
+            // the config in a save is the running config of the session: final already (not merged again), and
+            // in the old shape when the save is an old one
+            $errors = $loader->errors($loader->normalize($this->getSessionConfigContents()));
+        } catch (InvalidSessionConfigException $e) {
+            $errors = $e->getErrors();
+        } catch (\JsonException $e) {
+            $errors = [$e->getMessage()];
         }
-        return true;
+        foreach ($errors as $error) {
+            $this->setError($error);
+        }
+        return $errors === [];
     }
 
     private function gameListExists(): bool
