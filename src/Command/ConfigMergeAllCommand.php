@@ -54,6 +54,7 @@ final class ConfigMergeAllCommand extends ConfigCommand
                 'Write the final configs here, as <name>.json in the same folders as below --dir. Not in or below '
                 . '--dir. Files that are there are replaced. Without it nothing is written'
             )
+            ->addExcludeOption()
             ->addFormatOption();
     }
 
@@ -73,7 +74,7 @@ final class ConfigMergeAllCommand extends ConfigCommand
                 Command::INVALID
             );
         }
-        $directory = new ConfigDirectory($root);
+        $directory = new ConfigDirectory($root, $this->excludesOf($input));
         $skipped = [];
         $files = $directory->configFiles((string)$input->getOption('pattern'), $skipped);
         $stop = $this->skippedFiles($report, $directory, $skipped, $outputRoot !== null);

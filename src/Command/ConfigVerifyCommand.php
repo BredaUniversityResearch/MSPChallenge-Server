@@ -73,12 +73,16 @@ final class ConfigVerifyCommand extends ConfigCommand
                 InputOption::VALUE_REQUIRED,
                 'Take the originals from a folder, with the same paths below it as the configs have, instead of git'
             )
+            ->addExcludeOption()
             ->addFormatOption();
     }
 
     protected function perform(InputInterface $input, ConfigReport $report): int
     {
-        $directory = new ConfigDirectory(Path::makeAbsolute((string)$input->getOption('dir'), $this->projectDir));
+        $directory = new ConfigDirectory(
+            Path::makeAbsolute((string)$input->getOption('dir'), $this->projectDir),
+            $this->excludesOf($input)
+        );
         $repo = Path::makeAbsolute((string)$input->getOption('repo'), $this->projectDir);
         $originalDir = $input->getOption('original-dir');
         $skipped = [];

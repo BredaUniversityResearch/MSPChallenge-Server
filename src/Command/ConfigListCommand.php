@@ -53,6 +53,7 @@ final class ConfigListCommand extends ConfigCommand
                 'Exit with status 1 when something is wrong (for CI): a config or parent with a problem, a name that '
                 . 'two files have, or a file that is not valid JSON'
             )
+            ->addExcludeOption()
             ->addFormatOption();
     }
 
@@ -62,7 +63,7 @@ final class ConfigListCommand extends ConfigCommand
         if (!is_dir($root)) {
             return $report->fail("Config directory not found: $root", 'dir_not_found');
         }
-        $directory = new ConfigDirectory($root);
+        $directory = new ConfigDirectory($root, $this->excludesOf($input));
         $scan = $directory->scan((string)$input->getOption('pattern'));
         $parents = ConfigParents::fromDirectory($directory);
 

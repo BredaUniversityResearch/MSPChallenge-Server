@@ -42,6 +42,7 @@ Options that most commands have:
 |---|---|
 | `--dir=DIR` | The config root (see above) |
 | `--pattern=GLOB` | File name pattern of the configs to look at, anywhere below `--dir` (default `*.json`) |
+| `--exclude=PATTERN` | Leave out folders and files below `--dir`. Can be given more than once. See "Leaving things out" below |
 | `--format=text\|json` | `text` for people (the default), `json` for programs (see below) |
 | `--skip-validation` | (`split`, `strip`) do not check complete configs against the schema first |
 
@@ -59,6 +60,22 @@ More options, in short:
 - `list`: `--check` (exit 1 when something is wrong).
 
 Without `--apply` or `--output-dir`, `strip` and `split` only report. See `--help` of a command for everything.
+
+## Leaving things out: `--exclude`
+
+`list`, `validate`, `merge`, `merge-all`, `verify`, `strip` and `split` take `--exclude=PATTERN` (more than once for more
+patterns). A folder or file that is left out is **not seen at all**: it is not a config, it is not a parent (also not when a
+config names it), and it does not make two files with the same name an ambiguous parent. A file that is named on the command
+line is never left out: it was asked for.
+
+- A **name** (no `/`) leaves out a folder, or a file, with that name anywhere below `--dir`: `--exclude=NotMaintained`,
+  `--exclude="*_old.json"`. The name of a file can be written with or without `.json` (`--exclude=CS_Basic`).
+- A **path** (with a `/`) is from `--dir`, and leaves out what is at that path and below it: `--exclude=NS/old`,
+  `--exclude="NS/*_copy.json"`. A path also matches without `.json`.
+- `*` is any characters except `/`, `?` is one character except `/`, `**` is any characters including `/` (`**/x` is `x` at the
+  root and in any folder). Slashes and backslashes are the same, and so is a slash at the start or the end.
+- The case of letters matters, except on Windows (as on its file system).
+- Quote a pattern with `*` or `?` in a shell, or the shell expands it.
 
 ## Exit codes
 

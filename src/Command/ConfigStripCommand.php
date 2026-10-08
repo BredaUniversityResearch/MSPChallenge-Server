@@ -89,6 +89,7 @@ final class ConfigStripCommand extends ConfigCommand
                 InputOption::VALUE_NONE,
                 'Do not validate complete configs against SessionConfigJSONSchema.json'
             )
+            ->addExcludeOption()
             ->addFormatOption();
     }
 
@@ -102,7 +103,7 @@ final class ConfigStripCommand extends ConfigCommand
         if (!is_dir($root)) {
             return $report->fail("Config directory not found: $root", 'dir_not_found');
         }
-        $directory = new ConfigDirectory($root);
+        $directory = new ConfigDirectory($root, $this->excludesOf($input));
         $parents = ConfigParents::fromDirectory($directory);
         $merger = new RegionConfigMerger();
         $parentOption = $input->getOption('parent');

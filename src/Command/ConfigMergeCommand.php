@@ -46,6 +46,7 @@ final class ConfigMergeCommand extends ConfigCommand
                 InputOption::VALUE_REQUIRED,
                 'Write the result to this file instead of printing it'
             )
+            ->addExcludeOption()
             ->addFormatOption();
     }
 
@@ -70,7 +71,10 @@ final class ConfigMergeCommand extends ConfigCommand
 
     protected function perform(InputInterface $input, ConfigReport $report): int
     {
-        $directory = new ConfigDirectory(Path::makeAbsolute((string)$input->getOption('dir'), $this->projectDir));
+        $directory = new ConfigDirectory(
+            Path::makeAbsolute((string)$input->getOption('dir'), $this->projectDir),
+            $this->excludesOf($input)
+        );
         /** @var \ArrayObject<string, array{path: string, fingerprint: string}> $fingerprints */
         $fingerprints = new \ArrayObject();
         try {

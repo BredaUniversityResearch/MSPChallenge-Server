@@ -17,8 +17,14 @@ final class ConfigDirectory
     /** The name of the generic config the commands use when they are not told another one. */
     public const string DEFAULT_GENERIC = 'generic';
 
-    public function __construct(private readonly string $root)
-    {
+    /**
+     * @param ConfigExcludes $excludes what is left out when the folder is read (see there). A file that is named on
+     *        the command line is never left out: it was asked for.
+     */
+    public function __construct(
+        private readonly string $root,
+        private readonly ConfigExcludes $excludes = new ConfigExcludes()
+    ) {
     }
 
     public function root(): string
@@ -101,6 +107,9 @@ final class ConfigDirectory
         $skipped = [];
         $finder = new Finder()->files()->in($this->root)->name($pattern)->notName('*.region.json')->sortByName();
         foreach ($finder as $file) {
+            if ($this->excludes->excludes($file->getRelativePathname())) {
+                continue; // not part of the folder: not a config, and not a parent either
+            }
             $path = $file->getRealPath() ?: $file->getPathname(); // always a string
             try {
                 $document = $this->read($path);
@@ -143,6 +152,9 @@ final class ConfigDirectory
             return $names;
         }
         foreach (new Finder()->files()->in($this->root)->name('*.json')->sortByName() as $file) {
+            if ($this->excludes->excludes($file->getRelativePathname())) {
+                continue;
+            }
             $names[$file->getBasename('.json')][] = $file->getRealPath() ?: $file->getPathname();
         }
         return $names;

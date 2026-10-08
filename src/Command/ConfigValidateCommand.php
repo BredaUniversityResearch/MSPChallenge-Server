@@ -55,6 +55,7 @@ final class ConfigValidateCommand extends ConfigCommand
                 'File name pattern of the configs, anywhere below --dir',
                 '*.json'
             )
+            ->addExcludeOption()
             ->addFormatOption();
     }
 
@@ -64,7 +65,7 @@ final class ConfigValidateCommand extends ConfigCommand
         if (!is_dir($root)) {
             return $report->fail("Config directory not found: $root", 'dir_not_found');
         }
-        $directory = new ConfigDirectory($root);
+        $directory = new ConfigDirectory($root, $this->excludesOf($input));
         $loader = new ConfigLoader($root, $this->validator);
         $skipped = [];
         try {

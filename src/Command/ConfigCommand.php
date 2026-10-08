@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Domain\Config\ConfigDirectory;
+use App\Domain\Config\ConfigExcludes;
 use App\Domain\Config\Split\ConfigValues;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -39,6 +40,22 @@ abstract class ConfigCommand extends Command
             'text (for people) or json (one JSON document on stdout, for programs)',
             'text'
         );
+    }
+
+    protected function addExcludeOption(): static
+    {
+        return $this->addOption(
+            'exclude',
+            null,
+            InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
+            'Leave out folders and files below --dir: a name (NotMaintained, *_old.json) or a path from --dir '
+            . '(NS/old/*). They are not seen at all: not as configs, not as parents. Can be given more than once'
+        );
+    }
+
+    protected function excludesOf(InputInterface $input): ConfigExcludes
+    {
+        return new ConfigExcludes(array_map('strval', (array)$input->getOption('exclude')));
     }
 
     /**

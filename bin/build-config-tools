@@ -464,6 +464,11 @@ function smokeTest(?string $phar, ?string $exe, string $version): void
         "$what validate does not have the schema, it says: "
         . substr((string)json_encode($errors, JSON_UNESCAPED_SLASHES), 0, 1500)
     );
+    $left = $json(['app:config:list', '--exclude=NS'], 0); // the executable has the option that leaves folders out
+    check(
+        ($left['data']['summary']['configs'] ?? null) === 0 && ($left['data']['summary']['parents'] ?? null) === 1,
+        "$what list --exclude=NS still finds the config of NS"
+    );
     $merged = $dir . '-merged';
     $all = $json(['app:config:merge-all', '--output-dir=' . $merged], 0);
     $written = ($all['data']['written'] ?? null) === 1 && is_file($merged . '/NS/ns.json');

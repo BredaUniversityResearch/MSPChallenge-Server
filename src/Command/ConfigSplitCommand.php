@@ -99,6 +99,7 @@ final class ConfigSplitCommand extends ConfigCommand
                 InputOption::VALUE_NONE,
                 'Overwrite the generic config if it exists (this loses changes made to it by hand)'
             )
+            ->addExcludeOption()
             ->addFormatOption();
     }
 
@@ -115,7 +116,7 @@ final class ConfigSplitCommand extends ConfigCommand
         if (!is_dir($root)) {
             return $report->fail("Config directory not found: $root", 'dir_not_found');
         }
-        $directory = new ConfigDirectory($root);
+        $directory = new ConfigDirectory($root, $this->excludesOf($input));
         $genericName = (string)$input->getOption('generic');
         if (!ConfigDirectory::isValidParentName($genericName)) {
             return $report->fail(
