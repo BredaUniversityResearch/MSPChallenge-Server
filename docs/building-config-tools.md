@@ -110,8 +110,7 @@ needed). A release is a tag `config-tools-v<version>` that is pushed: the workfl
 1. It checks that the workflow is in the last commit, runs `php bin/build-config-tools --check`, and tells you about changes
    that are not committed (they are not in a release) and commits that are not pushed (it offers to push them).
 2. It asks for the version number (the highest one that exists is suggested) and the kind:
-   - **pre-release**: `config-tools-v6.0.5-pre`, for trying a build. GitHub marks it as a pre-release and not as "Latest", and
-     the config editor does not take it.
+   - **pre-release**: `config-tools-v6.0.5-pre`, for trying a build. GitHub marks it as a pre-release and not as "Latest".
    - **official release**: `config-tools-v6.0.5`.
 3. It makes the tag on the last commit and pushes it, and says where to look: the Actions page, and the release.
 

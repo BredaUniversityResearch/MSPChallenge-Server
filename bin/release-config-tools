@@ -8,9 +8,9 @@
 //   php bin/release-config-tools                      asks what you want: a release, or to remove a released version
 //   php bin/release-config-tools --dry-run            shows the git commands, does not run those that change something
 //
-// A pre-release is config-tools-v6.0.5-pre (the version 6.0.5-pre: a version with a "-" is a pre-release on GitHub, and
-// the config editor does not take it). An official release is config-tools-v6.0.5. To go from the one to the other,
-// make the official release (the same number without the suffix) and remove the pre-release.
+// A pre-release is config-tools-v6.0.5-pre (the version 6.0.5-pre: a version with a "-" is a pre-release on GitHub: it
+// is never the "Latest" release). An official release is config-tools-v6.0.5.
+// To go from the one to the other, make the official release (the same number without the suffix) and remove the pre-release.
 //
 // Options (everything that is not given is asked):
 //   --remote=NAME     the git remote that has the repository on GitHub (default: origin)
@@ -192,7 +192,8 @@ function makeRelease(array $state, array $options): void
     } elseif (isset($options['pre'])) {
         $suffix = $options['pre'] === true ? 'pre' : (string)$options['pre'];
     } else {
-        say("   1) pre-release: " . TAG_PREFIX . "$number-pre   (for trying it: not taken by the config editor)");
+        $note = '(not "Latest" on GitHub; watch-config-tools.ps1 takes it)';
+        say("   1) pre-release: " . TAG_PREFIX . "$number-pre   $note");
         say("   2) official release: " . TAG_PREFIX . $number);
         $suffix = ask('   Which one', '1') === '2' ? '' : ask('   Suffix of the pre-release', 'pre');
     }
@@ -228,7 +229,7 @@ function makeRelease(array $state, array $options): void
     say('');
     say('3. The release');
     say("   Tag     : $tag");
-    $kind = $suffix === '' ? 'official' : 'a pre-release: not "Latest", not for the editor';
+    $kind = $suffix === '' ? 'official' : 'a pre-release: not "Latest"';
     say("   Version : $version  ($kind)");
     say('   Commit  : ' . $state['commit'] . '  (' . $state['branch'] . ')');
     say('   Then    : the workflow builds the phar and the Windows and Linux executables and makes the release');
