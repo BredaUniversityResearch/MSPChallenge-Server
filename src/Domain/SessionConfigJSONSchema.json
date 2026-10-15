@@ -701,6 +701,26 @@
             "links"
           ]
         },
+        "simulation_settings": {
+          "type": "object",
+          "description": "CEL, SEL and MEL (the simulation settings), defined below as datamodel.CEL, .SEL and .MEL",
+          "properties": {
+            "CEL": {
+              "$ref": "#/properties/datamodel/properties/CEL"
+            },
+            "SEL": {
+              "$ref": "#/properties/datamodel/properties/SEL"
+            },
+            "MEL": {
+              "$ref": "#/properties/datamodel/properties/MEL"
+            }
+          },
+          "required": [
+            "CEL",
+            "SEL",
+            "MEL"
+          ]
+        },
         "CEL": {
           "type": "object",
           "properties": {
@@ -1319,8 +1339,7 @@
                 "required": [
                   "categoryName",
                   "categoryColor",
-                  "unit",
-                  "valueDefinitions"
+                  "unit"
                 ]
               }
             },
@@ -1711,10 +1730,7 @@
               "layer_category",
               "layer_subcategory",
               "layer_download_from_geoserver",
-              "layer_width",
-              "layer_height",
               "layer_raster_material",
-              "layer_raster_filter_mode",
               "layer_raster_color_interpolation",
               "layer_raster_pattern",
               "layer_raster_minimum_value_cutoff",
@@ -1826,9 +1842,7 @@
         "restrictions",
         "plans",
         "dependencies",
-        "CEL",
-        "SEL",
-        "MEL",
+        "simulation_settings",
         "meta",
         "expertise_definitions",
         "objectives",

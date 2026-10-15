@@ -1,5 +1,6 @@
 import { Controller } from 'stimulus';
 import { submitFormGeneric } from '../helpers/form';
+import { successNotification, errorNotification } from '../helpers/notification';
 import Modal from '../helpers/modal';
 
 export default class extends Controller {
@@ -40,6 +41,21 @@ export default class extends Controller {
                 document.querySelector('turbo-frame#configsTable').reload();
             }
         )
+    }
+
+    async cancelPendingUpload(event)
+    {
+        // throws away the files of an upload that is still waiting for more files
+        const body = new FormData();
+        body.append('_token', event.currentTarget.dataset.csrf);
+        const response = await fetch('/manager/gameconfig/form/cancel', { method: 'POST', body: body });
+        if (response.status != 204) {
+            errorNotification('Could not cancel the upload.');
+            return;
+        }
+        successNotification('The upload was cancelled, the uploaded files were discarded.');
+        // a fresh form
+        this.openNewConfigModal(event);
     }
 
     async onConfigFileSelection(event)

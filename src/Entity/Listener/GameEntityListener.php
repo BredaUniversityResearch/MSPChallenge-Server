@@ -2,6 +2,7 @@
 
 namespace App\Entity\Listener;
 
+use App\Domain\Config\ConfigLoader;
 use App\Entity\SessionAPI\Game;
 use Doctrine\ORM\Event\PostLoadEventArgs;
 use Doctrine\ORM\Event\PrePersistEventArgs;
@@ -50,13 +51,15 @@ readonly class GameEntityListener implements
         if ($fileSystem->exists($runningConfigPath)) {
             $gameConfigContentCompleteRaw = file_get_contents($runningConfigPath);
             $gameConfigContentComplete = json_decode($gameConfigContentCompleteRaw, true);
-            if ($gameConfigContentComplete === false) {
+            if ($gameConfigContentComplete === null) {
                 throw new \Exception(
                     "Cannot read contents of the session's running configuration file: {$runningConfigPath}"
                 );
             }
             $game->setRunningGameConfigFileContentsRaw($gameConfigContentCompleteRaw);
-            $game->setRunningGameConfigFileContents($gameConfigContentComplete);
+            // old running configs have CEL, SEL and MEL in datamodel, new ones in datamodel.simulation_settings: both
+            // can be read, whatever the shape of the file
+            $game->setRunningGameConfigFileContents(ConfigLoader::withBothShapes($gameConfigContentComplete));
         }
     }
 }
