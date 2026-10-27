@@ -205,6 +205,12 @@ function Get-FirstLanIPv4Address {
 
 $tabOrdering = @("Basic setup", "Advanced settings")
 
+# The parameter names in the order in which they are declared in the param() block above.
+# Do NOT iterate over the $parameters argument of the functions below to get an order: those are typed as
+# [hashtable], which converts $MyInvocation.MyCommand.Parameters into an unordered hashtable. On PowerShell 7
+# (Linux/.NET Core) its key order even differs from run to run. Iterate over this list instead.
+$parameterOrder = @($MyInvocation.MyCommand.Parameters.Keys)
+
 # Define metadata for parameters
 $parameterMetadata = @{
     BranchName = @{
@@ -239,7 +245,7 @@ $parameterMetadata = @{
         Link = @{
             Direct = @("ServerName", "UrlWsServerHost")
             Proxy = @("UrlWsServerHost")
-            LAM = @("UrlWsServerHost")
+            LAN = @("UrlWsServerHost")
             Local = @("UrlWsServerHost")
         }
     }
@@ -557,7 +563,7 @@ function Initialize-Parameters {
         [hashtable]$resolvedParameters,
         [hashtable]$parameterMetadata
     )
-    foreach ($param in $parameters.Keys) {
+    foreach ($param in $parameterOrder) {
         if (-not $resolvedParameters[$param]) {
             $envVar = GetParamMetadataValue -param $param -metadata "EnvVar" -parameterMetadata $parameterMetadata
             if ($envVar) {
@@ -594,7 +600,7 @@ function Get-ParameterCategories {
     foreach ($tab in $tabOrdering.Value) {
         $categories[$tab] = @()
     }
-    foreach ($param in $parameters.Keys) {
+    foreach ($param in $parameterOrder) {
         $tab = GetParamMetadataValue -param $param -metadata "Tab" -parameterMetadata $parameterMetadata
         if ($tab) {
             if (-not ($categories.Keys -contains $tab)) { $categories[$tab] = @() }
@@ -927,7 +933,7 @@ function Invoke-NonGuiMode {
     $selectedPreset = $resolvedParameters[$presetParam] = Read-InputWithDefault -prompt "Enter value for $presetParam" -defaultValue $defaultValue -paramDef $parameters[$presetParam]
     Set-Variable -Name "Preset" -Value $selectedPreset -Scope Global -Force
     Initialize-Parameters $parameters $resolvedParameters $parameterMetadata
-    foreach ($param in $parameters.Keys) {
+    foreach ($param in $parameterOrder) {
         # param is already set from command line, skip it
         if ($boundParameters.ContainsKey($param)) {
             continue
@@ -947,7 +953,7 @@ function Invoke-NonGuiMode {
         }
         # Check if any previous param links to this param for the current preset
         $linked = $false
-        foreach ($prevParam in $parameters.Keys) {
+        foreach ($prevParam in $parameterOrder) {
             if ($prevParam -eq $param) { break }
             $linkMeta = GetParamMetadataValue -param $prevParam -metadata "Link"
             if ($linkMeta -and $linkMeta.ContainsKey($selectedPreset) -and $linkMeta[$selectedPreset] -contains $param) {
@@ -982,8 +988,101 @@ foreach ($key in $PSBoundParameters.Keys) {
 # shell (e.g. run-ps1.sh) never sees any signal to trap, and this script can
 # otherwise unwind and exit 0 as if it had completed normally. Explicitly
 # defaulting to a non-zero exit unless we reach the very end closes that gap.
+function Read-EnvFile {
+    param([string]$path)
+    $values = @{}
+    if (-not (Test-Path $path)) { return $values }
+    foreach ($line in Get-Content $path) {
+        $trimmed = $line.Trim()
+        if ($trimmed -eq "" -or $trimmed.StartsWith("#")) { continue }
+        $idx = $trimmed.IndexOf("=")
+        if ($idx -lt 1) { continue }
+        $key = $trimmed.Substring(0, $idx).Trim()
+        $value = $trimmed.Substring($idx + 1).Trim()
+        if ($value.Length -ge 2 -and (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'")))) {
+            $value = $value.Substring(1, $value.Length - 2)
+        }
+        $values[$key] = $value
+    }
+    return $values
+}
+
+# Parameters holding generated secrets. When existing data is kept, these must keep the values of the
+# previous .env.local, otherwise they no longer match what is stored in the existing volumes
+# (e.g. the database password).
+$preservedParameters = @("CaddyMercureJwtSecret", "AppSecret", "DatabasePassword", "My2UserPassword", "JwtPassphrase")
+
 $script:setupSucceeded = $false
 try {
+    # Check if Docker is installed
+    if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+        Write-Host "Docker is not installed. Please install Docker and try again." -ForegroundColor Red
+        exit 1
+    }
+
+    Write-Host "Downloading docker-compose files for branch '$BranchName'..." -ForegroundColor Cyan
+
+    New-Item -ItemType Directory -Path ".\docker\database\init" -Force | Out-Null
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$BranchName/docker/database/init/01-create-connection-tracker.sql" -OutFile ".\docker\database\init\01-create-connection-tracker.sql"
+
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$BranchName/docker-compose.yml" -OutFile "docker-compose.yml"
+    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$BranchName/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
+
+    # Check if docker-compose.yml and docker-compose.prod.yml exist
+    if (-not (Test-Path "docker-compose.yml") -or -not (Test-Path "docker-compose.prod.yml")) {
+        Write-Host "Error: docker-compose files not found. Please check the branch name." -ForegroundColor Red
+        exit 1
+    }
+
+    # Detect existing data: named volumes of this compose project, or any *_simulations_data volume.
+    # Note: this must happen before .env.local is (re)written, and before the parameters are resolved.
+    $projectName = $null
+    try {
+        $existingEnvArgs = @()
+        if (Test-Path ".env.local") { $existingEnvArgs = @("--env-file", ".env.local") }
+        $projectName = (docker compose @existingEnvArgs -f docker-compose.yml -f docker-compose.prod.yml config --format json 2>$null | ConvertFrom-Json).name
+    } catch {}
+    if (-not $projectName) {
+        # Fallback: compose defaults to the lowercased directory name
+        $projectName = (Split-Path -Leaf (Get-Location).Path).ToLower() -replace '[^a-z0-9_-]', ''
+    }
+    $projectVolumes = @(docker volume ls -q --filter "label=com.docker.compose.project=$projectName" 2>$null)
+    $simulationsVolumes = @(docker volume ls -q 2>$null | Where-Object { $_ -match '_simulations_data$' })
+    # Volumes that survive a "keep data" upgrade (the simulations volume is always removed)
+    $keptVolumes = @($projectVolumes | Where-Object { $_ -notmatch '_simulations_data$' })
+    $hasExistingData = ($projectVolumes.Count -gt 0) -or ($simulationsVolumes.Count -gt 0)
+
+    $wipeData = $false
+    $existingEnv = @{}
+    if ($hasExistingData) {
+        Write-Host "Existing data volumes found:" -ForegroundColor Yellow
+        ($projectVolumes + $simulationsVolumes) | Sort-Object -Unique | ForEach-Object { Write-Host "  $_" -ForegroundColor Yellow }
+        $wipeAnswer = Read-Host "Wipe existing data? [y/n] (n)"
+        $wipeData = ($wipeAnswer -eq "y" -or $wipeAnswer -eq "Y")
+
+        if (-not $wipeData) {
+            # Keep the data: reuse the secrets of the existing .env.local instead of generating new ones.
+            $existingEnv = Read-EnvFile ".env.local"
+            if ($keptVolumes.Count -gt 0 -and -not $existingEnv.ContainsKey("DATABASE_PASSWORD")) {
+                Write-Host "Cannot keep existing data: no DATABASE_PASSWORD found in .env.local, so the existing database volume would not be accessible." -ForegroundColor Red
+                Write-Host "Restore the original .env.local, or run this script again and choose to wipe the data." -ForegroundColor Red
+                exit 1
+            }
+            foreach ($p in $preservedParameters) {
+                $envVar = $parameterMetadata[$p]["EnvVar"]
+                if ($PSBoundParameters.ContainsKey($p)) {
+                    Write-Host "Note: $p was given on the command line, so it is used instead of the existing $envVar value." -ForegroundColor Yellow
+                    continue
+                }
+                if ($existingEnv.ContainsKey($envVar) -and $existingEnv[$envVar] -ne "") {
+                    # Param defaults are read through Get-Variable by the GUI and non-GUI flows below.
+                    Set-Variable -Name $p -Value $existingEnv[$envVar] -Scope Script
+                    Write-Host "Reusing existing $envVar from .env.local" -ForegroundColor Cyan
+                }
+            }
+        }
+    }
+
     if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
         Write-Host "Running in GUI mode..."
         Initialize-Parameters $MyInvocation.MyCommand.Parameters $resolvedParameters $parameterMetadata
@@ -992,10 +1091,16 @@ try {
         Invoke-NonGuiMode $MyInvocation.MyCommand.Parameters $parameterMetadata $resolvedParameters $PSBoundParameters
     }
 
+    # Keeping data, but the (possibly edited) database password no longer matches the existing one?
+    if ($hasExistingData -and -not $wipeData -and $existingEnv.ContainsKey("DATABASE_PASSWORD") -and
+        $resolvedParameters["DatabasePassword"] -ne $existingEnv["DATABASE_PASSWORD"]) {
+        Write-Host "Warning: DATABASE_PASSWORD differs from the existing .env.local, the existing database volume will likely reject it." -ForegroundColor Red
+    }
+
     # Remove from $resolvedParameters those params that do not have an EnvVar metadata
     # Build all lines first, then write at once with Set-Content (avoids BOM issues in PowerShell Core and always writes the file)
     $envLines = @("APP_ENV=prod")
-    foreach ($param in $resolvedParameters.Keys.Clone()) {
+    foreach ($param in @($parameterOrder | Where-Object { $resolvedParameters.ContainsKey($_) })) {
         $envVar = GetParamMetadataValue -param $param -metadata "EnvVar" -parameterMetadata $parameterMetadata
         if (-not $envVar) {
             $resolvedParameters.Remove($param)
@@ -1013,27 +1118,36 @@ try {
         Write-Host "Installation aborted." -ForegroundColor Red
         exit 1
     }
-    # Check if Docker is installed
-    if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-        Write-Host "Docker is not installed. Please install Docker and try again." -ForegroundColor Red
-        exit 1
+
+    $composeArgs = @("--env-file", ".env.local", "-f", "docker-compose.yml", "-f", "docker-compose.prod.yml")
+
+    # Only now, after the final confirmation, touch the existing containers and data.
+    if ($wipeData) {
+        Write-Host "Stopping containers and wiping all data..." -ForegroundColor Cyan
+        docker compose @composeArgs down -v --remove-orphans
+    } else {
+        Write-Host "Stopping containers (keeping data)..." -ForegroundColor Cyan
+        docker compose @composeArgs down --remove-orphans
     }
-    Write-Host "Downloading docker-compose files for branch '$BranchName'..." -ForegroundColor Cyan
+    if ($LASTEXITCODE -ne 0) { throw "docker compose down failed (exit code $LASTEXITCODE)." }
 
-    New-Item -ItemType Directory -Path ".\docker\database\init" -Force | Out-Null
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$BranchName/docker/database/init/01-create-connection-tracker.sql" -OutFile ".\docker\database\init\01-create-connection-tracker.sql"
-
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$BranchName/docker-compose.yml" -OutFile "docker-compose.yml"
-    Invoke-WebRequest -Uri "https://raw.githubusercontent.com/BredaUniversityResearch/MSPChallenge-Server/refs/heads/$BranchName/docker-compose.prod.yml" -OutFile "docker-compose.prod.yml"
-
-    # Check if docker-compose.yml and docker-compose.prod.yml exist
-    if (-not (Test-Path "docker-compose.yml") -or -not (Test-Path "docker-compose.prod.yml")) {
-        Write-Host "Error: docker-compose files not found. Please check the branch name." -ForegroundColor Red
-        exit 1
+    # The *_simulations_data volume must always be removed (Powershell port of:
+    # docker volume rm $(docker volume ls -q | grep '_simulations_data$') ).
+    # Done after "down" so no container is using it anymore.
+    $simulationsVolumes = @(docker volume ls -q | Where-Object { $_ -match '_simulations_data$' })
+    if ($simulationsVolumes.Count -gt 0) {
+        Write-Host "Removing simulations data volume(s): $($simulationsVolumes -join ', ')" -ForegroundColor Cyan
+        docker volume rm @simulationsVolumes
+        if ($LASTEXITCODE -ne 0) { throw "Failed to remove simulations data volume(s)." }
     }
+
+    Write-Host "Pulling newer images..." -ForegroundColor Cyan
+    docker compose @composeArgs pull
+    if ($LASTEXITCODE -ne 0) { throw "docker compose pull failed (exit code $LASTEXITCODE)." }
+
     Write-Host "Starting Docker containers..." -ForegroundColor Cyan
-
-    docker compose --env-file .env.local -f docker-compose.yml -f "docker-compose.prod.yml" up -d
+    docker compose @composeArgs up -d
+    if ($LASTEXITCODE -ne 0) { throw "docker compose up failed (exit code $LASTEXITCODE)." }
     $script:setupSucceeded = $true
 } catch {
     Write-Host "Setup did not complete: $_" -ForegroundColor Red
