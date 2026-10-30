@@ -1161,4 +1161,21 @@ try {
     }
 }
 
+# Wait for the php container to report it is ready
+Write-Host "Awaiting php container to be ready.."
+$timeoutSeconds = 120
+$stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+$phpReady = $false
+while (-not $phpReady) {
+    $phpLogs = docker compose @composeArgs logs php 2>&1 | Out-String
+    if ($phpLogs -match 'PHP app ready!') {
+        $phpReady = $true
+    } elseif ($stopwatch.Elapsed.TotalSeconds -ge $timeoutSeconds) {
+        Write-Warning "Timed out after $timeoutSeconds seconds waiting for 'PHP app ready!' in the php container log."
+        exit 1
+    } else {
+        Start-Sleep -Seconds 2
+    }
+}
+Write-Host "PHP container is ready!"
 exit 0
