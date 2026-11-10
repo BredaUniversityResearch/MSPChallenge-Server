@@ -165,13 +165,32 @@ function Get-FirstLanIPv4Address {
     $ip = $null
 
     # Windows
+    # Rank the connected IPv4 interfaces like this, so a VPN/tunnel/virtual adapter does not win over the real LAN adapter:
+    #  1. interfaces that have a default gateway (the one that is really used to reach the network) first,
+    #  2. then physical adapters before virtual ones (VPN, Hyper-V, WSL, ...),
+    #  3. then the lowest effective metric (interface metric + route metric), like Windows itself does.
+    # Addresses with a /32 prefix (point-to-point/VPN) are never used.
     try {
-        $ip = Get-NetIPInterface -AddressFamily IPv4 |
-            Where-Object { $_.InterfaceAlias -match '^(Ethernet|Wi-Fi)' -and $_.ConnectionState -eq 'Connected' } |
-            Sort-Object -Property InterfaceMetric |
+        $physicalIndexes = @(Get-NetAdapter -Physical -ErrorAction Stop | ForEach-Object { $_.ifIndex })
+        $defaultRoutes = @(Get-NetRoute -AddressFamily IPv4 -DestinationPrefix '0.0.0.0/0' -ErrorAction SilentlyContinue)
+        $ip = Get-NetIPInterface -AddressFamily IPv4 -ErrorAction Stop |
+            Where-Object { $_.ConnectionState -eq 'Connected' } |
             ForEach-Object {
-                Get-NetIPAddress -InterfaceIndex $_.InterfaceIndex -AddressFamily IPv4 |
-                Where-Object { $_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.254.*' }
+                $ifIndex = $_.InterfaceIndex
+                $routes = @($defaultRoutes | Where-Object { $_.InterfaceIndex -eq $ifIndex })
+                $routeMetric = 0
+                if ($routes.Count -gt 0) { $routeMetric = ($routes | Measure-Object -Property RouteMetric -Minimum).Minimum }
+                [pscustomobject]@{
+                    InterfaceIndex = $ifIndex
+                    HasGateway = ($routes.Count -gt 0)
+                    IsPhysical = ($physicalIndexes -contains $ifIndex)
+                    Metric = [int]$_.InterfaceMetric + [int]$routeMetric
+                }
+            } |
+            Sort-Object -Property @{ Expression = 'HasGateway'; Descending = $true }, @{ Expression = 'IsPhysical'; Descending = $true }, @{ Expression = 'Metric'; Descending = $false } |
+            ForEach-Object {
+                Get-NetIPAddress -InterfaceIndex $_.InterfaceIndex -AddressFamily IPv4 -ErrorAction SilentlyContinue |
+                Where-Object { $_.IPAddress -notlike '127.*' -and $_.IPAddress -notlike '169.254.*' -and $_.PrefixLength -ne 32 }
             } |
             Select-Object -First 1 -ExpandProperty IPAddress
     } catch {}
@@ -1047,7 +1066,9 @@ try {
         $projectName = (Split-Path -Leaf (Get-Location).Path).ToLower() -replace '[^a-z0-9_-]', ''
     }
     $projectVolumes = @(docker volume ls -q --filter "label=com.docker.compose.project=$projectName" 2>$null)
-    $simulationsVolumes = @(docker volume ls -q 2>$null | Where-Object { $_ -match '_simulations_data$' })
+    # Only this project's simulations volume: other compose projects on this host
+    #   have their own *_simulations_data volume, which must never be detected or removed here.
+    $simulationsVolumes = @($projectVolumes | Where-Object { $_ -match '_simulations_data$' })
     # Volumes that survive a "keep data" upgrade (the simulations volume is always removed)
     $keptVolumes = @($projectVolumes | Where-Object { $_ -notmatch '_simulations_data$' })
     $hasExistingData = ($projectVolumes.Count -gt 0) -or ($simulationsVolumes.Count -gt 0)
@@ -1131,10 +1152,11 @@ try {
     }
     if ($LASTEXITCODE -ne 0) { throw "docker compose down failed (exit code $LASTEXITCODE)." }
 
-    # The *_simulations_data volume must always be removed (Powershell port of:
-    # docker volume rm $(docker volume ls -q | grep '_simulations_data$') ).
-    # Done after "down" so no container is using it anymore.
-    $simulationsVolumes = @(docker volume ls -q | Where-Object { $_ -match '_simulations_data$' })
+    # The *_simulations_data volume of this project must always be removed (Powershell port of:
+    # docker volume rm $(docker volume ls -q | grep '_simulations_data$') ), but only the one of THIS compose
+    # project: the grep-everything variant also hits the volumes of other, still running, projects on the host.
+    # Done after "down" so no container of this project is using it anymore.
+    $simulationsVolumes = @(docker volume ls -q --filter "label=com.docker.compose.project=$projectName" | Where-Object { $_ -match '_simulations_data$' })
     if ($simulationsVolumes.Count -gt 0) {
         Write-Host "Removing simulations data volume(s): $($simulationsVolumes -join ', ')" -ForegroundColor Cyan
         docker volume rm @simulationsVolumes
@@ -1161,21 +1183,4 @@ try {
     }
 }
 
-# Wait for the php container to report it is ready
-Write-Host "Awaiting php container to be ready.."
-$timeoutSeconds = 120
-$stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
-$phpReady = $false
-while (-not $phpReady) {
-    $phpLogs = docker compose @composeArgs logs php 2>&1 | Out-String
-    if ($phpLogs -match 'PHP app ready!') {
-        $phpReady = $true
-    } elseif ($stopwatch.Elapsed.TotalSeconds -ge $timeoutSeconds) {
-        Write-Warning "Timed out after $timeoutSeconds seconds waiting for 'PHP app ready!' in the php container log."
-        exit 1
-    } else {
-        Start-Sleep -Seconds 2
-    }
-}
-Write-Host "PHP container is ready!"
 exit 0
