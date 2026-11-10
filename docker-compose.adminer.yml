@@ -10,7 +10,10 @@ services:
       ADMINER_DEFAULT_PASSWORD: ${DATABASE_PASSWORD:-}
     ports:
       # run Adminer on port 8082 since 8080 will be used by mitmproxy
-      - ${ADMINER_PORT:-8082}:8080
+      - "0.0.0.0:${ADMINER_PORT:-8082}:8080"
+      - "[::]:${ADMINER_PORT:-8082}:8080"
+      - "127.0.0.1:${ADMINER_PORT:-8082}:8080"
+      - "[::1]:${ADMINER_PORT:-8082}:8080"
     networks:
       - msp_network
     volumes:
