@@ -23,8 +23,3 @@ services:
       MY2_PASSWORD: ${MY2_PASSWORD}
       JWT_PASSPHRASE: ${JWT_PASSPHRASE}
       DATABASE_CREATOR_PASSWORD: ${DATABASE_CREATOR_PASSWORD:-${DATABASE_PASSWORD}}
-    ports:
-      # HTTP
-      - target: 80
-        published: ${WEB_SERVER_PORT:-${HTTP_PORT:-80}}
-        protocol: tcp
