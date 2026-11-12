@@ -18,6 +18,14 @@ framework:
             doctrine.meta_cache_pool:
                 adapter: cache.app
 
+            # The merged configs of the Server Manager (see ConfigLoader): large entries (about 1.4 MB each), valid for
+            # as long as the config and its parent files are unchanged. A pool of its own, so that it can be cleared
+            # (bin/console cache:pool:clear config.cache) without clearing the other caches of cache.app. It follows
+            # cache.app (Redis in Docker, see FRAMEWORK_CACHE_APP); to keep it on the local disk instead, use
+            # "adapter: cache.adapter.filesystem".
+            config.cache:
+                adapter: cache.app
+
 # Disabled in Symfony by default:
         # Unique name of your app: used to compute stable namespaces for cache keys.
         #prefix_seed: your_vendor_name/app_name

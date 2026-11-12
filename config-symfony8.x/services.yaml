@@ -261,6 +261,11 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 0 }
 
+    App\Domain\Config\SessionConfigValidator:
+    App\Domain\Config\ConfigLoader:
+    App\Domain\Config\PendingConfigUploads:
+    App\Domain\Config\ConfigUploads:
+
 when@dev:
     parameters:
         app.guraas_game_id: '3318cf30-f78d-4284-b530-a329005c248a'

@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Domain\Config\PendingConfigUploads;
 use App\Entity\ServerManager\GameConfigFile;
 use App\Entity\ServerManager\GameConfigVersion;
 use App\Validator\ValidJson;
@@ -14,6 +15,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\All;
+use Symfony\Component\Validator\Constraints\Count;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Regex;
@@ -24,15 +27,26 @@ class GameConfigVersionUploadFormType extends AbstractType
     {
         $entityManager = $options['entity_manager'];
         $builder
+            // the configuration, and the generic configs (parents) that it needs and the server does not have
             ->add('gameConfigFileActual', FileType::class, [
                 'mapped' => false,
-                'constraints' => [
-                    new File([
-                        'maxSize' => '30M'
-                    ]),
-                    new NotBlank(),
-                    new ValidJson()
-                ],
+                'multiple' => true,
+                'constraints' => array_merge(
+                    [
+                        new All([
+                            new File([
+                                'maxSize' => '30M'
+                            ]),
+                            new ValidJson()
+                        ]),
+                        new Count([
+                            'max' => PendingConfigUploads::MAX_FILES,
+                            'maxMessage' => 'Upload at most {{ limit }} files: the configuration and its parents.'
+                        ]),
+                    ],
+                    // when an upload is waiting for more files, the files that are missing are all that is needed
+                    $options['has_pending_upload'] ? [] : [new NotBlank()]
+                ),
             ])
             ->add('gameConfigFile', ChoiceType::class, [
                 'choices' => [null, $entityManager->getRepository(GameConfigFile::class)->findAll()],
@@ -94,5 +108,8 @@ class GameConfigVersionUploadFormType extends AbstractType
         ]);
 
         $resolver->setRequired('entity_manager');
+        // an upload that is not complete is waiting for more files
+        $resolver->setDefault('has_pending_upload', false);
+        $resolver->setAllowedTypes('has_pending_upload', 'bool');
     }
 }
