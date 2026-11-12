@@ -10,7 +10,8 @@ use App\Domain\Config\Split\ConfigValues;
  * compared: CEL, SEL and MEL are moved into simulation_settings, layer_raster_filter_mode and layer_information
  * are removed from every layer (and layer_width and layer_height from layers that are not raster layers),
  * "valueDefinitions" are removed from the MEL ecologyCategories and restriction map keys are rebuilt as
- * startlayer|endlayer.
+ * startlayer|endlayer. The keys are put in the order of a final config (ConfigOrder), so that a normalized config can
+ * be compared as text with a merged one.
  */
 final class ConfigNormalizer
 {
@@ -40,6 +41,6 @@ final class ConfigNormalizer
                 LayerReferences::flattenRestrictions($datamodel->restrictions)
             );
         }
-        return $config;
+        return ConfigOrder::config($config);
     }
 }

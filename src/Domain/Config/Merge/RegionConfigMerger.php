@@ -51,14 +51,17 @@ final class RegionConfigMerger
         'layer_info_properties', 'layer_tags',
     ];
 
-    /** The simulations that are always in datamodel.simulation_settings of a final config, null when there is none. */
-    public const array SIMULATIONS = ['CEL', 'SEL', 'MEL'];
+    /**
+     * The simulations that are always in datamodel.simulation_settings of a final config, null when there is none. In
+     * alphabetical order, like every object of a final config (ConfigOrder).
+     */
+    public const array SIMULATIONS = ['CEL', 'MEL', 'SEL'];
 
     /**
      * The simulations that configs in the old shape have directly in datamodel. Other simulations (settings of
      * future or external simulations) only exist in datamodel.simulation_settings.
      */
-    public const array LEGACY_SIMULATIONS = ['CEL', 'REL', 'SEL', 'MEL'];
+    public const array LEGACY_SIMULATIONS = ['CEL', 'MEL', 'REL', 'SEL'];
 
     /**
      * Is the config stripped: does it need a parent? That is so when it names a parent, or when it has layers that
@@ -224,7 +227,7 @@ final class RegionConfigMerger
             );
         }
         $result->datamodel = $datamodel;
-        return $result;
+        return ConfigOrder::config($result);
     }
 
     /**
@@ -376,26 +379,12 @@ final class RegionConfigMerger
 
     /**
      * The keys of a layer in a fixed order: the generic name first (when it has one), then LAYER_KEY_ORDER, then the
-     * others as they were. Used for the merged layers and for what the split writes, so that the same layer always
-     * looks the same, whichever config it was first seen in.
+     * others alphabetically (see ConfigOrder). Used for the merged layers and for what the split writes, so that the
+     * same layer always looks the same, whichever config it was first seen in.
      */
     public static function orderLayerKeys(\stdClass $layer): \stdClass
     {
-        $ordered = new \stdClass();
-        if (ConfigValues::has($layer, 'msp_config_generic_name')) {
-            $ordered->msp_config_generic_name = $layer->msp_config_generic_name;
-        }
-        foreach (self::LAYER_KEY_ORDER as $key) {
-            if (ConfigValues::has($layer, $key)) {
-                $ordered->{$key} = $layer->{$key};
-            }
-        }
-        foreach (ConfigValues::props($layer) as $key => $value) {
-            if (!ConfigValues::has($ordered, $key)) {
-                $ordered->{$key} = $value;
-            }
-        }
-        return $ordered;
+        return ConfigOrder::layerKeys($layer);
     }
 
     private function mergeRestrictions(mixed $generic, mixed $region, array $present, \Closure $back): \stdClass

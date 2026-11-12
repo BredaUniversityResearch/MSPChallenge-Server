@@ -240,6 +240,15 @@ What the form is told is one of four states (`UploadProgress`): *idle* (nothing 
 - **Old sessions and saves.** Their running config is in the old format on disk, and is normalised when it is read.
 - **Dropped fields.** `layer_information` and `layer_raster_filter_mode` are not in a split config and are not needed. `layer_width` and `layer_height` are only kept for raster layers. A complete config that still has them is not changed when it is merged; they only go when a config is converted to a stripped one.
 
+### 6.6 The order of the keys
+
+The keys of a final config are always in the same order, whatever the config was made from, so that the same config looks the
+same and two can be compared as text. Objects are in alphabetical order (keys that are only digits first, in number order, such
+as the types of a layer: 0, 1, 2, 10), so nothing has a fixed list of keys: a new simulation, or a new field, finds its place.
+The one exception is a layer: `msp_config_generic_name` first, then the keys of `RegionConfigMerger::LAYER_KEY_ORDER` (the name
+first, the long fields last), then every other key alphabetically. **A list keeps its order**, and so do the layers of a config:
+the order of a list can mean something, such as the order in which the properties of a layer are shown.
+
 ## 7. What becomes generic
 
 When complete configs are converted (see section 8), **every layer is generic**. For the other data the rule for "shared" is the same everywhere: **two or more regions share it**.
@@ -262,11 +271,13 @@ A converted config always merges back into what it was made from (apart from the
 
 ## 8. Tools for developers
 
-Six commands work on a folder with configs:
+Eight commands work on a folder with configs:
 
-- **split** turns complete configs into a generic config and stripped region configs (a report says what became generic and what was overridden, with the size of every file now and as it would be written). It takes every config below the root, in any folder, and writes each stripped config where it was; an existing generic config is written where it is, a new one goes in the root. It can be run again on configs that are split already: layers that other configs now use move into the generic config, and the other way round. It only writes when all configs merge back into what they were, and writes all or nothing. A *check* option says whether anything would change. A JSON file that is not valid can not be told from a config: it is left out and reported, and nothing is written as long as there is one (leave it out with the pattern, or fix it).
+- **split** turns complete configs into a generic config and stripped region configs (a report says what became generic and what was overridden, with the size of every file now and as it would be written). It takes every config below the root, in any folder, and writes each stripped config where it was; an existing generic config is written where it is, a new one goes in the root. It can be run again on configs that are split already: the layers that a config has now are added to the generic config, and the layers that no config has any more leave it. It only writes when all configs merge back into what they were, and writes all or nothing. With `--original-dir` it checks against the configs in another folder: for a folder of normalized copies (see *normalize*), the check then includes the normalizing. A *check* option says whether anything would change. A JSON file that is not valid can not be told from a config: it is left out and reported, and nothing is written as long as there is one (leave it out with the pattern, or fix it).
 - **strip** strips one config against the generic configs that it is told to use, and warns about the layers that could not be stripped.
 - **merge** gives the final config of a stripped config.
+- **merge-all** writes the final config of every config in a folder to another folder, with the same names and folders (the parents are not written).
+- **normalize** writes every config of a folder to another folder in one fixed form: the current shape, the documented removals of the split, and the keys in the order of a final config (lists and the order of the layers are kept). Normalized originals and the merged configs of their split can be compared as text: what is left is the order of the lists that the split does not keep. It is the first step in the watcher of the config repository: original, normalize, split, merge.
 - **verify** proves for a folder that every stripped config merges back into the original that it was made from.
 - **validate** checks configs the way an upload is checked (the final config against the schema, raster layers need their size), per file, with the line and column of a syntax error.
 - **list** shows what is in a tree: the configs, the parents, who uses which parent, names that two files have, and what is wrong.

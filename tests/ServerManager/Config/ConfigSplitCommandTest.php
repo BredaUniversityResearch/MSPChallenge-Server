@@ -198,6 +198,72 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         ));
     }
 
+    public function testTheResultIsCheckedAgainstTheOriginalsWhenTheyAreGiven(): void
+    {
+        $this->writeOriginals();
+        $base = $this->temporaryDirectory();
+        $this->execute('app:config:normalize', ['--output-dir' => $base . '/normalized']);
+
+        $tester = $this->execute('app:config:split', [
+            '--dir' => $base . '/normalized',
+            '--original-dir' => $this->dir,
+            '--output-dir' => $base . '/split',
+            '--format' => 'json',
+        ]);
+
+        $this->assertSame(0, $tester->getStatusCode(), $tester->getDisplay());
+        $this->assertSame(6, self::documentOf($tester)['data']['written']['configs']);
+        $this->assertMergesBackToTheOriginals($base . '/split');
+    }
+
+    public function testACopyThatLostSomethingIsRefusedWhenTheOriginalsAreGiven(): void
+    {
+        $this->writeOriginals();
+        $base = $this->temporaryDirectory();
+        $this->execute('app:config:normalize', ['--output-dir' => $base . '/normalized']);
+        $file = $base . '/normalized/' . array_key_first(self::realConfigs()) . '.json';
+        $config = $this->decode($file);
+        foreach ($config->datamodel->meta as $layer) {
+            if (isset($layer->layer_tooltip)) {
+                unset($layer->layer_tooltip); // what a normalizer with a bug could do
+                break;
+            }
+        }
+        new Filesystem()->dumpFile($file, ConfigDirectory::encode($config));
+
+        $alone = $this->execute('app:config:split', [
+            '--dir' => $base . '/normalized',
+            '--output-dir' => $base . '/alone',
+            '--skip-validation' => true,
+        ]);
+        $checked = $this->execute('app:config:split', [
+            '--dir' => $base . '/normalized',
+            '--original-dir' => $this->dir,
+            '--output-dir' => $base . '/checked',
+            '--skip-validation' => true,
+            '--format' => 'json',
+        ]);
+
+        $this->assertSame(0, $alone->getStatusCode(), 'without the originals the check only knows its own input');
+        $this->assertSame(1, $checked->getStatusCode());
+        $this->assertContains('write_failed', self::errorCodesOf($checked));
+        $this->assertStringContainsString('layer_tooltip', $checked->getDisplay());
+        $this->assertFileDoesNotExist($base . '/checked/generic.json', 'nothing is written');
+    }
+
+    public function testAnOriginalThatIsMissingIsAnError(): void
+    {
+        $this->writeOriginals();
+
+        $tester = $this->execute('app:config:split', [
+            '--original-dir' => $this->temporaryDirectory() . '/nowhere',
+            '--format' => 'json',
+        ]);
+
+        $this->assertSame(1, $tester->getStatusCode());
+        $this->assertContains('original_missing', self::errorCodesOf($tester));
+    }
+
     public function testALayerThatANewConfigAddsIsAddedAndGoesAgainWhenNoConfigUsesItAnyMore(): void
     {
         $ems = 'Eastern_Med_Sea_basic/Eastern_Med_Sea_basic_1';
@@ -235,9 +301,11 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         $this->assertSame(['UniqueTestLayer'], self::documentOf($checkBack)['data']['layers']['unused']);
         $this->assertSame(0, $remove->getStatusCode(), $remove->getDisplay());
         $generic = $this->decode($this->dir . '/generic.json');
-        $this->assertSame(
-            json_encode(json_decode($genericBefore)->datamodel),
-            json_encode($generic->datamodel),
+        // what is in it, not the order of the keys: the first split started from the originals as they were
+        // written, and the later ones from the stripped files that were made of them
+        $this->assertSameJson(
+            json_decode($genericBefore)->datamodel,
+            $generic->datamodel,
             'the layers of generic.json are what they were'
         );
         $this->assertSame(

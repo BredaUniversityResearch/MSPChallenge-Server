@@ -474,6 +474,11 @@ function smokeTest(?string $phar, ?string $exe, string $version): void
     $written = ($all['data']['written'] ?? null) === 1 && is_file($merged . '/NS/ns.json');
     check($written, "$what merge-all did not write the final config of NS/ns");
     remove($merged);
+    $normalized = $dir . '-normalized';
+    $all = $json(['app:config:normalize', '--output-dir=' . $normalized], 0);
+    $written = ($all['data']['written'] ?? null) === 1 && is_file($normalized . '/NS/ns.json');
+    check($written, "$what normalize did not write the normalized config of NS/ns");
+    remove($normalized);
     // the text for people uses other parts of the packages (tables, wrapped blocks): a runtime that lacks something
     // finds out here, and not when somebody runs the tool without --format=json
     [$code, $out, $err] = capture(array_merge($command, ['app:config:list']), $dir);

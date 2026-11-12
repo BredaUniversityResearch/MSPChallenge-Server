@@ -46,6 +46,9 @@ final class ConfigTextRenderer
             case 'app:config:merge-all':
                 $this->mergeAll($io, $data);
                 break;
+            case 'app:config:normalize':
+                $this->mergeAll($io, $data, 'Normalizing');
+                break;
             case 'app:config:strip':
                 $this->strip($io, $data);
                 break;
@@ -114,7 +117,11 @@ final class ConfigTextRenderer
                     $blocks['stripped_configs_unsafe'][] = (string)(is_scalar($config) ? $config : '');
                 }
             } elseif ($file !== ''
-                && in_array($command, ['app:config:split', 'app:config:strip', 'app:config:merge-all'], true)
+                && in_array(
+                    $command,
+                    ['app:config:split', 'app:config:strip', 'app:config:merge-all', 'app:config:normalize'],
+                    true
+                )
             ) {
                 $blocks['invalid_configs'][] = $line;
             } else {
@@ -129,7 +136,7 @@ final class ConfigTextRenderer
             'stripped_configs_unsafe' => 'Nothing is written: these stripped configs cannot be written for the new '
                 . 'generic config:',
         ];
-        if ($command === 'app:config:merge-all') {
+        if ($command === 'app:config:merge-all' || $command === 'app:config:normalize') {
             // the files that could be written are written: only the others are not
             $headlines['write_failed'] = 'These files could not be written (the other files are written):';
         }
@@ -168,6 +175,9 @@ final class ConfigTextRenderer
                 break;
             case 'app:config:merge-all':
                 $this->closingMergeAll($io, $data);
+                break;
+            case 'app:config:normalize':
+                $this->closingMergeAll($io, $data, 'normalized', 'normalized configs');
                 break;
             case 'app:config:strip':
                 $this->closingStrip($io, $data);
@@ -335,13 +345,13 @@ final class ConfigTextRenderer
     /**
      * @param array<string, mixed> $data
      */
-    private function mergeAll(SymfonyStyle $io, array $data): void
+    private function mergeAll(SymfonyStyle $io, array $data, string $verb = 'Merging'): void
     {
         $results = self::arr($data, 'results');
         if ($results === []) {
             return;
         }
-        $io->title(sprintf('Merging %d configs from %s', count($results), self::str($data, 'root')));
+        $io->title(sprintf('%s %d configs from %s', $verb, count($results), self::str($data, 'root')));
         $io->table(
             ['Config', 'Kind', 'Parents', 'Size'],
             array_map(
@@ -363,20 +373,24 @@ final class ConfigTextRenderer
     /**
      * @param array<string, mixed> $data
      */
-    private function closingMergeAll(SymfonyStyle $io, array $data): void
-    {
+    private function closingMergeAll(
+        SymfonyStyle $io,
+        array $data,
+        string $done = 'merged',
+        string $what = 'final configs'
+    ): void {
         if (self::arr($data, 'results') === []) {
             return;
         }
         $outputDir = self::str($data, 'outputDir');
         if ($outputDir === '') {
             $io->note(
-                'Dry run, nothing written. Run with --output-dir=DIR to write the final configs there (the same names '
-                . 'and folders, without the parents).'
+                "Dry run, nothing written. Run with --output-dir=DIR to write the $what there (the same names and "
+                . 'folders, without the parents).'
             );
             return;
         }
-        $io->success(sprintf('%d config(s) merged and written to %s.', self::int($data, 'written'), $outputDir));
+        $io->success(sprintf('%d config(s) %s and written to %s.', self::int($data, 'written'), $done, $outputDir));
     }
 
     // ----------------------------------------------------------------------------------------------------- strip

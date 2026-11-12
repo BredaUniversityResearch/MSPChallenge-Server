@@ -22,6 +22,8 @@ final readonly class StripPlan
      * @param array<string, int> $stats
      * @param ?\stdClass $effective the final config the stripped version has to give back (null: the file merged
      *        with the generic config)
+     * @param ?\stdClass $expected the config that the written file has to give back when that is not $effective: the
+     *        original of a normalized copy (null: $effective)
      */
     public function __construct(
         public string $id,
@@ -32,7 +34,8 @@ final readonly class StripPlan
         public array $reasons = [],
         public array $warnings = [],
         public array $stats = [],
-        public ?\stdClass $effective = null
+        public ?\stdClass $effective = null,
+        public ?\stdClass $expected = null
     ) {
     }
 }

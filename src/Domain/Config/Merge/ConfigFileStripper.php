@@ -38,7 +38,8 @@ final class ConfigFileStripper
         \stdClass $generic,
         GenericNameRegistry $names,
         ?\stdClass $effective = null,
-        ?string $parent = null
+        ?string $parent = null,
+        ?\stdClass $expected = null
     ): StripPlan {
         $warnings = [];
         // $effective: the final config of the file. Without it the file is merged with $generic, which is right when
@@ -56,13 +57,25 @@ final class ConfigFileStripper
                 $result->reasons,
                 $warnings,
                 [],
-                $effective
+                $effective,
+                $expected
             );
         }
         $status = ConfigValues::canonical($result->region) === ConfigValues::canonical($current)
             ? StripPlan::UNCHANGED
             : StripPlan::CHANGED;
-        return new StripPlan($id, $path, $status, $current, $result->region, [], $warnings, $result->stats, $effective);
+        return new StripPlan(
+            $id,
+            $path,
+            $status,
+            $current,
+            $result->region,
+            [],
+            $warnings,
+            $result->stats,
+            $effective,
+            $expected
+        );
     }
 
     /**
@@ -104,7 +117,9 @@ final class ConfigFileStripper
         if (!$writable || $plan->stripped === null) {
             return [['Nothing to write for ' . $plan->id . ' (' . $plan->status . ')'], null];
         }
-        $expected = $this->normalizer->normalize($plan->effective ?? $this->merger->merge($generic, $plan->current));
+        $expected = $this->normalizer->normalize(
+            $plan->expected ?? $plan->effective ?? $this->merger->merge($generic, $plan->current)
+        );
         return $directory->stage(
             $target ?? $plan->path,
             $plan->stripped,

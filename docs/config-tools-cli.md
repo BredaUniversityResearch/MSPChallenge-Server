@@ -32,6 +32,7 @@ php bin/console <command> [arguments] [options]       # in the server
 | `app:config:validate [files...]` | Checks configs the way an upload is checked (the final config against the schema, raster layers need `layer_width` and `layer_height`) |
 | `app:config:merge <file>` | Gives the final config of a config: merged with its parents |
 | `app:config:merge-all` | Writes the final config of every config below the root to another folder (`--output-dir`), with the same names and folders |
+| `app:config:normalize` | Writes every config below the root to another folder (`--output-dir`) in one fixed form: for comparing as text, and as the input of a split |
 | `app:config:verify [files...]` | Checks that configs merged with their parents give the originals they were made from |
 | `app:config:strip [files...]` | Removes what a parent already provides from configs (`--parent=NAME`) |
 | `app:config:split` | Makes a generic config of the configs that share data, and strips the configs against it |
@@ -51,19 +52,21 @@ More options, in short:
 - `merge`: `--output=FILE` writes the result to a file.
 - `merge-all`: `--output-dir=DIR` (not in or below `--dir`). Without it nothing is written. Files that are in `DIR` are
   replaced. Nothing is written when one of the configs can not be merged.
+- `normalize`: the same options as `merge-all`.
 - `verify`: `--against=REV` (a git revision, default `HEAD`), `--repo=DIR`, `--original-dir=DIR` (originals in a folder
   with the same paths below it).
 - `strip`: `--parent=NAME`, `--apply` (replace the files, each one verified first), `--check` (exit 1 when a file could
   still be stripped), `--output-dir=DIR`.
 - `split`: `--generic=NAME` (default `generic`), `--apply`, `--check`, `--force` (overwrite an existing generic
-  config), `--output-dir=DIR`.
+  config), `--output-dir=DIR`, `--original-dir=DIR` (the originals that the result is checked against, when `--dir` holds
+  normalized copies: see `normalize`).
 - `list`: `--check` (exit 1 when something is wrong).
 
 Without `--apply` or `--output-dir`, `strip` and `split` only report. See `--help` of a command for everything.
 
 ## Leaving things out: `--exclude`
 
-`list`, `validate`, `merge`, `merge-all`, `verify`, `strip` and `split` take `--exclude=PATTERN` (more than once for more
+`list`, `validate`, `merge`, `merge-all`, `normalize`, `verify`, `strip` and `split` take `--exclude=PATTERN` (more than once for more
 patterns). A folder or file that is left out is **not seen at all**: it is not a config, it is not a parent (also not when a
 config names it), and it does not make two files with the same name an ambiguous parent. A file that is named on the command
 line is never left out: it was asked for.
@@ -196,6 +199,25 @@ stdout and its messages on stderr, so that a pipe stays clean. The other command
   and nothing is written. Files that are not valid JSON are a warning (`file_skipped`) in a report, and an error
   (`file_not_json`) when something is going to be written. Problems of a merge that are not an error (a layer reference
   to a layer that the config does not have) are warnings (`merge_warning`, with the config in `details.file`).
+
+### `app:config:normalize`
+
+The document is that of `merge-all` (`root`, `outputDir`, `written`, `results` with `id`, `path`, `kind`, `parents`, `output`,
+`bytes`). What is written is not the final config but its **normalized** form:
+
+- the current shape (`simulation_settings`), and the documented removals of the split (`layer_information`,
+  `layer_raster_filter_mode`, `layer_width` and `layer_height` of layers that are not raster layers, the `valueDefinitions` of
+  the MEL categories, restriction keys as `startlayer|endlayer`): the same rules that `verify` uses on an original before it
+  compares;
+- the keys in the order of a final config: objects alphabetically (keys that are only digits first, in number order), a layer
+  as `msp_config_generic_name`, the keys of `RegionConfigMerger::LAYER_KEY_ORDER`, then the others alphabetically. **Lists keep
+  their order, and so do the layers of a config.** A stripped config is merged with its parents first;
+- normalizing a normalized folder changes nothing, byte for byte.
+
+It is for **comparing as text**: the normalized originals against the merged configs of their split differ only in the order of
+the lists that the split does not keep (`layer_info_properties`, the SEL lists). It is also the input of the split in the
+watcher (`split --dir NORMALIZED --original-dir ORIGINALS`). Do not use the files as sources: the keys are in another order than
+the editor writes.
 
 ### `app:config:verify`
 

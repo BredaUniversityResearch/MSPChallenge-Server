@@ -57,6 +57,7 @@ class ConfigToolsApplicationTest extends ConfigCommandTestCase
             'app:config:validate',
             'app:config:merge',
             'app:config:merge-all',
+            'app:config:normalize',
             'app:config:verify',
             'app:config:strip',
             'app:config:split',

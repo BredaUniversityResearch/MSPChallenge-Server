@@ -19,7 +19,7 @@ use Symfony\Component\Filesystem\Path;
         . 'the same names and folders (the parents are not written: a final config needs none). A complete config is '
         . 'written in the current shape too. Reports only, unless --output-dir is given.'
 )]
-final class ConfigMergeAllCommand extends ConfigCommand
+class ConfigMergeAllCommand extends ConfigCommand
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%')]
@@ -51,7 +51,7 @@ final class ConfigMergeAllCommand extends ConfigCommand
                 'output-dir',
                 null,
                 InputOption::VALUE_REQUIRED,
-                'Write the final configs here, as <name>.json in the same folders as below --dir. Not in or below '
+                'Write the result here, as <name>.json in the same folders as below --dir. Not in or below '
                 . '--dir. Files that are there are replaced. Without it nothing is written'
             )
             ->addExcludeOption()
@@ -98,7 +98,7 @@ final class ConfigMergeAllCommand extends ConfigCommand
                 $parentName = ConfigParents::parentOf($config);
                 $pool = $parents->poolOf($config, '"' . $id . '"');
                 $warnings = [];
-                $json = ConfigDirectory::encode($merger->merge($pool, $config, $warnings));
+                $json = ConfigDirectory::encode($this->finalize($merger->merge($pool, $config, $warnings)));
             } catch (\Throwable $e) {
                 $errors[] = ConfigReport::describe($e, $id);
                 continue;
@@ -145,6 +145,14 @@ final class ConfigMergeAllCommand extends ConfigCommand
         }
         $report->data['written'] = $written;
         return $problems === [] ? Command::SUCCESS : $report->failWith($problems);
+    }
+
+    /**
+     * What is written for a merged config: the final config itself (ConfigNormalizeCommand changes it).
+     */
+    protected function finalize(\stdClass $merged): \stdClass
+    {
+        return $merged;
     }
 
     /**

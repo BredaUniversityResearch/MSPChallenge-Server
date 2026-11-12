@@ -298,9 +298,12 @@ class RegionConfigStripperTest extends ConfigTestCase
         $result = self::stripper()->strip($generic, $config, $registry);
 
         $region = $this->assertStrippedAndLossless($result, $generic, $config);
-        $this->assertSame(
-            [['property_name' => 'id', 'enabled' => 0], ['property_name' => 'extra', 'enabled' => 1]],
-            array_map('get_object_vars', $region->datamodel->meta[0]->layer_info_properties),
+        $this->assertSameJson(
+            json_decode((string)json_encode([
+                ['property_name' => 'id', 'enabled' => 0],
+                ['property_name' => 'extra', 'enabled' => 1],
+            ])),
+            $region->datamodel->meta[0]->layer_info_properties,
             'the version that differs first (it is merged into the generic one), then what only this config has'
         );
     }

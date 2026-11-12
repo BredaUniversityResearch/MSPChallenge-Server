@@ -103,7 +103,7 @@ class RegionConfigMergerTest extends ConfigTestCase
 
         $this->assertSame('01/01/2026', $merged->metadata->date_modified);
         $this->assertSame(
-            ['meta', 'restrictions', 'simulation_settings', 'plans', 'edition_name', 'dependencies'],
+            ['dependencies', 'edition_name', 'meta', 'plans', 'restrictions', 'simulation_settings'],
             self::datamodelKeys($merged)
         );
 
@@ -184,7 +184,7 @@ class RegionConfigMergerTest extends ConfigTestCase
     {
         $settings = self::merger()->merge(self::generic(), self::region())->datamodel->simulation_settings;
 
-        $this->assertSame(['CEL', 'SEL', 'MEL'], array_keys(get_object_vars($settings)));
+        $this->assertSame(['CEL', 'MEL', 'SEL'], array_keys(get_object_vars($settings)));
         $this->assertSame(['a' => 1, 'b' => 3], get_object_vars($settings->CEL));
         $this->assertSame('X_Countries', $settings->SEL->country_border_layer);
         $this->assertSame(
@@ -328,7 +328,7 @@ class RegionConfigMergerTest extends ConfigTestCase
 
         $settings = self::merger()->merge(self::emptyGeneric(), $region)->datamodel->simulation_settings;
 
-        $this->assertSame(['CEL', 'SEL', 'MEL'], array_keys(get_object_vars($settings)));
+        $this->assertSame(['CEL', 'MEL', 'SEL'], array_keys(get_object_vars($settings)));
         $this->assertNull($settings->SEL);
     }
 
@@ -365,14 +365,14 @@ class RegionConfigMergerTest extends ConfigTestCase
 
         $merged = self::merger()->merge($generic, $region)->datamodel->meta[0]->layer_info_properties;
 
-        $this->assertSame(
-            [
+        $this->assertSameJson(
+            json_decode((string)json_encode([
                 ['property_name' => 'id', 'enabled' => 0, 'display_name' => 'from the generic config'],
                 ['property_name' => 'name', 'enabled' => 1],
                 ['property_name' => 'new', 'enabled' => 1],
                 ['property_name' => 'id', 'enabled' => 5],
-            ],
-            array_map('get_object_vars', $merged),
+            ])),
+            $merged,
             'the generic order, the region wins field by field, then the others; a second one with a name is added'
         );
     }
@@ -539,7 +539,7 @@ class RegionConfigMergerTest extends ConfigTestCase
 
         $settings = self::merger()->merge($generic, $region)->datamodel->simulation_settings;
 
-        $this->assertSame(['CEL' => null, 'SEL' => null, 'MEL' => null], get_object_vars($settings));
+        $this->assertSame(['CEL' => null, 'MEL' => null, 'SEL' => null], get_object_vars($settings));
     }
 
     /**
@@ -616,18 +616,18 @@ class RegionConfigMergerTest extends ConfigTestCase
         $this->assertSameContents($before, self::canonical($config), 'the input is not modified');
         $this->assertSame(
             [
-                'restrictions',
-                'plans',
                 'dependencies',
-                'simulation_settings',
-                'policy_settings',
-                'meta',
-                'expertise_definitions',
-                'objectives',
                 'edition_name',
+                'end',
+                'expertise_definitions',
+                'meta',
+                'objectives',
+                'plans',
+                'policy_settings',
                 'region',
-                'start',
-                'end'
+                'restrictions',
+                'simulation_settings',
+                'start'
             ],
             self::datamodelKeys($merged),
             'simulation_settings takes the place of CEL, SEL and MEL'
@@ -723,7 +723,7 @@ class RegionConfigMergerTest extends ConfigTestCase
         $keys = self::datamodelKeys(self::merger()->merge(self::generic(), $region));
 
         $this->assertSame(
-            ['meta', 'restrictions', 'simulation_settings', 'plans', 'edition_name', 'dependencies'],
+            ['dependencies', 'edition_name', 'meta', 'plans', 'restrictions', 'simulation_settings'],
             $keys
         );
     }

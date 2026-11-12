@@ -99,6 +99,14 @@ final class ConfigSplitCommand extends ConfigCommand
                 InputOption::VALUE_NONE,
                 'Overwrite the generic config if it exists (this loses changes made to it by hand)'
             )
+            ->addOption(
+                'original-dir',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'The configs that the result has to give back, as <name>.json in the same folders as below --dir: '
+                . 'the check that every config merges back is made against these, not against --dir. For when --dir '
+                . 'holds normalized copies (app:config:normalize). Default: --dir'
+            )
             ->addExcludeOption()
             ->addFormatOption();
     }
@@ -199,6 +207,38 @@ final class ConfigSplitCommand extends ConfigCommand
             $report->warning($tooFew, 'too_few_configs');
         }
 
+        // the configs that the result has to give back, when they are not the ones that are split
+        $expecteds = [];
+        $originalOption = $input->getOption('original-dir');
+        if ($originalOption !== null) {
+            $originalRoot = Path::makeAbsolute((string)$originalOption, $this->projectDir);
+            foreach (array_keys($configs) as $id) {
+                $file = $originalRoot . '/' . $id . '.json';
+                try {
+                    if (!is_file($file)) {
+                        $errors[] = [
+                            'code' => 'original_missing',
+                            'message' => "There is no original for $id: $file does not exist.",
+                            'file' => $id,
+                        ];
+                        continue;
+                    }
+                    $original = $directory->read($file);
+                    if (RegionConfigMerger::isRegionFormat($original)) {
+                        throw new \RuntimeException(
+                            "The original $file is a stripped config: --original-dir has to hold complete configs."
+                        );
+                    }
+                    $expecteds[$id] = $original;
+                } catch (\Throwable $e) {
+                    $errors[] = ConfigReport::describe($e, $id);
+                }
+            }
+            if ($errors !== []) {
+                return $report->failWith($errors);
+            }
+        }
+
         // 2. generic names (those in the generic config first, proposals for the rest), the generic config, and the
         // stripped configs
         try {
@@ -215,7 +255,8 @@ final class ConfigSplitCommand extends ConfigCommand
                     $result->generic,
                     $registry,
                     $effectives[$id] ?? null,
-                    $genericName
+                    $genericName,
+                    $expecteds[$id] ?? null
                 );
             }
         } catch (\Throwable $e) {

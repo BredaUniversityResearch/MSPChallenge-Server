@@ -346,7 +346,7 @@ class ConfigLoaderTest extends ConfigCommandTestCase
         $this->assertTrue(array_key_exists('SEL', $new['datamodel']) && $new['datamodel']['SEL'] === null);
         $this->assertSame(['rows' => 2], $new['datamodel']['MEL']);
         $this->assertSame(
-            ['CEL' => ['a' => 1], 'SEL' => ['s' => 1], 'MEL' => null],
+            ['CEL' => ['a' => 1], 'MEL' => null, 'SEL' => ['s' => 1]],
             $old['datamodel']['simulation_settings']
         );
         $this->assertSame($old, ConfigLoader::withBothShapes($old), 'a second time changes nothing');
