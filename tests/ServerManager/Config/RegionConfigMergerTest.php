@@ -135,6 +135,19 @@ class RegionConfigMergerTest extends ConfigTestCase
         }
     }
 
+    public function testAnEntryThatNeedsAGenericLayerThatIsMissingIsAnError(): void
+    {
+        $generic = self::generic();
+        $generic->datamodel->meta = array_values(array_filter(
+            $generic->datamodel->meta,
+            static fn(\stdClass $layer) => $layer->msp_config_generic_name !== 'Countries'
+        ));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('refers to the generic layer "Countries", which is not in the generic config');
+        self::merger()->merge($generic, self::region());
+    }
+
     public function testLayerWithoutGenericCounterpartIsUsedAsIs(): void
     {
         $merged = self::merger()->merge(self::generic(), self::region());
@@ -310,6 +323,7 @@ class RegionConfigMergerTest extends ConfigTestCase
     public function testASimulationThatNobodyHasIsNotInTheResultExceptTheOnesThatAreAlwaysThere(): void
     {
         $region = self::region();
+        $region->datamodel->meta = []; // an empty generic config has no layers to refer to
         unset($region->datamodel->simulation_settings->SEL);
 
         $settings = self::merger()->merge(self::emptyGeneric(), $region)->datamodel->simulation_settings;

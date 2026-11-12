@@ -230,15 +230,20 @@ Ends with the error `verify_failed` (details: `failed`, `total`) when a config d
                  "nowBytes": 1409000, "afterBytes": 861000, "reasons": [] } ],
   "generic": { "name": "generic", "existed": true, "changed": false, "nowBytes": 552000, "afterBytes": 552000 },
   "total":   { "nowBytes": 5534000, "afterBytes": 5534000 },
-  "layers":  { "generic": 96, "regionOnly": 241, "overrides": { "layer_tooltip": 89 }, "proposedNames": 0,
-               "promoted": [], "demoted": [] },
+  "layers":  { "generic": 337, "shared": 96, "overrides": { "layer_tooltip": 89 }, "proposedNames": 0,
+               "added": [], "unused": [] },
   "sections": [ { "name": "restrictions", "participating": 6, "kind": "list", "values": 1, "genericValues": 0,
                   "distinctItems": 333, "genericItems": 7 } ],
   "removed": { "layer_information with a non-empty value": 26 },
   "written": { "generic": true, "genericPath": "generic.json", "configs": 6, "nothingToWrite": false } } }
 ```
 
-- `nowBytes` and `afterBytes` are file sizes: the file now, and as it would be written (the same when nothing changes).
+- `layers.generic` is the number of layers in the generic config: every layer of every config. `shared` is how many of them
+  two or more configs use. `added` and `unused` compare with a generic config that exists already: the layers that are new in
+  it, and the layers in it that no config has any more (the text report names them under "Changes to generic.json").
+- `nowBytes` and `afterBytes` are file sizes: the file now, and as it would be written (the same when nothing changes). The
+  text report gives the sizes per config and the total with the generic config: the total is the figure that counts, since
+  most of what a config had moves to the generic config.
   `generic.nowBytes` is `null` when there is no generic config yet.
 - `written` is only there after writing. `nothingToWrite` is true when what a split gives is on disk already: only
   files that would change are written.

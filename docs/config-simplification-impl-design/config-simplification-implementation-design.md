@@ -2,7 +2,7 @@
 
 > The diagrams in this document are Mermaid. Their sources are the files in [`diagrams/`](diagrams/) (open one on GitHub to see it on its own, or in a Mermaid editor to change it). The same text is in the document, so that it shows where it is read; `ConfigDocsTest` fails when a diagram in the document and its file differ.
 
-This page describes the choices that were made and how the implementation works. It follows the page **Config simplification**.
+This page describes the choices that were made and how the implementation works. It follows the page **Config simplification**; the places where the implementation differs from that page are listed in its comment **differences**.
 
 It does not describe code. It describes behaviour: what a config is, how configs are combined, what users and tools can expect.
 
@@ -17,7 +17,7 @@ When a config is used, the two are **merged** into one **final config**. The fin
 
 Two principles decide where data lives:
 
-- **Data that two or more regions share is generic.** Data that only one region uses is in that region.
+- **Every layer is generic**, also a layer that only one region uses: the generic config has all the layers, and a region lists the layers it uses. **Other data that two or more regions share is generic**; data that only one region has is in that region.
 - **A region can add to generic data and override it, but it can not take it away.** What a region is not allowed to take away must therefore only be generic when every region that is affected has it.
 
 ## 2. Concepts
@@ -49,7 +49,7 @@ The editor is a separate piece of work, and this is what the design asks of it:
 1. **Show the merged result.** Someone who edits a region config sees the final config, so they see what the game will see, and can tell which values come from a parent.
 2. **Save only what differs.** A region config that is saved holds `metadata.parent`, and only the data that differs from its chain. The same rules that merge a config also say what "differs" is, so what is saved always merges back into what was edited. The tools in section 8 can check that.
 3. **Ask where a change belongs.** A change to a value that comes from a parent is either an *override* in this region, or a change of the parent, which affects all its children. The editor should make that choice visible and warn about the children of a parent.
-4. **Layers.** A layer that only this region uses is kept in the region, without a generic name. A layer that is picked from the generic config is a region layer entry with the generic name. Sections that refer to layers use the generic name for a generic layer, and the layer's own name for a layer of the region.
+4. **Layers.** Every layer is a region layer entry with the generic name of its layer: its own `layer_name` and what differs from the generic layer. Sections that refer to layers use the generic name. A layer that the generic config does not have yet (a new layer in a config that is stripped against an existing generic config) is kept complete in the region, and the next split moves it to the generic config.
 5. **"Nothing" and "reset".** To say that a region has no simulation, such as no MEL, the editor writes an explicit `null`. To undo an override, it removes the key, so the value comes from the parent again.
 6. **Keep what it does not know.** `simulation_settings` is open-ended: other simulations can be there. The editor must keep entries it does not understand when it saves.
 7. **Complete configs.** The editor may also write a complete config (for example to hand to someone who does not have the parent files). The server accepts both.
@@ -194,7 +194,7 @@ What the form is told is one of four states (`UploadProgress`): *idle* (nothing 
 
 | Part of the config | Rule |
 |---|---|
-| **Layers** (`meta`) | The region config lists its layers, in its order. This decides which layers exist. A layer entry with a generic name takes the generic layer as its base; a layer without a generic name is used as it is. Generic layers that the region does not list are not in the final config. |
+| **Layers** (`meta`) | The region config lists its layers, in its order. This decides which layers exist. A layer entry with a generic name takes the generic layer as its base; a layer without a generic name is used as it is. Generic layers that the region does not list are not in the final config. An entry with a generic name that the generic config does not have is an error (`Layer "X" refers to the generic layer "Y", which is not in the generic config`), unless it is a complete layer of its own: that is an alias, for a region layer that is named like a generic layer. |
 | **Fields of a layer** | Merged field by field. |
 | **Restrictions** | Added up: the generic ones first, then the ones of the region. A generic restriction that refers to a layer that the region does not have is skipped. |
 | **Dependencies** | Replaced as a whole. When the region has dependencies, only those are used, nothing is combined. |
@@ -242,19 +242,21 @@ What the form is told is one of four states (`UploadProgress`): *idle* (nothing 
 
 ## 7. What becomes generic
 
-When complete configs are converted (see section 8), the rules for "shared" are the same everywhere: **two or more regions share it**.
+When complete configs are converted (see section 8), **every layer is generic**. For the other data the rule for "shared" is the same everywhere: **two or more regions share it**.
 
 | Data | When it is generic |
 |---|---|
-| **A layer** | Two or more regions use it. A layer that one region uses stays in that region. |
-| **A field of a shared layer** | A shared layer always has a complete definition in the generic config. The generic value is the most common value among the regions, or the one of the first region when no value is more common. A region with another value overrides it. |
+| **A layer** | Every layer, also one that only one region uses. The generic layer has all its values. The region lists the layer with its own `layer_name` and what differs from the generic layer. |
+| **A field of a layer** | A layer always has a complete definition in the generic config. The generic value is the most common value among the regions that use the layer (when one region uses it: its value), or the one of the first region when no value is more common. A region with another value overrides it. |
 | **A restriction or a list item that refers to layers** | Every region that has the layers it refers to has it, and two or more regions have those layers. An item that refers to a layer of one region only is never generic. |
-| **A layer property** | Every region has it, and two or more share a version of it. A region with another version carries that version. |
+| **A layer property** | Every region that has the layer has it, and two or more share a version of it (when one region has the layer: all of its properties). A region with another version carries that version. |
 | **A value in a section** (CEL, SEL, dependencies, other simulations) | Two or more regions have the same value. Other regions override it. A key of an object that not every region has stays in the regions. |
 | **A simulation other than CEL, SEL, MEL** | Every config has it, and then the rule above. |
 | **Policy settings, plans, other top-level fields** | Never. |
 
 A region can not take away what is generic, which is why an item that only some of the regions with the same layers share stays in those regions.
+
+The generic layers are written in the order of their generic names and their keys in a fixed order (the one of the merged layers), so that adding a config, or changing the order of the layers of a config, does not move anything in the generic config. The order of the layers of a region is its own. The generic config is released together with the region configs that use it: a stripped config is merged with the generic config that is there when it is used.
 
 A converted config always merges back into what it was made from (apart from the documented removals). The tools check this before they write anything.
 

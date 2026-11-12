@@ -122,6 +122,16 @@ final class RegionConfigMerger
         $layerNameOf = [];  // generic name => region layer name
         foreach (is_array($regionDatamodel->meta ?? null) ? $regionDatamodel->meta : [] as $entry) {
             $name = $entry->msp_config_generic_name ?? null;
+            if ($name !== null && !isset($genericLayers[$name]) && !ConfigValues::has($entry, 'layer_geotype')) {
+                // A complete layer with a generic name that the generic config does not have is an alias (see
+                // RegionConfigStripper). Without a layer_geotype the entry needs its generic layer: without it,
+                // it would become a layer with only the region's own fields.
+                throw new \RuntimeException(sprintf(
+                    'Layer "%s" refers to the generic layer "%s", which is not in the generic config.',
+                    $entry->layer_name ?? '?',
+                    $name
+                ));
+            }
             $layers[] = $this->mergeLayer($name === null ? null : ($genericLayers[$name] ?? null), $entry);
             if ($name !== null) {
                 $present[$name] = true;
@@ -342,7 +352,7 @@ final class RegionConfigMerger
         $entry = ConfigValues::clone($entry);
         unset($entry->msp_config_generic_name);
         if ($generic === null) {
-            return $this->orderLayerKeys($entry);
+            return self::orderLayerKeys($entry);
         }
         $generic = ConfigValues::clone($generic);
         unset($generic->msp_config_generic_name);
@@ -361,12 +371,20 @@ final class RegionConfigMerger
         } elseif ($genericHas) {
             $merged->layer_info_properties = $genericProperties;
         }
-        return $this->orderLayerKeys($merged);
+        return self::orderLayerKeys($merged);
     }
 
-    private function orderLayerKeys(\stdClass $layer): \stdClass
+    /**
+     * The keys of a layer in a fixed order: the generic name first (when it has one), then LAYER_KEY_ORDER, then the
+     * others as they were. Used for the merged layers and for what the split writes, so that the same layer always
+     * looks the same, whichever config it was first seen in.
+     */
+    public static function orderLayerKeys(\stdClass $layer): \stdClass
     {
         $ordered = new \stdClass();
+        if (ConfigValues::has($layer, 'msp_config_generic_name')) {
+            $ordered->msp_config_generic_name = $layer->msp_config_generic_name;
+        }
         foreach (self::LAYER_KEY_ORDER as $key) {
             if (ConfigValues::has($layer, $key)) {
                 $ordered->{$key} = $layer->{$key};

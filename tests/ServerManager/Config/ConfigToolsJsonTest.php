@@ -464,7 +464,8 @@ class ConfigToolsJsonTest extends ConfigCommandTestCase
         $this->assertFalse($data['generic']['existed']);
         $this->assertNull($data['generic']['nowBytes']);
         $this->assertSame('generic', $data['generic']['name']);
-        $this->assertSame(96, $data['layers']['generic']);
+        $this->assertSame(337, $data['layers']['generic'], 'every layer of every config');
+        $this->assertSame(96, $data['layers']['shared'], 'the layers that 2 or more configs use');
         $this->assertContains('restrictions', array_column($data['sections'], 'name'));
         $this->assertArrayHasKey('layer_width / layer_height of layers that are not raster layers', $data['removed']);
         $this->assertSame(

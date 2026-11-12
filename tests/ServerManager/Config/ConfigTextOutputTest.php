@@ -152,13 +152,13 @@ class ConfigTextOutputTest extends ConfigCommandTestCase
         $this->assertStringContainsString('Splitting 6 configs from ' . $this->dir, $words);
         $this->assertStringContainsString('Configs (file sizes now, and as they would be written)', $words);
         $this->assertStringNotContainsString('compact JSON', $words);
-        foreach (['Config', 'Layers', 'Now', 'After', 'Win'] as $header) {
+        foreach (['Config', 'Layers', 'Now', 'After'] as $header) {
             $this->assertStringContainsString($header, $words);
         }
         foreach (glob($this->dir . '/*/*.json') as $file) {
             $this->assertStringContainsString(number_format(filesize($file) / 1024, 1, '.', '') . ' kb', $words);
         }
-        $this->assertMatchesRegularExpression('/\d+\.\d kb\s+\d+\.\d kb\s+-?\d+\.\d%/', $words);
+        $this->assertMatchesRegularExpression('/\d+\.\d kb\s+\d+\.\d kb/', $words);
         $this->assertMatchesRegularExpression('/generic\.json: \d+\.\d kb \(new\)/', $words);
         $this->assertMatchesRegularExpression(
             '/All files, with generic\.json: \d+\.\d kb now, \d+\.\d kb after \(\d+\.\d% smaller\)/',
@@ -211,7 +211,7 @@ class ConfigTextOutputTest extends ConfigCommandTestCase
         $this->assertStringContainsString('6 of them are stripped already', $words, 'the uploads are complete');
         $this->assertStringContainsString('These configs have the same content: ', $words);
         $this->assertStringContainsString('North_Sea_basic has 2 versions (North_Sea_basic_1, ', $words);
-        $this->assertStringContainsString('A negative win', $words);
+        $this->assertStringContainsString('A config that gets larger', $words);
         $this->assertStringContainsString('Warnings', $words);
     }
 

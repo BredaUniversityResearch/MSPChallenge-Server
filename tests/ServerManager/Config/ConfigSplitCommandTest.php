@@ -198,46 +198,53 @@ class ConfigSplitCommandTest extends ConfigCommandTestCase
         ));
     }
 
-    public function testLayersThatASecondConfigUsesBecomeGenericAndMoveBackWhenItIsGone(): void
+    public function testALayerThatANewConfigAddsIsAddedAndGoesAgainWhenNoConfigUsesItAnyMore(): void
     {
         $ems = 'Eastern_Med_Sea_basic/Eastern_Med_Sea_basic_1';
+        $copyId = 'Copy_of_EMS_basic/Copy_of_EMS_basic_1';
         $this->runSplit(['--apply' => true]);
+        foreach (array_keys(self::realConfigs()) as $id) {
+            $this->assertSame(0, $this->layersWithoutGenericName($id), "$id: every layer is generic");
+        }
         [$layersBefore, $genericBefore] = $this->genericLayers();
-        $onlyEms = $this->layersWithoutGenericName($ems);
-        $this->assertGreaterThan(0, $onlyEms);
 
-        // a new config that has the same layers as Eastern Mediterranean Sea
-        new Filesystem()->dumpFile(
-            $this->dir . '/Copy_of_EMS_basic/Copy_of_EMS_basic_1.json',
-            self::realConfigFiles()[$ems]
-        );
+        // a new config with the layers of Eastern Mediterranean Sea and one of its own
+        $copy = ConfigFactory::copy(self::realConfigs()[$ems]);
+        $extra = ConfigFactory::copy($copy->datamodel->meta[0]);
+        $extra->layer_name = 'COPY_Unique_Layer';
+        $extra->layer_short = 'Unique Test Layer';
+        $copy->datamodel->meta[] = $extra;
+        new Filesystem()->dumpFile($this->dir . '/' . $copyId . '.json', ConfigDirectory::encode($copy));
         $check = $this->runSplit(['--check' => true]);
-        $promote = $this->runSplit(['--apply' => true, '--force' => true]);
+        $add = $this->runSplit(['--apply' => true, '--force' => true]);
 
         $this->assertSame(1, $check->getStatusCode(), 'a re-split would change things');
-        $this->assertCount($onlyEms, self::documentOf($check)['data']['layers']['promoted']);
-        $this->assertSame(0, $promote->getStatusCode(), $promote->getDisplay());
-        $this->assertSame($layersBefore + $onlyEms, $this->genericLayers()[0]);
-        $this->assertSame(0, $this->layersWithoutGenericName($ems), 'they are inherited now');
-        $this->assertSame(0, $this->layersWithoutGenericName('Copy_of_EMS_basic/Copy_of_EMS_basic_1'));
+        $this->assertSame(['UniqueTestLayer'], self::documentOf($check)['data']['layers']['added']);
+        $this->assertSame(0, $add->getStatusCode(), $add->getDisplay());
+        $this->assertSame($layersBefore + 1, $this->genericLayers()[0]);
+        $this->assertSame(0, $this->layersWithoutGenericName($copyId));
         $this->assertMergesBackToTheOriginals();
-        $this->assertSame([], self::differencesToOriginal(
-            $this->decode($this->dir . '/generic.json'),
-            $this->decode($this->dir . '/Copy_of_EMS_basic/Copy_of_EMS_basic_1.json'),
-            self::realConfigs()[$ems]
-        ));
         $this->assertSame(0, $this->runSplit(['--check' => true])->getStatusCode(), 'and that is stable');
 
-        // the new config is removed again: the layers only one config uses move back out of generic.json
-        unlink($this->dir . '/Copy_of_EMS_basic/Copy_of_EMS_basic_1.json');
+        // the new config is removed again: its layer is not used by any config any more
+        unlink($this->dir . '/' . $copyId . '.json');
         $checkBack = $this->runSplit(['--check' => true]);
-        $demote = $this->runSplit(['--apply' => true, '--force' => true]);
+        $remove = $this->runSplit(['--apply' => true, '--force' => true]);
 
         $this->assertSame(1, $checkBack->getStatusCode());
-        $this->assertCount($onlyEms, self::documentOf($checkBack)['data']['layers']['demoted']);
-        $this->assertSame(0, $demote->getStatusCode(), $demote->getDisplay());
-        $this->assertSameContents($genericBefore, $this->genericLayers()[1], 'generic.json is what it was');
-        $this->assertSame($onlyEms, $this->layersWithoutGenericName($ems));
+        $this->assertSame(['UniqueTestLayer'], self::documentOf($checkBack)['data']['layers']['unused']);
+        $this->assertSame(0, $remove->getStatusCode(), $remove->getDisplay());
+        $generic = $this->decode($this->dir . '/generic.json');
+        $this->assertSame(
+            json_encode(json_decode($genericBefore)->datamodel),
+            json_encode($generic->datamodel),
+            'the layers of generic.json are what they were'
+        );
+        $this->assertSame(
+            ['COPY_Unique_Layer'],
+            $generic->layer_names->UniqueTestLayer,
+            'the name stays, so the layer gets it again when it comes back'
+        );
         $this->assertMergesBackToTheOriginals();
     }
 

@@ -482,10 +482,8 @@ final class ConfigTextRenderer
         $io->title(sprintf('Splitting %d configs from %s', count($configs), self::str($data, 'root')));
         if (self::int($data, 'strippedCount') > 0) {
             $io->writeln(sprintf(
-                '%d of them are stripped already: they are expanded with their parents, so layers that more (or '
-                . 'fewer) configs use now can move into (or out of) %s.json.',
-                self::int($data, 'strippedCount'),
-                $name
+                '%d of them are stripped already: they are expanded with their parents first.',
+                self::int($data, 'strippedCount')
             ));
         }
 
@@ -503,11 +501,10 @@ final class ConfigTextRenderer
                 self::int($config, 'layers'),
                 self::kb($now),
                 $kept ? 'cannot be stripped' : self::kb($after),
-                $kept ? '-' : self::win($now, $after),
             ];
         }
         $io->section('Configs (file sizes now, and as they would be written)');
-        $io->table(['Config', 'Layers', 'Now', 'After', 'Win'], $rows);
+        $io->table(['Config', 'Layers', 'Now', 'After'], $rows);
         $genericNow = $generic['nowBytes'] ?? null;
         $genericAfter = self::int($generic, 'afterBytes');
         $io->writeln(
@@ -535,7 +532,7 @@ final class ConfigTextRenderer
         ));
         if ($larger) {
             $io->writeln(
-                'A negative win: that config needs more overrides afterwards, because what most configs share '
+                'A config that gets larger needs more overrides afterwards, because what most configs share '
                 . '(the generic config) changed.'
             );
         }
@@ -543,10 +540,10 @@ final class ConfigTextRenderer
         $layers = self::arr($data, 'layers');
         $io->section('Layers');
         $io->writeln(sprintf(
-            '%d generic layers (each used by 2 or more configs); %d layers are used by one config only and stay in '
-            . 'its file. Region layer entries overriding a generic value, per field:',
+            '%d generic layers: every layer of every config (%d of them are used by 2 or more configs). Region '
+            . 'layer entries overriding a generic value, per field:',
             self::int($layers, 'generic'),
-            self::int($layers, 'regionOnly')
+            self::int($layers, 'shared')
         ));
         $overrides = self::arr($layers, 'overrides');
         $io->writeln('  ' . ($overrides === [] ? 'none' : implode(', ', array_map(
@@ -635,24 +632,21 @@ final class ConfigTextRenderer
                 $shown
             )) . (!$io->isVerbose() && count($names) > 8 ? ', ... (-v lists all)' : '');
         };
-        $promoted = self::arr($layers, 'promoted');
-        $demoted = self::arr($layers, 'demoted');
+        $added = self::arr($layers, 'added');
+        $unused = self::arr($layers, 'unused');
         $io->writeln(
-            $promoted === []
-                ? 'No layer becomes generic.'
-                : sprintf(
-                    '%d layer(s) become generic, because 2 or more configs use them now: %s',
-                    count($promoted),
-                    $describe($promoted)
-                )
+            $added === []
+                ? sprintf('No layer is added to %s.json.', $name)
+                : sprintf('%d layer(s) are added to %s.json: %s', count($added), $name, $describe($added))
         );
         $io->writeln(
-            $demoted === []
-                ? 'No layer moves back to a single config.'
+            $unused === []
+                ? sprintf('Every layer in %s.json is used by a config.', $name)
                 : sprintf(
-                    '%d layer(s) move back into the one config that uses them: %s',
-                    count($demoted),
-                    $describe($demoted)
+                    '%d layer(s) in %s.json are not used by any config any more: %s',
+                    count($unused),
+                    $name,
+                    $describe($unused)
                 )
         );
     }

@@ -21,9 +21,11 @@ use App\Domain\Config\Merge\RegionConfigMerger;
  *    in `simulation_settings`, like `policy_settings`), in both input and output;
  *  - `meta` is a list of region layer entries, each pointing at a generic layer through
  *    msp_config_generic_name; the region list defines which layers exist and in which order.
- * Data is generic as soon as 2 or more regions share it, and a region never has to delete anything, because a region
- * can not take away what is generic: objects: keys present in all; values: the most common value (sections need
- * support from >= 2 regions); additive lists (restrictions, SEL lists): an item that refers to layers is generic when
+ * Every layer is generic, also when only one region uses it: the generic layer gets its values, and the region entry
+ * only what is the region's own (its layer_name and what differs from the generic value). Other data is generic as
+ * soon as 2 or more regions share it, and a region never has to delete anything, because a region can not take away
+ * what is generic: objects: keys present in all; values: the most common value (sections need support from >= 2
+ * regions); additive lists (restrictions, SEL lists): an item that refers to layers is generic when
  * every config that has those layers has it and 2 or more configs have them; layer_info_properties: a property that
  * every config has, of which 2 or more share a version. So the split is lossless by construction, apart from the
  * documented removals.
@@ -94,11 +96,10 @@ final class ConfigSplitter
     private array $layerOverrides = [];
     /** @var array<string, true> */
     private array $unresolved = [];
-    /** @var array<string, true> generic names of the layers that are used by 2 or more configs */
+    /** @var array<string, true> generic names of the layers (all of them are generic) */
     private array $shared = [];
-    /** @var array<string, array<string, true>> config id => the generic names of the shared layers it has */
+    /** @var array<string, array<string, true>> config id => the generic names of the layers it has */
     private array $layersOf = [];
-    private int $regionOnlyLayers = 0;
     /** @var string[] */
     private array $warnings = [];
 
@@ -165,8 +166,7 @@ final class ConfigSplitter
             $this->layerOverrides,
             $this->support,
             $this->dropped,
-            $this->warnings,
-            $this->regionOnlyLayers
+            $this->warnings
         );
     }
 
@@ -206,22 +206,22 @@ final class ConfigSplitter
             }
         }
 
+        // every layer is generic, also when one config uses it. In the order of the generic names, so that adding a
+        // config or changing the order of its layers does not move layers in the generic config
+        uksort($clusters, static fn($a, $b) => strcasecmp((string)$a, (string)$b) ?: strcmp((string)$a, (string)$b));
         $genericMeta = [];
         $patches = [];
         $propertyPatches = [];
-        $shared = 0;
+        $shared = 0; // the layers that 2 or more configs use
         foreach ($clusters as $generic => $byConfig) {
             $generic = (string)$generic;
-            if (count($byConfig) === 1) {
-                // used by one config only: nothing is shared, the layer lives in that config's file
-                $this->regionOnlyLayers++;
-                continue;
-            }
             $this->shared[$generic] = true;
             foreach (array_keys($byConfig) as $id) {
                 $this->layersOf[$id][$generic] = true;
             }
-            $shared++;
+            if (count($byConfig) >= 2) {
+                $shared++;
+            }
             $bases = array_map(static fn(array $entry) => $entry['base'], $byConfig);
             $properties = array_map(static fn(array $entry) => $entry['props'], $byConfig);
 
@@ -262,7 +262,7 @@ final class ConfigSplitter
             if ($setGenericProperties) {
                 $layer->layer_info_properties = $genericProperties;
             }
-            $genericMeta[] = $layer;
+            $genericMeta[] = RegionConfigMerger::orderLayerKeys($layer);
 
             foreach (array_keys($byConfig) as $id) {
                 $patch = $has ? ($basePatches[$id] ?? new \stdClass()) : $bases[$id];
@@ -284,25 +284,8 @@ final class ConfigSplitter
         $regionMeta = [];
         foreach ($configs as $id => $root) {
             $entries = [];
-            $sharedHere = [];
-            foreach ($root->datamodel->meta ?? [] as $layer) {
-                $sharedHere[(string)$this->names->get($layer->layer_name)] = true;
-            }
             foreach ($root->datamodel->meta ?? [] as $layer) {
                 $generic = (string)$this->names->get($layer->layer_name);
-                if (!isset($this->shared[$generic])) {
-                    if (isset($sharedHere[$layer->layer_name]) && isset($this->shared[$layer->layer_name])) {
-                        throw new \RuntimeException(sprintf(
-                            'Config "%s": layer "%s" is only used by this config, but "%s" is also the generic name '
-                            . 'of a layer it uses. Rename one in the layer name map.',
-                            $id,
-                            $layer->layer_name,
-                            $layer->layer_name
-                        ));
-                    }
-                    $entries[] = $this->regionOnlyLayer($layer);
-                    continue;
-                }
                 $entry = new \stdClass();
                 $entry->msp_config_generic_name = $generic;
                 foreach (self::REGION_LAYER_KEYS as $key) {
@@ -316,28 +299,12 @@ final class ConfigSplitter
                 if (array_key_exists($id, $propertyPatches[$generic] ?? [])) {
                     $entry->layer_info_properties = $propertyPatches[$generic][$id];
                 }
-                $entries[] = $entry;
+                $entries[] = RegionConfigMerger::orderLayerKeys($entry);
             }
             $regionMeta[$id] = $entries;
         }
 
         return [$genericMeta, $regionMeta, $shared];
-    }
-
-    /**
-     * A layer that no other config has: complete, without msp_config_generic_name (there is no generic layer to
-     * match). Sections that refer to it use its layer_name.
-     */
-    private function regionOnlyLayer(\stdClass $layer): \stdClass
-    {
-        $entry = new \stdClass();
-        $removed = self::removedLayerKeys($layer);
-        foreach (ConfigValues::props($layer) as $key => $value) {
-            if (!in_array($key, $removed, true)) {
-                $entry->{$key} = ConfigValues::clone($value);
-            }
-        }
-        return $entry;
     }
 
     private function resetState(): void
@@ -349,7 +316,6 @@ final class ConfigSplitter
         $this->warnings = [];
         $this->shared = [];
         $this->layersOf = [];
-        $this->regionOnlyLayers = 0;
     }
 
     /**
@@ -941,8 +907,9 @@ final class ConfigSplitter
     }
 
     /**
-     * The generic names of the shared layers that an item of a list refers to, null when it refers to something
-     * else (a layer that only one config has, or a reference that is not understood): that can not be generic.
+     * The generic names of the layers that an item of a list refers to, null when it refers to something else (a
+     * reference that is not understood): that can not be generic. Whether enough configs have those layers is
+     * decided by the caller.
      *
      * @return ?string[]
      */
@@ -975,8 +942,9 @@ final class ConfigSplitter
     /**
      * The layer_info_properties of the layers of one generic layer, by config. They are keyed by property_name: a
      * property is generic when every config has it and 2 or more configs have the same version of it (the most
-     * common one). A config that has another version carries that version, which is merged into the generic one by
-     * the name; the properties that are not generic stay in the configs that have them.
+     * common one; when only one config has the layer, all of its properties are generic). A config that has another
+     * version carries that version, which is merged into the generic one by the name; the properties that are not
+     * generic stay in the configs that have them.
      *
      * @param array<string, array<int, mixed>> $properties config id => list
      * @return array{0: bool, 1: array, 2: array<string, array>} whether there is a generic list, that list, and what
@@ -1013,7 +981,7 @@ final class ConfigSplitter
                     $best = (string)$canonical;
                 }
             }
-            if ($best !== null && count($versions[$best]) >= 2) {
+            if ($best !== null && count($versions[$best]) >= min(2, count($properties))) { // one config: all of them
                 $generic[] = ConfigValues::clone($byName[$versions[$best][0]][(string)$name]);
                 $genericCanonical[(string)$name] = $best;
             }

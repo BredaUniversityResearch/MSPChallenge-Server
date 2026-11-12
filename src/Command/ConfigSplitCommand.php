@@ -90,8 +90,8 @@ final class ConfigSplitCommand extends ConfigCommand
                 null,
                 InputOption::VALUE_NONE,
                 'Write nothing, exit with status 1 when running with --apply would change anything: the generic '
-                . 'config (for example layers that a second config now uses, or that only one config uses any '
-                . 'more) or a config'
+                . 'config (for example a layer that a config has now, or that no config uses any more) or a '
+                . 'config'
             )
             ->addOption(
                 'force',
@@ -227,8 +227,8 @@ final class ConfigSplitCommand extends ConfigCommand
         );
         $newNames = $layerNames($result->generic);
         $oldNames = $layerNames($oldGeneric);
-        $promoted = $oldGeneric === null ? [] : array_values(array_diff($newNames, $oldNames));
-        $demoted = $oldGeneric === null ? [] : array_values(array_diff($oldNames, $newNames));
+        $added = $oldGeneric === null ? [] : array_values(array_diff($newNames, $oldNames));
+        $unused = $oldGeneric === null ? [] : array_values(array_diff($oldNames, $newNames));
         $genericChanged = $oldGeneric === null
             || ConfigValues::canonical($oldGeneric) !== ConfigValues::canonical($result->generic);
         $changed = array_filter($plans, static fn(StripPlan $plan) => $plan->status === StripPlan::CHANGED);
@@ -244,8 +244,8 @@ final class ConfigSplitCommand extends ConfigCommand
             $plans,
             $genericName,
             $oldGeneric !== null,
-            $promoted,
-            $demoted,
+            $added,
+            $unused,
             $oldGeneric === null ? null : (int)@filesize((string)$genericFile),
             $genericChanged
         );
@@ -404,8 +404,8 @@ final class ConfigSplitCommand extends ConfigCommand
      *
      * @param array<string, \stdClass> $configs
      * @param array<string, StripPlan> $plans
-     * @param string[] $promoted
-     * @param string[] $demoted
+     * @param string[] $added the layers that are new in the generic config
+     * @param string[] $unused the layers of the generic config that no config has any more
      */
     private function describe(
         ConfigReport $report,
@@ -417,8 +417,8 @@ final class ConfigSplitCommand extends ConfigCommand
         array $plans,
         string $genericName,
         bool $hadGeneric,
-        array $promoted,
-        array $demoted,
+        array $added,
+        array $unused,
         ?int $genericNow,
         bool $genericChanged
     ): void {
@@ -508,11 +508,11 @@ final class ConfigSplitCommand extends ConfigCommand
             'total' => ['nowBytes' => $totalNow, 'afterBytes' => $totalAfter],
             'layers' => [
                 'generic' => $result->genericLayerCount,
-                'regionOnly' => $result->regionOnlyLayerCount,
+                'shared' => $result->sharedLayerCount,
                 'overrides' => (object)$result->layerOverrides,
                 'proposedNames' => count($registry->proposed()),
-                'promoted' => $promoted,
-                'demoted' => $demoted,
+                'added' => $added,
+                'unused' => $unused,
                 'nameMap' => (object)$registry->toMap(),
             ],
             'sections' => $sections,

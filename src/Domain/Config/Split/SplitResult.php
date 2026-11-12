@@ -20,8 +20,7 @@ final readonly class SplitResult
         public array     $layerOverrides,
         public array     $support,
         public array     $dropped,
-        public array     $warnings,
-        public int       $regionOnlyLayerCount = 0
+        public array     $warnings
     ) {
     }
 }

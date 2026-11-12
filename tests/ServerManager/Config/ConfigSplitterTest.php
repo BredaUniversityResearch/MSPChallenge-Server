@@ -31,7 +31,7 @@ class ConfigSplitterTest extends ConfigTestCase
         return array_map(static fn(\stdClass $layer) => $layer->msp_config_generic_name, $layers);
     }
 
-    public function testSharedLayersBecomeGenericAndOnlyDifferencesStayInTheRegion(): void
+    public function testEveryLayerIsGenericAndOnlyDifferencesStayInTheRegion(): void
     {
         $a = ConfigFactory::config([
             ConfigFactory::layer('A_Countries', 'Countries', ['layer_tooltip' => 'shared']),
@@ -45,13 +45,12 @@ class ConfigSplitterTest extends ConfigTestCase
 
         [$result] = self::split(['a/a' => $a, 'b/b' => $b]);
 
-        $this->assertSame(2, $result->genericLayerCount);
-        $this->assertSame(2, $result->sharedLayerCount);
-        $this->assertSame(1, $result->regionOnlyLayerCount);
+        $this->assertSame(3, $result->genericLayerCount);
+        $this->assertSame(2, $result->sharedLayerCount, 'used by 2 or more configs');
         $this->assertSame(
-            ['Countries', 'Ports'],
+            ['Countries', 'OnlyB', 'Ports'],
             self::layerNames($result->generic->datamodel->meta),
-            'OnlyB is used by one config'
+            'all layers, also OnlyB that one config uses, sorted by generic name'
         );
 
         $countries = $result->generic->datamodel->meta[0];
@@ -60,7 +59,12 @@ class ConfigSplitterTest extends ConfigTestCase
         foreach (['layer_name', 'layer_download_from_geoserver', 'layer_raster_minimum_value_cutoff'] as $key) {
             $this->assertFalse(ConfigValues::has($countries, $key), "$key is region specific");
         }
-        $this->assertSame(0, $result->generic->datamodel->meta[1]->layer_editable, 'a tie goes to the first config');
+        $this->assertSame(0, $result->generic->datamodel->meta[2]->layer_editable, 'a tie goes to the first config');
+        $this->assertSame(
+            'polygon',
+            $result->generic->datamodel->meta[1]->layer_geotype,
+            'OnlyB has all its values here'
+        );
 
         $regionA = $result->regions['a/a']->datamodel->meta;
         $regionB = $result->regions['b/b']->datamodel->meta;
@@ -76,16 +80,16 @@ class ConfigSplitterTest extends ConfigTestCase
         );
         $this->assertSame('A_Countries', $regionA[0]->layer_name);
         $this->assertFalse(ConfigValues::has($regionA[1], 'layer_editable'));
-        $only = $regionB[2]; // used by one config: complete, and without a generic name (nothing to match)
-        $this->assertFalse(ConfigValues::has($only, 'msp_config_generic_name'));
+        $only = $regionB[2]; // used by one config: generic too, so the entry only has what is the region's own
+        $this->assertSame('OnlyB', $only->msp_config_generic_name);
         $this->assertSame('B_Only', $only->layer_name);
-        $this->assertSame('polygon', $only->layer_geotype);
+        $this->assertFalse(ConfigValues::has($only, 'layer_geotype'), 'it is in the generic layer');
         $this->assertFalse(ConfigValues::has($only, 'layer_width'));
         $this->assertSame(1, $regionB[1]->layer_editable);
         $this->assertSame(['layer_editable' => 1], $result->layerOverrides);
     }
 
-    public function testLayersUsedByOneConfigStayInThatConfigAndSectionsReferToThemByLayerName(): void
+    public function testLayersUsedByOneConfigAreGenericAndSectionsReferToThemByGenericName(): void
     {
         $a = self::configFor('A');
         $a->datamodel->SEL->shipping_lane_layers = ['A_Ports'];
@@ -98,15 +102,86 @@ class ConfigSplitterTest extends ConfigTestCase
         [$result] = self::split(['a/a' => $a, 'b/b' => $b]);
 
         $regionB = $result->regions['b/b']->datamodel;
-        $this->assertSame(['Countries|B_Only'], array_keys(get_object_vars($regionB->restrictions)));
-        $entry = $regionB->restrictions->{'Countries|B_Only'}[0];
-        $this->assertSame('Countries', $entry->startlayer, 'a layer of the generic config: its generic name');
-        $this->assertSame('B_Only', $entry->endlayer, 'a layer of this config only: its layer name');
-        $this->assertSame(['B_Only'], $regionB->simulation_settings->SEL->shipping_lane_layers);
-        // the layers and sections of the generic config never mention it (only its layer_names does, see below)
-        $this->assertStringNotContainsString('B_Only', json_encode($result->generic->datamodel));
-        $this->assertStringNotContainsString('OnlyB', json_encode($result->generic->datamodel));
-        $this->assertSame(['B_Only'], $result->generic->layer_names->OnlyB, 'so it can join the generic config later');
+        $this->assertSame(['Countries|OnlyB'], array_keys(get_object_vars($regionB->restrictions)));
+        $entry = $regionB->restrictions->{'Countries|OnlyB'}[0];
+        $this->assertSame('Countries', $entry->startlayer, 'a generic name');
+        $this->assertSame('OnlyB', $entry->endlayer, 'also a generic name, although only this config has the layer');
+        $this->assertSame(['OnlyB'], $regionB->simulation_settings->SEL->shipping_lane_layers);
+        // the layer is in the generic config, the sections that refer to it are not: only one config has the layer
+        $this->assertContains('OnlyB', self::layerNames($result->generic->datamodel->meta));
+        $this->assertStringNotContainsString('OnlyB', json_encode($result->generic->datamodel->simulation_settings));
+        $this->assertSame(['B_Only'], $result->generic->layer_names->OnlyB);
+        $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions['b/b'], $b));
+    }
+
+    public function testTheGenericLayersAreInTheOrderOfTheirNamesWhateverTheOrderOfTheConfigs(): void
+    {
+        $a = ConfigFactory::config([
+            ConfigFactory::layer('A_Ports', 'Ports'),
+            ConfigFactory::layer('A_Countries', 'Countries'),
+        ]);
+        $b = ConfigFactory::config([
+            ConfigFactory::layer('B_Zebra', 'Zebra'),
+            ConfigFactory::layer('B_Countries', 'Countries'),
+            ConfigFactory::layer('B_Ports', 'Ports'),
+        ]);
+
+        [$ab] = self::split(['a/a' => $a, 'b/b' => $b]);
+        [$ba] = self::split(['b/b' => $b, 'a/a' => $a]);
+
+        $this->assertSame(['Countries', 'Ports', 'Zebra'], self::layerNames($ab->generic->datamodel->meta));
+        $this->assertSame(
+            self::layerNames($ab->generic->datamodel->meta),
+            self::layerNames($ba->generic->datamodel->meta)
+        );
+        $this->assertSame(
+            ['A_Ports', 'A_Countries'],
+            array_map(static fn($e) => $e->layer_name, $ab->regions['a/a']->datamodel->meta),
+            'the order of the layers of a region is its own'
+        );
+    }
+
+    public function testTheKeysOfALayerAreInAFixedOrder(): void
+    {
+        $a = ConfigFactory::config([ConfigFactory::layer('A_Countries', 'Countries', ['layer_tooltip' => 'x'])]);
+        $b = ConfigFactory::config([ConfigFactory::layer('B_Countries', 'Countries', ['layer_tooltip' => 'y'])]);
+
+        [$result] = self::split(['a/a' => $a, 'b/b' => $b]);
+
+        foreach ([$result->generic->datamodel->meta[0], $result->regions['b/b']->datamodel->meta[0]] as $layer) {
+            $keys = array_keys(get_object_vars($layer));
+            $this->assertSame('msp_config_generic_name', $keys[0]);
+            $known = array_values(array_filter(
+                $keys,
+                static fn(string $key) => in_array($key, RegionConfigMerger::LAYER_KEY_ORDER, true)
+            ));
+            $positions = array_map(
+                static fn(string $key) => array_search($key, RegionConfigMerger::LAYER_KEY_ORDER, true),
+                $known
+            );
+            $sorted = $positions;
+            sort($sorted);
+            $this->assertSame($sorted, $positions, 'the keys follow RegionConfigMerger::LAYER_KEY_ORDER');
+        }
+    }
+
+    public function testTheInfoPropertiesOfALayerThatOneConfigHasAreGenericToo(): void
+    {
+        $a = ConfigFactory::config([ConfigFactory::layer('A_Countries', 'Countries')]);
+        $b = ConfigFactory::config([
+            ConfigFactory::layer('B_Countries', 'Countries'),
+            ConfigFactory::layer('B_Only', 'Only B', ['layer_info_properties' => [
+                ['property_name' => 'id', 'enabled' => 1],
+                ['property_name' => 'name', 'enabled' => 0],
+            ]]),
+        ]);
+
+        [$result] = self::split(['a/a' => $a, 'b/b' => $b]);
+
+        $only = $result->generic->datamodel->meta[1];
+        $this->assertSame('OnlyB', $only->msp_config_generic_name);
+        $this->assertSame(['id', 'name'], array_map(static fn($p) => $p->property_name, $only->layer_info_properties));
+        $this->assertFalse(ConfigValues::has($result->regions['b/b']->datamodel->meta[1], 'layer_info_properties'));
         $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions['b/b'], $b));
     }
 
@@ -186,7 +261,7 @@ class ConfigSplitterTest extends ConfigTestCase
 
         $this->assertFalse(ConfigValues::has($result->generic->datamodel, 'restrictions'));
         $this->assertSame(
-            ['Countries|A_Only'],
+            ['Countries|OnlyA'],
             array_keys(get_object_vars($result->regions['a/a']->datamodel->restrictions))
         );
         $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions['a/a'], $a));
@@ -335,15 +410,18 @@ class ConfigSplitterTest extends ConfigTestCase
         }
     }
 
-    public function testALayerOfOneConfigWithTheGenericNameOfAnotherLayerOfThatConfigIsRejected(): void
+    public function testALayerNamedLikeAGenericLayerIsNoProblemBecauseEveryLayerHasAGenericName(): void
     {
         $a = self::configFor('A');
         $b = self::configFor('B');
-        $b->datamodel->meta[] = ConfigFactory::layer('Countries', 'Unique Thing');
+        $b->datamodel->meta[] = ConfigFactory::layer('Countries', 'Unique Thing'); // 'Countries' is also a generic name
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('only used by this config');
-        self::split(['a/a' => $a, 'b/b' => $b]);
+        [$result] = self::split(['a/a' => $a, 'b/b' => $b]);
+
+        $names = self::layerNames($result->generic->datamodel->meta);
+        $this->assertContains('Countries', $names);
+        $this->assertContains('UniqueThing', $names);
+        $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions['b/b'], $b));
     }
 
     public function testARegionConfigAlwaysDeclaresItselfEvenWhenItHasNothingOfItsOwnToSay(): void
@@ -437,7 +515,7 @@ class ConfigSplitterTest extends ConfigTestCase
         [$result] = self::split(['a/a' => $a, 'b/b' => $b]);
 
         $generic = $result->generic->datamodel->meta;
-        $this->assertSame(['Bathymetry', 'Countries'], self::layerNames($generic));
+        $this->assertSame(['Bathymetry', 'Countries', 'OnlyRaster'], self::layerNames($generic));
         $this->assertSame(131, $generic[0]->layer_width, 'a tie goes to the first config');
         $this->assertSame(113, $generic[0]->layer_height);
         $this->assertFalse(ConfigValues::has($generic[1], 'layer_width'), 'removed from a layer that is not a raster');
@@ -445,8 +523,9 @@ class ConfigSplitterTest extends ConfigTestCase
         $regionB = $result->regions['b/b']->datamodel->meta;
         $this->assertSame(76, $regionB[0]->layer_width, 'the size of this config is an override');
         $this->assertSame(44, $regionB[0]->layer_height);
-        $this->assertSame(1024, $regionB[2]->layer_width, 'also in a raster layer that only this config has');
-        $this->assertSame(2048, $regionB[2]->layer_height);
+        $this->assertSame(1024, $generic[2]->layer_width, 'also in a raster layer that only one config has');
+        $this->assertSame(2048, $generic[2]->layer_height);
+        $this->assertFalse(ConfigValues::has($regionB[2], 'layer_width'), 'it is in the generic layer');
         $this->assertSame(
             2,
             $result->dropped['layer_width / layer_height of layers that are not raster layers']
