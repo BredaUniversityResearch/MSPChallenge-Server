@@ -15,6 +15,9 @@ use App\Domain\Config\Split\ConfigValues;
  *   (the name first, the long fields last), then every other key, alphabetically.
  * - A list keeps its order, and so do the layers of a config: the order of a list can mean something (the order in
  *   which the properties of a layer are shown).
+ * - A number with a whole value is written without a fraction: 1.0 becomes 1. 1 and 1.0 are the same number, and the
+ *   same number is always written the same way, whichever file it came from (a value of the generic config or of a
+ *   region). A number with a fraction is as PHP writes it (0.4).
  */
 final class ConfigOrder
 {
@@ -68,6 +71,9 @@ final class ConfigOrder
     {
         if ($value instanceof \stdClass) {
             return self::object($value, $path);
+        }
+        if (is_float($value) && is_finite($value) && floor($value) === $value && abs($value) < 1e15) {
+            return (int)$value;
         }
         if (is_array($value)) {
             $ordered = [];

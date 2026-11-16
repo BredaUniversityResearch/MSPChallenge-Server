@@ -213,6 +213,14 @@ The document is that of `merge-all` (`root`, `outputDir`, `written`, `results` w
   as `msp_config_generic_name`, the keys of `RegionConfigMerger::LAYER_KEY_ORDER`, then the others alphabetically. **Lists keep
   their order, and so do the layers of a config.** A stripped config is merged with its parents first;
 - normalizing a normalized folder changes nothing, byte for byte.
+- a number with a whole value is written without a fraction (`1.0` becomes `1`), also in a final config (`merge`, `merge-all`): the same
+  number is always written the same way, whichever file it came from. 5 and 5.0 are the same value when configs are compared;
+- **every config is audited before anything is written**: the source and the normalized config are walked at the same time, and
+  every difference has to be on the list of documented changes (the simulations moved into `simulation_settings`, the removals
+  above, the restrictions as the same set of entries). A lost field, a changed value, a layer more or
+  less: the config is refused with the error `normalization_audit` (the differences are in `details.differences`), and nothing is
+  written, also not the configs that were fine. The audit does not use the normalizer or its lists, so a mistake in the normalizer
+  shows up as a difference.
 
 It is for **comparing as text**: the normalized originals against the merged configs of their split differ only in the order of
 the lists that the split does not keep (`layer_info_properties`, the SEL lists). It is also the input of the split in the
@@ -300,6 +308,7 @@ Ends with the error `verify_failed` (details: `failed`, `total`) when a config d
 | `generic_has_parent` | The generic config of `split` has a parent itself: choose another name with `--generic` | `generic` |
 | `stripped_configs_unsafe` | `split` can not write stripped configs for the new generic config | `configs` |
 | `write_failed` | Something could not be written or did not verify: nothing was changed | |
+| `normalization_audit` | `normalize` found a difference between a config and its normalized form that is not documented (`details.differences`): nothing is written | |
 | `error` | Anything else: the message says what | |
 
 ### Warnings

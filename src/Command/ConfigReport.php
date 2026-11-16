@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Domain\Config\ConfigParentException;
 use App\Domain\Config\InvalidSessionConfigException;
+use App\Domain\Config\Merge\NormalizationAuditException;
 use Symfony\Component\Console\Command\Command;
 
 /**
@@ -107,6 +108,10 @@ final class ConfigReport
         }
         if ($e instanceof \JsonException) {
             return ['code' => 'invalid_json', 'message' => $e->getMessage()] + $file;
+        }
+        if ($e instanceof NormalizationAuditException) {
+            return ['code' => 'normalization_audit', 'message' => $e->getMessage()] + $file
+                + ['details' => ['differences' => $e->problems]];
         }
         $message = $e->getMessage();
         $code = match (true) {

@@ -33,6 +33,23 @@ class ConfigOrderTest extends ConfigTestCase
         $this->assertSame(['x', 'Y', 'z'], self::keys($ordered->a), 'also in the objects below');
     }
 
+    public function testANumberWithAWholeValueIsWrittenWithoutAFraction(): void
+    {
+        $config = ConfigFactory::json(
+            '{"a": 1.0, "b": 2.5, "c": 3, "d": [4.0, 5.5], "e": {"f": -0.0}, "g": 1.0e20, "h": "1.0"}'
+        );
+
+        $ordered = ConfigOrder::config($config);
+
+        $this->assertSame(1, $ordered->a, '1.0 and 1 are the same number: written the same way');
+        $this->assertSame(2.5, $ordered->b);
+        $this->assertSame(3, $ordered->c);
+        $this->assertSame([4, 5.5], $ordered->d);
+        $this->assertSame(0, $ordered->e->f);
+        $this->assertSame(1.0e20, $ordered->g, 'too big for an integer: as it is');
+        $this->assertSame('1.0', $ordered->h, 'a string is not a number');
+    }
+
     public function testKeysThatAreOnlyDigitsComeFirstInNumberOrder(): void
     {
         $config = ConfigFactory::json(

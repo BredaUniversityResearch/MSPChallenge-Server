@@ -5,6 +5,7 @@ namespace App\Tests\ServerManager\Config;
 use App\Command\ConfigReport;
 use App\Domain\Config\ConfigParentException;
 use App\Domain\Config\InvalidSessionConfigException;
+use App\Domain\Config\Merge\NormalizationAuditException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -23,6 +24,22 @@ class ConfigReportTest extends TestCase
             ['code' => 'parent_missing', 'message' => 'no parent', 'file' => 'a/b', 'details' => ['parent' => 'x']],
             $error
         );
+    }
+
+    public function testAFailedNormalizationAuditHasItsOwnCodeAndTheDifferences(): void
+    {
+        $error = ConfigReport::describe(
+            new NormalizationAuditException(['/datamodel/meta[0] "A"/layer_tooltip: only in the original']),
+            'NS/ns'
+        );
+
+        $this->assertSame('normalization_audit', $error['code']);
+        $this->assertSame('NS/ns', $error['file']);
+        $this->assertSame(
+            ['/datamodel/meta[0] "A"/layer_tooltip: only in the original'],
+            $error['details']['differences']
+        );
+        $this->assertStringContainsString('layer_tooltip', $error['message']);
     }
 
     public function testAnExceptionWithoutDetailsHasNoDetailsKey(): void

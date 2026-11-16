@@ -2,6 +2,9 @@
 
 namespace App\Tests\ServerManager\Config;
 
+use App\Domain\Config\ConfigDirectory;
+use Symfony\Component\Filesystem\Filesystem;
+
 /**
  * app:config:normalize: every config in one fixed form, so that originals and merged configs can be compared as text,
  * and so that a split can start from the normalized copies.
@@ -37,6 +40,27 @@ class ConfigNormalizeCommandTest extends ConfigCommandTestCase
         ];
     }
 
+    /**
+     * How many numbers are written as a float and as an integer: the same number is written the same way, so this is
+     * the same in the normalized and in the merged configs.
+     *
+     * @return array{floats: int, ints: int}
+     */
+    private static function numberTypes(mixed $value): array
+    {
+        $count = ['floats' => 0, 'ints' => 0];
+        $items = $value instanceof \stdClass ? get_object_vars($value) : (is_array($value) ? $value : null);
+        if ($items === null) {
+            return ['floats' => is_float($value) ? 1 : 0, 'ints' => is_int($value) ? 1 : 0];
+        }
+        foreach ($items as $item) {
+            $inner = self::numberTypes($item);
+            $count['floats'] += $inner['floats'];
+            $count['ints'] += $inner['ints'];
+        }
+        return $count;
+    }
+
     public function testWithoutAnOutputDirectoryItOnlyReportsAndWritesNothing(): void
     {
         $this->writeOriginals();
@@ -69,6 +93,11 @@ class ConfigNormalizeCommandTest extends ConfigCommandTestCase
             foreach ($written->datamodel->meta as $layer) {
                 $this->assertFalse(property_exists($layer, 'layer_information'), "$id: a documented removal");
             }
+            $this->assertDoesNotMatchRegularExpression(
+                '/(^|: )-?\d+\.0,?$/m',
+                (string)file_get_contents($output . '/' . $id . '.json'),
+                "$id: a whole number is written without a fraction"
+            );
         }
     }
 
@@ -145,6 +174,36 @@ class ConfigNormalizeCommandTest extends ConfigCommandTestCase
             $merged = $this->decode($base . '/merged/' . $id . '.json');
             $this->assertSame(self::keyOrders($normalized), self::keyOrders($merged), $id);
             $this->assertSame([], self::comparator()->differences($normalized, $merged), $id);
+            $this->assertSame(
+                self::numberTypes($normalized),
+                self::numberTypes($merged),
+                "$id: the same number is written the same way"
+            );
+            $this->assertDoesNotMatchRegularExpression(
+                '/(^|: )-?\d+\.0,?$/m',
+                (string)file_get_contents($base . '/merged/' . $id . '.json'),
+                "$id: a whole number is written without a fraction"
+            );
         }
+    }
+
+    public function testAConfigThatTheAuditCanNotVouchForIsNotWritten(): void
+    {
+        $this->writeOriginals();
+        $id = array_key_first(self::realConfigs());
+        $file = $this->dir . '/' . $id . '.json';
+        $config = $this->decode($file);
+        // both shapes of a simulation: normalizing combines them, and the audit does not know how
+        $config->datamodel->simulation_settings = (object)['CEL' => (object)['x' => 1]];
+        new Filesystem()->dumpFile($file, ConfigDirectory::encode($config));
+        $output = $this->temporaryDirectory() . '/normalized';
+
+        $tester = $this->execute('app:config:normalize', ['--output-dir' => $output]);
+
+        $this->assertSame(1, $tester->getStatusCode());
+        $this->assertContains('normalization_audit', self::errorCodesOf($tester));
+        $this->assertStringContainsString($id, $tester->getDisplay());
+        $this->assertFileDoesNotExist($output . '/' . $id . '.json', 'nothing is written');
+        $this->assertSame([], glob($output . '/*/*.json') ?: [], 'also not the configs that were fine');
     }
 }

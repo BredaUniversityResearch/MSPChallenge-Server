@@ -18,7 +18,8 @@ final class ConfigValues
         | JSON_THROW_ON_ERROR;
 
     /**
-     * Stable string identity of a value: object key order is ignored, 5 and 5.0 are the same number.
+     * Stable string identity of a value: object key order is ignored, 5 and 5.0 are the same number. (How a number is
+     * written in a file is another matter: see ConfigOrder.)
      * @throws \JsonException
      */
     public static function canonical(mixed $value): string

@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Domain\Config\ConfigDirectory;
 use App\Domain\Config\ConfigParents;
 use App\Domain\Config\Merge\RegionConfigMerger;
+use App\Domain\Config\Split\ConfigValues;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -95,10 +96,12 @@ class ConfigMergeAllCommand extends ConfigCommand
         foreach ($files as $id => $path) {
             try {
                 $config = $directory->read($path);
+                $pristine = ConfigValues::clone($config); // what the file says: for what finalize() has to check
                 $parentName = ConfigParents::parentOf($config);
                 $pool = $parents->poolOf($config, '"' . $id . '"');
                 $warnings = [];
-                $json = ConfigDirectory::encode($this->finalize($merger->merge($pool, $config, $warnings)));
+                $merged = $merger->merge($pool, $config, $warnings);
+                $json = ConfigDirectory::encode($this->finalize($merged, $pristine, $parentName !== null));
             } catch (\Throwable $e) {
                 $errors[] = ConfigReport::describe($e, $id);
                 continue;
@@ -149,8 +152,10 @@ class ConfigMergeAllCommand extends ConfigCommand
 
     /**
      * What is written for a merged config: the final config itself (ConfigNormalizeCommand changes it).
+     *
+     * @param \stdClass $source the config as the file says (the final config of a stripped config has no such form)
      */
-    protected function finalize(\stdClass $merged): \stdClass
+    protected function finalize(\stdClass $merged, \stdClass $source, bool $stripped): \stdClass
     {
         return $merged;
     }
