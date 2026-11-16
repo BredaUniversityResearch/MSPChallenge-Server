@@ -1,0 +1,29 @@
+sequenceDiagram
+    actor Admin as Session administrator
+    participant Handler as Session creation<br/>(GameListCreationMessageHandler)
+    participant Loader as ConfigLoader
+    participant Cache as config.cache<br/>(Redis in Docker)
+    participant Tree as Config folder<br/>(configs and parents)
+    participant Session as Files of the session<br/>(the running config)
+
+    Admin->>Handler: create a session with a config version
+    Handler->>Tree: read the stored config file (complete, or stripped)
+    Handler->>Loader: mergedJson(contents of the file)
+    Loader->>Cache: entry for the fingerprint of these contents?
+    opt an entry exists
+        Loader->>Tree: read the parent files that the entry was made with
+    end
+    alt an entry exists and every parent file has the fingerprint that was recorded
+        Loader-->>Handler: the cached merged config
+    else no entry, or a parent file has changed
+        Loader->>Tree: scan the file names, find the parent by name, then its parent
+        alt a parent is missing or ambiguous, or the chain loops
+            Loader-->>Handler: an error that names the problem (no session is created)
+        else every parent is found
+            Note over Loader: merge the config with its chain<br/>(the config wins, a parent fills in)
+            Loader->>Cache: keep it with the fingerprints of the parents (7 days)
+            Loader-->>Handler: the merged config
+        end
+    end
+    Handler->>Session: write it as the running config of the session
+    Note over Session: A copy. A later change of a parent changes neither this session<br/>nor a save of it. A save holds the running config, so it needs no parent.

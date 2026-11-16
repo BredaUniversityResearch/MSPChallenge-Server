@@ -1,6 +1,6 @@
 services:
   php:
-    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:staging
+    image: docker-hub.mspchallenge.info/cradlewebmaster/msp-challenge-server:staging.config-split
     volumes:
       # Only defined here (not in the shared docker-compose.yml) because the prod/staging
       # image bakes ServerManager/configfiles into the image at build time (see Dockerfile),

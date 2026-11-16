@@ -175,6 +175,7 @@ class GameListCreationMessageHandler extends CommonSessionHandler
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
+     * @throws \Exception
      */
     private function createSessionRunningConfig(): string
     {
@@ -182,7 +183,13 @@ class GameListCreationMessageHandler extends CommonSessionHandler
             sprintf($this->params->get('app.session_config_name'), $this->gameSession->getId());
         $gameConfigFilePath = $this->params->get('app.server_manager_config_dir').
             $this->gameSession->getGameConfigVersion()->getFilePath();
-        $content = file_get_contents($gameConfigFilePath);
+        if (false === $storedContent = file_get_contents($gameConfigFilePath)) {
+            throw new \Exception(
+                "Cannot read contents of the session's chosen configuration file: {$gameConfigFilePath}"
+            );
+        }
+        // the final config: merged with generic.json now, so the running config does not change when generic.json does
+        $content = $this->configLoader()->mergedJson($storedContent);
         is_dir(dirname($sessionConfigStore)) or mkdir(dirname($sessionConfigStore), 0777, true);
         file_put_contents($sessionConfigStore, $content);
         $this->sessionLogHandler->info("Created the running session config file at {$sessionConfigStore}");

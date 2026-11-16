@@ -3,8 +3,31 @@
     {{ form_start(gameConfigVersionForm) }}
     <div class="modal-body">
     {{ form_errors(gameConfigVersionForm) }}
+        {% if pendingUpload %}
+        <div class="alert alert-warning">
+            <p><strong>This upload is not complete yet.</strong> These files were uploaded, and are kept until the upload is complete:</p>
+            <ul>
+                {% for file in pendingUpload.files %}
+                <li>{{ file }}</li>
+                {% endfor %}
+            </ul>
+            {% if pendingUpload.missingConfig %}
+            <p>The configuration itself is missing: all these files are generic configurations. Add the configuration file that uses them.</p>
+            {% endif %}
+            {% for missing in pendingUpload.missing %}
+            <p>Missing: <strong>{{ missing.file }}</strong>, the parent of {{ missing.neededBy }}.</p>
+            {% endfor %}
+            {% if not pendingUpload.missingConfig and not pendingUpload.missing %}
+            <p>All the files that are needed are there now. Press Upload to finish.</p>
+            {% else %}
+            <p>Select the missing file(s) below and upload again. Nothing is processed before all the files are there.</p>
+            {% endif %}
+            <p>Cancelling throws the uploaded files away.</p>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-action="modal-gameconfig#cancelPendingUpload" data-csrf="{{ csrf_token('gameconfig_upload_cancel') }}">Cancel this upload</button>
+        </div>
+        {% endif %}
         <div class="form-group">
-            {{ form_label(gameConfigVersionForm.gameConfigFileActual, 'Select a Configuration file to upload', {'label_attr': {'class': 'form-label'}}) }}
+            {{ form_label(gameConfigVersionForm.gameConfigFileActual, pendingUpload ? 'Select the missing file(s) to upload' : 'Select a Configuration file to upload, together with the parent files it needs (if any)', {'label_attr': {'class': 'form-label'}}) }}
             <div class="text-danger">
                 {{ form_errors(gameConfigVersionForm.gameConfigFileActual) }}
             </div>

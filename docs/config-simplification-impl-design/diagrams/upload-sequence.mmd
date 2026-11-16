@@ -1,0 +1,45 @@
+sequenceDiagram
+    actor User
+    participant Form as Upload form<br/>(controller)
+    participant Uploads as ConfigUploads
+    participant Waiting as Waiting files<br/>(var/config_upload)
+    participant Loader as ConfigLoader<br/>(inspect, merge, validate)
+    participant Store as Config folder<br/>and database
+
+    User->>Form: files (the config and/or its parents)
+    Form->>Uploads: submit(token from the user's session, files)
+    Uploads->>Waiting: remove waiting uploads older than 24 hours
+    Uploads->>Loader: decode each new file
+    opt a new file is not valid JSON
+        Uploads-->>Form: REJECTED (the line and the column)
+    end
+    Uploads->>Waiting: read the files that wait for this token
+    Note over Uploads: all files = waiting files + new files<br/>(a new file replaces a waiting file with the same name)
+    opt more than 12 files
+        Uploads-->>Form: REJECTED
+    end
+    Uploads->>Loader: inspect(all files)
+    Loader->>Store: a parent that is not uploaded is looked for among the generic configs of the server
+    Loader-->>Uploads: INVALID, INCOMPLETE or COMPLETE
+    alt INVALID (more than one config, parents that loop)
+        Uploads-->>Form: REJECTED with the errors (the waiting files stay)
+    else INCOMPLETE (the config or a parent is missing)
+        Uploads->>Waiting: keep the new files (the first time under a new token)
+        Uploads-->>Form: WAITING, with what is missing
+    else COMPLETE
+        Uploads->>Loader: checkUploadFiles(all files)
+        Note over Loader: merge the config with its parents,<br/>validate the result against the schema
+        alt the result is not a valid config
+            Uploads-->>Form: REJECTED with the errors
+        else the result is valid
+            Uploads->>Waiting: discard this upload
+            Uploads-->>Form: DONE, with the complete final config
+            Form->>Store: write it as a new version of the config, save the version in the database
+        end
+    end
+    Form-->>User: the form again (errors, or what is missing), or the new version
+
+    Note over User,Store: Later, instead of adding files, the user cancels
+    User->>Form: Cancel
+    Form->>Uploads: cancel(token)
+    Uploads->>Waiting: discard the upload and all its files
