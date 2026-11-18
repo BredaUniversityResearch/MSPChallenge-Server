@@ -304,7 +304,7 @@ $parameterMetadata = @{
         EnvVar = "URL_WEB_SERVER_PORT"
         Tab = "Advanced settings"
         Presets = @{
-            Proxy = 80
+            Proxy = 443
             Local = 80
             LAN = 80
         }
@@ -319,7 +319,7 @@ $parameterMetadata = @{
         EnvVar = "URL_WS_SERVER_PORT"
         Tab = "Advanced settings"
         Presets = @{
-            Proxy = 45001
+            Proxy = 443
             Local = 45001
             LAN = 45001
         }
@@ -597,7 +597,11 @@ function Initialize-Parameters {
             }
         }
         if (-not $resolvedParameters[$param]) {
-            $selectedPreset = (Get-Variable -Name "Preset" -ErrorAction SilentlyContinue).Value
+            # Use the preset that was resolved (chosen at the prompt or given on the command line). Do NOT use
+            # Get-Variable -Name "Preset" here: it finds the script's own $Preset parameter (the default "Direct")
+            # before the global one that the non-GUI prompt sets, so all preset values would be those of "Direct".
+            $selectedPreset = $resolvedParameters["Preset"]
+            if (-not $selectedPreset) { $selectedPreset = (Get-Variable -Name "Preset" -ErrorAction SilentlyContinue).Value }
             $presetValues = GetParamMetadataValue -param $param -metadata "Presets" -parameterMetadata $parameterMetadata
             if ($presetValues -and $presetValues.Count -gt 0 -and $presetValues.ContainsKey($selectedPreset)) {
                  $resolvedParameters[$param] = $presetValues[$selectedPreset]
