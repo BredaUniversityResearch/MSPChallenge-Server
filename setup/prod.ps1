@@ -304,7 +304,7 @@ $parameterMetadata = @{
         EnvVar = "URL_WEB_SERVER_PORT"
         Tab = "Advanced settings"
         Presets = @{
-            Proxy = 80
+            Proxy = 443
             Local = 80
             LAN = 80
         }
@@ -319,7 +319,7 @@ $parameterMetadata = @{
         EnvVar = "URL_WS_SERVER_PORT"
         Tab = "Advanced settings"
         Presets = @{
-            Proxy = 45001
+            Proxy = 443
             Local = 45001
             LAN = 45001
         }
