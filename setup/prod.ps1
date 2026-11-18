@@ -597,7 +597,11 @@ function Initialize-Parameters {
             }
         }
         if (-not $resolvedParameters[$param]) {
-            $selectedPreset = (Get-Variable -Name "Preset" -ErrorAction SilentlyContinue).Value
+            # Use the preset that was resolved (chosen at the prompt or given on the command line). Do NOT use
+            # Get-Variable -Name "Preset" here: it finds the script's own $Preset parameter (the default "Direct")
+            # before the global one that the non-GUI prompt sets, so all preset values would be those of "Direct".
+            $selectedPreset = $resolvedParameters["Preset"]
+            if (-not $selectedPreset) { $selectedPreset = (Get-Variable -Name "Preset" -ErrorAction SilentlyContinue).Value }
             $presetValues = GetParamMetadataValue -param $param -metadata "Presets" -parameterMetadata $parameterMetadata
             if ($presetValues -and $presetValues.Count -gt 0 -and $presetValues.ContainsKey($selectedPreset)) {
                  $resolvedParameters[$param] = $presetValues[$selectedPreset]
@@ -1026,6 +1030,66 @@ function Read-EnvFile {
     return $values
 }
 
+# Host ports that the compose project publishes, as reported by "docker compose config" (so it follows the compose files).
+# Returns $null when they could not be determined.
+function Get-PublishedHostPorts {
+    param([string[]]$composeArgs)
+    $json = docker compose @composeArgs config --format json 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $json) { return $null }
+    try {
+        $config = ($json -join "`n") | ConvertFrom-Json
+    } catch {
+        return $null
+    }
+    $ports = @()
+    foreach ($service in $config.services.PSObject.Properties) {
+        foreach ($mapping in @($service.Value.ports)) {
+            if (-not $mapping -or -not $mapping.published) { continue }
+            $protocol = "tcp"
+            if ($mapping.protocol) { $protocol = [string]$mapping.protocol }
+            $published = [string]$mapping.published
+            if ($published -match '^(\d+)-(\d+)$') {
+                $range = ([int]$Matches[1])..([int]$Matches[2])
+            } else {
+                $range = @([int]$published)
+            }
+            foreach ($port in $range) {
+                $ports += [pscustomobject]@{ Port = $port; Protocol = $protocol; Service = $service.Name }
+            }
+        }
+    }
+    return @($ports | Sort-Object -Property Port, Protocol -Unique)
+}
+
+# Which of the given host ports are already in use by a process, on ANY local address (0.0.0.0, ::, 127.0.0.1, ...)?
+# Docker Desktop on Windows does not report these: a Windows socket that did not ask for exclusive use of its port
+# (e.g. Apache, IIS, ...) can be bound again on another address, so "docker compose up" happily starts next to it.
+function Get-HostPortConflicts {
+    param($ports)
+    $conflicts = @()
+    foreach ($entry in $ports) {
+        if ($entry.Protocol -eq "udp") {
+            $listeners = @(Get-NetUDPEndpoint -LocalPort $entry.Port -ErrorAction SilentlyContinue)
+        } else {
+            $listeners = @(Get-NetTCPConnection -LocalPort $entry.Port -State Listen -ErrorAction SilentlyContinue)
+        }
+        foreach ($listener in $listeners) {
+            $owner = Get-Process -Id $listener.OwningProcess -ErrorAction SilentlyContinue
+            $ownerName = "unknown process"
+            if ($owner) { $ownerName = $owner.ProcessName }
+            $conflicts += [pscustomobject]@{
+                Port = $entry.Port
+                Protocol = $entry.Protocol
+                Service = $entry.Service
+                Address = $listener.LocalAddress
+                OwnerPid = $listener.OwningProcess
+                Owner = $ownerName
+            }
+        }
+    }
+    return $conflicts
+}
+
 # Parameters holding generated secrets. When existing data is kept, these must keep the values of the
 # previous .env.local, otherwise they no longer match what is stored in the existing volumes
 # (e.g. the database password).
@@ -1066,8 +1130,8 @@ try {
         $projectName = (Split-Path -Leaf (Get-Location).Path).ToLower() -replace '[^a-z0-9_-]', ''
     }
     $projectVolumes = @(docker volume ls -q --filter "label=com.docker.compose.project=$projectName" 2>$null)
-    # Only this project's simulations volume: other compose projects on this host
-    #   have their own *_simulations_data volume, which must never be detected or removed here.
+    # Only this project's simulations volume: other compose projects on this host (e.g. a "test" setup next to a
+    # "test2" one) have their own *_simulations_data volume, which must never be detected or removed here.
     $simulationsVolumes = @($projectVolumes | Where-Object { $_ -match '_simulations_data$' })
     # Volumes that survive a "keep data" upgrade (the simulations volume is always removed)
     $keptVolumes = @($projectVolumes | Where-Object { $_ -notmatch '_simulations_data$' })
@@ -1143,14 +1207,49 @@ try {
     $composeArgs = @("--env-file", ".env.local", "-f", "docker-compose.yml", "-f", "docker-compose.prod.yml")
 
     # Only now, after the final confirmation, touch the existing containers and data.
-    if ($wipeData) {
-        Write-Host "Stopping containers and wiping all data..." -ForegroundColor Cyan
-        docker compose @composeArgs down -v --remove-orphans
-    } else {
-        Write-Host "Stopping containers (keeping data)..." -ForegroundColor Cyan
-        docker compose @composeArgs down --remove-orphans
-    }
+    # First only stop and remove the containers (no data is touched yet): the ports they were using are free after this.
+    Write-Host "Stopping containers..." -ForegroundColor Cyan
+    docker compose @composeArgs down --remove-orphans
     if ($LASTEXITCODE -ne 0) { throw "docker compose down failed (exit code $LASTEXITCODE)." }
+
+    # Check that the host ports we are going to publish are really free, before wiping or starting anything.
+    # Docker does not do this reliably on Windows, see Get-HostPortConflicts. On Linux, Docker itself refuses to start.
+    if ($env:OS -eq "Windows_NT") {
+        $publishedPorts = Get-PublishedHostPorts $composeArgs
+        if ($null -eq $publishedPorts) {
+            Write-Host "Warning: could not determine the published ports, skipping the port availability check." -ForegroundColor Yellow
+        } else {
+            $conflicts = @()
+            for ($attempt = 1; $attempt -le 10; $attempt++) {
+                $conflicts = @(Get-HostPortConflicts $publishedPorts)
+                if ($conflicts.Count -eq 0) { break }
+                # Containers that were just stopped may need a moment to release their ports.
+                if ($attempt -lt 10) { Start-Sleep -Seconds 1 }
+            }
+            if ($conflicts.Count -gt 0) {
+                Write-Host "The following host ports are already in use, so the MSP Challenge server cannot be started:" -ForegroundColor Red
+                $conflicts | Group-Object -Property Port, Protocol | ForEach-Object {
+                    $first = $_.Group[0]
+                    Write-Host "  Port $($first.Port)/$($first.Protocol) (needed by service '$($first.Service)'):" -ForegroundColor Red
+                    $_.Group | ForEach-Object {
+                        Write-Host "    in use on $($_.Address) by $($_.Owner) (PID $($_.OwnerPid))" -ForegroundColor Red
+                    }
+                }
+                Write-Host "Stop the program that uses the port(s), or run this script again and choose different ports." -ForegroundColor Yellow
+                Write-Host "The containers were stopped, but no data was wiped or removed." -ForegroundColor Yellow
+                throw "Host port(s) already in use."
+            }
+        }
+    }
+
+    if ($wipeData) {
+        # The containers are already gone, so this only removes the volumes (and networks) of the project.
+        Write-Host "Wiping all data..." -ForegroundColor Cyan
+        docker compose @composeArgs down -v --remove-orphans
+        if ($LASTEXITCODE -ne 0) { throw "docker compose down -v failed (exit code $LASTEXITCODE)." }
+    } else {
+        Write-Host "Keeping existing data." -ForegroundColor Cyan
+    }
 
     # The *_simulations_data volume of this project must always be removed (Powershell port of:
     # docker volume rm $(docker volume ls -q | grep '_simulations_data$') ), but only the one of THIS compose
