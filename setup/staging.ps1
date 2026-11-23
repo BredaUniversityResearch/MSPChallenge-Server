@@ -44,7 +44,20 @@ JWT_PASSPHRASE=$env:JWT_PASSPHRASE
 MY2_PASSWORD=$env:MY2_PASSWORD
 "@
 
-docker compose --env-file .env.local -f docker-compose.yml -f docker-compose.staging.yml -f docker-compose.adminer.yml up -d
+$composeArgs = @(
+    "--env-file", ".env.local",
+    "-f", "docker-compose.yml",
+    "-f", "docker-compose.staging.yml",
+    "-f", "docker-compose.adminer.yml"
+)
+
+docker compose @composeArgs pull
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Pulling images failed, aborting." -ForegroundColor Red
+    exit 1
+}
+
+docker compose @composeArgs up -d
 
 # Show the database password to the user
 Write-Host "Database password: $env:DATABASE_PASSWORD"
