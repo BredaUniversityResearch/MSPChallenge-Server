@@ -229,6 +229,12 @@ $tabOrdering = @("Basic setup", "Advanced settings")
 # [hashtable], which converts $MyInvocation.MyCommand.Parameters into an unordered hashtable. On PowerShell 7
 # (Linux/.NET Core) its key order even differs from run to run. Iterate over this list instead.
 $parameterOrder = @($MyInvocation.MyCommand.Parameters.Keys)
+$scriptParameters = $MyInvocation.MyCommand.Parameters
+# State of the "keep existing data" flow: values and preset of the previous .env.local
+$script:previousEnv = $null
+$script:previousPreset = $null
+$script:presetIsGuessed = $false
+$script:commandLineParameters = @($PSBoundParameters.Keys)
 
 # Define metadata for parameters
 $parameterMetadata = @{
@@ -470,6 +476,8 @@ function Update-ControlsByPreset {
         if ($presetValues -and $presetValues.Count -gt 0 -and $presetValues.ContainsKey($selectedPreset)) {
             $presetValue = $presetValues[$selectedPreset]
         }
+        $previousValue = Get-PreviousEnvValue $param $selectedPreset
+        if ($null -ne $previousValue) { $presetValue = $previousValue }
         if ($container.Controls[1] -is [System.Windows.Forms.TextBox]) {
             $container.Controls[1].Text = $presetValue
             $container.Controls[1].ReadOnly = $isReadOnly
@@ -492,6 +500,24 @@ function GetParamMetadataValue {
         return $null
     }
     return $parameterMetadata[$param][$metadata]
+}
+
+# Value in the previous .env.local, when keeping existing data and the selected preset is the one of that file.
+# Not for values fixed by the preset (read-only), nor for command line arguments.
+function Get-PreviousEnvValue {
+    param([string]$param, [string]$selectedPreset)
+    if ($null -eq $script:previousEnv -or $selectedPreset -ne $script:previousPreset) { return $null }
+    if ($script:commandLineParameters -contains $param) { return $null }
+    $envVar = GetParamMetadataValue -param $param -metadata "EnvVar" -parameterMetadata $parameterMetadata
+    if (-not $envVar -or [string]::IsNullOrEmpty($script:previousEnv[$envVar])) { return $null }
+    $readOnly = GetParamMetadataValue -param $param -metadata "ReadOnly" -parameterMetadata $parameterMetadata
+    if ($readOnly -and $readOnly.ContainsKey($selectedPreset) -and $readOnly[$selectedPreset]) { return $null }
+    try {
+        return [System.Management.Automation.LanguagePrimitives]::ConvertTo(
+            $script:previousEnv[$envVar], $scriptParameters[$param].ParameterType)
+    } catch {
+        return $null
+    }
 }
 
 function Read-InputWithDefault {
@@ -602,9 +628,15 @@ function Initialize-Parameters {
             # before the global one that the non-GUI prompt sets, so all preset values would be those of "Direct".
             $selectedPreset = $resolvedParameters["Preset"]
             if (-not $selectedPreset) { $selectedPreset = (Get-Variable -Name "Preset" -ErrorAction SilentlyContinue).Value }
-            $presetValues = GetParamMetadataValue -param $param -metadata "Presets" -parameterMetadata $parameterMetadata
-            if ($presetValues -and $presetValues.Count -gt 0 -and $presetValues.ContainsKey($selectedPreset)) {
-                 $resolvedParameters[$param] = $presetValues[$selectedPreset]
+            $previousValue = Get-PreviousEnvValue $param $selectedPreset
+            if ($null -ne $previousValue) {
+                $resolvedParameters[$param] = $previousValue
+            } else {
+                $presetValues = GetParamMetadataValue -param $param -metadata "Presets" `
+                    -parameterMetadata $parameterMetadata
+                if ($presetValues -and $presetValues.Count -gt 0 -and $presetValues.ContainsKey($selectedPreset)) {
+                    $resolvedParameters[$param] = $presetValues[$selectedPreset]
+                }
             }
         }
         if (-not $resolvedParameters[$param]) {
@@ -951,6 +983,9 @@ function Invoke-NonGuiMode {
         [hashtable]$boundParameters
     )
     Write-Host "Running in non-GUI mode..."
+    if ($script:presetIsGuessed) {
+        Write-Host "Warning: the preset below is guessed from earlier values, please check it." -ForegroundColor Yellow
+    }
     $presetParam = "Preset"
     $defaultValue = (Get-Variable -Name $presetParam -EA SilentlyContinue).Value
     $selectedPreset = $resolvedParameters[$presetParam] = Read-InputWithDefault -prompt "Enter value for $presetParam" -defaultValue $defaultValue -paramDef $parameters[$presetParam]
@@ -1030,6 +1065,38 @@ function Read-EnvFile {
     return $values
 }
 
+# The preset stored by a previous run as "# PRESET=<name>" in the env file, or $null.
+function Get-StoredPreset {
+    param([string]$path)
+    if (-not (Test-Path $path)) { return $null }
+    $validValues = ($scriptParameters["Preset"].Attributes |
+        Where-Object { $_ -is [System.Management.Automation.ValidateSetAttribute] }).ValidValues
+    foreach ($line in Get-Content $path) {
+        if ($line -match '^\s*#\s*PRESET\s*=\s*(\S+)\s*$') {
+            $name = $Matches[1]
+            return @($validValues | Where-Object { $_ -eq $name })[0]
+        }
+    }
+    return $null
+}
+
+# Guess the preset from the values of an env file that has no "# PRESET=" line (older script versions).
+function Get-GuessedPreset {
+    param([hashtable]$envValues)
+    $webHost = $envValues["URL_WEB_SERVER_HOST"]
+    if (-not $webHost) { return $null }
+    $serverName = $envValues["SERVER_NAME"]
+    # Direct: the web server serves the domain itself, so SERVER_NAME is that domain (other presets: ":80")
+    if ($serverName -and $serverName -ne ":80" -and $serverName -eq $webHost) { return "Direct" }
+    # Local: the host machine itself
+    if ($webHost -match '^(localhost|host\.docker\.internal|127\.\d+\.\d+\.\d+|::1)$') { return "Local" }
+    # LAN: an IP address
+    if ($webHost -match '^\d{1,3}(\.\d{1,3}){3}$') { return "LAN" }
+    # A domain name: http only in a LAN, https behind a reverse proxy
+    if ($envValues["URL_WEB_SERVER_SCHEME"] -eq "http") { return "LAN" }
+    return "Proxy"
+}
+
 # Parameters holding generated secrets. When existing data is kept, these must keep the values of the
 # previous .env.local, otherwise they no longer match what is stored in the existing volumes
 # (e.g. the database password).
@@ -1105,11 +1172,26 @@ try {
                     Write-Host "Reusing existing $envVar from .env.local" -ForegroundColor Cyan
                 }
             }
+            # Also reuse the other values as defaults, and the preset they were written with (stored, else guessed)
+            $script:previousEnv = $existingEnv
+            $script:previousPreset = Get-StoredPreset ".env.local"
+            if (-not $script:previousPreset) {
+                $script:previousPreset = Get-GuessedPreset $existingEnv
+                $script:presetIsGuessed = [bool]$script:previousPreset -and
+                    -not $PSBoundParameters.ContainsKey("Preset")
+            }
+            if ($script:previousPreset -and -not $PSBoundParameters.ContainsKey("Preset")) {
+                Set-Variable -Name "Preset" -Value $script:previousPreset -Scope Script
+            }
         }
     }
 
     if ($EnableGui -and ($env:OS -eq "Windows_NT")) {
         Write-Host "Running in GUI mode..."
+        if ($script:presetIsGuessed) {
+            Write-Host "Warning: the preselected preset is guessed from earlier values, please check it." `
+                -ForegroundColor Yellow
+        }
         Initialize-Parameters $MyInvocation.MyCommand.Parameters $resolvedParameters $parameterMetadata
         Show-GuiParameterForm $MyInvocation.MyCommand.Parameters $resolvedParameters $parameterMetadata
     } else {
@@ -1124,7 +1206,11 @@ try {
 
     # Remove from $resolvedParameters those params that do not have an EnvVar metadata
     # Build all lines first, then write at once with Set-Content (avoids BOM issues in PowerShell Core and always writes the file)
-    $envLines = @("APP_ENV=prod")
+    # Store the chosen preset as a comment, so a next run can default to it (see Get-StoredPreset)
+    $chosenPreset = (Get-Variable -Name "Preset" -Scope Global -ErrorAction SilentlyContinue).Value
+    if (-not $chosenPreset) { $chosenPreset = $resolvedParameters["Preset"] }
+    if (-not $chosenPreset) { $chosenPreset = $Preset }
+    $envLines = @("APP_ENV=prod", "# PRESET=$chosenPreset")
     foreach ($param in @($parameterOrder | Where-Object { $resolvedParameters.ContainsKey($_) })) {
         $envVar = GetParamMetadataValue -param $param -metadata "EnvVar" -parameterMetadata $parameterMetadata
         if (-not $envVar) {
@@ -1188,3 +1274,4 @@ try {
 }
 
 exit 0
+
