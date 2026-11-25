@@ -5,6 +5,7 @@ namespace App\Domain\API\v1;
 use App\Domain\Common\EntityEnums\GameStateValue;
 use App\Domain\Common\EntityEnums\GameTransitionStateValue;
 use App\Domain\Communicator\WatchdogCommunicator;
+use App\Domain\Config\ConfigLoader;
 use App\Domain\Services\ConnectionManager;
 use App\Domain\Services\SymfonyToLegacyHelper;
 use App\Entity\ServerManager\GameWatchdogServer;
@@ -121,7 +122,8 @@ class Game extends Base
     {
         $data = json_decode($this->LoadConfigFile($overrideFileName), true);
         if (isset($data["datamodel"])) {
-            return $data["datamodel"];
+            // CEL, SEL and MEL both directly in the data model (old shape) and in simulation_settings (new shape)
+            return ConfigLoader::datamodelWithBothShapes($data["datamodel"]);
         }
         return $data ?? [];
     }

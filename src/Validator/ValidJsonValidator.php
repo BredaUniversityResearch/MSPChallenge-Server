@@ -2,6 +2,7 @@
 
 namespace App\Validator;
 
+use App\Domain\Config\JsonSyntax;
 use Symfony\Component\HttpFoundation\File\File as FileObject;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraint;
@@ -37,7 +38,8 @@ class ValidJsonValidator extends ConstraintValidator
         $this->context->buildViolation($constraint->message)
             ->setParameter('{{ string }}', $value instanceof UploadedFile ?
                 $value->getClientOriginalName() : $value->getFilename())
-            ->setParameter('{{ error }}', json_last_error_msg())
+            // where the error is (line and column), when it can be found
+            ->setParameter('{{ error }}', JsonSyntax::firstError($fileContent) ?? json_last_error_msg())
             ->addViolation();
     }
 }
