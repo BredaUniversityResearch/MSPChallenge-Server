@@ -102,6 +102,8 @@ final class ConfigSplitter
     private array $layersOf = [];
     /** @var string[] */
     private array $warnings = [];
+    /** @var string the path of the layer that is being split: its layer_type is not split field by field */
+    private string $layerPath = '';
 
     public function __construct(private readonly GenericNameRegistry $names)
     {
@@ -225,7 +227,8 @@ final class ConfigSplitter
             $bases = array_map(static fn(array $entry) => $entry['base'], $byConfig);
             $properties = array_map(static fn(array $entry) => $entry['props'], $byConfig);
 
-            [$has, $genericBase, $basePatches] = $this->splitValue($bases, 1, 'meta.' . $generic);
+            $this->layerPath = 'meta.' . $generic;
+            [$has, $genericBase, $basePatches] = $this->splitValue($bases, 1, $this->layerPath);
 
             // layer_info_properties: the region ADDS to the generic list, but only when both are lists.
             // If any config has null, the generic value is null and a region list simply replaces it.
@@ -799,7 +802,10 @@ final class ConfigSplitter
             foreach ($ids as $id) {
                 $children[$id] = $props[$id][$key];
             }
-            [$has, $child, $childPatches] = $this->splitValue($children, $minSupport, $path . '.' . $key);
+            $childPath = $path . '.' . $key;
+            [$has, $child, $childPatches] = $key === 'layer_type' && $path === $this->layerPath
+                ? $this->splitLayerTypes($children, $minSupport, $childPath)
+                : $this->splitValue($children, $minSupport, $childPath);
             if ($has) {
                 $generic->{$key} = $child;
             }
@@ -812,6 +818,141 @@ final class ConfigSplitter
             return [false, null, array_map(ConfigValues::clone(...), $values)];
         }
         return [true, $generic, $patches];
+    }
+
+    /**
+     * The layer_type of one layer. The keys are indexes: their order and meaning matter, and the same index is another
+     * type in another region, so the fields of a type are not voted one by one (that mixes types: the name of one with
+     * the colour of another). A type that every config has is split as a whole, see splitLayerType().
+     *
+     * @param array<string, mixed> $types config id => layer_type
+     * @return array{0: bool, 1: mixed, 2: array<string, mixed>}
+     * @throws \JsonException
+     */
+    private function splitLayerTypes(array $types, int $minSupport, string $path): array
+    {
+        foreach ($types as $type) {
+            if (!$type instanceof \stdClass || ConfigValues::props($type) === []) {
+                return $this->splitValue($types, $minSupport, $path);
+            }
+        }
+        $ids = array_keys($types);
+        $props = [];
+        $union = [];
+        foreach ($types as $id => $type) {
+            $props[$id] = ConfigValues::props($type);
+            foreach (array_keys($props[$id]) as $index) {
+                $union[$index] = true;
+            }
+        }
+        $generic = new \stdClass();
+        $patches = [];
+        foreach (array_keys($union) as $index) {
+            $index = (string)$index;
+            $have = array_values(array_filter($ids, static fn($id) => array_key_exists($index, $props[$id])));
+            if (count($have) !== count($ids)) { // a type that not every config has: the configs that have it carry it
+                foreach ($have as $id) {
+                    $patches[$id] ??= new \stdClass();
+                    $patches[$id]->{$index} = ConfigValues::clone($props[$id][$index]);
+                }
+                continue;
+            }
+            $entries = [];
+            foreach ($ids as $id) {
+                $entries[$id] = $props[$id][$index];
+            }
+            [$has, $entry, $entryPatches] = $this->splitLayerType($entries, $minSupport, $path . '.' . $index);
+            if ($has) {
+                $generic->{$index} = $entry;
+            }
+            foreach ($entryPatches as $id => $patch) {
+                $patches[$id] ??= new \stdClass();
+                $patches[$id]->{$index} = $patch;
+            }
+        }
+        if (ConfigValues::props($generic) === []) {
+            return [false, null, array_map(ConfigValues::clone(...), $types)];
+        }
+        return [true, $generic, $patches];
+    }
+
+    /**
+     * One type (one index) that every config has. The generic type is a real type of one config: the name (displayName)
+     * that most configs give it is chosen first, then the most common whole type among the configs with that name.
+     * A tie goes to the first config (input order). A field is generic when every config has it and it is a plain
+     * value (an object or a list is generic only when all configs have the same). A region carries the fields that
+     * are not generic, or differ from the generic type.
+     *
+     * @param array<string, mixed> $entries config id => type
+     * @return array{0: bool, 1: mixed, 2: array<string, mixed>}
+     * @throws \JsonException
+     */
+    private function splitLayerType(array $entries, int $minSupport, string $path): array
+    {
+        foreach ($entries as $entry) {
+            if (!$entry instanceof \stdClass || ConfigValues::props($entry) === []) {
+                return $this->splitValue($entries, $minSupport, $path);
+            }
+        }
+        $byName = [];
+        foreach ($entries as $id => $entry) {
+            $byName[ConfigValues::canonical($entry->displayName ?? null)][] = $id;
+        }
+        $byEntry = [];
+        foreach ($this->mostCommon($byName) as $id) {
+            $byEntry[ConfigValues::canonical($entries[$id])][] = $id;
+        }
+        $chosen = $entries[$this->mostCommon($byEntry)[0]];
+
+        $generic = new \stdClass();
+        foreach (ConfigValues::props($chosen) as $field => $value) {
+            $field = (string)$field;
+            $inAll = true;
+            $same = true;
+            $canonical = ConfigValues::canonical($value);
+            foreach ($entries as $entry) {
+                $inAll = $inAll && ConfigValues::has($entry, $field);
+                $same = $same && $inAll && ConfigValues::canonical($entry->{$field}) === $canonical;
+            }
+            $plain = !($value instanceof \stdClass) && !is_array($value);
+            if ($inAll && ($plain || $same)) {
+                $generic->{$field} = ConfigValues::clone($value);
+            }
+        }
+        if (ConfigValues::props($generic) === []) {
+            return [false, null, array_map(ConfigValues::clone(...), $entries)];
+        }
+        $patches = [];
+        foreach ($entries as $id => $entry) {
+            $patch = new \stdClass();
+            foreach (ConfigValues::props($entry) as $field => $value) {
+                $field = (string)$field;
+                if (!ConfigValues::has($generic, $field)
+                    || ConfigValues::canonical($value) !== ConfigValues::canonical($generic->{$field})
+                ) {
+                    $patch->{$field} = ConfigValues::clone($value);
+                }
+            }
+            if (ConfigValues::props($patch) !== []) {
+                $patches[$id] = $patch;
+            }
+        }
+        return [true, $generic, $patches];
+    }
+
+    /**
+     * @param array<array<string>> $groups ids per value, in the order the values were first seen
+     * @return string[] the ids of the largest group; on a tie the group that was seen first
+     */
+    private function mostCommon(array $groups): array
+    {
+        $best = [];
+        foreach ($groups as $ids) {
+            if (count($ids) > count($best)) {
+                $best = $ids;
+            }
+        }
+        return $best;
     }
 
     /**

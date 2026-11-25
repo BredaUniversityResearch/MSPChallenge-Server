@@ -437,7 +437,7 @@ class ConfigSplitterTest extends ConfigTestCase
         }
     }
 
-    public function testLayerTypesAreSplitPerTypeAndFieldWithoutDeleting(): void
+    public function testLayerTypesOfEveryConfigAreGenericAndTheRestIsCarriedByTheRegion(): void
     {
         $a = ConfigFactory::config([ConfigFactory::layer('A_Wind', 'Wind Farms')]);
         $b = ConfigFactory::config([ConfigFactory::layer('B_Wind', 'Wind Farms', [
@@ -462,6 +462,85 @@ class ConfigSplitterTest extends ConfigTestCase
         $this->assertSame(['displayName' => 'other'], get_object_vars($patch->{'1'}));
         $this->assertSame('extra', $patch->{'2'}->displayName);
         $this->assertFalse(ConfigValues::has($result->regions['a/a']->datamodel->meta[0], 'layer_type'));
+    }
+
+    /**
+     * A layer whose type "0" has the given name and colour.
+     *
+     * @param array<string, mixed> $extra more fields of the type
+     */
+    private static function layerWithType(string $layer, string $name, string $color, array $extra = []): \stdClass
+    {
+        $type = ['displayName' => $name, 'approval' => 'EEZ', 'value' => 3, 'polygonColor' => $color] + $extra;
+        return ConfigFactory::layer($layer, 'Wind Farms', [
+            'layer_type' => ConfigFactory::json('{"0": ' . json_encode($type, JSON_THROW_ON_ERROR) . '}'),
+        ]);
+    }
+
+    public function testLayerTypeIsAWholeTypeOfOneConfigChosenByTheMostCommonName(): void
+    {
+        $configs = [];
+        foreach (
+            [
+                'a' => ['Pink', '#E252BBFF'], 'b' => ['Pink', '#E252BBFF'], 'c' => ['Green', '#111111FF'],
+                'd' => ['Green', '#222222FF'], 'e' => ['Green', '#222222FF'],
+            ] as $id => [$name, $color]
+        ) {
+            $layer = self::layerWithType(strtoupper($id) . '_Wind', $name, $color);
+            $configs["$id/$id"] = ConfigFactory::config([$layer]);
+        }
+
+        [$result] = self::split($configs);
+
+        $type = $result->generic->datamodel->meta[0]->layer_type->{'0'};
+        $this->assertSame('Green', $type->displayName, 'the name most configs give the type');
+        $this->assertSame('#222222FF', $type->polygonColor, 'the colour of the most common whole type with that name');
+        $patch = static function (string $id) use ($result) {
+            $layer = $result->regions["$id/$id"]->datamodel->meta[0];
+            return ConfigValues::has($layer, 'layer_type') ? $layer->layer_type->{'0'} : null;
+        };
+        $this->assertSame(
+            ['displayName' => 'Pink', 'polygonColor' => '#E252BBFF'],
+            get_object_vars($patch('a'))
+        );
+        $this->assertSame(['polygonColor' => '#111111FF'], get_object_vars($patch('c')));
+        $this->assertNull($patch('d'));
+        foreach ($configs as $id => $original) {
+            $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions[$id], $original), $id);
+        }
+    }
+
+    public function testLayerTypeTieOnTheNameGoesToTheFirstConfigAsAWholeType(): void
+    {
+        $a = ConfigFactory::config([self::layerWithType('A_Wind', 'Green', '#111111FF')]);
+        $b = ConfigFactory::config([self::layerWithType('B_Wind', 'Pink', '#222222FF')]);
+
+        [$result] = self::split(['a/a' => $a, 'b/b' => $b]);
+
+        $type = $result->generic->datamodel->meta[0]->layer_type->{'0'};
+        $this->assertSame(['Green', '#111111FF'], [$type->displayName, $type->polygonColor], 'not a mix of the two');
+        $this->assertSame(
+            ['displayName' => 'Pink', 'polygonColor' => '#222222FF'],
+            get_object_vars($result->regions['b/b']->datamodel->meta[0]->layer_type->{'0'})
+        );
+    }
+
+    public function testLayerTypeFieldsThatNotEveryConfigHasStayInTheRegion(): void
+    {
+        $a = ConfigFactory::config([self::layerWithType('A_Wind', 'Green', '#111111FF')]);
+        $b = ConfigFactory::config([self::layerWithType('B_Wind', 'Green', '#111111FF', ['extra' => 7])]);
+        $configs = ['a/a' => $a, 'b/b' => $b];
+
+        [$result] = self::split($configs);
+
+        $this->assertFalse(ConfigValues::has($result->generic->datamodel->meta[0]->layer_type->{'0'}, 'extra'));
+        $this->assertSame(
+            ['extra' => 7],
+            get_object_vars($result->regions['b/b']->datamodel->meta[0]->layer_type->{'0'})
+        );
+        foreach ($configs as $id => $original) {
+            $this->assertSame([], self::differencesToOriginal($result->generic, $result->regions[$id], $original), $id);
+        }
     }
 
     public function testFieldsRemovedByTheDesignDocumentAreDroppedAndCounted(): void
